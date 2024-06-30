@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/client-service" />
+            <option value="$PROJECT_DIR$/common-models" />
+            <option value="$PROJECT_DIR$/ecommerce_cart-service" />
+            <option value="$PROJECT_DIR$/ecommerce_order-service" />
+            <option value="$PROJECT_DIR$/ecommerce_payment-service" />
+            <option value="$PROJECT_DIR$/ecommerce_sale-service" />
+            <option value="$PROJECT_DIR$/employee-service" />
+            <option value="$PROJECT_DIR$/inventory-service" />
+            <option value="$PROJECT_DIR$/product-service" />
+            <option value="$PROJECT_DIR$/sale-service" />
+            <option value="$PROJECT_DIR$/user-service" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
