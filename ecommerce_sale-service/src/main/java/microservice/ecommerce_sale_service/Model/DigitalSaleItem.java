@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "physical_sale_items")
+@Table(name = "digital_sale_items")
 public class DigitalSaleItem extends SaleItem {
 
     @Id

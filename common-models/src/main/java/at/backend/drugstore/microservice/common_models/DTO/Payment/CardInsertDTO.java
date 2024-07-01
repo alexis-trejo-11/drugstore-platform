@@ -1,10 +1,6 @@
 package at.backend.drugstore.microservice.common_models.DTO.Payment;
 
-import at.backend.drugstore.microservice.common_models.Utils.MonthYearDeserializer;
-import at.backend.drugstore.microservice.common_models.Utils.MonthYearSerializer;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -34,8 +30,6 @@ public class CardInsertDTO {
 
     @JsonProperty("expiration_date")
     @NotNull(message = "expiration_date is obligatory")
-    @JsonSerialize(using = MonthYearSerializer.class)
-    @JsonDeserialize(using = MonthYearDeserializer.class)
     private LocalDate expirationDate;
 
     @JsonProperty("cvv")
@@ -48,8 +42,4 @@ public class CardInsertDTO {
     @NotNull(message = "card_type is obligatory")
     @NotBlank(message = "card_type is empty")
     private String cardType;
-
-    public boolean isValidCardType() {
-        return cardType != null && (cardType.equalsIgnoreCase("VISA") || cardType.equalsIgnoreCase("MASTERCARD") || cardType.equalsIgnoreCase("AMEX") || cardType.equalsIgnoreCase("DISCOVER"));
-    }
 }

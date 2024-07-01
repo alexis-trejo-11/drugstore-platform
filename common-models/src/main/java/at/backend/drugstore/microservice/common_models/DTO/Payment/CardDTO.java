@@ -13,6 +13,8 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 public class CardDTO {
+    @JsonProperty("id")
+    private Long id;
 
     @JsonProperty("client_id")
     private Long clientId;

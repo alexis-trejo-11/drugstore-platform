@@ -85,7 +85,7 @@ public class StockService {
             }
 
             // Get Product Connecting With Product-Service
-            Result<ProductDTO> productResult = externalProductService.findProductById(productId);
+            Result<ProductDTO> productResult = externalProductService.getProductById(productId);
 
             ProductStockDTO productStockDTO = ModelTransform.inventoryToProductStockDTO(inventories, productResult.getData());
             return CompletableFuture.completedFuture(Result.success(productStockDTO));
