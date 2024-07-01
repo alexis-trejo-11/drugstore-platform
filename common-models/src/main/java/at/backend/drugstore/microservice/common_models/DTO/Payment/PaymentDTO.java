@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class PaymentDTO {
 
-    @JsonProperty("user_id")
-    private Long userId;
+    @JsonProperty("client_id")
+    private Long clientId;
 
-    @JsonProperty("payment_method_id")
-    private Long paymentMethodId;
+    @JsonProperty("payment_method")
+    private String paymentMethod;
 
     @JsonProperty("amount")
     private Double amount;
