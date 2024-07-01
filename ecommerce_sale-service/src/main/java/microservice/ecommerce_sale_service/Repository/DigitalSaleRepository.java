@@ -10,8 +10,7 @@ import java.util.List;
 
 public interface DigitalSaleRepository extends JpaRepository<DigitalSale, Long> {
 
-        // Find sales based on sale date and sale status
-        @Query("SELECT s FROM digital_sale s WHERE s.saleDate >= :startOfDay AND s.saleDate < :endOfDay")
+        @Query("SELECT s FROM DigitalSale s WHERE s.saleDate >= :startOfDay AND s.saleDate < :endOfDay")
         List<DigitalSale> findDigitalSalesByDate(
                 @Param("startOfDay") LocalDateTime startOfDay,
                 @Param("endOfDay") LocalDateTime endOfDay

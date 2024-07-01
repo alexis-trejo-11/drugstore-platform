@@ -20,17 +20,16 @@ public class DigitalSale extends Sale {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "physicalSale", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-        private List<DigitalSaleItem> saleItems;
+    @OneToMany(mappedBy = "digitalSale", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DigitalSaleItem> saleItems;
 
-    private DigitalPayType payType;
+    @Column(name = "client_id")
+    private Long clientId;
 
-    private Long ClientPaymentId;
-
+    @Column(name = "order_id")
     private Long orderId;
 
-    public enum DigitalPayType {
-        CREDIT, CARD, SHOP_CREDIT
+    @Column(name = "pay_id")
+    private Long paymentId;
 
-    }
 }

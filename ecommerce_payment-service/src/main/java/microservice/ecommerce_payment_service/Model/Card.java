@@ -11,9 +11,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Entity
 public class Card {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
     @Column(name = "client_id")
@@ -44,4 +44,3 @@ public class Card {
         VISA, MASTERCARD, AMEX, DISCOVER
     }
 }
-
