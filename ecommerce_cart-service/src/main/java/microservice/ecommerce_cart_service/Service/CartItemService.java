@@ -1,7 +1,9 @@
 package microservice.ecommerce_cart_service.Service;
 
+import at.backend.drugstore.microservice.common_models.DTO.Cart.CartDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Cart.CartItemDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Cart.CartItemInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Cart.ClientEcommerceDataDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
 import at.backend.drugstore.microservice.common_models.ExternalService.Products.ExternalProductService;
 import at.backend.drugstore.microservice.common_models.ExternalService.Products.ExternalProductServiceImpl;
@@ -11,6 +13,7 @@ import microservice.ecommerce_cart_service.Model.CartItem;
 import microservice.ecommerce_cart_service.Repository.CartItemRepository;
 import microservice.ecommerce_cart_service.Repository.CartRepository;
 import microservice.ecommerce_cart_service.Utils.ModelTransformer;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
@@ -145,23 +148,23 @@ public class CartItemService {
 
     @Async
     @Transactional
-    public CompletionStage<Result<List<CartItemDTO>>> purchaseProductsFromCart(Long clientId) {
+    public Result<List<CartItemDTO>> purchaseProductsFromCart(ClientEcommerceDataDTO clientEcommerceDataDTO) {
         try {
             // Find Cart
-            Optional<Cart> cartOptional = cartRepository.findByClientId(clientId);
+            Optional<Cart> cartOptional = cartRepository.findByClientId(clientEcommerceDataDTO.clientDTO.getId());
             if (cartOptional.isEmpty()) {
-                return CompletableFuture.completedFuture(Result.error("Cart With Client Id: " + clientId + " Not Found"));
+                return Result.error("Cart Not Found");
             }
 
             Cart cart = cartOptional.get();
 
             // Initialize lazy-loaded collection
             List<CartItem> cartItems = cart.getCartItems();
-            cartItems.size(); // Ensure lazy collection is initialized
+            cartItems.size();
             List<CartItemDTO> cartItemDTOS = ModelTransformer.cartItemsToDTOs(cartItems);
 
             if (cartItems.isEmpty()) {
-                return CompletableFuture.completedFuture(new Result<>(false, null, "No products to purchase in the cart", HttpStatus.BAD_REQUEST));
+                return new Result<>(false, null, "No products to purchase in the cart", HttpStatus.BAD_REQUEST);
             }
 
             // Update total price
@@ -176,10 +179,9 @@ public class CartItemService {
             cartRepository.saveAndFlush(cart);
 
             // Convert cart items to DTOs
-
-            return CompletableFuture.completedFuture(Result.success(cartItemDTOS));
+            return Result.success(cartItemDTOS);
         } catch (Exception e) {
-            return CompletableFuture.failedFuture(e);
+            throw new RuntimeException("An Error Occurred Updating Cart",e);
         }
     }
 

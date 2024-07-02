@@ -5,6 +5,8 @@ import at.backend.drugstore.microservice.common_models.ExternalService.Client.Ex
 import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientServiceImpl;
 import at.backend.drugstore.microservice.common_models.ExternalService.Order.ExternalOrderService;
 import at.backend.drugstore.microservice.common_models.ExternalService.Order.ExternalOrderServiceImpl;
+import at.backend.drugstore.microservice.common_models.ExternalService.Payment.ExternalPaymentService;
+import at.backend.drugstore.microservice.common_models.ExternalService.Payment.ExternalPaymentServiceServiceImpl;
 import at.backend.drugstore.microservice.common_models.ExternalService.Products.ExternalProductService;
 import at.backend.drugstore.microservice.common_models.ExternalService.Products.ExternalProductServiceImpl;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +38,10 @@ public class AppConfig {
         return new ExternalAddressService(restTemplate);
     }
 
+    @Bean
+    public ExternalPaymentService externalPaymentService(RestTemplate restTemplate) {
+        return new ExternalPaymentServiceServiceImpl(restTemplate);
+    }
 
     @Bean
     public RestTemplate restTemplate() {
