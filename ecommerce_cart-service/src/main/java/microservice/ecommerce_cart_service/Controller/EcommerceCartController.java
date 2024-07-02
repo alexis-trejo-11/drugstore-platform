@@ -1,17 +1,19 @@
 package microservice.ecommerce_cart_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTO.Cart.CartDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Cart.CartItemInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Cart.PurchaseSummaryDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Cart.*;
 import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentInsertDTO;
 import at.backend.drugstore.microservice.common_models.ExternalService.Adress.ExternalAddressService;
 import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientService;
 import at.backend.drugstore.microservice.common_models.Utils.ErrorResponseUtil;
 import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_models.Validations.CustomControllerResponse;
+import at.backend.drugstore.microservice.common_models.Validations.ControllerValidation;
 import microservice.ecommerce_cart_service.Service.CartItemService;
 import microservice.ecommerce_cart_service.Service.CartService;
+import microservice.ecommerce_cart_service.Service.ExternalService;
 import microservice.ecommerce_cart_service.Service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,13 +22,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import java.util.Collections;
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,16 +40,16 @@ public class EcommerceCartController {
     private final CartService cartService;
     private final CartItemService cartItemService;
     private final OrderService orderService;
-    private final ExternalClientService externalClientService;
-    private final ExternalAddressService externalAddressService;
+    private final ExternalService externalService;
 
     @Autowired
-    public EcommerceCartController(CartService cartService, CartItemService cartItemService, OrderService orderService, ExternalClientService externalClientService, ExternalAddressService externalAddressService) {
+    public EcommerceCartController(CartService cartService, CartItemService cartItemService,
+                                   OrderService orderService, ExternalClientService externalClientService,
+                                   ExternalAddressService externalAddressService, ExternalService externalService) {
         this.cartService = cartService;
         this.cartItemService = cartItemService;
         this.orderService = orderService;
-        this.externalClientService = externalClientService;
-        this.externalAddressService = externalAddressService;
+        this.externalService = externalService;
     }
 
     @PostMapping("/create/{clientId}")
@@ -74,7 +75,7 @@ public class EcommerceCartController {
 
     @GetMapping("/client/{clientId}")
     public CompletableFuture<ResponseEntity<ResponseWrapper<CartDTO>>> getCartByClientId(
-            @PathVariable @Min(1) Long clientId) {
+            @PathVariable Long clientId) {
 
         if (clientId <= 0) {
             ResponseWrapper<CartDTO> errorResponse = ErrorResponseUtil.createErrorResponse(HttpStatus.BAD_REQUEST, "Client ID must be greater than 0");
@@ -148,51 +149,50 @@ public class EcommerceCartController {
 
 
     @PostMapping("/purchase")
-    public CompletionStage<ResponseEntity<ResponseWrapper<Void>>> purchaseProductsFromCart(@RequestParam  Long clientId, @RequestParam Long addressId) {
+    public ResponseEntity<?> purchaseProductsFromCart(@RequestParam Long clientId,
+                                                      @RequestParam Long addressId,
+                                                      @RequestParam Long cardId) {
+        try {
+            // Get External Service Data
+            Result<ClientEcommerceDataDTO> ecommerceDataDTOResult = externalService.getExternalServiceDataById(clientId);
+            if (!ecommerceDataDTOResult.isSuccess()) {
+               return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ecommerceDataDTOResult.getErrorMessage());
+            }
+            var clientData = ecommerceDataDTOResult.getData();
 
-        Result<ClientDTO> clientDTOResult = externalClientService.findClientById(clientId);
-        if (!clientDTOResult.isSuccess()) {
-                ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, clientDTOResult.getErrorMessage(), clientDTOResult.getStatus());
-            return CompletableFuture.completedFuture(ResponseEntity.status(clientDTOResult.getStatus()).body(errorResponse));
+            // Update Cart
+            Result<List<CartItemDTO>> purchaseResult = cartItemService.purchaseProductsFromCart(clientData);
+            if (!purchaseResult.isSuccess()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomControllerResponse(
+                        HttpStatus.NOT_FOUND,
+                        purchaseResult.getErrorMessage()
+                ));
+            }
+
+            List<CartItemDTO> itemsToPurchase  = purchaseResult.getData();
+
+
+            // Create Order
+            Result<Void> orderResult = orderService.CreateOrder(itemsToPurchase, clientData, addressId);
+            if (!orderResult.isSuccess()) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CustomControllerResponse(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        orderResult.getErrorMessage()));
+            }
+
+            // Proceed to create payment if order is created successfully
+            externalService.makePayment(clientData, cardId);
+
+            // Return Success Response
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomControllerResponse(
+                    HttpStatus.OK,
+                    "Success!")
+            );
+        } catch (Exception ex) {
+            // Handle Exceptions
+            logger.log(Level.SEVERE, "Error purchasing products from cart", ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        Result<AddressDTO> addressDTOResult = externalAddressService.getAddressId(addressId);
-        if (!addressDTOResult.isSuccess()) {
-            ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, addressDTOResult.getErrorMessage(), addressDTOResult.getStatus());
-            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse));
-        }
-
-        boolean isAddressValidate = orderService.ValidateAddress(clientDTOResult.getData(), addressDTOResult.getData());
-        if (!isAddressValidate) {
-           ResponseWrapper<Void> responseWrapper = new ResponseWrapper<>(null, "Invalid Address", HttpStatus.FORBIDDEN);
-            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseWrapper));
-        }
-
-        return cartItemService.purchaseProductsFromCart(clientId)
-                .thenCompose(result -> {
-                    if (result.isSuccess()) {
-                        return orderService.CreateOrder(result.getData(), addressDTOResult.getData(), clientDTOResult.getData() )
-                                .thenApply(orderResult -> {
-                                    if (orderResult.isSuccess()) {
-                                        ResponseWrapper<Void> response = new ResponseWrapper<>(null, "Order Created, Payment Will Be Authorized Soon!", HttpStatus.OK);
-                                        return ResponseEntity.status(HttpStatus.OK).body(response);
-                                    } else {
-                                        HttpStatus badRequest = HttpStatus.BAD_REQUEST;
-                                        ResponseWrapper<Void> errorResponse = ErrorResponseUtil.createErrorResponse(badRequest, orderResult.getErrorMessage());
-                                        return ResponseEntity.status(badRequest).body(errorResponse);
-                                    }
-                                });
-                    } else {
-                        HttpStatus badRequest = HttpStatus.BAD_REQUEST;
-                        ResponseWrapper<Void> errorResponse = ErrorResponseUtil.createErrorResponse(badRequest, result.getErrorMessage());
-                        return CompletableFuture.completedFuture(ResponseEntity.status(badRequest).body(errorResponse));
-                    }
-                })
-                .exceptionally(ex -> {
-                    logger.log(Level.SEVERE, "Error purchasing products from cart", ex);
-                    HttpStatus internalServerError = HttpStatus.INTERNAL_SERVER_ERROR;
-                    ResponseWrapper<Void> errorResponse = ErrorResponseUtil.createErrorResponse(internalServerError, ex.getMessage());
-                    return ResponseEntity.status(internalServerError).body(errorResponse);
-                });
     }
 }
+
