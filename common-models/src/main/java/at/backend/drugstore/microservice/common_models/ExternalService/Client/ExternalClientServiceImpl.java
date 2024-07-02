@@ -65,7 +65,7 @@ public class ExternalClientServiceImpl implements  ExternalClientService {
 
 
     public Result<ClientDTO> findClientById(Long clientId) {
-        String url = clientServiceUrl + "/" + clientId;
+        String url = clientServiceUrl + "/clients/" + clientId;
         try {
             ResponseEntity<ResponseWrapper<ClientDTO>> response = restTemplate.exchange(
                     url,

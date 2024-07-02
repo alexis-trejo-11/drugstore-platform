@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
-    @Query("SELECT p FROM Payment p WHERE p.userId = :clientId AND p.status = 'SUCCESS'")
+    @Query("SELECT p FROM Payment p WHERE p.clientId = :clientId AND p.status = 'SUCCESS'")
     List<Payment> findCompletedPaymentsByClientId(Long clientId);
 }

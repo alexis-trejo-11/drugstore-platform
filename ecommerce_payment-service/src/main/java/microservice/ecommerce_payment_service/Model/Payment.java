@@ -13,11 +13,10 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonProperty("user_id")
-    private Long userId;
+    @JsonProperty("client_id")
+    private Long clientId;
 
-    @ManyToOne
-    @JoinColumn(name = "payment_method_id", nullable = false)
+    @Enumerated(EnumType.STRING)
     @JsonProperty("payment_method")
     private PaymentMethod paymentMethod;
 
@@ -40,5 +39,9 @@ public class Payment {
 
     public enum PaymentStatus {
         SUCCESS, FAILURE, PENDING
+    }
+
+    public enum PaymentMethod {
+        CARD, CASH
     }
 }

@@ -1,9 +1,11 @@
 package microservice.ecommerce_payment_service.Service;
 
 import at.backend.drugstore.microservice.common_models.DTO.Cart.CartDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Order.OrderInsertDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentInsertDTO;
 import microservice.ecommerce_payment_service.Automappers.PaymentMapper;
+import microservice.ecommerce_payment_service.Model.Card;
 import microservice.ecommerce_payment_service.Model.Payment;
 import microservice.ecommerce_payment_service.Repository.CardRepository;
 import microservice.ecommerce_payment_service.Repository.PaymentRepository;
@@ -91,7 +93,6 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-
     @Override
     @Async
     @Transactional
@@ -99,10 +100,22 @@ public class PaymentServiceImpl implements PaymentService {
         try {
             Payment payment = paymentMapper.toEntity(paymentInsertDTO);
 
+            if (paymentInsertDTO.getCardId() != null) {
+                handleCartData(payment, paymentInsertDTO);
+            }
+
             paymentRepository.saveAndFlush(payment);
         } catch (Exception e) {
             throw new RuntimeException("Failed to validate payment", e);
         }
+    }
+
+
+
+    private void handleCartData(Payment payment, PaymentInsertDTO paymentInsertDTO) {
+        Card card = new Card();
+        card.setId(paymentInsertDTO.getCardId());
+        payment.setCard(card);
     }
 
 }

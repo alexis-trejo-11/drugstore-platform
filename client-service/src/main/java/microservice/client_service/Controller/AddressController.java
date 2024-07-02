@@ -77,7 +77,7 @@ public class AddressController {
      * @param id The ID of the address to retrieve.
      * @return A CompletableFuture containing a ResponseEntity with the address information or an error message.
      */
-    @GetMapping("clients/address/{id}")
+    @GetMapping("client/address/{id}")
     public CompletableFuture<ResponseEntity<ResponseWrapper<AddressDTO>>> getAddressById(@PathVariable Long id) {
         return addressService.getAddressById(id)
                 .thenApplyAsync(result -> {
