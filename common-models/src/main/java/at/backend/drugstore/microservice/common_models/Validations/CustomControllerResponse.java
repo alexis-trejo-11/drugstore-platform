@@ -1,18 +1,33 @@
 package at.backend.drugstore.microservice.common_models.Validations;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-@AllArgsConstructor
+import java.util.HashMap;
+import java.util.Map;
+
+@Getter
 @Data
-public class ControllerResponse {
-    private String key;
-    private Object value;
+public class CustomControllerResponse {
+    private Map<String, Object> map;
 
-    public ControllerResponse(HttpStatus key, Object value) {
-        this.key = key.getReasonPhrase();
-        this.value = value;
+    public CustomControllerResponse() {
+        this.map = new HashMap<>();
     }
-}
 
+    public void add(String key, Object value) {
+        map.put(key, value);
+    }
+
+    public CustomControllerResponse(String key, Object value) {
+        this.map = new HashMap<>();
+        this.map.put(key, value);
+    }
+
+    public CustomControllerResponse(HttpStatus key, Object value) {
+        this.map = new HashMap<>();
+        this.map.put(key.getReasonPhrase(), value);
+    }
+
+}

@@ -1,5 +1,6 @@
 package microservice.ecommerce_payment_service.Config;
 
+import at.backend.drugstore.microservice.common_models.ExternalService.Adress.ExternalAddressService;
 import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientService;
 import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientServiceImpl;
 import at.backend.drugstore.microservice.common_models.ExternalService.Products.ExternalProductService;
@@ -18,7 +19,13 @@ public class AppConfig {
     }
 
     @Bean
+    @Primary
     public ExternalClientService externalClientService(RestTemplate restTemplate) {
         return new ExternalClientServiceImpl(restTemplate);
+    }
+
+    @Bean
+    public ExternalAddressService externalAddressService(RestTemplate restTemplate) {
+        return new ExternalAddressService(restTemplate);
     }
 }

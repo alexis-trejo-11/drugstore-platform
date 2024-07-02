@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -61,6 +62,34 @@ public class ExternalAddressService {
             }
         } catch (Exception e) {
             return new Result<>(false, null, "Exception occurred while retrieving address for ID: " + addressId + ": " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Async
+    public Result<List<AddressDTO>> getAddressByClientId(Long clientId) {
+        String addressUrl = clientServiceUrl + "client/address-client/" + clientId;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<?> requestEntity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<ResponseWrapper<List<AddressDTO>>> responseEntity = restTemplate.exchange(
+                    addressUrl,
+                    HttpMethod.GET,
+                    requestEntity,
+                    new ParameterizedTypeReference<ResponseWrapper<List<AddressDTO>>>() {}
+            );
+
+            if (responseEntity.getStatusCode()  != HttpStatus.OK) {
+                return new Result<>(false, null, "Can't Get Addresses");
+            }
+
+            List<AddressDTO> addressDTO = Objects.requireNonNull(responseEntity.getBody()).getData();
+            return Result.success(addressDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result<>(false, null, "Exception occurred while retrieving address");
         }
     }
 
