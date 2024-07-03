@@ -55,17 +55,17 @@ public class ProductController {
     /**
      * Retrieves a product by ID.
      *
-     * @param id the ID of the product
+     * @param productId the ID of the product
      * @return ResponseEntity with the product DTO
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
-        ProductDTO productDTO = productService.getProductById(id);
+    @GetMapping("/{productId}")
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long productId) {
+        ProductDTO productDTO = productService.getProductById(productId);
         if (productDTO == null) {
-            logger.warn("Product not found for ID: {}", id);
+            logger.warn("Product not found for ID: {}", productId);
             return ResponseEntity.notFound().build();
         }
-        logger.info("Product found for ID: {}", id);
+        logger.info("Product found for ID: {}", productId);
         return ResponseEntity.ok(productDTO);
     }
 
