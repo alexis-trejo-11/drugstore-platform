@@ -21,6 +21,6 @@ public class CategoryDTO {
 
     List<ProductDTO> productsDTO;
 
-    List<SubcategoryReturnDTO> subcategoriesDTOS;
+    List<SubcategoryDTO> subcategoriesDTOS;
 
 }

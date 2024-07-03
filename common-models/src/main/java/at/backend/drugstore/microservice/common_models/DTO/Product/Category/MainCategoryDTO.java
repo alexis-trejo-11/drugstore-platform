@@ -10,16 +10,15 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class MainCategoryDTO {
-
     private Long id;
 
     @NotBlank(message = "Name is required")
     private String name;
 
-
-    // RelaitionShip
     List<ProductDTO> productsDTO;
+
     List<CategoryDTO> categoryDTOS;
-    List<SubcategoryReturnDTO> subcategoriesDTOS;
+
+    List<SubcategoryDTO> subcategoriesDTOS;
 
 }

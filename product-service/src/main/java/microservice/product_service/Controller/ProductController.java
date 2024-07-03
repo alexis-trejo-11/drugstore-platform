@@ -2,6 +2,8 @@ package microservice.product_service.Controller;
 
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductInsertDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_models.Validations.ControllerValidation;
 import microservice.product_service.Service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,13 +116,19 @@ public class ProductController {
      * @return ResponseEntity with a status message
      */
     @PostMapping
-    public ResponseEntity<String> insertProduct(@Valid @RequestBody ProductInsertDTO productInsertDTO, BindingResult bindingResult) {
+    public ResponseEntity<?> insertProduct(@Valid @RequestBody ProductInsertDTO productInsertDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
+            var validationErrors = ControllerValidation.handleValidationError(bindingResult);
             logger.error("Invalid data provided for inserting product");
-            return ResponseEntity.badRequest().body("Invalid data");
+            return ResponseEntity.badRequest().body(validationErrors);
         }
 
-        productService.insertProduct(productInsertDTO);
+        Result<Void> insertResult = productService.processInsertProduct(productInsertDTO);
+        if (!insertResult.isSuccess()) {
+            logger.error("Invalid data provided for process product");
+            return ResponseEntity.badRequest().body(insertResult.getErrorMessage());
+        }
+
         logger.info("Product inserted successfully: {}", productInsertDTO.getName());
         return ResponseEntity.ok("Product inserted successfully");
     }
@@ -140,9 +148,9 @@ public class ProductController {
             return ResponseEntity.badRequest().body("Invalid data");
         }
 
-        boolean updated = productService.updateProduct(id, productInsertDTO);
-        if (!updated) {
-            logger.warn("Product not found for ID: {}", id);
+        Result<Void> updatedResult = productService.updateProduct(id, productInsertDTO);
+        if (!updatedResult.isSuccess()) {
+            logger.warn("Invalid data provided for process updating product");
             return ResponseEntity.notFound().build();
         }
         logger.info("Product updated successfully, ID: {}", id);

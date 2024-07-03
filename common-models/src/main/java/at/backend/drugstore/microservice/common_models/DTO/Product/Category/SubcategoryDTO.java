@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SubcategoryReturnDTO {
+public class SubcategoryDTO {
     private Long id;
     private String name;
     private Long categoryId;

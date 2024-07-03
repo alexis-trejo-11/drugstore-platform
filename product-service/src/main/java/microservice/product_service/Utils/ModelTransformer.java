@@ -1,12 +1,7 @@
 package microservice.product_service.Utils;
 
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.CategoryDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.MainCategoryDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.SubcategoryReturnDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductInsertDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Supplier.SupplierInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Supplier.SupplierReturnDTO;
 import microservice.product_service.Model.*;
 
 import java.time.LocalDateTime;
@@ -38,16 +33,6 @@ public class ModelTransformer {
 
         return productDTO;
     }
-
-    public static SubcategoryReturnDTO subcategoryToReturnDTO(Subcategory subcategory) {
-        SubcategoryReturnDTO subcategoryReturnDTO= new SubcategoryReturnDTO();
-        subcategoryReturnDTO.setId(subcategory.getId());
-        subcategoryReturnDTO.setName(subcategory.getName());
-        subcategoryReturnDTO.setCategoryId(subcategory.getCategory() != null ? subcategory.getCategory().getId() : null);
-
-        return  subcategoryReturnDTO;
-    }
-
     public static Product insertDtoToProduct (ProductInsertDTO productInsertDTO) {
         Product product = new Product();
 
@@ -68,42 +53,4 @@ public class ModelTransformer {
 
         return product;
     }
-
-    public static CategoryDTO categoryToReturnDTO(Category category) {
-        CategoryDTO categoryDTO = new CategoryDTO();
-        categoryDTO.setId(category.getId());
-        categoryDTO.setName(category.getName());
-
-        return categoryDTO;
-    }
-
-    public static MainCategoryDTO mainCategorytoDTO(MainCategory mainCategory) {
-        MainCategoryDTO mainCategoryDTO = new MainCategoryDTO();
-        mainCategoryDTO.setId(mainCategory.getId());
-        mainCategoryDTO.setName(mainCategory.getName());
-
-        return mainCategoryDTO;
-    }
-
-    public static Supplier insertDtoToSupplier(SupplierInsertDTO supplierInsertDTO) {
-        Supplier supplier = new Supplier();
-        supplier.setName(supplierInsertDTO.getName());
-        supplier.setContactInfo(supplierInsertDTO.getContactInfo());
-        supplier.setEmail(supplierInsertDTO.getEmail());
-        supplier.setAddress(supplierInsertDTO.getAddress());
-
-        return supplier;
-    }
-
-    public static SupplierReturnDTO supplierToReturnDTO(Supplier supplier) {
-        SupplierReturnDTO supplierReturnDTO = new SupplierReturnDTO();
-        supplierReturnDTO.setId(supplier.getId());
-        supplierReturnDTO.setName(supplier.getName());
-        supplierReturnDTO.setContactInfo(supplier.getContactInfo());
-        supplierReturnDTO.setEmail(supplier.getEmail());
-        supplierReturnDTO.setAddress(supplier.getAddress());
-
-        return supplierReturnDTO;
-    }
-
 }

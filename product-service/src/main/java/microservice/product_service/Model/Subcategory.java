@@ -1,8 +1,6 @@
 package microservice.product_service.Model;
 
-
-
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.SubcategoryReturnDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Product.Category.SubcategoryDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -42,7 +40,7 @@ public class Subcategory {
 
 
 
-    public Subcategory(SubcategoryReturnDTO subcategoryDTO) {
+    public Subcategory(SubcategoryDTO subcategoryDTO) {
         this.name = subcategoryDTO.getName();
 
         if (subcategoryDTO.getCategoryId() != null) {
@@ -52,7 +50,7 @@ public class Subcategory {
         }
     }
 
-    public void updateFromDTO(SubcategoryReturnDTO subcategoryDTO) {
+    public void updateFromDTO(SubcategoryDTO subcategoryDTO) {
         this.name = subcategoryDTO.getName();
         this.updatedAt = LocalDateTime.now(); // Update the updated at time
 

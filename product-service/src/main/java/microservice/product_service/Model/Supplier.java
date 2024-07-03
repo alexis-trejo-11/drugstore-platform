@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -37,6 +38,6 @@ public class Supplier {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "supplier")
-    private Set<Product> products;
+    private List<Product> products;
 
 }
