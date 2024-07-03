@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/suppliers")
+@RequestMapping("/v1/api/products/suppliers")
 public class SupplierController {
 
     private final SupplierService supplierService;
