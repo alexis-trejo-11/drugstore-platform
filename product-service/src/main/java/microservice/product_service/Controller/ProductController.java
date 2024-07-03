@@ -4,7 +4,7 @@ import at.backend.drugstore.microservice.common_models.DTO.Product.ProductInsert
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import at.backend.drugstore.microservice.common_models.Validations.ControllerValidation;
-import microservice.product_service.Service.ProductService;
+import microservice.product_service.Service.ProductServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +19,12 @@ import java.util.List;
 @RequestMapping("/v1/api/products")
 public class ProductController {
 
-    private final ProductService productService;
+    private final ProductServiceImpl productServiceImpl;
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
 
     @Autowired
-    public ProductController(ProductService productService) {
-        this.productService = productService;
+    public ProductController(ProductServiceImpl productServiceImpl) {
+        this.productServiceImpl = productServiceImpl;
     }
 
     /**
@@ -34,7 +34,7 @@ public class ProductController {
      */
     @GetMapping
     public ResponseEntity<List<ProductDTO>> getAllProducts() {
-        List<ProductDTO> productDTOS = productService.getAllProducts();
+        List<ProductDTO> productDTOS = productServiceImpl.getAllProducts();
         logger.info("All products retrieved successfully");
         return ResponseEntity.ok(productDTOS);
     }
@@ -47,7 +47,7 @@ public class ProductController {
      */
     @GetMapping("/by-ids")
     public ResponseEntity<List<ProductDTO>> getProductsById(@RequestParam List<Long> productIds) {
-        List<ProductDTO> productDTOS = productService.getProductsById(productIds);
+        List<ProductDTO> productDTOS = productServiceImpl.getProductsById(productIds);
         logger.info("Products retrieved for IDs: {}", productIds);
         return ResponseEntity.ok(productDTOS);
     }
@@ -60,7 +60,7 @@ public class ProductController {
      */
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDTO> getProductById(@PathVariable Long productId) {
-        ProductDTO productDTO = productService.getProductById(productId);
+        ProductDTO productDTO = productServiceImpl.getProductById(productId);
         if (productDTO == null) {
             logger.warn("Product not found for ID: {}", productId);
             return ResponseEntity.notFound().build();
@@ -77,7 +77,7 @@ public class ProductController {
      */
     @GetMapping("/by-supplier/{supplierId}")
     public ResponseEntity<List<ProductDTO>> getProductsBySupplier(@PathVariable Long supplierId) {
-        List<ProductDTO> productDTOS = productService.FindProductsBySupplier(supplierId);
+        List<ProductDTO> productDTOS = productServiceImpl.FindProductsBySupplier(supplierId);
         logger.info("Products retrieved for supplier ID: {}", supplierId);
         return ResponseEntity.ok(productDTOS);
     }
@@ -90,7 +90,7 @@ public class ProductController {
      */
     @GetMapping("/by-category/{categoryId}")
     public ResponseEntity<List<ProductDTO>> getProductsByCategory(@PathVariable Long categoryId) {
-        List<ProductDTO> productDTOS = productService.findProductsByCategoryId(categoryId);
+        List<ProductDTO> productDTOS = productServiceImpl.findProductsByCategoryId(categoryId);
         logger.info("Products retrieved for category ID: {}", categoryId);
         return ResponseEntity.ok(productDTOS);
     }
@@ -103,7 +103,7 @@ public class ProductController {
      */
     @GetMapping("/by-subcategory/{subcategoryId}")
     public ResponseEntity<List<ProductDTO>> getProductsBySubCategory(@PathVariable Long subcategoryId) {
-        List<ProductDTO> productDTOS = productService.findProductsBySubCategory(subcategoryId);
+        List<ProductDTO> productDTOS = productServiceImpl.findProductsBySubCategory(subcategoryId);
         logger.info("Products retrieved for subcategory ID: {}", subcategoryId);
         return ResponseEntity.ok(productDTOS);
     }
@@ -123,7 +123,7 @@ public class ProductController {
             return ResponseEntity.badRequest().body(validationErrors);
         }
 
-        Result<Void> insertResult = productService.processInsertProduct(productInsertDTO);
+        Result<Void> insertResult = productServiceImpl.processInsertProduct(productInsertDTO);
         if (!insertResult.isSuccess()) {
             logger.error("Invalid data provided for process product");
             return ResponseEntity.badRequest().body(insertResult.getErrorMessage());
@@ -148,7 +148,7 @@ public class ProductController {
             return ResponseEntity.badRequest().body("Invalid data");
         }
 
-        Result<Void> updatedResult = productService.updateProduct(id, productInsertDTO);
+        Result<Void> updatedResult = productServiceImpl.updateProduct(id, productInsertDTO);
         if (!updatedResult.isSuccess()) {
             logger.warn("Invalid data provided for process updating product");
             return ResponseEntity.notFound().build();
@@ -165,7 +165,7 @@ public class ProductController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
-        boolean deleted = productService.deleteProduct(id);
+        boolean deleted = productServiceImpl.deleteProduct(id);
         if (!deleted) {
             logger.warn("Product not found for deletion, ID: {}", id);
             return ResponseEntity.notFound().build();

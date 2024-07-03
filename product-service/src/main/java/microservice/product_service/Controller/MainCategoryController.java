@@ -1,7 +1,7 @@
 package microservice.product_service.Controller;
 
 import at.backend.drugstore.microservice.common_models.DTO.Product.Category.MainCategoryDTO;
-import microservice.product_service.Service.MainCategoryService;
+import microservice.product_service.Service.MainCategoryServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,18 +10,17 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/v1/api/products/main-categories")
 public class MainCategoryController {
 
-    private final MainCategoryService mainCategoryService;
+    private final MainCategoryServiceImpl mainCategoryServiceImpl;
     private static final Logger logger = LoggerFactory.getLogger(MainCategoryController.class);
 
     @Autowired
-    public MainCategoryController(MainCategoryService mainCategoryService) {
-        this.mainCategoryService = mainCategoryService;
+    public MainCategoryController(MainCategoryServiceImpl mainCategoryServiceImpl) {
+        this.mainCategoryServiceImpl = mainCategoryServiceImpl;
     }
 
     /**
@@ -38,7 +37,7 @@ public class MainCategoryController {
             return ResponseEntity.badRequest().body("Invalid data");
         }
 
-        mainCategoryService.insertCategory(mainCategoryDTO);
+        mainCategoryServiceImpl.insertCategory(mainCategoryDTO);
         logger.info("Main category inserted successfully: {}", mainCategoryDTO.getName());
         return ResponseEntity.ok("Category inserted successfully");
     }
@@ -51,7 +50,7 @@ public class MainCategoryController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<MainCategoryDTO> getMainCategoryById(@PathVariable Long id) {
-        MainCategoryDTO mainCategoryDTO = mainCategoryService.findMainCategoryByIdWithCategoryAndSubCategory(id);
+        MainCategoryDTO mainCategoryDTO = mainCategoryServiceImpl.findMainCategoryByIdWithCategoryAndSubCategory(id);
         if (mainCategoryDTO == null) {
             logger.warn("Main category not found for ID: {}", id);
             return ResponseEntity.notFound().build();
@@ -68,7 +67,7 @@ public class MainCategoryController {
      */
     @GetMapping("/{id}/products")
     public ResponseEntity<MainCategoryDTO> getMainCategoryByIdWithProducts(@PathVariable Long id) {
-        MainCategoryDTO mainCategoryDTO = mainCategoryService.findMainCategoryByIdWithProducts(id);
+        MainCategoryDTO mainCategoryDTO = mainCategoryServiceImpl.findMainCategoryByIdWithProducts(id);
         if (mainCategoryDTO == null) {
             logger.warn("Main category not found for ID: {}", id);
             return ResponseEntity.notFound().build();
@@ -91,7 +90,7 @@ public class MainCategoryController {
             return ResponseEntity.badRequest().body("Invalid data");
         }
 
-        boolean updated = mainCategoryService.updateMainCategory(mainCategoryDTO);
+        boolean updated = mainCategoryServiceImpl.updateMainCategory(mainCategoryDTO);
         if (!updated) {
             logger.warn("Main category not found for ID: {}", mainCategoryDTO.getId());
             return ResponseEntity.notFound().build();
@@ -108,7 +107,7 @@ public class MainCategoryController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
-        boolean deleted = mainCategoryService.deleteCategoryById(id);
+        boolean deleted = mainCategoryServiceImpl.deleteCategoryById(id);
         if (!deleted) {
             logger.warn("Main category not found for deletion, ID: {}", id);
             return ResponseEntity.notFound().build();
