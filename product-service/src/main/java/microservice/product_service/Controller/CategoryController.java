@@ -2,7 +2,7 @@ package microservice.product_service.Controller;
 
 import at.backend.drugstore.microservice.common_models.DTO.Product.Category.CategoryDTO;
 import at.backend.drugstore.microservice.common_models.Validations.ControllerValidation;
-import microservice.product_service.Service.CategoryService;
+import microservice.product_service.Service.CategoryServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +18,11 @@ import javax.validation.Valid;
 public class CategoryController {
 
     private static final Logger logger = LoggerFactory.getLogger(CategoryController.class);
-    private final CategoryService categoryService;
+    private final CategoryServiceImpl categoryServiceImpl;
 
     @Autowired
-    public CategoryController(CategoryService categoryService) {
-        this.categoryService = categoryService;
+    public CategoryController(CategoryServiceImpl categoryServiceImpl) {
+        this.categoryServiceImpl = categoryServiceImpl;
     }
 
     /**
@@ -38,7 +38,7 @@ public class CategoryController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationError);
         }
 
-        categoryService.insertCategory(categoryDTO);
+        categoryServiceImpl.insertCategory(categoryDTO);
         logger.info("Category inserted successfully: {}", categoryDTO);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -50,7 +50,7 @@ public class CategoryController {
      */
     @GetMapping("/{categoryId}")
     public ResponseEntity<CategoryDTO> getCategoryWithProductsById(@PathVariable Long categoryId) {
-        CategoryDTO categoryDTO = categoryService.findCategoryByIdWithProducts(categoryId);
+        CategoryDTO categoryDTO = categoryServiceImpl.findCategoryByIdWithProducts(categoryId);
         if (categoryDTO == null) {
             logger.warn("Category with ID {} not found", categoryId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -67,7 +67,7 @@ public class CategoryController {
      */
     @GetMapping("/subcategories/{categoryId}")
     public ResponseEntity<CategoryDTO> getCategoryWithSubCategories(@PathVariable Long categoryId) {
-        CategoryDTO categoryDTO = categoryService.findCategoryByIdWithSubcategory(categoryId);
+        CategoryDTO categoryDTO = categoryServiceImpl.findCategoryByIdWithSubcategory(categoryId);
         if (categoryDTO == null) {
             logger.warn("Category with subcategories and ID {} not found", categoryId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -84,7 +84,7 @@ public class CategoryController {
      */
     @GetMapping("/subcategories/products/{categoryId}")
     public ResponseEntity<CategoryDTO> getCategoryWithProducts(@PathVariable Long categoryId) {
-        CategoryDTO categoryDTO = categoryService.findCategoryByIdWithSubCategoriesAndProducts(categoryId);
+        CategoryDTO categoryDTO = categoryServiceImpl.findCategoryByIdWithSubCategoriesAndProducts(categoryId);
         if (categoryDTO == null) {
             logger.warn("Category with subcategories and products and ID {} not found", categoryId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -101,7 +101,7 @@ public class CategoryController {
      */
     @PutMapping("/admin/categories/update")
     public ResponseEntity<Void> updateCategory(@RequestBody CategoryDTO categoryDTO) {
-        boolean isCategoryUpdated = categoryService.updateCategory(categoryDTO);
+        boolean isCategoryUpdated = categoryServiceImpl.updateCategory(categoryDTO);
         if (!isCategoryUpdated) {
             logger.warn("Category with ID {} not found for update", categoryDTO.getId());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -118,7 +118,7 @@ public class CategoryController {
      */
     @DeleteMapping("/admin/categories/delete/{categoryId}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long categoryId) {
-        boolean isCategoryDeleted = categoryService.deleteCategory(categoryId);
+        boolean isCategoryDeleted = categoryServiceImpl.deleteCategory(categoryId);
         if (!isCategoryDeleted) {
             logger.warn("Category with ID {} not found for deletion", categoryId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
