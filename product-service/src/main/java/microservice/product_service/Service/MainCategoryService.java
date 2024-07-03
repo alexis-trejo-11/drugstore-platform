@@ -1,9 +1,12 @@
 package microservice.product_service.Service;
 
+import at.backend.drugstore.microservice.common_models.DTO.Product.Category.SubcategoryDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.Category.CategoryDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.Category.MainCategoryDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.SubcategoryReturnDTO;
+import microservice.product_service.Mappers.CategoryMapper;
+import microservice.product_service.Mappers.MainCategoryMapper;
+import microservice.product_service.Mappers.SubCategoryMapper;
 import microservice.product_service.Model.MainCategory;
 import microservice.product_service.Repository.MainCategoryRepository;
 import microservice.product_service.Utils.ModelTransformer;
@@ -21,10 +24,16 @@ import java.util.stream.Collectors;
 public class MainCategoryService {
 
     private final MainCategoryRepository mainCategoryRepository;
+    private final MainCategoryMapper mainCategoryMapper;
+    private final CategoryMapper categoryMapper;
+    private final SubCategoryMapper subCategoryMapper;
 
     @Autowired
-    public MainCategoryService(MainCategoryRepository mainCategoryRepository) {
+    public MainCategoryService(MainCategoryRepository mainCategoryRepository, MainCategoryMapper mainCategoryMapper, CategoryMapper categoryMapper, SubCategoryMapper subCategoryMapper) {
         this.mainCategoryRepository = mainCategoryRepository;
+        this.mainCategoryMapper = mainCategoryMapper;
+        this.categoryMapper = categoryMapper;
+        this.subCategoryMapper = subCategoryMapper;
     }
 
     @Async
@@ -55,15 +64,15 @@ public class MainCategoryService {
 
             }
 
-            MainCategoryDTO mainCategoryDTO = ModelTransformer.mainCategorytoDTO(mainCategory.get());
+            MainCategoryDTO mainCategoryDTO = mainCategoryMapper.mainCategoryToDTO(mainCategory.get());
 
             List<CategoryDTO> categoryDTOS = mainCategory.get().getCategories().stream()
-                    .map(ModelTransformer::categoryToReturnDTO)
+                    .map(categoryMapper::categoryToDTO)
                     .collect(Collectors.toList());
             mainCategoryDTO.setCategoryDTOS(categoryDTOS);
 
-            List<SubcategoryReturnDTO> subcategoryDTOS = mainCategory.get().getSubcategories().stream()
-                    .map(ModelTransformer::subcategoryToReturnDTO)
+            List<SubcategoryDTO> subcategoryDTOS = mainCategory.get().getSubcategories().stream()
+                    .map(subCategoryMapper::subcategoryToDTO)
                     .collect(Collectors.toList());
             mainCategoryDTO.setSubcategoriesDTOS(subcategoryDTOS);
 
@@ -82,7 +91,7 @@ public class MainCategoryService {
                 return null;
             }
 
-            MainCategoryDTO mainCategoryDTO = ModelTransformer.mainCategorytoDTO(mainCategory.get());
+            MainCategoryDTO mainCategoryDTO = mainCategoryMapper.mainCategoryToDTO(mainCategory.get());
 
             List<ProductDTO> productDTOS = mainCategory.get().getProducts().stream()
                     .map(ModelTransformer::productToDTO)

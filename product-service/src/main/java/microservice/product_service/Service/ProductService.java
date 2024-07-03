@@ -2,9 +2,10 @@ package microservice.product_service.Service;
 
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductInsertDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_models.Utils.Result;
+import microservice.product_service.Mappers.ProductMapper;
 import microservice.product_service.Model.*;
 import microservice.product_service.Repository.*;
-import microservice.product_service.Utils.ModelTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -23,137 +24,122 @@ public class ProductService {
     private final SubcategoryRepository subcategoryRepository;
     private final SupplierRepository supplierRepository;
     private final BrandRepository brandRepository;
+    private final ProductMapper productMapper;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, MainCategoryRepository mainCategoryRepository, CategoryRepository categoryRepository, SubcategoryRepository subcategoryRepository, SupplierRepository supplierRepository, BrandRepository brandRepository) {
+    public ProductService(ProductRepository productRepository, MainCategoryRepository mainCategoryRepository, CategoryRepository categoryRepository, SubcategoryRepository subcategoryRepository, SupplierRepository supplierRepository, BrandRepository brandRepository, ProductMapper productMapper) {
         this.productRepository = productRepository;
         this.mainCategoryRepository = mainCategoryRepository;
         this.categoryRepository = categoryRepository;
         this.subcategoryRepository = subcategoryRepository;
         this.supplierRepository = supplierRepository;
         this.brandRepository = brandRepository;
+        this.productMapper = productMapper;
     }
 
 
     @Async
     @Transactional
     public List<ProductDTO> getAllProducts() {
-        try {
-            List<Product> products = productRepository.findAll();
+        List<Product> products = productRepository.findAll();
 
-            return products.stream()
-                    .map(ModelTransformer::productToDTO)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        return products.stream()
+                .map(productMapper::productToDTO)
+                .collect(Collectors.toList());
     }
 
     @Async
     @Transactional
     public List<ProductDTO> getProductsById(List<Long> productId) {
-        try {
-            List<Product> products = productRepository.findByIdIn(productId);
+        List<Product> products = productRepository.findByIdIn(productId);
 
-            return products.stream()
-                    .map(ModelTransformer::productToDTO)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        return products.stream()
+                .map(productMapper::productToDTO)
+                .collect(Collectors.toList());
     }
 
     @Async
     @Transactional
     public ProductDTO getProductById(Long productId) {
-        try {
-            Optional<Product> productOptional = productRepository.findById(productId);
-            if(productOptional.isEmpty()) {
-                return null;
-            }
-            Product product = productOptional.get();
-
-            return ModelTransformer.productToDTO(product);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if(productOptional.isEmpty()) {
+            return null;
         }
+        Product product = productOptional.get();
+
+        return productMapper.productToDTO(product);
     }
 
     @Async
     @Transactional
     public List<ProductDTO> FindProductsBySupplier(Long supplierId) {
-        try {
             List<Product> products = productRepository.findBySupplier_Id(supplierId);
 
             return products.stream()
-                    .map(ModelTransformer::productToDTO)
+                    .map(productMapper::productToDTO)
                     .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
     }
 
     @Async
     @Transactional
     public List<ProductDTO> findProductsByCategoryId(Long categoryId) {
-        try {
-            List<Product> products = productRepository.findByCategory_Id(categoryId);
+        List<Product> products = productRepository.findByCategory_Id(categoryId);
 
-            return products.stream()
-                    .map(ModelTransformer::productToDTO)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        return products.stream()
+                .map(productMapper::productToDTO)
+                .collect(Collectors.toList());
     }
 
     @Async
     @Transactional
     public List<ProductDTO> findProductsBySubCategory(Long subcategoryId) {
-        try {
             List<Product> products = productRepository.findBySubcategory_Id(subcategoryId);
 
             return products.stream()
-                    .map(ModelTransformer::productToDTO)
+                    .map(productMapper::productToDTO)
                     .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+
     }
 
     @Async
     @Transactional
-    public void insertProduct(ProductInsertDTO productInsertDTO) {
-        try {
-            Product product = ModelTransformer.insertDtoToProduct(productInsertDTO);
+    public Result<Void> processInsertProduct(ProductInsertDTO productInsertDTO) {
+        Product product = productMapper.insertDtoToProduct(productInsertDTO);
 
-            handleAndSetRelationship(productInsertDTO, product);
-
-            productRepository.saveAndFlush(product);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+        // Validates And Sett Relationship Values In Model Created
+        Result<Void> relationshipResult = handleRelationShips(productInsertDTO, product);
+        if (!relationshipResult.isSuccess()) {
+            return Result.error(relationshipResult.getErrorMessage());
         }
+
+        addProduct(productInsertDTO);
+        return Result.success();
     }
+
+
 
     @Async
     @Transactional
-    public boolean updateProduct(Long productId, ProductInsertDTO productInsertDTO) {
+    public Result<Void> updateProduct(Long productId, ProductInsertDTO productInsertDTO) {
         try {
             Optional<Product> optionalProduct = productRepository.findById(productId);
             if (optionalProduct.isEmpty()) {
-                return false;
+                return Result.error("Product Not Found");
             }
 
             Long productFoundedId = optionalProduct.get().getId();
-            Product product = ModelTransformer.insertDtoToProduct(productInsertDTO);
+            Product product = productMapper.insertDtoToProduct(productInsertDTO);
             product.setUpdatedAt(LocalDateTime.now());
             product.setId(productFoundedId);
 
-            handleAndSetRelationship(productInsertDTO, product);
+            Result<Void> relationshipResult = handleRelationShips(productInsertDTO, product);
+            if (!relationshipResult.isSuccess()) {
+                return Result.error(relationshipResult.getErrorMessage());
+            }
 
             productRepository.saveAndFlush(product);
 
-            return true;
+            return Result.success();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -176,22 +162,49 @@ public class ProductService {
         }
     }
 
-    private void handleAndSetRelationship(ProductInsertDTO productInsertDTO, Product product) {
-        Optional<Category> category = categoryRepository.findById(productInsertDTO.getCategoryId());
-        Optional<Brand> brand = brandRepository.findById(productInsertDTO.getBrandId());
-        Optional<Subcategory> subcategory = subcategoryRepository.findById(productInsertDTO.getSubcategoryId());
-        Optional<Supplier> supplier = supplierRepository.findById(productInsertDTO.getSupplierId());
-        Optional<MainCategory> mainCategory = mainCategoryRepository.findById(productInsertDTO.getMainCategoryId());
-        setProductRelationships(product, brand, category, subcategory, supplier, mainCategory);
+    public Result<Void> handleRelationShips(ProductInsertDTO productInsertDTO, Product product) {
+        Optional<MainCategory> optionalMainCategory = mainCategoryRepository.findById(productInsertDTO.getMainCategoryId());
+        if (optionalMainCategory.isEmpty()) {
+            return Result.error("Invalid Main Category");
+        }
+
+        Optional<Category> optionalCategory = categoryRepository.findById(productInsertDTO.getCategoryId());
+        if (optionalCategory.isEmpty()) {
+            return Result.error("Invalid Category");
+        }
+
+        Optional<Subcategory> optionalSubcategory = subcategoryRepository.findById(productInsertDTO.getSubcategoryId());
+        if (optionalSubcategory.isEmpty()) {
+            return Result.error("Invalid SubCategory");
+        }
+
+        Optional<Brand> optionalBrand = brandRepository.findById(productInsertDTO.getBrandId());
+        if (optionalBrand.isEmpty()) {
+            return Result.error("Invalid Brand");
+        }
+
+        Optional<Supplier> optionalSupplier = supplierRepository.findById(productInsertDTO.getSupplierId());
+        if (optionalSupplier.isEmpty()) {
+            return Result.error("Invalid Supplier");
+        }
+
+        addRelationship(product, optionalMainCategory.get(), optionalCategory.get(), optionalSubcategory.get(), optionalSupplier.get(), optionalBrand.get());
+        return Result.success();
     }
 
-    private void setProductRelationships(Product product, Optional<Brand> brand, Optional<Category> category,
-                                         Optional<Subcategory> subcategory, Optional<Supplier> supplier,
-                                         Optional<MainCategory> mainCategory) {
-        product.setCategory(category.orElse(null));
-        product.setBrand(brand.orElse(null));
-        product.setSubcategory(subcategory.orElse(null));
-        product.setSupplier(supplier.orElse(null));
-        product.setMainCategory(mainCategory.orElse(null));
+    private void addProduct(ProductInsertDTO productInsertDTO) {
+        Product product = productMapper.insertDtoToProduct(productInsertDTO);
+        productRepository.saveAndFlush(product);
     }
+
+    private void addRelationship(Product product ,MainCategory mainCategory, Category category, Subcategory subcategory, Supplier supplier, Brand brand) {
+        product.setMainCategory(mainCategory);
+        product.setCategory(category);
+        product.setSubcategory(subcategory);
+        product.setSupplier(supplier);
+        product.setBrand(brand);
+    }
+
 }
+
+

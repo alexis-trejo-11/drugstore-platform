@@ -1,15 +1,16 @@
 package microservice.product_service.Service;
 
+import at.backend.drugstore.microservice.common_models.DTO.Product.Category.SubcategoryDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.Category.CategoryDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.SubcategoryReturnDTO;
+import microservice.product_service.Mappers.CategoryMapper;
+import microservice.product_service.Mappers.ProductMapper;
+import microservice.product_service.Mappers.SubCategoryMapper;
 import microservice.product_service.Model.Category;
 import microservice.product_service.Repository.CategoryRepository;
-import microservice.product_service.Utils.ModelTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,10 +22,16 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
+    private final ProductMapper productMapper;
+    private final SubCategoryMapper subCategoryMapper;
 
     @Autowired
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, CategoryMapper categoryMapper, ProductMapper productMapper, SubCategoryMapper subCategoryMapper) {
         this.categoryRepository = categoryRepository;
+        this.categoryMapper = categoryMapper;
+        this.productMapper = productMapper;
+        this.subCategoryMapper = subCategoryMapper;
     }
 
     // Create
@@ -53,9 +60,9 @@ public class CategoryService {
                 return null;
             }
 
-            CategoryDTO categoryDTO = ModelTransformer.categoryToReturnDTO(category.get());
+            CategoryDTO categoryDTO = categoryMapper.categoryToDTO(category.get());
             List<ProductDTO> productInsertDTOS = category.get().getProducts().stream()
-                    .map(ModelTransformer::productToDTO)
+                    .map(productMapper::productToDTO)
                     .collect(Collectors.toList());
             categoryDTO.setProductsDTO(productInsertDTOS);
 
@@ -74,10 +81,10 @@ public class CategoryService {
                 return null;
             }
 
-            CategoryDTO categoryDTO = ModelTransformer.categoryToReturnDTO(category.get());
+            CategoryDTO categoryDTO = categoryMapper.categoryToDTO(category.get());
 
-            List<SubcategoryReturnDTO> subcategoryDTOS = category.get().getSubCategories().stream()
-                    .map(ModelTransformer::subcategoryToReturnDTO)
+            List<SubcategoryDTO> subcategoryDTOS = category.get().getSubCategories().stream()
+                    .map(subCategoryMapper::subcategoryToDTO)
                     .collect(Collectors.toList());
             categoryDTO.setSubcategoriesDTOS(subcategoryDTOS);
 
@@ -96,15 +103,15 @@ public class CategoryService {
                return null;
             }
 
-            CategoryDTO categoryDTO = ModelTransformer.categoryToReturnDTO(category.get());
+            CategoryDTO categoryDTO = categoryMapper.categoryToDTO(category.get());
 
             List<ProductDTO> productDTOS = category.get().getProducts().stream()
-                    .map(ModelTransformer::productToDTO)
+                    .map(productMapper::productToDTO)
                     .collect(Collectors.toList());
             categoryDTO.setProductsDTO(productDTOS);
 
-            List<SubcategoryReturnDTO> subcategoryDTOS = category.get().getSubCategories().stream()
-                    .map(ModelTransformer::subcategoryToReturnDTO)
+            List<SubcategoryDTO> subcategoryDTOS = category.get().getSubCategories().stream()
+                    .map(subCategoryMapper::subcategoryToDTO)
                     .collect(Collectors.toList());
             categoryDTO.setSubcategoriesDTOS(subcategoryDTOS);
 

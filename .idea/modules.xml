@@ -5,7 +5,10 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/client-service/backend.drugstore.client-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/client-service/backend.drugstore.client-service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/client-service/backend.drugstore.client-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/client-service/backend.drugstore.client-service.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common-models/backend.drugstore.common-models.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common-models/backend.drugstore.common-models.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ecommerce_cart-service/backend.drugstore.ecommerce_cart-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ecommerce_cart-service/backend.drugstore.ecommerce_cart-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ecommerce_order-service/backend.drugstore.ecommerce_order-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ecommerce_order-service/backend.drugstore.ecommerce_order-service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/ecommerce_payment-service/backend.drugstore.ecommerce_payment-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ecommerce_payment-service/backend.drugstore.ecommerce_payment-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/product-service/backend.drugstore.product-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/product-service/backend.drugstore.product-service.main.iml" />
     </modules>
   </component>
 </project>

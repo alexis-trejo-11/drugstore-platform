@@ -1,7 +1,8 @@
 package microservice.product_service.Service;
 
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.SubcategoryReturnDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Product.Category.SubcategoryDTO;
+import microservice.product_service.Mappers.SubCategoryMapper;
 import microservice.product_service.Model.Subcategory;
 import microservice.product_service.Repository.SubcategoryRepository;
 import microservice.product_service.Utils.ModelTransformer;
@@ -18,95 +19,77 @@ import java.util.stream.Collectors;
 public class SubcategoryService {
 
     private final SubcategoryRepository subcategoryRepository;
+    private final SubCategoryMapper subCategoryMapper;
 
     @Autowired
-    public SubcategoryService(SubcategoryRepository subcategoryRepository) {
+    public SubcategoryService(SubcategoryRepository subcategoryRepository, SubCategoryMapper subCategoryMapper) {
         this.subcategoryRepository = subcategoryRepository;
+        this.subCategoryMapper = subCategoryMapper;
     }
 
     @Async
     @Transactional
-    public void insertCategory(SubcategoryReturnDTO subcategoryDTO) {
-        try {
-            Subcategory subcategory = new Subcategory(subcategoryDTO);
-
-            subcategoryRepository.saveAndFlush(subcategory);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+    public void insertCategory(SubcategoryDTO subcategoryDTO) {
+        Subcategory subcategory = new Subcategory(subcategoryDTO);
+        subcategoryRepository.saveAndFlush(subcategory);
     }
 
     @Async
     @Transactional
-    public List<SubcategoryReturnDTO> findAllSubCategories() {
-        try {
-            List<Subcategory> subcategories = subcategoryRepository.findAll();
-            return subcategories.stream()
-                    .map(ModelTransformer::subcategoryToReturnDTO)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+    public List<SubcategoryDTO> findAllSubCategories() {
+        List<Subcategory> subcategories = subcategoryRepository.findAll();
+        return subcategories.stream()
+                .map(subCategoryMapper::subcategoryToDTO)
+                .collect(Collectors.toList());
     }
 
     @Async
     @Transactional
-    public SubcategoryReturnDTO findSubCategoryByIdWithProducts(Long id) {
-        try {
-            Optional<Subcategory> subcategoryOpt = subcategoryRepository.findById(id);
-            if (subcategoryOpt.isEmpty()) {
-               return null;
-            }
-
-            Subcategory subcategory = subcategoryOpt.get();
-            SubcategoryReturnDTO subcategoryReturnDTO = ModelTransformer.subcategoryToReturnDTO(subcategory);
-
-            List<ProductDTO> productDTOs = subcategory.getProducts().stream()
-                    .map(ModelTransformer::productToDTO)
-                    .collect(Collectors.toList());
-            subcategoryReturnDTO.setProductInsertDTOS(productDTOs);
-
-            return subcategoryReturnDTO;
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+    public SubcategoryDTO findSubCategoryByIdWithProducts(Long id) {
+        Optional<Subcategory> subcategoryOpt = subcategoryRepository.findById(id);
+        if (subcategoryOpt.isEmpty()) {
+            return null;
         }
+
+        Subcategory subcategory = subcategoryOpt.get();
+        SubcategoryDTO subcategoryReturnDTO = subCategoryMapper.subcategoryToDTO(subcategory);
+
+        List<ProductDTO> productDTOs = subcategory.getProducts().stream()
+                .map(ModelTransformer::productToDTO)
+                .collect(Collectors.toList());
+        subcategoryReturnDTO.setProductInsertDTOS(productDTOs);
+
+        return subcategoryReturnDTO;
     }
 
     @Async
     @Transactional
-    public SubcategoryReturnDTO updateCategory(Long id, SubcategoryReturnDTO subcategoryDTO) {
-        try {
-            Optional<Subcategory> optionalSubcategory = subcategoryRepository.findById(id);
-            if (optionalSubcategory.isEmpty()) {
-                return null;
-            }
-
-            Subcategory subcategory = optionalSubcategory.get();
-            subcategory.updateFromDTO(subcategoryDTO);
-            subcategoryRepository.saveAndFlush(subcategory);
-
-            return ModelTransformer.subcategoryToReturnDTO(subcategory);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+    public SubcategoryDTO updateCategory(Long id, SubcategoryDTO subcategoryDTO) {
+        Optional<Subcategory> optionalSubcategory = subcategoryRepository.findById(id);
+        if (optionalSubcategory.isEmpty()) {
+            return null;
         }
+
+        Subcategory subcategory = optionalSubcategory.get();
+        subcategory.updateFromDTO(subcategoryDTO);
+
+        subcategoryRepository.saveAndFlush(subcategory);
+
+        return subCategoryMapper.subcategoryToDTO(subcategory);
     }
 
     @Async
     @Transactional
-    public SubcategoryReturnDTO deleteCategory(Long id) {
-        try {
-            Optional<Subcategory> optionalSubcategory = subcategoryRepository.findById(id);
-            if (optionalSubcategory.isEmpty()) {
-                return null;
-            }
-
-            Subcategory subcategory = optionalSubcategory.get();
-            SubcategoryReturnDTO subcategoryReturnDTO = ModelTransformer.subcategoryToReturnDTO(subcategory);
-            subcategoryRepository.delete(subcategory);
-
-            return subcategoryReturnDTO;
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+    public SubcategoryDTO deleteCategory(Long id) {
+        Optional<Subcategory> optionalSubcategory = subcategoryRepository.findById(id);
+        if (optionalSubcategory.isEmpty()) {
+            return null;
         }
+
+        Subcategory subcategory = optionalSubcategory.get();
+        SubcategoryDTO subcategoryReturnDTO = subCategoryMapper.subcategoryToDTO(subcategory);
+        subcategoryRepository.delete(subcategory);
+
+        return subcategoryReturnDTO;
     }
 }

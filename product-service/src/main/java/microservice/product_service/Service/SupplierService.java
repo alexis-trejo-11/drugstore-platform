@@ -2,9 +2,9 @@ package microservice.product_service.Service;
 
 import at.backend.drugstore.microservice.common_models.DTO.Supplier.SupplierInsertDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Supplier.SupplierReturnDTO;
+import microservice.product_service.Mappers.SupplierMapper;
 import microservice.product_service.Model.Supplier;
 import microservice.product_service.Repository.SupplierRepository;
-import microservice.product_service.Utils.ModelTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -18,17 +18,19 @@ import java.util.stream.Collectors;
 public class SupplierService {
 
     private final SupplierRepository supplierRepository;
+    private final SupplierMapper supplierMapper;
 
     @Autowired
-    public SupplierService(SupplierRepository supplierRepository) {
+    public SupplierService(SupplierRepository supplierRepository, SupplierMapper supplierMapper) {
         this.supplierRepository = supplierRepository;
+        this.supplierMapper = supplierMapper;
     }
 
     @Async
     @Transactional
     public void insertSupplier(SupplierInsertDTO supplierInsertDTO) {
         try {
-            Supplier supplier = ModelTransformer.insertDtoToSupplier(supplierInsertDTO);
+            Supplier supplier = supplierMapper.insertDtoToSupplier(supplierInsertDTO);
 
             supplierRepository.saveAndFlush(supplier);
         } catch (Exception e) {
@@ -42,7 +44,7 @@ public class SupplierService {
         try {
             Optional<Supplier> optionalSupplier = supplierRepository.findById(supplierId);
 
-            return optionalSupplier.map(ModelTransformer::supplierToReturnDTO).orElse(null);
+            return optionalSupplier.map(supplierMapper::supplierToReturnDTO).orElse(null);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -54,7 +56,7 @@ public class SupplierService {
         try {
             Optional<Supplier> optionalSupplier = supplierRepository.findByName(name);
 
-            return optionalSupplier.map(ModelTransformer::supplierToReturnDTO).orElse(null);
+            return optionalSupplier.map(supplierMapper::supplierToReturnDTO).orElse(null);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -67,7 +69,7 @@ public class SupplierService {
             List<Supplier> suppliers = supplierRepository.findAll();
 
             return suppliers.stream()
-                    .map(ModelTransformer::supplierToReturnDTO)
+                    .map(supplierMapper::supplierToReturnDTO)
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
