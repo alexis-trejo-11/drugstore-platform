@@ -13,7 +13,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1/api/products/main-category")
+@RequestMapping("/v1/api/products/main-categories")
 public class MainCategoryController {
 
     private final MainCategoryService mainCategoryService;

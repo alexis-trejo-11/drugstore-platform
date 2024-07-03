@@ -48,7 +48,7 @@ public class CategoryController {
      * @param categoryId the category ID
      * @return HTTP response entity with category data or 404 status if not found
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{categoryId}")
     public ResponseEntity<CategoryDTO> getCategoryWithProductsById(@PathVariable Long categoryId) {
         CategoryDTO categoryDTO = categoryService.findCategoryByIdWithProducts(categoryId);
         if (categoryDTO == null) {
@@ -65,7 +65,7 @@ public class CategoryController {
      * @param categoryId the category ID
      * @return HTTP response entity with category data or 404 status if not found
      */
-    @GetMapping("/subcategories/{id}")
+    @GetMapping("/subcategories/{categoryId}")
     public ResponseEntity<CategoryDTO> getCategoryWithSubCategories(@PathVariable Long categoryId) {
         CategoryDTO categoryDTO = categoryService.findCategoryByIdWithSubcategory(categoryId);
         if (categoryDTO == null) {
@@ -82,7 +82,7 @@ public class CategoryController {
      * @param categoryId the category ID
      * @return HTTP response entity with category data or 404 status if not found
      */
-    @GetMapping("/subcategories/products/{id}")
+    @GetMapping("/subcategories/products/{categoryId}")
     public ResponseEntity<CategoryDTO> getCategoryWithProducts(@PathVariable Long categoryId) {
         CategoryDTO categoryDTO = categoryService.findCategoryByIdWithSubCategoriesAndProducts(categoryId);
         if (categoryDTO == null) {
@@ -99,7 +99,7 @@ public class CategoryController {
      * @param categoryDTO the category data transfer object
      * @return HTTP response entity with status
      */
-    @PutMapping("/admin/categories/update/{id}")
+    @PutMapping("/admin/categories/update")
     public ResponseEntity<Void> updateCategory(@RequestBody CategoryDTO categoryDTO) {
         boolean isCategoryUpdated = categoryService.updateCategory(categoryDTO);
         if (!isCategoryUpdated) {
@@ -116,7 +116,7 @@ public class CategoryController {
      * @param categoryId the category ID
      * @return HTTP response entity with status
      */
-    @DeleteMapping("/admin/categories/delete/{id}")
+    @DeleteMapping("/admin/categories/delete/{categoryId}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long categoryId) {
         boolean isCategoryDeleted = categoryService.deleteCategory(categoryId);
         if (!isCategoryDeleted) {
