@@ -1,5 +1,6 @@
 package at.backend.drugstore.microservice.common_models.Validations;
 
+import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -53,5 +54,11 @@ public class CustomGlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         errors.put(ex.getParameterName(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<String>> handleException(Exception ex) {
+        ApiResponse<String> response = new ApiResponse<>(false, null, "An unexpected error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
