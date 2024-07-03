@@ -2,100 +2,118 @@ package microservice.product_service.Controller;
 
 import at.backend.drugstore.microservice.common_models.DTO.Product.Category.MainCategoryDTO;
 import microservice.product_service.Service.MainCategoryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestController
+@RequestMapping("/main-category")
 public class MainCategoryController {
 
     private final MainCategoryService mainCategoryService;
+    private static final Logger logger = LoggerFactory.getLogger(MainCategoryController.class);
 
     @Autowired
     public MainCategoryController(MainCategoryService mainCategoryService) {
         this.mainCategoryService = mainCategoryService;
     }
 
-    // CREATE
-    @PostMapping("/admin/maincategories/add")
-    public CompletableFuture<ResponseEntity<?>> insertMainCategory(@RequestBody MainCategoryDTO mainCategoryDTO, BindingResult bindingResult) {
+    /**
+     * Inserts a new main category.
+     *
+     * @param mainCategoryDTO the main category DTO
+     * @param bindingResult   the binding result for validation
+     * @return ResponseEntity with a status message
+     */
+    @PostMapping
+    public ResponseEntity<String> insertCategory(@Valid @RequestBody MainCategoryDTO mainCategoryDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error ->
-                    errors.put(error.getField(), error.getDefaultMessage())
-            );
-            return CompletableFuture.completedFuture(new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST));
+            logger.error("Invalid data provided for inserting main category");
+            return ResponseEntity.badRequest().body("Invalid data");
         }
 
-        return mainCategoryService.insertCategory(mainCategoryDTO)
-                .thenApply(result -> {
-                    if (result.isSuccess()) {
-                        return new ResponseEntity<>(result.getData(), HttpStatus.CREATED);
-                    } else {
-                        return new ResponseEntity<>(result.getErrorMessage(), HttpStatus.BAD_REQUEST);
-                    }
-                })
-                .exceptionally(ex -> new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
+        mainCategoryService.insertCategory(mainCategoryDTO);
+        logger.info("Main category inserted successfully: {}", mainCategoryDTO.getName());
+        return ResponseEntity.ok("Category inserted successfully");
     }
 
-    // READ
-    @GetMapping("maincategories/{id}")
-    public CompletableFuture<ResponseEntity<?>> getCategoryWithProductsById(@PathVariable Long id) {
-        return mainCategoryService.findMainCategoryByIdWithProducts(id)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        return new ResponseEntity<>(result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                    } else {
-                        return new ResponseEntity<>(result.getData(), HttpStatus.OK);
-                    }
-                })
-                .exceptionally(ex -> new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
+    /**
+     * Retrieves a main category by ID along with its subcategories.
+     *
+     * @param id the ID of the main category
+     * @return ResponseEntity with the main category DTO
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<MainCategoryDTO> getMainCategoryById(@PathVariable Long id) {
+        MainCategoryDTO mainCategoryDTO = mainCategoryService.findMainCategoryByIdWithCategoryAndSubCategory(id);
+        if (mainCategoryDTO == null) {
+            logger.warn("Main category not found for ID: {}", id);
+            return ResponseEntity.notFound().build();
+        }
+        logger.info("Main category found for ID: {}", id);
+        return ResponseEntity.ok(mainCategoryDTO);
     }
 
-    @GetMapping("maincategories/categories/subcategories/{id}")
-    public CompletableFuture<ResponseEntity<?>> getCategoryWithSubCategories(@PathVariable Long id) {
-        return mainCategoryService.findMainCategoryByIdWithCategoryAndSubCategory(id)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        return new ResponseEntity<>(result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                    } else {
-                        return new ResponseEntity<>(result.getData(), HttpStatus.OK);
-                    }
-                })
-                .exceptionally(ex -> new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
+    /**
+     * Retrieves a main category by ID along with its products.
+     *
+     * @param id the ID of the main category
+     * @return ResponseEntity with the main category DTO
+     */
+    @GetMapping("/{id}/products")
+    public ResponseEntity<MainCategoryDTO> getMainCategoryByIdWithProducts(@PathVariable Long id) {
+        MainCategoryDTO mainCategoryDTO = mainCategoryService.findMainCategoryByIdWithProducts(id);
+        if (mainCategoryDTO == null) {
+            logger.warn("Main category not found for ID: {}", id);
+            return ResponseEntity.notFound().build();
+        }
+        logger.info("Main category with products found for ID: {}", id);
+        return ResponseEntity.ok(mainCategoryDTO);
     }
 
-    // UPDATE
-    @PutMapping("admin/maincategories/update{id}")
-    public CompletableFuture<ResponseEntity<?>> updateCategory(@PathVariable Long id, @RequestBody MainCategoryDTO mainCategoryDTO) {
-        return mainCategoryService.updateMainCategory(id, mainCategoryDTO)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        return new ResponseEntity<>(result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                    } else {
-                        return new ResponseEntity<>(result.getData(), HttpStatus.OK);
-                    }
-                })
-                .exceptionally(ex -> new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
+    /**
+     * Updates an existing main category.
+     *
+     * @param mainCategoryDTO the main category DTO
+     * @param bindingResult   the binding result for validation
+     * @return ResponseEntity with a status message
+     */
+    @PutMapping
+    public ResponseEntity<String> updateMainCategory(@Valid @RequestBody MainCategoryDTO mainCategoryDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            logger.error("Invalid data provided for updating main category");
+            return ResponseEntity.badRequest().body("Invalid data");
+        }
+
+        boolean updated = mainCategoryService.updateMainCategory(mainCategoryDTO);
+        if (!updated) {
+            logger.warn("Main category not found for ID: {}", mainCategoryDTO.getId());
+            return ResponseEntity.notFound().build();
+        }
+        logger.info("Main category updated successfully: {}", mainCategoryDTO.getId());
+        return ResponseEntity.ok("Category updated successfully");
     }
 
-    // DELETE
-    @DeleteMapping("admin/maincategories/delete{id}")
-    public CompletableFuture<ResponseEntity<?>> deleteCategory(@PathVariable Long id) {
-        return mainCategoryService.deleteCategory(id)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        return new ResponseEntity<>(result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                    } else {
-                        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-                    }
-                })
-                .exceptionally(ex -> new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
+    /**
+     * Deletes a main category by ID.
+     *
+     * @param id the ID of the main category
+     * @return ResponseEntity with a status message
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
+        boolean deleted = mainCategoryService.deleteCategoryById(id);
+        if (!deleted) {
+            logger.warn("Main category not found for deletion, ID: {}", id);
+            return ResponseEntity.notFound().build();
+        }
+        logger.info("Main category deleted successfully, ID: {}", id);
+        return ResponseEntity.ok("Category deleted successfully");
     }
 }

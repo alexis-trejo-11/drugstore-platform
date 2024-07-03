@@ -41,22 +41,22 @@ public class ExternalProductServiceImpl implements ExternalProductService {
         HttpEntity<Map<String, List<Long>>> requestEntity = new HttpEntity<>(request, headers);
 
         try {
-            ResponseEntity<ResponseWrapper<List<ProductDTO>>> productResponseEntity = restTemplate.exchange(
+            ResponseEntity<List<ProductDTO>> productResponseEntity = restTemplate.exchange(
                     productUrl,
                     HttpMethod.POST,
                     requestEntity,
                     new ParameterizedTypeReference<>() {});
 
             if (productResponseEntity.getStatusCode() != HttpStatus.OK) {
-                Result result = new Result<>();
+                Result<List<ProductDTO>> result = new Result<>();
                 result.setStatus(productResponseEntity.getStatusCode());
-                result.setErrorMessage(productResponseEntity.getBody().getMessage());
+                result.setErrorMessage("An Error Occurred Retrieving");
                 return result;
             }
 
-            ResponseWrapper<List<ProductDTO>> products = productResponseEntity.getBody();
+            List<ProductDTO> products = productResponseEntity.getBody();
             assert products != null;
-            return Result.success(products.getData());
+            return Result.success(products);
         } catch (Exception e) {
             return Result.error("Exception occurred while fetching product data: " + e.getMessage());
         }
@@ -71,18 +71,20 @@ public class ExternalProductServiceImpl implements ExternalProductService {
         HttpEntity<?> requestEntity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<ResponseWrapper<ProductDTO>> productResponseEntity = restTemplate.exchange(
+            ResponseEntity<ProductDTO> productResponseEntity = restTemplate.exchange(
                     productUrl,
                     HttpMethod.GET,
                     requestEntity,
-                    new ParameterizedTypeReference<ResponseWrapper<ProductDTO>>() {}
+                    new ParameterizedTypeReference<ProductDTO>() {}
             );
 
-            if (productResponseEntity.getStatusCode() != HttpStatus.OK || productResponseEntity.getBody() == null) {
-                return new Result<>(false, null, productResponseEntity.getBody().getMessage(), productResponseEntity.getStatusCode());
+            if (productResponseEntity.getStatusCode() == HttpStatus.NOT_FOUND || productResponseEntity.getBody() == null) {
+                return new Result<>(false, null, "Product Not Found" ,productResponseEntity.getStatusCode());
+            } else if (productResponseEntity.getStatusCode() != HttpStatus.OK) {
+                return new Result<>(false, null, "An Error Occurred Retrieving Product" ,productResponseEntity.getStatusCode());
+
             } else {
-                ResponseWrapper<ProductDTO> response = new ResponseWrapper<>(productResponseEntity.getBody().getData(), null);
-                return Result.success(response.getData());
+                return Result.success(productResponseEntity.getBody());
             }
         } catch (Exception e) {
             return new Result<>(false, null, e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

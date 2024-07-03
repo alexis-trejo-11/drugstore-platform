@@ -2,17 +2,15 @@ package microservice.product_service.Controller;
 
 import at.backend.drugstore.microservice.common_models.DTO.Supplier.SupplierInsertDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Supplier.SupplierReturnDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
 import microservice.product_service.Service.SupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @RestController
+@RequestMapping("/suppliers")
 public class SupplierController {
 
     private final SupplierService supplierService;
@@ -22,96 +20,39 @@ public class SupplierController {
         this.supplierService = supplierService;
     }
 
-    @PostMapping("admin/suppliers/add")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<SupplierReturnDTO>>> addSupplier(@RequestBody SupplierInsertDTO supplierDTO) {
-        return supplierService.insertSupplier(supplierDTO)
-                .thenApply(result -> {
-                    if (result.isSuccess()) {
-                        ResponseWrapper<SupplierReturnDTO> response = new ResponseWrapper<>(result.getData(), null, HttpStatus.CREATED);
-                        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-                    } else {
-                        ResponseWrapper<SupplierReturnDTO> response = new ResponseWrapper<>(null, result.getErrorMessage(), HttpStatus.BAD_REQUEST);
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-                    }
-                })
-                .exceptionally(ex -> {
-                    ResponseWrapper<SupplierReturnDTO> response = new ResponseWrapper<>(null, ex.getMessage(), HttpStatus.BAD_REQUEST);
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-                });
+    @PostMapping
+    public ResponseEntity<Void> insertSupplier(@RequestBody SupplierInsertDTO supplierInsertDTO) {
+        supplierService.insertSupplier(supplierInsertDTO);
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("suppliers/{id}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<SupplierReturnDTO>>> getSupplierById(@PathVariable Long id) {
-        return supplierService.getSupplierById(id)
-                .thenApply(result -> {
-                    if (result.isSuccess()) {
-                        ResponseWrapper<SupplierReturnDTO> response = new ResponseWrapper<>(result.getData(), null, HttpStatus.OK);
-                        return ResponseEntity.status(HttpStatus.OK).body(response);
-                    } else {
-                        ResponseWrapper<SupplierReturnDTO> response = new ResponseWrapper<>(null, result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-                    }
-                })
-                .exceptionally(ex -> {
-                    ResponseWrapper<SupplierReturnDTO> response = new ResponseWrapper<>(null, ex.getMessage(), HttpStatus.BAD_REQUEST);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-                });
+    @GetMapping("/{id}")
+    public ResponseEntity<SupplierReturnDTO> getSupplierById(@PathVariable Long id) {
+        SupplierReturnDTO supplierReturnDTO = supplierService.getSupplierById(id);
+        return supplierReturnDTO != null ? ResponseEntity.ok().body(supplierReturnDTO) : ResponseEntity.notFound().build();
     }
 
-    @GetMapping("suppliers/name/{name}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<SupplierReturnDTO>>> getSupplierByName(@PathVariable String name) {
-        return supplierService.getSupplierByName(name)
-                .thenApply(result -> {
-                    if (result.isSuccess()) {
-                        ResponseWrapper<SupplierReturnDTO> response = new ResponseWrapper<>(result.getData(), null, HttpStatus.OK);
-                        return ResponseEntity.status(HttpStatus.OK).body(response);
-                    } else {
-                        ResponseWrapper<SupplierReturnDTO> response = new ResponseWrapper<>(null, result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-                    }
-                })
-                .exceptionally(ex -> {
-                    ResponseWrapper<SupplierReturnDTO> response = new ResponseWrapper<>(null, ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-                });
+    @GetMapping("/name/{name}")
+    public ResponseEntity<SupplierReturnDTO> getSupplierByName(@PathVariable String name) {
+        SupplierReturnDTO supplierReturnDTO = supplierService.getSupplierByName(name);
+        return supplierReturnDTO != null ? ResponseEntity.ok().body(supplierReturnDTO) : ResponseEntity.notFound().build();
     }
 
-    @GetMapping("admin/suppliers/all")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<List<SupplierReturnDTO>>>> getAllSuppliers() {
-        return supplierService.getAllSuppliers()
-                .thenApply(list -> {
-                    ResponseWrapper<List<SupplierReturnDTO>> response = new ResponseWrapper<>(list, null, HttpStatus.OK);
-                    return ResponseEntity.status(HttpStatus.OK).body(response);
-                })
-                .exceptionally(ex -> {
-                    ResponseWrapper<List<SupplierReturnDTO>> response = new ResponseWrapper<>(null, ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-                });
+    @GetMapping
+    public ResponseEntity<List<SupplierReturnDTO>> getAllSuppliers() {
+        List<SupplierReturnDTO> supplierReturnDTOs = supplierService.getAllSuppliers();
+        return ResponseEntity.ok().body(supplierReturnDTOs);
     }
 
-    @PutMapping("admin/suppliers/update/{id}")
-    public CompletableFuture<ResponseEntity<?>> updateSupplier(@PathVariable Long id, @RequestBody SupplierReturnDTO supplierDTO) {
-        return supplierService.updateSupplier(id, supplierDTO)
-                .thenApply(result -> {
-                    if (result.isSuccess()) {
-                        return new ResponseEntity<>(result.getData(), HttpStatus.OK);
-                    } else {
-                        return new ResponseEntity<>(result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                    }
-                })
-                .exceptionally(ex -> new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
+    @PutMapping
+    public ResponseEntity<Void> updateSupplier(@RequestBody SupplierReturnDTO supplierDTO) {
+        boolean success = supplierService.updateSupplier(supplierDTO);
+        return success ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 
-    @DeleteMapping("admin/suppliers/delete/{id}")
-    public CompletableFuture<ResponseEntity<?>> deleteSupplier(@PathVariable Long id) {
-        return supplierService.deleteSupplier(id)
-                .thenApply(result -> {
-                    if (result.isSuccess()) {
-                        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-                    } else {
-                        return new ResponseEntity<>(result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                    }
-                })
-                .exceptionally(ex -> new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSupplier(@PathVariable Long id) {
+        boolean success = supplierService.deleteSupplier(id);
+        return success ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 }
