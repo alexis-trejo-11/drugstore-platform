@@ -1,6 +1,6 @@
 package microservice.product_service.Utils;
 
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.CategoryReturnDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Product.Category.CategoryDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.Category.MainCategoryDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.Category.SubcategoryReturnDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductInsertDTO;
@@ -69,12 +69,12 @@ public class ModelTransformer {
         return product;
     }
 
-    public static CategoryReturnDTO  categoryToReturnDTO(Category category) {
-        CategoryReturnDTO categoryReturnDTO = new CategoryReturnDTO();
-        categoryReturnDTO.setId(category.getId());
-        categoryReturnDTO.setName(category.getName());
+    public static CategoryDTO categoryToReturnDTO(Category category) {
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setId(category.getId());
+        categoryDTO.setName(category.getName());
 
-        return categoryReturnDTO;
+        return categoryDTO;
     }
 
     public static MainCategoryDTO mainCategorytoDTO(MainCategory mainCategory) {

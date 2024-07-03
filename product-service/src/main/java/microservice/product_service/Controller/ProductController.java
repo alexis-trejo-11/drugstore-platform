@@ -1,178 +1,168 @@
 package microservice.product_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductInsertDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
 import microservice.product_service.Service.ProductService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @RestController
+@RequestMapping("/v1/api/products")
 public class ProductController {
 
     private final ProductService productService;
+    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
 
     @Autowired
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
-    @GetMapping("products/all")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<List<ProductDTO>>>> getAllProducts() {
-        return productService.getAll()
-                .thenApplyAsync(productDTOS -> {
-                    ResponseWrapper<List<ProductDTO>> responseWrapper = new ResponseWrapper<>(productDTOS, null);
-                    return ResponseEntity.status(HttpStatus.OK).body(responseWrapper);
-                })
-                .exceptionally(ex -> {
-                    ResponseWrapper<List<ProductDTO>> responseWrapper = new ResponseWrapper<>(null, ex.getMessage());
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseWrapper);
-                });
+    /**
+     * Retrieves all products.
+     *
+     * @return ResponseEntity with the list of product DTOs
+     */
+    @GetMapping
+    public ResponseEntity<List<ProductDTO>> getAllProducts() {
+        List<ProductDTO> productDTOS = productService.getAllProducts();
+        logger.info("All products retrieved successfully");
+        return ResponseEntity.ok(productDTOS);
     }
 
-    @GetMapping("products/{productId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<ProductDTO>>> getProductById(@PathVariable Long productId) {
-        return productService.getProductById(productId)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        ResponseWrapper<ProductDTO> errorResponse = new ResponseWrapper<>(null, result.getErrorMessage());
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-                    } else {
-                        ResponseWrapper<ProductDTO> response = new ResponseWrapper<>(result.getData(), null);
-                        return ResponseEntity.status(HttpStatus.OK).body(response);
-                    }
-                }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    /**
+     * Retrieves products by their IDs.
+     *
+     * @param productIds the list of product IDs
+     * @return ResponseEntity with the list of product DTOs
+     */
+    @GetMapping("/by-ids")
+    public ResponseEntity<List<ProductDTO>> getProductsById(@RequestParam List<Long> productIds) {
+        List<ProductDTO> productDTOS = productService.getProductsById(productIds);
+        logger.info("Products retrieved for IDs: {}", productIds);
+        return ResponseEntity.ok(productDTOS);
+    }
+
+    /**
+     * Retrieves a product by ID.
+     *
+     * @param id the ID of the product
+     * @return ResponseEntity with the product DTO
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
+        ProductDTO productDTO = productService.getProductById(id);
+        if (productDTO == null) {
+            logger.warn("Product not found for ID: {}", id);
+            return ResponseEntity.notFound().build();
         }
-
-
-    @PostMapping("/products/many")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<List<ProductDTO>>>> getProductsById(@RequestBody Map<String, List<Long>> request) {
-            List<Long> productIds = request.get("productIds");
-            return productService.getProductsById(productIds)
-                    .thenApplyAsync(result -> {
-                            if (!result.isSuccess()) {
-                                ResponseWrapper<List<ProductDTO>> response = new ResponseWrapper<>(null, result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                                return ResponseEntity.status(HttpStatus.OK).body(response);
-                            }
-
-                        ResponseWrapper<List<ProductDTO>> response = new ResponseWrapper<>(result.getData(), null, HttpStatus.OK);
-                        return ResponseEntity.status(HttpStatus.OK).body(response);
-                    }).exceptionally(ex -> {
-                        ResponseWrapper<List<ProductDTO>> responseWrapper = new ResponseWrapper<>(null, ex.getMessage());
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseWrapper);
-                    });
-            }
-
-    @GetMapping("products/supplier/{supplierId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<List<ProductDTO>>>> findProductsBySupplier(@PathVariable Long supplierId) {
-                return productService.FindProductsBySupplier(supplierId)
-                        .thenApplyAsync(productDTOS -> {
-                            ResponseWrapper<List<ProductDTO>> response = new ResponseWrapper<>(productDTOS, null);
-                            return ResponseEntity.status(HttpStatus.OK).body(response);
-                        }).exceptionally(ex -> {
-                            ResponseWrapper<List<ProductDTO>> responseWrapper = new ResponseWrapper<>(null, ex.getMessage());
-                            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseWrapper);
-                        });
+        logger.info("Product found for ID: {}", id);
+        return ResponseEntity.ok(productDTO);
     }
 
-    @GetMapping("products/category/{categoryId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<List<ProductDTO>>>> findProductsByCategoryId(@PathVariable Long categoryId) {
-        return productService.findProductsByCategoryId(categoryId)
-                .thenApplyAsync(productDTOS -> {
-                    ResponseWrapper<List<ProductDTO>> response = new ResponseWrapper<>(productDTOS, null);
-                    return ResponseEntity.status(HttpStatus.OK).body(response);
-                }).exceptionally(ex -> {
-                    ResponseWrapper<List<ProductDTO>> responseWrapper = new ResponseWrapper<>(null, ex.getMessage());
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseWrapper);
-                });
+    /**
+     * Retrieves products by supplier ID.
+     *
+     * @param supplierId the ID of the supplier
+     * @return ResponseEntity with the list of product DTOs
+     */
+    @GetMapping("/by-supplier/{supplierId}")
+    public ResponseEntity<List<ProductDTO>> getProductsBySupplier(@PathVariable Long supplierId) {
+        List<ProductDTO> productDTOS = productService.FindProductsBySupplier(supplierId);
+        logger.info("Products retrieved for supplier ID: {}", supplierId);
+        return ResponseEntity.ok(productDTOS);
     }
 
-    // Find Products By Subcategory ID
-    @GetMapping("products/subcategory/{subcategoryId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<List<ProductDTO>>>> findProductsBySubCategory(@PathVariable Long subcategoryId) {
-        return productService.findProductsBySubCategory(subcategoryId)
-                .thenApplyAsync(productDTOS -> {
-                    ResponseWrapper<List<ProductDTO>> response = new ResponseWrapper<>(productDTOS, null);
-                    return ResponseEntity.status(HttpStatus.OK).body(response);
-                }).exceptionally(ex -> {
-                    ResponseWrapper<List<ProductDTO>> responseWrapper = new ResponseWrapper<>(null, ex.getMessage());
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseWrapper);
-                });
-        }
+    /**
+     * Retrieves products by category ID.
+     *
+     * @param categoryId the ID of the category
+     * @return ResponseEntity with the list of product DTOs
+     */
+    @GetMapping("/by-category/{categoryId}")
+    public ResponseEntity<List<ProductDTO>> getProductsByCategory(@PathVariable Long categoryId) {
+        List<ProductDTO> productDTOS = productService.findProductsByCategoryId(categoryId);
+        logger.info("Products retrieved for category ID: {}", categoryId);
+        return ResponseEntity.ok(productDTOS);
+    }
 
-    @PostMapping("admin/products/add")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> insertProduct(@Valid @RequestBody ProductInsertDTO productInsertDTO, BindingResult bindingResult) {
+    /**
+     * Retrieves products by subcategory ID.
+     *
+     * @param subcategoryId the ID of the subcategory
+     * @return ResponseEntity with the list of product DTOs
+     */
+    @GetMapping("/by-subcategory/{subcategoryId}")
+    public ResponseEntity<List<ProductDTO>> getProductsBySubCategory(@PathVariable Long subcategoryId) {
+        List<ProductDTO> productDTOS = productService.findProductsBySubCategory(subcategoryId);
+        logger.info("Products retrieved for subcategory ID: {}", subcategoryId);
+        return ResponseEntity.ok(productDTOS);
+    }
+
+    /**
+     * Inserts a new product.
+     *
+     * @param productInsertDTO the product insert DTO
+     * @param bindingResult    the binding result for validation
+     * @return ResponseEntity with a status message
+     */
+    @PostMapping
+    public ResponseEntity<String> insertProduct(@Valid @RequestBody ProductInsertDTO productInsertDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            // Handle validation errors
-            String errorMessages = bindingResult.getAllErrors().stream()
-                    .map(ObjectError::getDefaultMessage)
-                    .collect(Collectors.joining(", "));
-            ResponseWrapper<Void> responseWrapper = new ResponseWrapper<>(null, errorMessages);
-            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseWrapper));
+            logger.error("Invalid data provided for inserting product");
+            return ResponseEntity.badRequest().body("Invalid data");
         }
-        return productService.insertProduct(productInsertDTO)
-                .thenApplyAsync(result -> {
-                    if (!result.isSuccess()) {
-                        ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, result.getErrorMessage());
-                        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-                    } else {
-                        ResponseWrapper<Void> response = new ResponseWrapper<>(result.getData(), null);
-                        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-                    }
-                } );
+
+        productService.insertProduct(productInsertDTO);
+        logger.info("Product inserted successfully: {}", productInsertDTO.getName());
+        return ResponseEntity.ok("Product inserted successfully");
     }
 
+    /**
+     * Updates an existing product.
+     *
+     * @param id               the ID of the product
+     * @param productInsertDTO the product insert DTO
+     * @param bindingResult    the binding result for validation
+     * @return ResponseEntity with a status message
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductInsertDTO productInsertDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            logger.error("Invalid data provided for updating product");
+            return ResponseEntity.badRequest().body("Invalid data");
+        }
 
-    // Update Product
-    @PutMapping("products/{productId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> updateProduct(@PathVariable Long productId, @RequestBody ProductInsertDTO productInsertDTO) {
-        return productService.updateProduct(productId, productInsertDTO)
-                .thenApplyAsync(result -> {
-                    if (!result.isSuccess()) {
-                        if (result.getErrorMessage().contains("Product")) {
-                            ResponseWrapper<Void> errorResponseNotFound = new ResponseWrapper<>(null, result.getErrorMessage());
-                            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseNotFound);
-                        } else {
-                            ResponseWrapper<Void> errorResponseBadRequest = new ResponseWrapper<>(null, result.getErrorMessage());
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseBadRequest);
-                        }
-                    } else {
-                        ResponseWrapper<Void> response = new ResponseWrapper<>(null, null);
-                        return ResponseEntity.status(HttpStatus.OK).body(response);
-                    }
-                }).exceptionally(ex -> {
-                    ResponseWrapper<Void> responseWrapper = new ResponseWrapper<>(null, ex.getMessage());
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseWrapper);
-                });
+        boolean updated = productService.updateProduct(id, productInsertDTO);
+        if (!updated) {
+            logger.warn("Product not found for ID: {}", id);
+            return ResponseEntity.notFound().build();
+        }
+        logger.info("Product updated successfully, ID: {}", id);
+        return ResponseEntity.ok("Product updated successfully");
     }
 
-    // Delete Product
-    @DeleteMapping("products/{productId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> deleteProduct(@PathVariable Long productId) {
-        return productService.deleteProduct(productId)
-                .thenApplyAsync(result -> {
-                    if (!result.isSuccess()) {
-                        ResponseWrapper<Void> responseWrapper = new ResponseWrapper<>(null, result.getErrorMessage());
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseWrapper);
-                    } else {
-                        ResponseWrapper<Void> responseWrapper = new ResponseWrapper<>(null,null);
-                        return ResponseEntity.status(HttpStatus.OK).body(responseWrapper);
-                    }
-                }).exceptionally(ex -> {
-            ResponseWrapper<Void> responseWrapper = new ResponseWrapper<>(null, ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseWrapper);
-        });
-
+    /**
+     * Deletes a product by ID.
+     *
+     * @param id the ID of the product
+     * @return ResponseEntity with a status message
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
+        boolean deleted = productService.deleteProduct(id);
+        if (!deleted) {
+            logger.warn("Product not found for deletion, ID: {}", id);
+            return ResponseEntity.notFound().build();
+        }
+        logger.info("Product deleted successfully, ID: {}", id);
+        return ResponseEntity.ok("Product deleted successfully");
     }
 }

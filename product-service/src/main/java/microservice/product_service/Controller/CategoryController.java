@@ -1,20 +1,23 @@
 package microservice.product_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.CategoryReturnDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Product.Category.CategoryDTO;
+import at.backend.drugstore.microservice.common_models.Validations.ControllerValidation;
 import microservice.product_service.Service.CategoryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import javax.validation.Valid;
 
 @RestController
+@RequestMapping("/categories")
 public class CategoryController {
 
+    private static final Logger logger = LoggerFactory.getLogger(CategoryController.class);
     private final CategoryService categoryService;
 
     @Autowired
@@ -22,93 +25,106 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    // CREATE
-    @PostMapping("/admin/categories/add")
-    public CompletableFuture<ResponseEntity<?>> insertCategory(@RequestBody CategoryReturnDTO categoryDTO, BindingResult bindingResult) {
+    /**
+     * Inserts a new category.
+     * @param categoryDTO the category data transfer object
+     * @param bindingResult the result of validation binding
+     * @return HTTP response entity with status
+     */
+    @PostMapping("/admin/add")
+    public ResponseEntity<?> insertCategory(@Valid @RequestBody CategoryDTO categoryDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-            return CompletableFuture.completedFuture(new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST));
+            var validationError = ControllerValidation.handleValidationError(bindingResult);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationError);
         }
 
-        return categoryService.insertCategory(categoryDTO)
-                .thenApply(result -> {
-                    if (result.isSuccess()) {
-                        return new ResponseEntity<>(result.getData(), HttpStatus.CREATED);
-                    } else {
-                        return new ResponseEntity<>(result.getErrorMessage(), HttpStatus.BAD_REQUEST);
-                    }
-                })
-                .exceptionally(ex -> new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
+        categoryService.insertCategory(categoryDTO);
+        logger.info("Category inserted successfully: {}", categoryDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    /**
+     * Fetches a category with its products by ID.
+     * @param categoryId the category ID
+     * @return HTTP response entity with category data or 404 status if not found
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoryDTO> getCategoryWithProductsById(@PathVariable Long categoryId) {
+        CategoryDTO categoryDTO = categoryService.findCategoryByIdWithProducts(categoryId);
+        if (categoryDTO == null) {
+            logger.warn("Category with ID {} not found", categoryId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
 
-
-    // READ
-    @GetMapping("categories/{id}")
-    public CompletableFuture<ResponseEntity<?>> getCategoryWithProductsById(@PathVariable Long id) {
-        return categoryService.findCategoryByIdWithProducts(id)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        return new ResponseEntity<>(result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                    } else {
-                        return new ResponseEntity<>(result.getData(), HttpStatus.OK);
-                    }
-                })
-                .exceptionally(ex -> new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
+        logger.info("Category with products retrieved successfully: {}", categoryDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(categoryDTO);
     }
 
-    @GetMapping("categories/subcategories/{id}")
-    public CompletableFuture<ResponseEntity<?>> getCategoryWithSubCategories(@PathVariable Long id) {
-        return categoryService.findCategoryByIdWithSubcategory(id)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        return new ResponseEntity<>(result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                    } else {
-                        return new ResponseEntity<>(result.getData(), HttpStatus.OK);
-                    }
-                })
-                .exceptionally(ex -> new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
+    /**
+     * Fetches a category with its subcategories by ID.
+     * @param categoryId the category ID
+     * @return HTTP response entity with category data or 404 status if not found
+     */
+    @GetMapping("/subcategories/{id}")
+    public ResponseEntity<CategoryDTO> getCategoryWithSubCategories(@PathVariable Long categoryId) {
+        CategoryDTO categoryDTO = categoryService.findCategoryByIdWithSubcategory(categoryId);
+        if (categoryDTO == null) {
+            logger.warn("Category with subcategories and ID {} not found", categoryId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        logger.info("Category with subcategories retrieved successfully: {}", categoryDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(categoryDTO);
     }
 
-    @GetMapping("categories/subcategories/products/{id}")
-    public CompletableFuture<ResponseEntity<?>> getCategoryWithProducts(@PathVariable Long id) {
-        return categoryService.findCategoryByIdWithSubCategoriesAndProducts(id)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        return new ResponseEntity<>(result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                    } else {
-                        return new ResponseEntity<>(result.getData(), HttpStatus.OK);
-                    }
-                })
-                .exceptionally(ex -> new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
+    /**
+     * Fetches a category with its subcategories and products by ID.
+     * @param categoryId the category ID
+     * @return HTTP response entity with category data or 404 status if not found
+     */
+    @GetMapping("/subcategories/products/{id}")
+    public ResponseEntity<CategoryDTO> getCategoryWithProducts(@PathVariable Long categoryId) {
+        CategoryDTO categoryDTO = categoryService.findCategoryByIdWithSubCategoriesAndProducts(categoryId);
+        if (categoryDTO == null) {
+            logger.warn("Category with subcategories and products and ID {} not found", categoryId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        logger.info("Category with subcategories and products retrieved successfully: {}", categoryDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(categoryDTO);
     }
 
-    // UPDATE
-    @PutMapping("admin/categories/update{id}")
-    public CompletableFuture<ResponseEntity<?>> updateCategory(@PathVariable Long id, @RequestBody CategoryReturnDTO categoryDTO) {
-        return categoryService.updateCategory(id, categoryDTO)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        return new ResponseEntity<>(result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                    } else {
-                        return new ResponseEntity<>(result.getData(), HttpStatus.OK);
-                    }
-                })
-                .exceptionally(ex -> new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
+    /**
+     * Updates an existing category.
+     * @param categoryDTO the category data transfer object
+     * @return HTTP response entity with status
+     */
+    @PutMapping("/admin/categories/update/{id}")
+    public ResponseEntity<Void> updateCategory(@RequestBody CategoryDTO categoryDTO) {
+        boolean isCategoryUpdated = categoryService.updateCategory(categoryDTO);
+        if (!isCategoryUpdated) {
+            logger.warn("Category with ID {} not found for update", categoryDTO.getId());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        logger.info("Category updated successfully: {}", categoryDTO);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    // DELETE
-    @DeleteMapping("admin/categories/delete{id}")
-    public CompletableFuture<ResponseEntity<?>> deleteCategory(@PathVariable Long id) {
-        return categoryService.deleteCategory(id)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        return new ResponseEntity<>(result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                    } else {
-                        return new ResponseEntity<>(result.getData(), HttpStatus.NO_CONTENT);
-                    }
-                })
-                .exceptionally(ex -> new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
+    /**
+     * Deletes a category by ID.
+     * @param categoryId the category ID
+     * @return HTTP response entity with status
+     */
+    @DeleteMapping("/admin/categories/delete/{id}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long categoryId) {
+        boolean isCategoryDeleted = categoryService.deleteCategory(categoryId);
+        if (!isCategoryDeleted) {
+            logger.warn("Category with ID {} not found for deletion", categoryId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        logger.info("Category deleted successfully: {}", categoryId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

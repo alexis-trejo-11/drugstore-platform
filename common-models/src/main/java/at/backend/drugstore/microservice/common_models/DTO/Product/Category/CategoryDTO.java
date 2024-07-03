@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryReturnDTO {
+public class CategoryDTO {
 
     private Long id;
 

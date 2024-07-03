@@ -19,7 +19,7 @@ public class MainCategoryDTO {
 
     // RelaitionShip
     List<ProductDTO> productsDTO;
-    List<CategoryReturnDTO> categoryDTOS;
+    List<CategoryDTO> categoryDTOS;
     List<SubcategoryReturnDTO> subcategoriesDTOS;
 
 }

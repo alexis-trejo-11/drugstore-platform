@@ -1,16 +1,13 @@
 package microservice.product_service.Service;
 
-
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.CategoryReturnDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Product.Category.CategoryDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.Category.MainCategoryDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.Category.SubcategoryReturnDTO;
 import microservice.product_service.Model.MainCategory;
 import microservice.product_service.Repository.MainCategoryRepository;
 import microservice.product_service.Utils.ModelTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +15,6 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,28 +29,17 @@ public class MainCategoryService {
 
     @Async
     @Transactional
-    public CompletableFuture<Result<MainCategoryDTO>> insertCategory(MainCategoryDTO mainCategoryDTO) {
+    public void insertCategory(MainCategoryDTO mainCategoryDTO) {
         try {
-            // Create a new Category object and transform DTO into Model using the constructor
             MainCategory mainCategory = new MainCategory();
-            mainCategory.setName(mainCategory.getName());
+            mainCategory.setName(mainCategoryDTO.getName());
 
-            // Set Model Dates
             LocalDateTime now = LocalDateTime.now();
             mainCategory.setCreatedAt(now);
             mainCategory.setUpdatedAt(now);
 
-            // Save to the database
             mainCategoryRepository.saveAndFlush(mainCategory);
-
-            // Return DTO
-            MainCategoryDTO mainCategoryReturnDTO = new MainCategoryDTO();
-            return CompletableFuture.completedFuture(Result.success(mainCategoryReturnDTO));
-        } catch (DataIntegrityViolationException e) {
-            // Handle the data integrity violation exception
-            throw new DataIntegrityViolationException("Error occurred while inserting category: " + e.getMessage());
         } catch (Exception e) {
-            // Handle any other unexpected exception
             throw new RuntimeException("An unexpected error occurred while inserting category", e);
         }
     }
@@ -62,111 +47,90 @@ public class MainCategoryService {
 
     @Transactional
     @Async
-    public CompletableFuture<Result<MainCategoryDTO>> findMainCategoryByIdWithCategoryAndSubCategory(Long id) {
+    public MainCategoryDTO findMainCategoryByIdWithCategoryAndSubCategory(Long id) {
         try {
-            // Attempt to find the category by its ID
             Optional<MainCategory> mainCategory = mainCategoryRepository.findById(id);
+            if (mainCategory.isEmpty()) {
+                return null;
 
-            // If the category is present, transform it into a DTO and return it
-            if (mainCategory.isPresent()) {
-                MainCategoryDTO mainCategoryDTO = ModelTransformer.mainCategorytoDTO(mainCategory.get());
-
-                // Set Categories and SubCategories for the CategoryDTO
-                List<CategoryReturnDTO> categoryDTOS = mainCategory.get().getCategories().stream()
-                        .map(ModelTransformer::categoryToReturnDTO)
-                        .collect(Collectors.toList());
-                mainCategoryDTO.setCategoryDTOS(categoryDTOS);
-
-                List<SubcategoryReturnDTO> subcategoryDTOS = mainCategory.get().getSubcategories().stream()
-                        .map(ModelTransformer::subcategoryToReturnDTO)
-                        .collect(Collectors.toList());
-                mainCategoryDTO.setSubcategoriesDTOS(subcategoryDTOS);
-
-                // Return DTO
-                return CompletableFuture.completedFuture(Result.success(mainCategoryDTO));
-            } else {
-                // If the category is not found, return an error result
-                return CompletableFuture.completedFuture(Result.error("Category with ID: " + id + " not found."));
             }
+
+            MainCategoryDTO mainCategoryDTO = ModelTransformer.mainCategorytoDTO(mainCategory.get());
+
+            List<CategoryDTO> categoryDTOS = mainCategory.get().getCategories().stream()
+                    .map(ModelTransformer::categoryToReturnDTO)
+                    .collect(Collectors.toList());
+            mainCategoryDTO.setCategoryDTOS(categoryDTOS);
+
+            List<SubcategoryReturnDTO> subcategoryDTOS = mainCategory.get().getSubcategories().stream()
+                    .map(ModelTransformer::subcategoryToReturnDTO)
+                    .collect(Collectors.toList());
+            mainCategoryDTO.setSubcategoriesDTOS(subcategoryDTOS);
+
+            return mainCategoryDTO;
         } catch (Exception e) {
-            // Handle other exceptions and return a failed CompletableFuture with an error message
-            return CompletableFuture.completedFuture(Result.error(e.getMessage()));
+            throw new RuntimeException(e.getMessage());
         }
     }
 
     @Transactional
     @Async
-    public CompletableFuture<Result<MainCategoryDTO>> findMainCategoryByIdWithProducts(Long id) {
+    public MainCategoryDTO findMainCategoryByIdWithProducts(Long mainCategoryId) {
         try {
-            // Attempt to find the category by its ID
-            Optional<MainCategory> mainCategory =  mainCategoryRepository.findById(id);
-
-            // If the category is present, transform it into a DTO and return it
-            if (mainCategory.isPresent()) {
-                MainCategoryDTO mainCategoryDTO = ModelTransformer.mainCategorytoDTO(mainCategory.get());
-
-                // Set products for the CategoryDTO
-                List<ProductDTO> productDTOS = mainCategory.get().getProducts().stream()
-                        .map(ModelTransformer::productToDTO)
-                        .collect(Collectors.toList());
-                mainCategoryDTO.setProductsDTO(productDTOS);
-
-                // Return DTO
-                return CompletableFuture.completedFuture(Result.success(mainCategoryDTO));
-            } else {
-                // If the category is not found, return Bad Result
-                return CompletableFuture.completedFuture(Result.error("Category with ID: " + id.toString() + " not found."));
+            Optional<MainCategory> mainCategory =  mainCategoryRepository.findById(mainCategoryId);
+            if (mainCategory.isEmpty()) {
+                return null;
             }
+
+            MainCategoryDTO mainCategoryDTO = ModelTransformer.mainCategorytoDTO(mainCategory.get());
+
+            List<ProductDTO> productDTOS = mainCategory.get().getProducts().stream()
+                    .map(ModelTransformer::productToDTO)
+                    .collect(Collectors.toList());
+            mainCategoryDTO.setProductsDTO(productDTOS);
+
+            // Return DTO
+            return mainCategoryDTO;
         } catch (Exception e) {
-            // Handle other exceptions and return a failed CompletableFuture with an error message
-            return CompletableFuture.failedFuture(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
-
-    // Update
     @Async
     @Transactional
-    public CompletableFuture<Result<MainCategoryDTO>> updateMainCategory(Long id, MainCategoryDTO mainCategoryDTO) {
+    public boolean updateMainCategory(MainCategoryDTO mainCategoryDTO) {
         try {
-            Optional<MainCategory> mainCategoryOptional = mainCategoryRepository.findById(id);
+            Optional<MainCategory> mainCategoryOptional = mainCategoryRepository.findById(mainCategoryDTO.getId());
             if (mainCategoryOptional.isEmpty()) {
-                return CompletableFuture.completedFuture(Result.error("Category with ID: " + id.toString() + " not found."));
+                return false;
             }
-            // Update category properties using constructor
+
             MainCategory mainCategory = new MainCategory();
             mainCategory.setName(mainCategoryDTO.getName());
             mainCategory.setUpdatedAt(LocalDateTime.now());
 
-            // Save the updated category
-            MainCategory  mainCategoryUpdated = mainCategoryRepository.save(mainCategory);
+            mainCategoryRepository.saveAndFlush(mainCategory);
 
-            return CompletableFuture.completedFuture(Result.success(ModelTransformer.mainCategorytoDTO(mainCategoryUpdated)));
+            return true;
         } catch (Exception e) {
-            return CompletableFuture.completedFuture(Result.error(e.getMessage()));
+            throw new RuntimeException(e.getMessage());
         }
     }
 
-    // Delete
     @Async
     @Transactional
-    public CompletableFuture<Result<MainCategoryDTO>> deleteCategory(Long id) {
+    public boolean deleteCategoryById(Long categoryId) {
         try {
-            Optional<MainCategory> mainCategory = mainCategoryRepository.findById(id);
+            Optional<MainCategory> mainCategory = mainCategoryRepository.findById(categoryId);
             if (mainCategory.isEmpty()) {
-                return CompletableFuture.completedFuture(Result.error("Category with ID: " + id.toString() + " not found."));
+                return false;
             }
 
-            // Make DTO before removing the entity
-            MainCategoryDTO mainCategoryDTO = ModelTransformer.mainCategorytoDTO(mainCategory.get());
+            mainCategoryRepository.deleteById(categoryId);
 
-
-            // Delete the category
-            mainCategoryRepository.delete(mainCategory.get());
-
-            return CompletableFuture.completedFuture(Result.success(mainCategoryDTO));
+            return true;
         } catch (Exception e) {
-            return CompletableFuture.completedFuture(Result.error(e.getMessage()));
+            throw new RuntimeException(e.getMessage());
         }
     }
 }
