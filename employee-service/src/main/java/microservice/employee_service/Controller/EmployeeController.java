@@ -36,20 +36,20 @@ public class EmployeeController {
         }
 
         employeeService.addEmployee(employeeDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(false, null, "Employee Successfully Created.", 201));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, null, "Employee Successfully Created.", 201));
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<EmployeeDTO>>> getAllEmployees() {
         List<EmployeeDTO> employeeDTOS = employeeService.getAllEmployees();
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(false, employeeDTOS, "Employees Successfully Fetched.", 200));
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, employeeDTOS, "Employees Successfully Fetched.", 200));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{employeeId}")
     public ResponseEntity<ApiResponse<EmployeeDTO>> getEmployeeById(@PathVariable Long employeeId) {
         EmployeeDTO employeeDTO = employeeService.getEmployeeById(employeeId);
         if (employeeDTO == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Employee With " + employeeId + " Not Found", 404));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(true, null, "Employee With " + employeeId + " Not Found", 404));
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(false, employeeDTO, "Employee Successfully Fetched.", 200));
@@ -67,7 +67,7 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, updateEmployeeResult.getErrorMessage(), 404));
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(false, null, "Employee Successfully Updated.", 200));
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Employee Successfully Updated.", 200));
     }
 
 
@@ -79,6 +79,6 @@ public class EmployeeController {
         }
 
         employeeService.deleteEmployee(employeeId);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(false, null, "Employee Successfully Deleted.", 200));
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Employee Successfully Deleted.", 200));
     }
 }
