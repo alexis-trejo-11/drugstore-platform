@@ -1,6 +1,7 @@
 package at.backend.drugstore.microservice.common_models.ExternalService.Products;
 
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
 import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import org.springframework.http.ResponseEntity;
