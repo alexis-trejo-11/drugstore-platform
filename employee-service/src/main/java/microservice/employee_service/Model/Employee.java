@@ -29,6 +29,7 @@ public class Employee implements Serializable {
     @Enumerated(EnumType.STRING)
     private Genre genre;
 
+
     @Column(name = "birth_date")
     private Date birthDate;
 

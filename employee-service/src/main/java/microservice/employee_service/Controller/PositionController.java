@@ -1,95 +1,111 @@
 package microservice.employee_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
 import at.backend.drugstore.microservice.common_models.DTO.Employee.Postion.PositionInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Employee.Postion.PositionReturnDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Employee.Postion.PositionDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Employee.Postion.PositionUpdateDTO;
-import microservice.employee_service.Service.PositionServiceImpl;
+import at.backend.drugstore.microservice.common_models.Validations.ControllerValidation;
+import microservice.employee_service.Service.PositionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @RestController
-@RequestMapping("/positions")
+@RequestMapping("v1/api/employees/positions")
 public class PositionController {
 
-    private final PositionServiceImpl positionService;
+    private static final Logger logger = LoggerFactory.getLogger(PositionController.class);
+
+    private final PositionService positionService;
 
     @Autowired
-    public PositionController(PositionServiceImpl positionService) {
+    public PositionController(PositionService positionService) {
         this.positionService = positionService;
     }
 
-    @PostMapping
-    public CompletableFuture<ResponseEntity<ResponseWrapper>> createPosition(@RequestBody PositionInsertDTO positionInsertDTO, BindingResult bindingResult) {
+    /**
+     * Create a new position.
+     */
+    @PostMapping("/admin/create")
+    public ResponseEntity<ApiResponse<?>> createPosition(@Valid @RequestBody PositionInsertDTO positionInsertDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            StringBuilder errorMessage = new StringBuilder();
-            bindingResult.getAllErrors().forEach(error -> {
-                errorMessage.append(error.getDefaultMessage()).append("\n");
-            });
-            ResponseWrapper response = new ResponseWrapper<>(null, errorMessage.toString());
-            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(response));
+            var validationErrors = ControllerValidation.handleValidationError(bindingResult);
+            logger.warn("Validation errors occurred while creating position: {}", validationErrors);
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, validationErrors, "Validation Error", HttpStatus.BAD_REQUEST.value()));
         }
 
-        return CompletableFuture.supplyAsync(() -> {
-            positionService.createPosition(positionInsertDTO);
-            ResponseWrapper responseWrapper = new ResponseWrapper("Position Successfully Created", null );
-            return ResponseEntity.status(201).body(responseWrapper);
-        }).exceptionally(ex -> ResponseEntity.status(500).build());
+        positionService.createPosition(positionInsertDTO);
+        logger.info("Position successfully created.");
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, null, "Position Successfully Created.", HttpStatus.CREATED.value()));
     }
 
-    @GetMapping
-    public ResponseEntity<List<PositionReturnDTO>> getAllPositions() {
-        List<PositionReturnDTO> positions = positionService.getAllPositions();
-        return ResponseEntity.ok(positions);
+    /**
+     * Get all positions.
+     */
+    @GetMapping("/admin/all")
+    public ResponseEntity<ApiResponse<List<PositionDTO>>> getAllPositions() {
+        List<PositionDTO> positions = positionService.getAllPositions();
+        logger.info("Fetched all positions.");
+        return ResponseEntity.ok(new ApiResponse<>(true, positions, "Positions Successfully Fetched.", HttpStatus.OK.value()));
     }
 
+    /**
+     * Get position by ID.
+     */
     @GetMapping("/{positionId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper>> getPositionById(@PathVariable Long positionId) {
-        return CompletableFuture.supplyAsync(() -> {
-           Result result = positionService.getPositionById(positionId);
-           if (!result.isSuccess()) {
-               ResponseWrapper responseWrapper = new ResponseWrapper(null, result.getErrorMessage());
-               return ResponseEntity.status(404).body(responseWrapper);
-           } else {
-               ResponseWrapper responseWrapper = new ResponseWrapper( result.getData(), null);
-               return ResponseEntity.status(302).body(responseWrapper);
-           }
-        }).exceptionally(ex -> ResponseEntity.status(500).build());
-
+    public ResponseEntity<ApiResponse<PositionDTO>> getPositionById(@PathVariable Long positionId) {
+        PositionDTO positionDTO = positionService.getPositionById(positionId);
+        if (positionDTO == null) {
+            logger.warn("Position with ID {} not found.", positionId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(false, null, "Position with Id " + positionId + " Not Found.", HttpStatus.NOT_FOUND.value()));
+        }
+        logger.info("Fetched position with ID {}.", positionId);
+        return ResponseEntity.ok(new ApiResponse<>(true, positionDTO, "Position Successfully Fetched.", HttpStatus.OK.value()));
     }
 
-    @PutMapping
-    public CompletableFuture<ResponseEntity<ResponseWrapper>> updatePosition(@RequestBody PositionUpdateDTO positionUpdateDTO) {
-        return CompletableFuture.supplyAsync(() -> {
-            Result<PositionReturnDTO> result = positionService.updatePosition(positionUpdateDTO);
-            if (!result.isSuccess()) {
-                ResponseWrapper responseWrapper = new ResponseWrapper(null, result.getErrorMessage());
-                return ResponseEntity.status(404).body(responseWrapper);
-            } else {
-                ResponseWrapper responseWrapper = new ResponseWrapper( result.getData(), null);
-                return ResponseEntity.status(200).body(responseWrapper);
-            }
-        }).exceptionally(ex -> ResponseEntity.status(500).build());
+    /**
+     * Update an existing position.
+     */
+    @PutMapping("/admin/update")
+    public ResponseEntity<ApiResponse<?>> updatePosition(@Valid @RequestBody PositionUpdateDTO positionUpdateDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            var validationErrors = ControllerValidation.handleValidationError(bindingResult);
+            logger.warn("Validation errors occurred while updating position: {}", validationErrors);
+            return ResponseEntity.badRequest().body(new ApiResponse<>(false, validationErrors, "Validation Error", HttpStatus.BAD_REQUEST.value()));
+        }
 
+        boolean isPositionUpdated = positionService.updatePosition(positionUpdateDTO);
+        if (!isPositionUpdated) {
+            logger.warn("Position with ID {} not found for update.", positionUpdateDTO.getId());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(false, null, "Position with Id " + positionUpdateDTO.getId() + " Not Found.", HttpStatus.NOT_FOUND.value()));
+        }
+        logger.info("Position with ID {} successfully updated.", positionUpdateDTO.getId());
+        return ResponseEntity.ok(new ApiResponse<>(true, null, "Position Successfully Updated.", HttpStatus.OK.value()));
     }
 
+    /**
+     * Delete a position by ID.
+     */
     @DeleteMapping("/{positionId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper>> deletePosition(@PathVariable Long positionId) {
-        return CompletableFuture.supplyAsync(() -> {
-            Result result = positionService.deletePosition(positionId);
-            if (!result.isSuccess()) {
-                ResponseWrapper responseWrapper = new ResponseWrapper(null, result.getErrorMessage());
-                return ResponseEntity.status(404).body(responseWrapper);
-            } else {
-                ResponseWrapper responseWrapper = new ResponseWrapper("Position Successfully Deleted", null);
-                return ResponseEntity.status(200).body(responseWrapper);
-            }
-        }).exceptionally(ex -> ResponseEntity.status(500).build());
+    public ResponseEntity<ApiResponse<Void>> deletePosition(@PathVariable Long positionId) {
+        PositionDTO positionDTO = positionService.getPositionById(positionId);
+        if (positionDTO == null) {
+            logger.warn("Position with ID {} not found for deletion.", positionId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(false, null, "Position with Id " + positionId + " Not Found.", HttpStatus.NOT_FOUND.value()));
+        }
+
+        positionService.deletePosition(positionId);
+        logger.info("Position with ID {} successfully deleted.", positionId);
+        return ResponseEntity.ok(new ApiResponse<>(true, null, "Position Successfully Deleted.", HttpStatus.OK.value()));
     }
 }
