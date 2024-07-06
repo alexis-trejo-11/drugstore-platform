@@ -4,12 +4,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-import javax.swing.text.Position;
 import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
-public class PositionReturnDTO {
+public class PositionDTO {
 
     private Long id;
 

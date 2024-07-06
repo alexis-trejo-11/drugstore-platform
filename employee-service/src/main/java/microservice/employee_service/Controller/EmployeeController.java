@@ -1,11 +1,13 @@
 package microservice.employee_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
-
+import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
 import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeInsertDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeeDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeeUpdateDTO;
-import microservice.employee_service.Service.EmployeeServiceImpl;
+import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_models.Validations.ControllerValidation;
+import at.backend.drugstore.microservice.common_models.Validations.CustomControllerResponse;
+import microservice.employee_service.Service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,114 +16,69 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @RestController
-@RequestMapping("/employees")
+@RequestMapping("v1/api/employees")
 public class EmployeeController {
 
-    private final EmployeeServiceImpl employeeService;
-
+    private final EmployeeService employeeService;
 
     @Autowired
-    public EmployeeController(EmployeeServiceImpl employeeService) {
+    public EmployeeController(EmployeeService employeeService) {
         this.employeeService = employeeService;
     }
 
     @PostMapping
-    public CompletableFuture<ResponseEntity<String>> addEmployee(@RequestBody @Valid EmployeInsertDTO employeeDTO, BindingResult bindingResult) {
-        // Validation Using DTO Config
-        if (bindingResult.hasErrors()) {
-            StringBuilder errorMessage = new StringBuilder();
-            bindingResult.getAllErrors().forEach(error -> {
-                errorMessage.append(error.getDefaultMessage()).append("\n");
-            });
-            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(errorMessage.toString()));
+    public ResponseEntity<ApiResponse<?>> addEmployee(@RequestBody @Valid EmployeInsertDTO employeeDTO, BindingResult bindingResult) {
+        if (!bindingResult.hasErrors()) {
+        CustomControllerResponse validationError = ControllerValidation.handleValidationError(bindingResult);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, validationError, "Validation Error", 400));
         }
 
-        // Employee Creation Using Service Layer
-        return CompletableFuture.supplyAsync(() -> {
-            employeeService.addEmployee(employeeDTO);
-
-            return ResponseEntity.ok().body("Created");
-        }).exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
-
+        employeeService.addEmployee(employeeDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(false, null, "Employee Successfully Created.", 201));
     }
 
     @GetMapping
-    public CompletableFuture<ResponseEntity<ResponseWrapper<List<EmployeeDTO>>>> getAllEmployees() {
-        return employeeService.getAllEmployees()
-                .thenApply(employeeDTOS -> {
-                    ResponseWrapper<List<EmployeeDTO>> errorResponse = new ResponseWrapper<>(employeeDTOS, null);
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-                })
-                .exceptionally(ex -> {
-                    ResponseWrapper<List<EmployeeDTO>> errorResponse = new ResponseWrapper<>(null, ex.getMessage());
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                });
+    public ResponseEntity<ApiResponse<List<EmployeeDTO>>> getAllEmployees() {
+        List<EmployeeDTO> employeeDTOS = employeeService.getAllEmployees();
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(false, employeeDTOS, "Employees Successfully Fetched.", 200));
     }
 
     @GetMapping("/{id}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<EmployeeDTO>>> getEmployeeById(@PathVariable Long id) {
-        return employeeService.getEmployeeById(id)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        ResponseWrapper<EmployeeDTO> errorResponse = new ResponseWrapper<>(null, result.getErrorMessage());
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-                    } else {
-                        ResponseWrapper<EmployeeDTO> response = new ResponseWrapper<>(result.getData(), null);
-                        return ResponseEntity.status(HttpStatus.OK).body(response);
-                    }
-                })
-                .exceptionally(ex -> {
-                    ResponseWrapper<EmployeeDTO> errorResponse = new ResponseWrapper<>(null, ex.getMessage());
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                });
+    public ResponseEntity<ApiResponse<EmployeeDTO>> getEmployeeById(@PathVariable Long employeeId) {
+        EmployeeDTO employeeDTO = employeeService.getEmployeeById(employeeId);
+        if (employeeDTO == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Employee With " + employeeId + " Not Found", 404));
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(false, employeeDTO, "Employee Successfully Fetched.", 200));
     }
 
     @PutMapping
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> updateEmployee(@RequestBody EmployeeUpdateDTO employeeUpdateDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            StringBuilder errorMessage = new StringBuilder();
-            bindingResult.getAllErrors().forEach(error -> {
-                errorMessage.append(error.getDefaultMessage()).append("\n");
-            });
-            ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, errorMessage.toString());
-            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse));
+    public ResponseEntity<ApiResponse<?>> updateEmployee(@RequestBody EmployeeUpdateDTO employeeUpdateDTO, BindingResult bindingResult) {
+        if (!bindingResult.hasErrors()) {
+            CustomControllerResponse validationError = ControllerValidation.handleValidationError(bindingResult);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, validationError, "Validation Error", 400));
         }
 
-        return employeeService.updateEmployee(employeeUpdateDTO)
-          .thenApply(result -> {
-            if (!result.isSuccess()) {
-                ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, result.getErrorMessage());
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-            } else {
-                ResponseWrapper<Void> response = new ResponseWrapper<>(result.getData(), null);
-                return ResponseEntity.status(HttpStatus.OK).body(response);
-            }
-        })
-                .exceptionally(ex -> {
-                    ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, ex.getMessage());
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                });
+        Result<Void> updateEmployeeResult = employeeService.updateEmployee(employeeUpdateDTO);
+        if (!updateEmployeeResult.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, updateEmployeeResult.getErrorMessage(), 404));
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(false, null, "Employee Successfully Updated.", 200));
     }
 
 
     @DeleteMapping("/{id}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> deleteEmployee(@PathVariable Long employeeId) {
-        return employeeService.deleteEmployee(employeeId)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, result.getErrorMessage());
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-                    } else {
-                        ResponseWrapper<Void> response = new ResponseWrapper<>(result.getData(), null);
-                        return ResponseEntity.status(HttpStatus.OK).body(response);
-                    }
-                })
-                .exceptionally(ex -> {
-                    ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, ex.getMessage());
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                });
+    public ResponseEntity<ApiResponse<Void>> deleteEmployee(@PathVariable Long employeeId) {
+        EmployeeDTO employeeDTO = employeeService.getEmployeeById(employeeId);
+        if (employeeDTO == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Employee With " + employeeId + " Not Found", 404));
+        }
+
+        employeeService.deleteEmployee(employeeId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(false, null, "Employee Successfully Deleted.", 200));
     }
 }

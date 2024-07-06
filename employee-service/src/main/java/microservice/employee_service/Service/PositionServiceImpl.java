@@ -1,13 +1,14 @@
 package microservice.employee_service.Service;
 
-import at.backend.drugstore.microservice.common_models.Utils.Result;
 import at.backend.drugstore.microservice.common_models.DTO.Employee.Postion.PositionInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Employee.Postion.PositionReturnDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Employee.Postion.PositionDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Employee.Postion.PositionUpdateDTO;
+import microservice.employee_service.Mappers.PositionMapper;
 import microservice.employee_service.Model.Position;
 import microservice.employee_service.Model.enums.ClassificationWorkday;
 import microservice.employee_service.Repository.PositionRepository;
-import microservice.employee_service.Utils.ModelTransform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -19,90 +20,85 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class PositionServiceImpl {
+public class PositionServiceImpl implements PositionService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PositionServiceImpl.class);
 
     private final PositionRepository positionRepository;
+    private final PositionMapper positionMapper;
 
     @Autowired
-    public PositionServiceImpl(PositionRepository positionRepository) {
+    public PositionServiceImpl(PositionRepository positionRepository, PositionMapper positionMapper) {
         this.positionRepository = positionRepository;
+        this.positionMapper = positionMapper;
     }
 
+    /**
+     * Asynchronously create a new position.
+     */
+    @Override
     @Async
     @Transactional
     public void createPosition(PositionInsertDTO positionInsertDTO) {
-        try {
-            Position position = ModelTransform.insertDtoToPosition(positionInsertDTO);
-
-            positionRepository.saveAndFlush(position);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getCause());
-        }
+        Position position = positionMapper.insertDtoToEntity(positionInsertDTO);
+        positionRepository.saveAndFlush(position);
+        logger.info("Position created: {}", position);
     }
 
+    /**
+     * Asynchronously get all positions.
+     */
+    @Override
     @Async
-    public List<PositionReturnDTO> getAllPositions() {
+    public List<PositionDTO> getAllPositions() {
         List<Position> positions = positionRepository.findAll();
-
-        return positions
-                .stream()
-                .map(ModelTransform::positionToReturnDTO)
+        return positions.stream()
+                .map(positionMapper::entityToDTO)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Asynchronously get a position by ID.
+     */
+    @Override
     @Async
-    public Result<PositionReturnDTO> getPositionById(Long positionId) {
-        try {
-            Optional<Position> position = positionRepository.findById(positionId);
-            if (position.isPresent()) {
-                PositionReturnDTO positionReturnDTO = ModelTransform.positionToReturnDTO(position.get());
-                return Result.success(positionReturnDTO);
-            } else {
-                return Result.error("Position With Id: " + positionId + " Not Found");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e.getCause());
-        }
-    }
-    @Async
-    @Transactional
-    public Result<PositionReturnDTO> updatePosition (PositionUpdateDTO positionUpdateDTO) {
-        try {
-            Optional<Position> positionOptional = positionRepository.findById(positionUpdateDTO.getId());
-            if (positionOptional.isPresent()) {
-                Position position = positionOptional.get();
-                position.setPositionName(positionUpdateDTO.getPositionName());
-                position.setSalary(positionUpdateDTO.getSalary());
-                position.setClassificationWorkday(ClassificationWorkday.valueOf(positionUpdateDTO.getClassificationWorkday()));
-                position.setUpdatedAt(LocalDateTime.now());
-
-                positionRepository.saveAndFlush(position);
-
-                PositionReturnDTO positionReturnDTO =ModelTransform.positionToReturnDTO(position);
-                return Result.success(positionReturnDTO);
-            } else {
-                return Result.error("Position With Id: " + positionUpdateDTO.getPositionId() + " Not Found");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e.getCause());
-        }
+    public PositionDTO getPositionById(Long positionId) {
+        Optional<Position> optionalPosition = positionRepository.findById(positionId);
+        return optionalPosition.map(positionMapper::entityToDTO).orElse(null);
     }
 
+    /**
+     * Asynchronously update an existing position.
+     */
+    @Override
     @Async
     @Transactional
-    public Result<String> deletePosition (Long positionId){
-        try {
-            Optional<Position> positionOptional = positionRepository.findById(positionId);
-            if (positionOptional.isPresent()) {
-                positionRepository.deleteById(positionId);
-                return Result.success("Position deleted successfully");
-            } else {
-                return Result.error("Position With Id: " + positionId + " Not Found");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e.getCause());
+    public boolean updatePosition(PositionUpdateDTO positionUpdateDTO) {
+        Optional<Position> positionOptional = positionRepository.findById(positionUpdateDTO.getId());
+        if (positionOptional.isEmpty()) {
+            logger.warn("Position with ID {} not found for update.", positionUpdateDTO.getId());
+            return false;
         }
+        Position position = positionOptional.get();
+
+        position.setPositionName(positionUpdateDTO.getPositionName());
+        position.setSalary(positionUpdateDTO.getSalary());
+        position.setClassificationWorkday(ClassificationWorkday.valueOf(positionUpdateDTO.getClassificationWorkday()));
+        position.setUpdatedAt(LocalDateTime.now());
+
+        positionRepository.saveAndFlush(position);
+        logger.info("Position updated: {}", position);
+        return true;
+    }
+
+    /**
+     * Asynchronously delete a position by ID.
+     */
+    @Override
+    @Async
+    @Transactional
+    public void deletePosition(Long positionId) {
+        positionRepository.deleteById(positionId);
+        logger.info("Position with ID {} deleted.", positionId);
     }
 }
-
-
