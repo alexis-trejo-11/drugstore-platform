@@ -7,5 +7,5 @@ import org.springframework.stereotype.Service;
 @Service
 public interface ExternalCartService {
 
-    ResponseEntity<Result<Void>> createClientCart(Long clientId);
+    Result<Void> createClientCart(Long clientId);
 }
