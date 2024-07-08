@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Objects;
+
 
 @Service
 public class ExternalClientServiceImpl implements  ExternalClientService {
@@ -35,7 +35,7 @@ public class ExternalClientServiceImpl implements  ExternalClientService {
     }
 
     @Async
-    public ResponseEntity<Result<ClientDTO>> createClient(ClientInsertDTO clientInsertDTO) {
+    public Result<ClientDTO> createClient(ClientInsertDTO clientInsertDTO) {
         String url = clientServiceUrl + "/clients/add";
         try {
             ResponseEntity<ResponseWrapper<ClientDTO>> response = restTemplate.exchange(
@@ -45,21 +45,14 @@ public class ExternalClientServiceImpl implements  ExternalClientService {
                     new ParameterizedTypeReference<ResponseWrapper<ClientDTO>>() {}
             );
 
-            if (response.getStatusCode() != HttpStatus.CREATED) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Result.error("Cannot create client: " + response.getStatusCode().getReasonPhrase()));
-            } else {
-                ResponseWrapper<ClientDTO> responseBody = response.getBody();
-                if (responseBody != null && responseBody.getData() != null) {
-                    return ResponseEntity.status(response.getStatusCode()).body(Result.success(responseBody.getData()));
-                } else if (responseBody != null && responseBody.getMessage() != null) {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Result.error("Client service error: " + responseBody.getMessage()));
-                } else {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Result.error("Invalid response from client service"));
-                }
-            }
+             if (response.getStatusCode() != HttpStatus.CREATED && response.getBody() != null) {
+                 return new Result<>(false, null, response.getBody().getMessage());
+             }
+
+            return Result.success(response.getBody().getData());
         } catch (Exception e) {
             logger.error("Error occurred while creating client", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Result.error("Internal server error: " + e.getMessage()));
+            return (Result.error("Internal server error: " + e.getMessage()));
         }
     }
 

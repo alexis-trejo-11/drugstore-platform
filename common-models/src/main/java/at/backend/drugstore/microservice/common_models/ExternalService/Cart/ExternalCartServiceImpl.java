@@ -26,7 +26,7 @@ public class ExternalCartServiceImpl implements ExternalCartService {
     }
 
     @Async
-    public ResponseEntity<Result<Void>> createClientCart(Long clientId) {
+    public Result<Void> createClientCart(Long clientId) {
         String url = ecommerceCartServiceUrl + "/ecommerce/carts/create/" + clientId;
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -35,13 +35,13 @@ public class ExternalCartServiceImpl implements ExternalCartService {
 
             ResponseEntity<ResponseWrapper> response = restTemplate.exchange(url, HttpMethod.POST, entity, ResponseWrapper.class);
             if (response.getStatusCode() == HttpStatus.CREATED) {
-                return ResponseEntity.status(response.getStatusCode()).body(Result.success());
+                return Result.success();
             } else {
-                return ResponseEntity.status(response.getStatusCode()).body(Result.error("Cant Create Cart"));
+                return Result.error("Cant Create Cart");
             }
         } catch (Exception e) {
             logger.error("Error occurred while creating cart for client", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Result.error("Internal Server Error"));
+            return Result.error("Internal Server Error");
         }
     }
 }

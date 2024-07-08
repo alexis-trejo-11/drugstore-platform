@@ -13,7 +13,7 @@ public class UserLoginDTO {
 
     private Long employeeId;
 
-    private String hashedPassword;
+    private String password;
 
     private Long clientId;
 
