@@ -1,20 +1,12 @@
 package microservice.ecommerce_cart_service.Controller;
 
 import at.backend.drugstore.microservice.common_models.DTO.Cart.*;
-import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentInsertDTO;
-import at.backend.drugstore.microservice.common_models.ExternalService.Adress.ExternalAddressService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientService;
-import at.backend.drugstore.microservice.common_models.Utils.ErrorResponseUtil;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
-import at.backend.drugstore.microservice.common_models.Validations.CustomControllerResponse;
 import at.backend.drugstore.microservice.common_models.Validations.ControllerValidation;
 import microservice.ecommerce_cart_service.Service.CartItemService;
 import microservice.ecommerce_cart_service.Service.CartService;
-import microservice.ecommerce_cart_service.Service.ExternalService;
-import microservice.ecommerce_cart_service.Service.OrderService;
+import microservice.ecommerce_cart_service.Service.PurchaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,177 +14,135 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RestController
-@RequestMapping("/ecommerce/carts")
+@RequestMapping("v1/api/ecommerce/carts")
 public class EcommerceCartController {
 
     private static final Logger logger = Logger.getLogger(EcommerceCartController.class.getName());
 
     private final CartService cartService;
     private final CartItemService cartItemService;
-    private final OrderService orderService;
-    private final ExternalService externalService;
+    private final PurchaseService purchaseService;
 
     @Autowired
-    public EcommerceCartController(CartService cartService, CartItemService cartItemService,
-                                   OrderService orderService, ExternalClientService externalClientService,
-                                   ExternalAddressService externalAddressService, ExternalService externalService) {
+    public EcommerceCartController(CartService cartService, CartItemService cartItemService, PurchaseService purchaseService) {
         this.cartService = cartService;
         this.cartItemService = cartItemService;
-        this.orderService = orderService;
-        this.externalService = externalService;
+        this.purchaseService = purchaseService;
     }
 
+    /**
+     * Create a new cart for the specified client.
+     *
+     * @param clientId The ID of the client for whom the cart is to be created.
+     * @return A ResponseEntity containing an ApiResponse with the result of the cart creation.
+     */
     @PostMapping("/create/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> createCart(@PathVariable final Long clientId) {
-        return cartService.createCart(clientId)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        HttpStatus notFound = HttpStatus.NOT_FOUND;
-                        ResponseWrapper<Void> errorResponse = ErrorResponseUtil.createErrorResponse(notFound, result.getErrorMessage());
-                        return ResponseEntity.status(notFound).body(errorResponse);
-                    } else {
-                        ResponseWrapper<Void> response = new ResponseWrapper<>(result.getData(), null, HttpStatus.CREATED);
-                        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-                    }
-                })
-                .exceptionally(ex -> {
-                    logger.log(Level.SEVERE, "Error creating cart for client " + clientId, ex);
-                    HttpStatus internalServerError = HttpStatus.INTERNAL_SERVER_ERROR;
-                    ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, ex.getMessage(), HttpStatus.CREATED);
-                    return ResponseEntity.status(internalServerError).body(errorResponse);
-                });
+    public ResponseEntity<ApiResponse<Void>> createCart(@PathVariable final Long clientId) {
+        logger.info("Creating cart for client ID: " + clientId);
+        Result<Void> cartResult = cartService.createCart(clientId);
+        if (!cartResult.isSuccess()) {
+            logger.warning("Failed to create cart for client ID: " + clientId + ". Error: " + cartResult.getErrorMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(false, null, cartResult.getErrorMessage(), 409));
+        }
+        logger.info("Successfully created cart for client ID: " + clientId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, null, "Cart Successfully Created.", 201));
     }
 
+    /**
+     * Get the cart for the specified client.
+     *
+     * @param clientId The ID of the client whose cart is to be retrieved.
+     * @return A ResponseEntity containing an ApiResponse with the client's cart.
+     */
     @GetMapping("/client/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<CartDTO>>> getCartByClientId(
-            @PathVariable Long clientId) {
-
-        if (clientId <= 0) {
-            ResponseWrapper<CartDTO> errorResponse = ErrorResponseUtil.createErrorResponse(HttpStatus.BAD_REQUEST, "Client ID must be greater than 0");
-                     return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse));
+    public ResponseEntity<ApiResponse<CartDTO>> getCartByClientId(@PathVariable Long clientId) {
+        logger.info("Fetching cart for client ID: " + clientId);
+        CartDTO cartDTO = cartService.getCartByClientId(clientId);
+        if (cartDTO == null) {
+            logger.warning("No cart found for client ID: " + clientId);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(false, null, null, 409));
         }
-
-        return cartService.getCartByClientId(clientId)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        ResponseWrapper<CartDTO> errorResponse = ErrorResponseUtil.createErrorResponse(HttpStatus.NOT_FOUND, result.getErrorMessage());
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-                    } else {
-                        ResponseWrapper<CartDTO> response = new ResponseWrapper<>(result.getData(), null, HttpStatus.OK);
-                        return ResponseEntity.status(HttpStatus.OK).body(response);
-                    }
-                })
-                .exceptionally(ex -> {
-                    ResponseWrapper<CartDTO> errorResponse = ErrorResponseUtil.createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-
-                });
+        logger.info("Successfully fetched cart for client ID: " + clientId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, cartDTO, null, 200));
     }
 
+    /**
+     * Add a product to the client's cart.
+     *
+     * @param clientId  The ID of the client.
+     * @param productId The ID of the product to add to the cart.
+     * @param quantity  The quantity of the product to add to the cart.
+     * @return A ResponseEntity containing an ApiResponse with the result of the add operation.
+     */
     @PostMapping("/product/{clientId}/{productId}/{quantity}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> addProductToCart(@PathVariable final Long clientId, @PathVariable final Long productId, @PathVariable final int quantity) {
-
-        return cartItemService.addProductsCart(clientId, productId, quantity)
-                .thenApply(result -> {
-                    if (result.isSuccess()) {
-                        ResponseWrapper<Void> response = new ResponseWrapper<>(null, null, HttpStatus.OK);
-                        return ResponseEntity.status(HttpStatus.OK).body(response);
-                    } else {
-                        ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, result.getErrorMessage(), HttpStatus.NOT_FOUND);
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-                    }
-                })
-                .exceptionally(ex -> {
-                    logger.log(Level.SEVERE, "Error adding product to cart", ex);
-                    ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                });
+    public ResponseEntity<ApiResponse<Void>> addProductToCart(@PathVariable final Long clientId, @PathVariable final Long productId, @PathVariable final int quantity) {
+        logger.info("Adding product ID: " + productId + " with quantity: " + quantity + " to cart for client ID: " + clientId);
+        Result<Void> cartResult = cartItemService.addProductsCart(clientId, productId, quantity);
+        if (!cartResult.isSuccess()) {
+            logger.warning("Failed to add product ID: " + productId + " to cart for client ID: " + clientId + ". Error: " + cartResult.getErrorMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, cartResult.getErrorMessage(), 404));
+        }
+        logger.info("Successfully added product ID: " + productId + " to cart for client ID: " + clientId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Products Successfully Added.", 200));
     }
 
+    /**
+     * Delete a product from the client's cart.
+     *
+     * @param clientId           The ID of the client.
+     * @param cartItemInsertDTO  The DTO containing the product details to be deleted from the cart.
+     * @param bindingResult      The binding result for validation errors.
+     * @return A ResponseEntity containing an ApiResponse with the result of the delete operation.
+     */
     @DeleteMapping("/product/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> deleteProductFromCart(@Valid @PathVariable final Long clientId, @RequestBody final CartItemInsertDTO cartItemInsertDTO, BindingResult bindingResult) {
+    public ResponseEntity<ApiResponse<?>> deleteProductFromCart(@Valid @PathVariable final Long clientId, @RequestBody final CartItemInsertDTO cartItemInsertDTO, BindingResult bindingResult) {
+        logger.info("Deleting product from cart for client ID: " + clientId);
         if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-            ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, errors.toString(), HttpStatus.BAD_REQUEST);
-            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse));
+            var validationErrors = ControllerValidation.handleValidationError(bindingResult);
+            logger.warning("Validation errors while deleting product from cart for client ID: " + clientId + ". Errors: " + validationErrors);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, validationErrors, "Validation Errors", 400));
         }
 
-        return cartItemService.deleteProductFromCart(clientId, cartItemInsertDTO)
-                .thenApply(result -> {
-                    if (result.isSuccess()) {
-                        ResponseWrapper<Void> response = new ResponseWrapper<>(null, null, HttpStatus.OK);
-                        return ResponseEntity.status(HttpStatus.OK).body(response);
-                    } else {
-                        HttpStatus notFound = HttpStatus.NOT_FOUND;
-                        ResponseWrapper<Void> errorResponse = ErrorResponseUtil.createErrorResponse(notFound, result.getErrorMessage());
-                        return ResponseEntity.status(notFound).body(errorResponse);
-                    }
-                })
-                .exceptionally(ex -> {
-                    logger.log(Level.SEVERE, "Error deleting product from cart", ex);
-                    HttpStatus internalServerError = HttpStatus.INTERNAL_SERVER_ERROR;
-                    ResponseWrapper<Void> errorResponse = ErrorResponseUtil.createErrorResponse(internalServerError, ex.getMessage());
-                    return ResponseEntity.status(internalServerError).body(errorResponse);
-                });
+        Result<Void> deleteResult = cartItemService.deleteProductFromCart(clientId, cartItemInsertDTO);
+        if (!deleteResult.isSuccess()) {
+            logger.warning("Failed to delete product from cart for client ID: " + clientId + ". Error: " + deleteResult.getErrorMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, null, deleteResult.getErrorMessage(), 400));
+        }
+        logger.info("Successfully deleted product from cart for client ID: " + clientId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Product Successfully Deleted", 200));
     }
 
-
+    /**
+     * Purchase products from the client's cart.
+     *
+     * @param clientId  The ID of the client.
+     * @param addressId The ID of the address to ship the products to.
+     * @param cardId    The ID of the card to charge for the purchase.
+     * @return A ResponseEntity containing an ApiResponse with the result of the purchase operation.
+     */
     @PostMapping("/purchase")
-    public ResponseEntity<?> purchaseProductsFromCart(@RequestParam Long clientId,
-                                                      @RequestParam Long addressId,
-                                                      @RequestParam Long cardId) {
-        try {
-            // Get External Service Data
-            Result<ClientEcommerceDataDTO> ecommerceDataDTOResult = externalService.getExternalServiceDataById(clientId);
-            if (!ecommerceDataDTOResult.isSuccess()) {
-               return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ecommerceDataDTOResult.getErrorMessage());
-            }
-            var clientData = ecommerceDataDTOResult.getData();
-
-            // Update Cart
-            Result<List<CartItemDTO>> purchaseResult = cartItemService.purchaseProductsFromCart(clientData);
-            if (!purchaseResult.isSuccess()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomControllerResponse(
-                        HttpStatus.NOT_FOUND,
-                        purchaseResult.getErrorMessage()
-                ));
-            }
-
-            List<CartItemDTO> itemsToPurchase  = purchaseResult.getData();
-
-
-            // Create Order
-            Result<Void> orderResult = orderService.CreateOrder(itemsToPurchase, clientData, addressId);
-            if (!orderResult.isSuccess()) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CustomControllerResponse(
-                        HttpStatus.INTERNAL_SERVER_ERROR,
-                        orderResult.getErrorMessage()));
-            }
-
-            // Proceed to create payment if order is created successfully
-            externalService.makePayment(clientData, cardId);
-
-            // Return Success Response
-            return ResponseEntity.status(HttpStatus.OK).body(new CustomControllerResponse(
-                    HttpStatus.OK,
-                    "Success!")
-            );
-        } catch (Exception ex) {
-            // Handle Exceptions
-            logger.log(Level.SEVERE, "Error purchasing products from cart", ex);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    public ResponseEntity<ApiResponse<?>> purchaseProductsFromCart(@RequestParam Long clientId,
+                                                                   @RequestParam Long addressId,
+                                                                   @RequestParam Long cardId) {
+        logger.info("Processing purchase for client ID: " + clientId);
+        Result<ClientEcommerceDataDTO> ecommerceDataDTOResult = purchaseService.prepareClientData(clientId);
+        if (!ecommerceDataDTOResult.isSuccess()) {
+            logger.warning("Failed to prepare client data for purchase for client ID: " + clientId + ". Error: " + ecommerceDataDTOResult.getErrorMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, ecommerceDataDTOResult.getErrorMessage(), 404));
         }
+
+        Result<List<CartItemDTO>> purchaseResult = cartItemService.processCartAndGetItems(ecommerceDataDTOResult.getData());
+        if (!purchaseResult.isSuccess()) {
+            logger.warning("Failed to process cart items for purchase for client ID: " + clientId + ". Error: " + purchaseResult.getErrorMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, null, purchaseResult.getErrorMessage(), 400));
+        }
+
+        purchaseService.processPurchase(ecommerceDataDTOResult.getData(), cardId, purchaseResult.getData(), addressId);
+        logger.info("Successfully processed purchase for client ID: " + clientId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Order Created Payment Will Be Validate Soon.", 200));
     }
 }
-

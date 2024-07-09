@@ -1,6 +1,6 @@
 package at.backend.drugstore.microservice.common_models.ExternalService.Cart;
 
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class ExternalCartServiceImpl implements ExternalCartService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            ResponseEntity<ResponseWrapper> response = restTemplate.exchange(url, HttpMethod.POST, entity, ResponseWrapper.class);
+            ResponseEntity<ApiResponse> response = restTemplate.exchange(url, HttpMethod.POST, entity, ApiResponse.class);
             if (response.getStatusCode() == HttpStatus.CREATED) {
                 return Result.success();
             } else {
