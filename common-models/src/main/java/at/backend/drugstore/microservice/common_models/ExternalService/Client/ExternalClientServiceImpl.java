@@ -2,7 +2,7 @@ package at.backend.drugstore.microservice.common_models.ExternalService.Client;
 
 import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Client.ClientInsertDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Objects;
 
 
 @Service
@@ -38,21 +38,21 @@ public class ExternalClientServiceImpl implements  ExternalClientService {
     public Result<ClientDTO> createClient(ClientInsertDTO clientInsertDTO) {
         String url = clientServiceUrl + "/clients/add";
         try {
-            ResponseEntity<ResponseWrapper<ClientDTO>> response = restTemplate.exchange(
+            ResponseEntity<ApiResponse<ClientDTO>> response = restTemplate.exchange(
                     url,
                     HttpMethod.POST,
                     new HttpEntity<>(clientInsertDTO),
-                    new ParameterizedTypeReference<ResponseWrapper<ClientDTO>>() {}
+                    new ParameterizedTypeReference<ApiResponse<ClientDTO>>() {}
             );
 
-             if (response.getStatusCode() != HttpStatus.CREATED && response.getBody() != null) {
-                 return new Result<>(false, null, response.getBody().getMessage());
+             if (response.getStatusCode() != HttpStatus.CREATED) {
+                 return Result.success(Objects.requireNonNull(response.getBody()).getData());
+             } else {
+                 return new Result<>(false, null, Objects.requireNonNull(response.getBody()).getMessage());
              }
-
-            return Result.success(response.getBody().getData());
         } catch (Exception e) {
             logger.error("Error occurred while creating client", e);
-            return (Result.error("Internal server error: " + e.getMessage()));
+            throw new RuntimeException(e);
         }
     }
 
@@ -60,30 +60,31 @@ public class ExternalClientServiceImpl implements  ExternalClientService {
     public Result<ClientDTO> findClientById(Long clientId) {
         String url = clientServiceUrl + "/clients/" + clientId;
         try {
-            ResponseEntity<ResponseWrapper<ClientDTO>> response = restTemplate.exchange(
+            ResponseEntity<ApiResponse<ClientDTO>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<ResponseWrapper<ClientDTO>>() {
+                    new ParameterizedTypeReference<ApiResponse<ClientDTO>>() {
                     }
             );
-
-            ResponseWrapper<ClientDTO> responseBody = response.getBody();
+            ApiResponse<ClientDTO> responseBody = response.getBody();
             HttpStatus statusCode = response.getStatusCode();
 
-            if (statusCode == HttpStatus.OK && responseBody != null && responseBody.getData() != null) {
-                return new Result<>(true, responseBody.getData(), null, HttpStatus.OK);
-            } else if (responseBody != null) {
-                return new Result<>(false, null, responseBody.getMessage(), statusCode);
-            } else {
-                return new Result<>(false, null, "An error occurred", statusCode);
-            }
-        } catch (HttpClientErrorException.NotFound e) {
-            logger.error("Client with ID " + clientId + " not found", e);
-            return new Result<>(false, null, "Client with ID " + clientId + " not found", HttpStatus.NOT_FOUND);
+                // Handle Status Code using switch statement
+                if (statusCode == HttpStatus.OK) {
+                    assert responseBody != null;
+                    return new Result<>(true, responseBody.getData(), responseBody.getMessage());
+
+                } else if (statusCode == HttpStatus.NOT_FOUND) {
+                    assert responseBody != null;
+                    return new Result<>(false, null, responseBody.getMessage());
+                } else {
+                    assert responseBody != null;
+                    return new Result<>(false, null, responseBody.getMessage());
+                }
         } catch (Exception e) {
             logger.error("Error occurred while finding client", e);
-            return new Result<>(false, null, "Internal server error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw  new RuntimeException(e);
         }
     }
 }
