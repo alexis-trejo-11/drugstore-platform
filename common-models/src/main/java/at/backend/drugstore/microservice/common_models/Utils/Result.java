@@ -21,11 +21,6 @@ public class Result<T> {
     @JsonProperty("error")
     private String errorMessage;
 
-    @Getter
-    @Setter
-    @JsonProperty("status")
-    private HttpStatus status;
-
 
     @JsonCreator
     public Result(@JsonProperty("success") boolean success,
@@ -34,17 +29,6 @@ public class Result<T> {
         this.success = success;
         this.data = data;
         this.errorMessage = errorMessage;
-    }
-
-    @JsonCreator
-    public Result(@JsonProperty("success") boolean success,
-                  @JsonProperty("data") T data,
-                  @JsonProperty("error") String errorMessage,
-                  HttpStatus httpStatus) {
-        this.success = success;
-        this.data = data;
-        this.errorMessage = errorMessage;
-        this.status = httpStatus;
     }
 
     public static <T> Result<T> success(T data) {

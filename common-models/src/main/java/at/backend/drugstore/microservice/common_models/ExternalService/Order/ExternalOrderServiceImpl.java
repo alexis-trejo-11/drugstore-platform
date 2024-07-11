@@ -43,10 +43,10 @@ public class ExternalOrderServiceImpl implements ExternalOrderService {
                 if (responseWrapper.getData() != null) {
                     return Result.success(null);
                 } else {
-                    return new Result<>(false, null, responseWrapper.getMessage(), responseEntity.getStatusCode());
+                    return new Result<>(false, null, responseWrapper.getMessage());
                 }
             } else {
-                return new Result<>(false, null, "Failed to create order, status code: " + responseEntity.getStatusCode(), responseEntity.getStatusCode());
+                return new Result<>(false, null, "Failed to create order, status code: " + responseEntity.getStatusCode());
             }
         } catch (Exception e) {
             e.printStackTrace();

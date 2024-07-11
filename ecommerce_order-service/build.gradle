@@ -16,24 +16,44 @@ repositories {
 	mavenCentral()
 }
 
-ext {
-	set('springCloudVersion', "2023.0.2")
-}
+def springCloudVersion = "2021.0.3"
+def resilience4jVersion = "1.7.0"
 
 dependencies {
+	// Spring
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	runtimeOnly 'org.postgresql:postgresql'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// Postgres
 	implementation 'org.postgresql:postgresql'
+	runtimeOnly 'org.postgresql:postgresql'
+
+	// Common Models
 	implementation project(':common-models')
+
+	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
+	// AutoMappers
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+	implementation 'org.modelmapper:modelmapper:2.4.4'
 
+	// Resilience4j
+	implementation "io.github.resilience4j:resilience4j-spring-boot2:${resilience4jVersion}"
+	implementation "io.github.resilience4j:resilience4j-all:${resilience4jVersion}"
+	implementation "io.github.resilience4j:resilience4j-ratelimiter:${resilience4jVersion}"
+	implementation "io.github.resilience4j:resilience4j-circuitbreaker:${resilience4jVersion}"
+	implementation "io.github.resilience4j:resilience4j-bulkhead:${resilience4jVersion}"
+	implementation "io.github.resilience4j:resilience4j-retry:${resilience4jVersion}"
+	implementation "io.github.resilience4j:resilience4j-timelimiter:${resilience4jVersion}"
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 }
 
 dependencyManagement {

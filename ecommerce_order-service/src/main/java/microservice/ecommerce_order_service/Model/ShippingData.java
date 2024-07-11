@@ -20,7 +20,7 @@ public class ShippingData {
     @Column(name = "recipient_name")
     private String recipientName;
 
-    @Column(name = "address")  // Corrected the column name to match the field
+    @Column(name = "address")
     private String address;
 
     @Column(name = "city")
@@ -52,5 +52,5 @@ public class ShippingData {
     private String trackingNumber;
 
     @OneToOne(mappedBy = "shippingData")
-    private Order order;  // Added back-reference to Order entity
+    private Order order;
 }
