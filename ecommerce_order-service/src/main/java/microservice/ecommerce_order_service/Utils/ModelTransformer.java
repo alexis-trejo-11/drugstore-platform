@@ -26,23 +26,8 @@ public class ModelTransformer {
         return order;
     }
 
-    public static List<OrderItem>  MakeOrderItems(List<OrderItemInsertDTO> orderItemInsertDTOS, Order order) {
-        List<OrderItem> orderItems = new ArrayList<>();
-        for (var orderItemInsertDTO : orderItemInsertDTOS) {
-          OrderItem orderItem = new OrderItem();
-            orderItem.setProductId(orderItemInsertDTO.getProductId());
-            orderItem.setOrder(order);
-            orderItem.setQuantity(orderItemInsertDTO.getQuantity());
-
-            orderItems.add(orderItem);
-        }
-
-        return orderItems;
-    }
-
-    public static ShippingData makeShippingData(OrderDTO orderDTO, ClientDTO clientDTO) {
+    public static ShippingData makeShippingData(AddressDTO addressDTO, ClientDTO clientDTO) {
         ShippingData shippingData = new ShippingData();
-        AddressDTO addressDTO = orderDTO.getAddress();
 
         StringBuilder address = new StringBuilder();
         address.append(addressDTO.getStreet());

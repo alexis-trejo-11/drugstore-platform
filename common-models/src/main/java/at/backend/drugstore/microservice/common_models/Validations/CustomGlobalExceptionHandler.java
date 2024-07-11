@@ -1,6 +1,7 @@
 package at.backend.drugstore.microservice.common_models.Validations;
 
 import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class CustomGlobalExceptionHandler {
 
+    // Data Validation Request
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         BindingResult bindingResult = ex.getBindingResult();
@@ -54,6 +56,12 @@ public class CustomGlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         errors.put(ex.getParameterName(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    @ExceptionHandler(RequestNotPermitted.class)
+    public ResponseEntity<String> handleRequestNotPermitted(RequestNotPermitted exception) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body("Rate limit exceeded. Please try again later.");
     }
 
     @ExceptionHandler(Exception.class)

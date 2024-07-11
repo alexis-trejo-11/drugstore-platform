@@ -2,132 +2,84 @@ package microservice.ecommerce_order_service.Controller;
 
 import at.backend.drugstore.microservice.common_models.DTO.Order.OrderDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Order.OrderInsertDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
+import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_models.Validations.ControllerValidation;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_order_service.Service.OrderService;
+import microservice.ecommerce_order_service.Service.OrderServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("v1/api/orders")
+@RateLimiter(name = "orderApiLimiter")
 public class OrderController {
 
     private final OrderService orderService;
 
     @Autowired
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderServiceImpl orderService) {
         this.orderService = orderService;
     }
 
 
     @PostMapping("/create")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> createOrder(@Valid @RequestBody OrderInsertDTO orderInsertDTO, BindingResult bindingResult) {
+    public ResponseEntity<ApiResponse<?>> createOrder(@Valid @RequestBody OrderInsertDTO orderInsertDTO, BindingResult bindingResult) {
+        log.info("Received create order request: {}", orderInsertDTO);
         if (bindingResult.hasErrors()) {
-            // Collect validation errors
-            List<String> errorMessages = bindingResult.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.toList());
-
-            // Create a ResponseWrapper with the validation errors
-            ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, String.join(", ", errorMessages), HttpStatus.BAD_REQUEST);
-
-            // Log validation errors
-            log.error("Validation errors: {}", errorMessages);
-
-            // Return a BadRequest response with the error details
-            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse));
+            var validationErrors = ControllerValidation.handleValidationError(bindingResult);
+            return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, validationErrors, "Validation errors.", 400));
         }
 
-        // If validation was successful, proceed to create the order
-        return orderService.createOrder(orderInsertDTO)
-                .thenApply(createOrderResult -> {
-                    // Check if the order creation was successful
-                    if (!createOrderResult.isSuccess()) {
-                        // Return a response with an error if order creation failed
-                        ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, createOrderResult.getErrorMessage(), createOrderResult.getStatus());
-                        return ResponseEntity.status(createOrderResult.getStatus()).body(errorResponse);
-                    } else {
-                        // All operations succeeded, return a success response
-                        ResponseWrapper<Void> response = new ResponseWrapper<>(null, "Order Successfully Created! Payment will be validated soon.", HttpStatus.OK);
-                        return ResponseEntity.status(HttpStatus.OK).body(response);
-                    }
-                }).exceptionally(ex -> {
-                    // Log the exception
-                    log.error("Exception occurred while creating order", ex);
-                    // Handle exceptions and return an internal server error response
-                    ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                });
+        OrderDTO orderDTO = orderService.createOrder(orderInsertDTO);
+        log.info("Order created successfully with ID: {}", orderDTO.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, orderDTO, "Order created successfully created.", 201));
     }
 
 
 
     @PutMapping("/complete-order")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> completeOrder(
-            @RequestParam boolean isOrderPaid,
-            @RequestParam Long orderId)
+    public ResponseEntity<ApiResponse<Void>> completeOrder(@RequestParam boolean isOrderPaid, @RequestParam Long orderId)
     {
-        return orderService.validateOrderPayment(isOrderPaid, orderId)
-                .thenCompose(orderResult -> {
-                    if (!orderResult.isSuccess()) {
-                        // Payment validation failed
-                        ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, orderResult.getErrorMessage(), orderResult.getStatus());
-                        return CompletableFuture.completedFuture(ResponseEntity.status(orderResult.getStatus()).body(errorResponse));
-                    }
+        Result<Void> orderResult = orderService.validateOrderPayment(isOrderPaid, orderId);
+        if (!orderResult.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Order with ID " + orderId + " not found",404));
+        }
 
-                    ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, orderResult.getErrorMessage(), orderResult.getStatus());
-                    return CompletableFuture.completedFuture(ResponseEntity.status(orderResult.getStatus()).body(errorResponse));
-                })
-                .exceptionally(e -> {
-                    // Handle unexpected exceptions
-                    ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, "Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                });
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(false, null, "Order completed",200));
     }
 
-
-    @GetMapping("/{orderId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<OrderDTO>>> getOrderById(@PathVariable Long orderId) {
-        return orderService.getOrderById(orderId)
-                .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        ResponseWrapper<OrderDTO> errorResponse = new ResponseWrapper<>(null, result.getErrorMessage());
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-
-                    } else {
-                        ResponseWrapper<OrderDTO> response = new ResponseWrapper<>(result.getData(), null);
-                        return ResponseEntity.status(HttpStatus.OK).body(response);
-                    }
-                })
-                .exceptionally(ex -> {
-                    ResponseWrapper<OrderDTO> errorResponse = new ResponseWrapper<>(null, ex.getMessage());
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                });
-    }
-
+    @Cacheable(value = "orderCache", key = "#clientId + '-' + #page + '-' + #size")
     @GetMapping("/client/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<List<OrderDTO>>>> getOrdersByClientId(@PathVariable Long clientId) {
-        return orderService.getOrdersByClientId(clientId)
-                .thenApply(listResult -> {
-                    ResponseWrapper<List<OrderDTO>> response = new ResponseWrapper<>(listResult.getData(), null);
-                    return ResponseEntity.status(HttpStatus.OK).body(response);
-                })
-                .exceptionally(ex -> {
-                    ResponseWrapper<List<OrderDTO>> errorResponse = new ResponseWrapper<>(null, ex.getMessage());
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                });
+    public ResponseEntity<ApiResponse<Page<OrderDTO>>> getOrdersByClientId(
+            @PathVariable Long clientId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        boolean isClientValidate = orderService.validateExistingClient(clientId);
+        if (!isClientValidate) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Client with ID " + clientId + " not found",404));
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<OrderDTO> orderDTOS = orderService.getOrdersByClientId(clientId, pageable);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, orderDTOS, "Orders successfully fetched.", 200));
     }
+
+
 
     /**
      * Asynchronously delivers an order based on orderId and isDelivered flag.
@@ -135,56 +87,38 @@ public class OrderController {
      *
      * @param orderId The ID of the order to be delivered.
      * @param isDelivered Flag indicating whether the order is successfully delivered.
-     * @return CompletableFuture<ResponseEntity<ResponseWrapper<String>>> A CompletableFuture holding the delivery response.
+     * @return ResponseEntity<ApiResponse<String>>> A holding the delivery response.
      */
     @PutMapping("/deliver/{orderId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<String>>> deliverOrder(@PathVariable Long orderId, @RequestParam boolean isDelivered) {
-        // Invoke deliveryOrder service method asynchronously
-        return orderService.deliveryOrder(orderId, isDelivered)
-                .thenApply(result -> {
-                    // Handle case where deliveryOrder service method returns an error result
-                    if (!result.isSuccess()) {
-                        if (result.getStatus() == HttpStatus.NOT_FOUND) {
-                            // Return 404 Not Found response for order not found
-                            ResponseWrapper<String> errorResponse = new ResponseWrapper<>(null, result.getErrorMessage(), result.getStatus());
-                            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-                        } else if (result.getStatus() == HttpStatus.BAD_REQUEST) {
-                            // Return 400 Bad Request response for validation or business rule failure
-                            ResponseWrapper<String> errorResponse = new ResponseWrapper<>(null, result.getErrorMessage(), result.getStatus());
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-                        }
-                    }
+    public ResponseEntity<ApiResponse<Void>> deliverOrder(@PathVariable Long orderId, @RequestParam boolean isDelivered) {
+        OrderDTO orderDTO = orderService.getOrderById(orderId);
+        if (orderDTO == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Order with ID " + orderId.toString() + " not found.", 404 ));
+        }
 
-                    // Return success response with delivery status
-                    ResponseWrapper<String> successResponse = new ResponseWrapper<>(result.getData(), null, result.getStatus());
-                    return ResponseEntity.ok(successResponse);
-                })
-                .exceptionally(ex -> {
-                    // Handle unexpected exceptions during the delivery process
-                    ResponseWrapper<String> errorResponse = new ResponseWrapper<>(null, "An unexpected error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                });
+        Result<Void> validateResult = orderService.validateOrderForDelivery(orderDTO);
+        if (!validateResult.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, null, validateResult.getErrorMessage(), 400));
+        }
+
+        String deliveryStatus = orderService.deliveryOrder(orderId, isDelivered);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, deliveryStatus, 200));
     }
 
 
     @PutMapping("/cancel/{orderId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> cancelOrder(@PathVariable Long orderId) {
-        return orderService.cancelOrder(orderId)
-                .thenApply(result -> {
-                    if (result.isSuccess()) {
-                        ResponseWrapper<Void> successResponse = new ResponseWrapper<>(null, null, result.getStatus());
-                        return ResponseEntity.ok(successResponse);
-                    } else {
-                        HttpStatus status = result.getStatus() != null ? result.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-                        ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, result.getErrorMessage(), status);
-                        return ResponseEntity.status(status).body(errorResponse);
-                    }
-                })
-                .exceptionally(ex -> {
-                    String errorMessage = "An unexpected error occurred: " + ex.getMessage();
-                    ResponseWrapper<Void> errorResponse = new ResponseWrapper<>(null, errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-                });
-    }
+    public ResponseEntity<ApiResponse<Void>> cancelOrder(@PathVariable Long orderId) {
+       OrderDTO orderDTO = orderService.getOrderById(orderId);
+       if (orderDTO == null) {
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Order with ID " + orderId + " not found.", 400));
 
+       }
+
+        Result<Void> orderResult = orderService.cancelOrder(orderId);
+        if (!orderResult.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, null, orderResult.getErrorMessage(), 400));
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Order successfully canceled.", 200));
+    }
 }

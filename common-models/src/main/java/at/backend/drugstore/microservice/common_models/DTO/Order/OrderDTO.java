@@ -33,13 +33,7 @@ public class OrderDTO {
     @JsonProperty("items")
     private List<OrderItemDTO> items;
 
-    @JsonProperty("address")
-    private AddressDTO address;
-
     @JsonProperty("shipping_address")
     private String shippingAddress;
-
-    @JsonProperty("payment_method")
-    private String paymentMethod;
 
 }
