@@ -23,13 +23,10 @@ public class DigitalSale extends Sale {
     @OneToMany(mappedBy = "digitalSale", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<DigitalSaleItem> saleItems;
 
-    @Column(name = "client_id")
-    private Long clientId;
-
     @Column(name = "order_id")
     private Long orderId;
 
-    @Column(name = "pay_id")
+    @Column(name = "payment_id")
     private Long paymentId;
 
 }

@@ -30,4 +30,8 @@ public class PaymentInsertDTO {
 
     @JsonProperty("card_id")
     private Long cardId;
+
+    @JsonProperty("order_id")
+    private Long orderId;
+
 }
