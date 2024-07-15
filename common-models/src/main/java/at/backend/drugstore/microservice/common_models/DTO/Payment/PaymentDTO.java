@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 public class PaymentDTO {
+    @JsonProperty("id")
+    private Long id;
 
     @JsonProperty("client_id")
     private Long clientId;
@@ -24,6 +26,9 @@ public class PaymentDTO {
 
     @JsonProperty("card_id")
     private Long cardId;
+
+    @JsonProperty("order_id")
+    private Long orderId;
 
     @JsonProperty("status")
     private String status;

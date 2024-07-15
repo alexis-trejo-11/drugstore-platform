@@ -1,11 +1,6 @@
 package microservice.ecommerce_sale_service.Utils;
 
-import at.backend.drugstore.microservice.common_models.DTO.Cart.CartDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Cart.CartItemDTO;
-
-import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Sale.*;
-import at.backend.drugstore.microservice.common_models.Models.Sales.SaleStatus;
 import microservice.ecommerce_sale_service.Model.DigitalSale;
 import microservice.ecommerce_sale_service.Model.DigitalSaleItem;
 
@@ -13,76 +8,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class ModelTransformer {
-
-    public static DigitalSale MakeDigitalSale(CartDTO cartDTO, SaleDTO saleDTO) {
-        DigitalSale sale = new DigitalSale();
-        // Date
-        sale.setSaleDate(LocalDateTime.now());
-        sale.setSaleStatus(SaleStatus.PAID);
-        sale.setClientId(cartDTO.getUserId());
-        sale.setDiscount(saleDTO.getDiscount());
-        sale.setSubTotal(saleDTO.getSubTotal());
-        sale.setTotal(saleDTO.getTotal());
-
-        return sale;
-    }
-
-    public static List<DigitalSaleItem> MakeSaleItems(List<CartItemDTO> cartItemDTOS, List<ProductDTO> productDTOS, DigitalSale sale) {
-        List<DigitalSaleItem> saleItems = new ArrayList<>();
-        for (var orderItemDTO : cartItemDTOS) {
-            // Get Product
-            Optional<ProductDTO> productOptional = productDTOS.stream()
-                    .filter(product -> product.getId().equals(orderItemDTO.getProductId()))
-                    .findFirst();
-            if (productOptional.isEmpty()) {
-                // Handle case where product is not found
-                continue;
-            }
-            ProductDTO productDTO = productOptional.get();
-
-            // Create Sale Item
-            DigitalSaleItem saleItem = new DigitalSaleItem();
-
-            saleItem.setProductId(productDTO.getId());
-            saleItem.setProductName(productOptional.get().getName());
-            saleItem.setProductUnitPrice(productDTO.getPrice());
-            saleItem.setDigitalSale(sale);
-
-            saleItem.setCreatedAt(LocalDateTime.now());
-
-            saleItem.setProductQuantity(orderItemDTO.getQuantity());
-
-            saleItems.add(saleItem);
-        }
-        return saleItems;
-    }
-
-
-    public static SaleDTO saleToDTO(DigitalSale sale) {
-        SaleDTO saleDTO = new SaleDTO();
-        saleDTO.setId(sale.getId());
-        saleDTO.setSaleStatus(String.valueOf(sale.getSaleStatus()));
-        saleDTO.setDiscount(sale.getDiscount());
-        saleDTO.setTotal(sale.getTotal());
-        if (sale.getClientId() != null) {
-            saleDTO.setClientId(sale.getClientId());
-
-        }
-        saleDTO.setSaleDate(sale.getSaleDate());
-
-        // Set Sale Items To DTO
-        List<DigitalSaleItem> saleItemDTOS = SaleItemToDTO(sale.getSaleItems());
-        /*
-        saleDTO.setSaleItemDTOS(saleItemDTOS);
-         */
-        return saleDTO;
-    }
+public class DigitalSaleHelper {
 
     public static SalesSummaryDTO saleToSummaryDTO(List<DigitalSale> digitalSales, LocalDateTime startTime, LocalDateTime endTime) {
         SalesSummaryDTO salesSummaryDTO = new SalesSummaryDTO();
 
-        // Set basic summary information
         salesSummaryDTO.setQuantitySales(digitalSales.size());
         salesSummaryDTO.setSummaryDate(LocalDateTime.now());
         salesSummaryDTO.setStartSummary(startTime);
