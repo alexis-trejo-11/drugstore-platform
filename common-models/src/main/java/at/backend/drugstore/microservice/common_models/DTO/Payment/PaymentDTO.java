@@ -1,9 +1,11 @@
 package at.backend.drugstore.microservice.common_models.DTO.Payment;
 
+import at.backend.drugstore.microservice.common_models.Models.Sales.SaleStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -18,8 +20,14 @@ public class PaymentDTO {
     @JsonProperty("payment_method")
     private String paymentMethod;
 
-    @JsonProperty("amount")
-    private Double amount;
+    @JsonProperty("discount")
+    private BigDecimal discount;
+
+    @JsonProperty("subtotal")
+    private BigDecimal subtotal;
+
+    @JsonProperty("total")
+    private BigDecimal total;
 
     @JsonProperty("payment_date")
     private LocalDateTime paymentDate;
@@ -30,6 +38,6 @@ public class PaymentDTO {
     @JsonProperty("order_id")
     private Long orderId;
 
-    @JsonProperty("status")
-    private String status;
+    @JsonProperty("payment_status")
+    private String paymentStatus;
 }

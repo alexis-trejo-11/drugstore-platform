@@ -35,7 +35,7 @@ public class StockServiceImpl implements StockService {
     public Result<ProductDTO> validateExistingProduct(Long productId) {
         Result<ProductDTO> productResult = externalProductService.getProductById(productId);
         if (!productResult.isSuccess()) {
-            new Result<>(false, null, productResult.getErrorMessage(), productResult.getStatus());
+            new Result<>(false, null, productResult.getErrorMessage());
         }
 
         return Result.success(productResult.getData());
@@ -51,7 +51,7 @@ public class StockServiceImpl implements StockService {
             // Sort inventories by expiration date
             inventories.sort(Comparator.comparing(Inventory::getExpirationDate));
 
-            int productQuantity = saleItemDTO.getQuantity();
+            int productQuantity = saleItemDTO.getProductQuantity();
 
             boolean processed = false;
 

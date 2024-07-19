@@ -1,4 +1,4 @@
-package microservice.ecommerce_cart_service.Mapper;
+package microservice.ecommerce_cart_service.Mappers;
 
 import org.mapstruct.Mapper;
 

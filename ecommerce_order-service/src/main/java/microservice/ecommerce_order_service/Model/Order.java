@@ -21,6 +21,12 @@ public class Order {
     @Column(name = "client_id")
     private Long clientId;
 
+    @Column(name = "payment_id")
+    private Long paymentId;
+
+    @Column(name = "address_id")
+    private Long addressId;
+
     @Column(name = "order_date")
     private LocalDateTime orderDate;
 

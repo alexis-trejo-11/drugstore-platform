@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/api/products")
@@ -45,13 +46,16 @@ public class ProductController {
     /**
      * Retrieves products by their IDs.
      *
-     * @param productIds the list of product IDs
+     * @param request the list of product IDs
      * @return ResponseEntity with the list of product DTOs
      */
-    @GetMapping("/by-ids")
-    public ResponseEntity<ApiResponse<List<ProductDTO>>> getProductsById(@RequestParam List<Long> productIds) {
+    @PostMapping("/by-ids")
+    public ResponseEntity<ApiResponse<List<ProductDTO>>> getProductsById(@RequestBody Map<String, List<Long>> request) {
+        List<Long> productIds = request.get("productIds");
+
         List<ProductDTO> productDTOS = productServiceImpl.getProductsById(productIds);
         logger.info("Products retrieved for IDs: {}", productIds);
+
         return ResponseEntity.ok(new ApiResponse<>(true, productDTOS, "Products retrieved successfully", HttpStatus.OK.value()));
     }
 
@@ -69,12 +73,11 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
         }
         logger.info("Product found for ID: {}", productId);
-        return ResponseEntity.ok(new ApiResponse<>(true, productDTO, "Product retrieved successfully", HttpStatus.OK.value()));
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, productDTO, "Product retrieved successfully", HttpStatus.OK.value()));
     }
 
     /**
      * Retrieves products by supplier ID.
-     *
      * @param supplierId the ID of the supplier
      * @return ResponseEntity with the list of product DTOs
      */

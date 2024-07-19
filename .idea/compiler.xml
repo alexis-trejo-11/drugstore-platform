@@ -7,21 +7,18 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.24/13a394eed5c4f9efb2a6d956e2086f1d81e857d9/lombok-1.18.24.jar" />
         </processorPath>
-        <module name="backend.drugstore.product-service.test" />
-        <module name="backend.drugstore.inventory-service.test" />
-        <module name="backend.drugstore.ecommerce_sale-service.main" />
-        <module name="backend.drugstore.common-models.test" />
-        <module name="backend.drugstore.user-service.test" />
         <module name="backend.drugstore.common-models.main" />
         <module name="backend.drugstore.ecommerce_cart-service.test" />
-        <module name="backend.drugstore.ecommerce_order-service.main" />
+        <module name="backend.drugstore.product-service.test" />
         <module name="backend.drugstore.ecommerce_order-service.test" />
         <module name="backend.drugstore.ecommerce_sale-service.test" />
+        <module name="backend.drugstore.inventory-service.test" />
         <module name="backend.drugstore.ecommerce_payment-service.test" />
         <module name="backend.drugstore.sale-service.test" />
         <module name="backend.drugstore.client-service.test" />
-        <module name="backend.drugstore.ecommerce_cart-service.main" />
         <module name="backend.drugstore.employee-service.test" />
+        <module name="backend.drugstore.common-models.test" />
+        <module name="backend.drugstore.user-service.test" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
@@ -48,10 +45,13 @@
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.24/13a394eed5c4f9efb2a6d956e2086f1d81e857d9/lombok-1.18.24.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.mapstruct/mapstruct-processor/1.5.5.Final/897f6f115930b936287bef552bf5fe28cc64717d/mapstruct-processor-1.5.5.Final.jar" />
         </processorPath>
+        <module name="backend.drugstore.ecommerce_order-service.main" />
+        <module name="backend.drugstore.product-service.main" />
+        <module name="backend.drugstore.ecommerce_cart-service.main" />
+        <module name="backend.drugstore.ecommerce_sale-service.main" />
         <module name="backend.drugstore.user-service.main" />
         <module name="backend.drugstore.inventory-service.main" />
         <module name="backend.drugstore.employee-service.main" />
-        <module name="backend.drugstore.product-service.main" />
         <module name="backend.drugstore.sale-service.main" />
       </profile>
     </annotationProcessing>

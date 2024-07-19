@@ -32,9 +32,8 @@ public class SaleController {
         Result<CreateSaleDTO> result = saleService.createSale(saleProductsDTO);
         if (result.isSuccess()) {
             return new ResponseEntity<>(new ApiResponse<>(true, result.getData(), "Sale created successfully", HttpStatus.CREATED.value()), HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(new ApiResponse<>(false, null, result.getErrorMessage(), HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
         }
+        return new ResponseEntity<>(new ApiResponse<>(false, null, result.getErrorMessage(), HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/pay")

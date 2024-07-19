@@ -16,11 +16,11 @@ public class SaleItemDTO {
     private String productName;
 
     @JsonProperty("quantity")
-    private int quantity;
+        private int productQuantity;
 
-    @JsonProperty("unit_price")
-    private BigDecimal unitPrice;
+    @JsonProperty("product_unit_price")
+    private BigDecimal productUnitPrice;
 
-    @JsonProperty("sub_total")
-    private BigDecimal subtotal;
+    @JsonProperty("item_total")
+    private BigDecimal itemTotal;
 }

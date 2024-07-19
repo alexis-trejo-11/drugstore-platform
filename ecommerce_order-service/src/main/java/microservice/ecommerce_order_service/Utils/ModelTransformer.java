@@ -21,7 +21,7 @@ public class ModelTransformer {
         order.setOrderDate(LocalDateTime.now());
         order.setLastOrderUpdate(LocalDateTime.now());
         order.setDeliveryTries(0);
-        order.setClientId(orderInsertDTO.getAddressDTO().getClientId());
+        order.setClientId(orderInsertDTO.getClientId());
 
         return order;
     }
@@ -68,9 +68,9 @@ public class ModelTransformer {
         for (var orderitem  : orderItems) {
             OrderItemDTO orderItemDTO = new OrderItemDTO();
             orderItemDTO.setOrderId(orderitem.getProductId());
-            orderItemDTO.setQuantity(orderitem.getQuantity());
+            orderItemDTO.setProductQuantity(orderitem.getProductQuantity());
             orderItemDTO.setOrderId(orderitem.getOrder().getId());
-            orderItemDTO.setQuantity(orderitem.getQuantity());
+            orderItemDTO.setProductQuantity(orderitem.getProductQuantity());
 
             orderItemDTOS.add(orderItemDTO);
         }

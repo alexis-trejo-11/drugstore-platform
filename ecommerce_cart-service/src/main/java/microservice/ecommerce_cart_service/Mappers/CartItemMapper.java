@@ -1,19 +1,22 @@
-package microservice.ecommerce_cart_service.Mapper;
+package microservice.ecommerce_cart_service.Mappers;
 
 import at.backend.drugstore.microservice.common_models.DTO.Cart.CartItemDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Order.OrderItemDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
 import microservice.ecommerce_cart_service.Model.Cart;
 import microservice.ecommerce_cart_service.Model.CartItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import org.mapstruct.Named;
 
-import java.math.BigDecimal;
 
 @Mapper(componentModel = "spring")
 public interface CartItemMapper {
 
+    @Mappings({
+            @Mapping(target = "productQuantity", source = "cartItem.quantity"),
+            @Mapping(target = "productUnitPrice", source = "cartItem.productPrice"),
+    })
     CartItemDTO entityToDTO(CartItem cartItem);
 
     @Mappings({
@@ -23,10 +26,20 @@ public interface CartItemMapper {
             @Mapping(target = "quantity", source = "quantity"),
             @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())"),
             @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())"),
-            @Mapping(target = "itemTotal", expression = "java(microservice.ecommerce_cart_service.Mapper.CartItemMapperUtil.calculateItemTotal(productDTO, quantity))"),
+            @Mapping(target = "itemTotal", ignore = true),
             @Mapping(target = "cart", source = "cart"),
             @Mapping(target = "id", ignore = true)
     })
     CartItem productDtoToCartItem(ProductDTO productDTO, int quantity, Cart cart);
 
+    @Mappings({
+            @Mapping(target = "productId", source = "cartItemDTO.productId"),
+            @Mapping(target = "productName", source = "cartItemDTO.productName"),
+            @Mapping(target = "productQuantity", source = "cartItemDTO.productQuantity"),
+            @Mapping(target = "productUnitPrice", source = "cartItemDTO.productUnitPrice"),
+            @Mapping(target = "orderId", ignore = true),
+            @Mapping(target = "itemTotal", ignore = true),
+
+    })
+    OrderItemDTO cartItemToOrderDTO(CartItemDTO cartItemDTO);
 }

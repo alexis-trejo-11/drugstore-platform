@@ -1,8 +1,9 @@
 package at.backend.drugstore.microservice.common_models.ExternalService.Payment;
 
 import at.backend.drugstore.microservice.common_models.DTO.Payment.CardDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentInsertDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,50 +30,50 @@ public class ExternalPaymentServiceServiceImpl implements ExternalPaymentService
     }
 
     @Override
-    public Result<Void> initPayment(PaymentInsertDTO paymentInsertDTO) {
-        String url = paymentServiceUrl + "/payment/init";
+    public PaymentDTO initPayment(PaymentInsertDTO paymentInsertDTO) {
+        String url = paymentServiceUrl + "/v1/api/payments/init";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<PaymentInsertDTO> requestEntity = new HttpEntity<>(paymentInsertDTO, headers);
 
         try {
-            ResponseEntity<ResponseWrapper<Void>> responseEntity = restTemplate.exchange(
+            ResponseEntity<ApiResponse<PaymentDTO>> responseEntity = restTemplate.exchange(
                     url,
                     HttpMethod.POST,
                     requestEntity,
-                    new ParameterizedTypeReference<ResponseWrapper<Void>>() {
+                    new ParameterizedTypeReference<ApiResponse<PaymentDTO>>() {
                     }
             );
 
             if (responseEntity.getStatusCode() == HttpStatus.CREATED && responseEntity.getBody() != null) {
-                return Result.success();
+                return responseEntity.getBody().getData();
             } else {
-                return new Result<>(false, null, "Failed to init payment, status code: " + responseEntity.getStatusCode(), responseEntity.getStatusCode());
+                return null;
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return Result.error("Exception occurred while creating order: " + e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
     @Async
     @Override
     public Result<List<CardDTO>> getCardByClientId(Long clientId) {
-        String addressUrl = paymentServiceUrl + "/cards/client/" + clientId;
+        String addressUrl = paymentServiceUrl + "/v1/api/client-cards/client/" + clientId;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<?> requestEntity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<ResponseWrapper<List<CardDTO>>> responseEntity = restTemplate.exchange(
+            ResponseEntity<ApiResponse<List<CardDTO>>> responseEntity = restTemplate.exchange(
                     addressUrl,
                     HttpMethod.GET,
                     requestEntity,
-                    new ParameterizedTypeReference<ResponseWrapper<List<CardDTO>>>() {}
+                    new ParameterizedTypeReference<ApiResponse<List<CardDTO>>>() {}
             );
 
-            if (responseEntity.getStatusCode()  != HttpStatus.OK) {
+            if (responseEntity.getStatusCode()  == HttpStatus.NOT_FOUND && responseEntity.getBody() != null) {
                 return new Result<>(false, null, "Can't Get Addresses");
             }
 
@@ -80,7 +81,7 @@ public class ExternalPaymentServiceServiceImpl implements ExternalPaymentService
             return Result.success(addressDTO);
         } catch (Exception e) {
             e.printStackTrace();
-            return new Result<>(false, null, "Exception occurred while retrieving cards");
+            throw new RuntimeException(e);
         }
     }
 

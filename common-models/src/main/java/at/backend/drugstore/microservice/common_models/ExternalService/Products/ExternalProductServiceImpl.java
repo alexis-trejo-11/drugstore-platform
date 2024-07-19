@@ -2,7 +2,6 @@ package at.backend.drugstore.microservice.common_models.ExternalService.Products
 
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
 import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,16 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
+
 
 @Service
 public class ExternalProductServiceImpl implements ExternalProductService {
@@ -38,7 +35,7 @@ public class ExternalProductServiceImpl implements ExternalProductService {
 
     @Override
     public Result<List<ProductDTO>> findProducts(List<Long> productIds) {
-        String productUrl = productServiceUrl + "/many";
+        String productUrl = productServiceUrl + "/by-ids";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -48,28 +45,27 @@ public class ExternalProductServiceImpl implements ExternalProductService {
         HttpEntity<Map<String, List<Long>>> requestEntity = new HttpEntity<>(request, headers);
 
         try {
-            ResponseEntity<List<ProductDTO>> productResponseEntity = restTemplate.exchange(
+            ResponseEntity<ApiResponse<List<ProductDTO>>> productResponseEntity = restTemplate.exchange(
                     productUrl,
                     HttpMethod.POST,
                     requestEntity,
-                    new ParameterizedTypeReference<>() {
+                    new ParameterizedTypeReference<ApiResponse<List<ProductDTO>>>() {
                     });
 
-            if (productResponseEntity.getStatusCode() != HttpStatus.OK) {
-                Result<List<ProductDTO>> result = new Result<>();
-                result.setStatus(productResponseEntity.getStatusCode());
-                result.setErrorMessage("An Error Occurred Retrieving");
-                return result;
-            }
+            logger.info("Received response from Product Service with status: {}", productResponseEntity.getStatusCode());
 
-            List<ProductDTO> products = productResponseEntity.getBody();
-            assert products != null;
-            return Result.success(products);
+            if (productResponseEntity.getStatusCode() == HttpStatus.OK && productResponseEntity.getBody() != null) {
+                logger.debug("Response Body: {}", productResponseEntity.getBody());
+                return Result.success(productResponseEntity.getBody().getData());
+            } else {
+                logger.error("Error in response from Product Service: {}", productResponseEntity.getBody().getMessage());
+                return Result.error(productResponseEntity.getBody().getMessage());
+            }
         } catch (Exception e) {
-            return Result.error("Exception occurred while fetching product data: " + e.getMessage());
+            logger.error("Exception occurred while calling Product Service", e);
+            throw new RuntimeException(e);
         }
     }
-
     @Override
     public Result<ProductDTO> getProductById(Long productId) {
         String productUrl = productServiceUrl + "/" + productId;
@@ -93,7 +89,7 @@ public class ExternalProductServiceImpl implements ExternalProductService {
 
             if (statusCode == HttpStatus.NOT_FOUND && productBody != null) {
                 logger.warn("Product with ID {} not found", productId);
-                return new Result<>(false, null, "Product Not Found", statusCode);
+                return new Result<>(false, null, "Product Not Found");
             } else {
                 logger.info("Product information retrieved successfully for product ID: {}", productId);
                 assert productBody != null;
@@ -102,7 +98,7 @@ public class ExternalProductServiceImpl implements ExternalProductService {
 
         } catch (Exception e) {
             logger.error("An unexpected error occurred while retrieving product with ID {}: {}", productId, e.getMessage());
-            return new Result<>(false, null, "Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+            throw  new RuntimeException(e);
         }
     }
 }

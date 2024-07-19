@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +25,8 @@ public class Cart {
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CartItem> cartItems;
 
-    @Column(name = "total_price")
-    private BigDecimal totalPrice;
+    @Column(name = "subtotal")
+    private BigDecimal subtotal;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -37,7 +36,7 @@ public class Cart {
 
     public Cart(Long userId) {
         this.clientId = userId;
-        this.totalPrice = BigDecimal.ZERO;
+        this.subtotal = BigDecimal.ZERO;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.cartItems = new ArrayList<>();

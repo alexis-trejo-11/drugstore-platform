@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 @RestController
-@RequestMapping("/inventory/stock")
+@RequestMapping("v1/api/inventory/stock")
 public class StockController {
 
     private static final Logger logger = LoggerFactory.getLogger(StockController.class);
@@ -41,7 +41,7 @@ public class StockController {
         Result<ProductDTO> productDTOResult = stockServiceImpl.validateExistingProduct(productId);
         if(!productDTOResult.isSuccess()) {
             logger.info("Product with ID {} not found.", productId);
-            return ResponseEntity.status(productDTOResult.getStatus()).body(new ApiResponse<>(false, null, productDTOResult.getErrorMessage(), productDTOResult.getStatus().value()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Not Found" ,404));
         }
 
         ProductStockDTO productStockDTO = stockServiceImpl.getCurrentStockByProduct(productId, productDTOResult.getData());
