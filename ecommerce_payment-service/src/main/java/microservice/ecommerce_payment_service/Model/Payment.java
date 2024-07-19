@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -20,18 +21,22 @@ public class Payment {
     @JsonProperty("payment_method")
     private PaymentMethod paymentMethod;
 
-    @JsonProperty("amount")
-    private Double amount;
+    private BigDecimal subtotal;
 
-    @JsonProperty("payment_created_at")
-    private LocalDateTime paymentCreatedAt;
+    private BigDecimal discount;
+
+    private BigDecimal total;
 
     @JsonProperty("payment_date")
     private LocalDateTime paymentDate;
 
     @ManyToOne
     @JoinColumn(name = "card_id")
-    private Card card; // Nullable for payments made with cash
+    private Card card;
+
+    private Long saleId;
+
+    private Long orderId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")

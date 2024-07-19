@@ -17,7 +17,7 @@ public class Sale {
 
     private LocalDateTime saleDate;
 
-    private BigDecimal subTotal;
+    private BigDecimal subtotal;
 
     private BigDecimal discount;
 

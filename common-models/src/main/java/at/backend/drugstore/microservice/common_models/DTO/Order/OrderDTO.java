@@ -18,6 +18,9 @@ public class OrderDTO {
     @JsonProperty("client_id")
     private Long clientId;
 
+    @JsonProperty("address_id")
+    private Long addressId;
+
     @JsonProperty("client_name")
     private String clientName;
 

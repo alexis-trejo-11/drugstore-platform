@@ -19,4 +19,5 @@ public class ClientEcommerceDataDTO {
     public List<AddressDTO> addressDTOS;
     public List<OrderDTO> orderDTOS;
     public List<PaymentDTO> paymentDTOS;
+
 }

@@ -16,6 +16,5 @@ public interface ExternalProductService {
     Result<List<ProductDTO>> findProducts(List<Long> productIds);
 
 
-    @Async
     Result<ProductDTO> getProductById(Long productId);
 }

@@ -16,9 +16,14 @@
                 @Mapping(target = "orderDate", expression = "java(java.time.LocalDateTime.now())"),
                 @Mapping(target = "lastOrderUpdate", expression = "java(java.time.LocalDateTime.now())"),
                 @Mapping(target = "deliveryTries", constant = "0"),
-                @Mapping(target = "clientId", source = "addressDTO.clientId")
+                @Mapping(target = "clientId", source = "clientId"),
+                @Mapping(target = "items", ignore = true),
+                @Mapping(target = "shippingData", ignore = true),
+                @Mapping(target = "id", ignore = true),
+                @Mapping(target = "paymentId", ignore = true),
+                @Mapping(target = "addressId", source = "addressId")
         })
-        Order insertDtoToEntity(OrderInsertDTO orderInsertDTO);
+        Order insertDtoToEntity(Long addressId, Long clientId);
 
 
         @Mapping(target = "items", ignore = true)

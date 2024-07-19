@@ -58,7 +58,7 @@ public class ExternalClientServiceImpl implements  ExternalClientService {
 
 
     public Result<ClientDTO> findClientById(Long clientId) {
-        String url = clientServiceUrl + "/clients/" + clientId;
+        String url = clientServiceUrl + "/v1/api/clients/" + clientId;
         try {
             ResponseEntity<ApiResponse<ClientDTO>> response = restTemplate.exchange(
                     url,
@@ -84,7 +84,7 @@ public class ExternalClientServiceImpl implements  ExternalClientService {
                 }
         } catch (Exception e) {
             logger.error("Error occurred while finding client", e);
-            throw  new RuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 }

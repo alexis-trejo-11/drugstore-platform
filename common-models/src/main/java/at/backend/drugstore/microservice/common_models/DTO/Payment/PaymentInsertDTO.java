@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 
 @Data
@@ -23,10 +24,20 @@ public class PaymentInsertDTO {
     @NotBlank(message = "payment_method must has content.")
     private String paymentMethod;
 
-    @JsonProperty("amount")
-    @NotNull(message = "amount is obligatory.")
-    @Positive(message = "amount must be positive.")
-    private BigDecimal amount;
+    @JsonProperty("subtotal")
+    @NotNull(message = "subtotal is obligatory.")
+    @Positive(message = "subtotal must be positive.")
+    private BigDecimal subtotal;
+
+    @JsonProperty("discount")
+    @NotNull(message = "discount is obligatory.")
+    @PositiveOrZero(message = "discount can not be a negative number.")
+    private BigDecimal discount;
+
+    @JsonProperty("total")
+    @NotNull(message = "total is obligatory.")
+    @Positive(message = "total must be positive.")
+    private BigDecimal total;
 
     @JsonProperty("card_id")
     private Long cardId;

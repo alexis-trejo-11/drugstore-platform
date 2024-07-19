@@ -2,6 +2,7 @@ package at.backend.drugstore.microservice.common_models.DTO.Cart;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,10 +14,20 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 public class CartDTO {
+    @JsonProperty("id")
     private Long id;
-    private Long userId;
+
+    @JsonProperty("client_id")
+    private Long clientId;
+
+    @JsonProperty("subtotal")
+    private BigDecimal subtotal;
+
+    @JsonProperty("number_of_product")
+    private int numberOfProduct() {
+        return cartItems.size();
+    }
     private List<CartItemDTO> cartItems;
-    private BigDecimal totalPrice;
 
     @JsonIgnore
     public List<Long> getProductsIds() {

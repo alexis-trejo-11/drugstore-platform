@@ -1,26 +1,26 @@
-package microservice.ecommerce_cart_service.Service;
+package microservice.ecommerce_cart_service.Service.Implementations;
 
 import at.backend.drugstore.microservice.common_models.DTO.Cart.CartDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Cart.CartItemDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Cart.ClientEcommerceDataDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Order.OrderInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Order.OrderItemInsertDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Payment.CardDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentInsertDTO;
 import at.backend.drugstore.microservice.common_models.ExternalService.Adress.ExternalAddressService;
 import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientService;
 import at.backend.drugstore.microservice.common_models.ExternalService.Order.ExternalOrderService;
 import at.backend.drugstore.microservice.common_models.ExternalService.Payment.ExternalPaymentService;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
+import microservice.ecommerce_cart_service.Service.PurchaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PurchaseServiceImpl implements PurchaseService {
@@ -32,7 +32,11 @@ public class PurchaseServiceImpl implements PurchaseService {
     private final ExternalOrderService externalOrderService;
 
     @Autowired
-    public PurchaseServiceImpl(CartServiceImpl cartServiceImpl, ExternalClientService externalClientService, ExternalAddressService externalAddressService, ExternalPaymentService externalPaymentService, ExternalOrderService externalOrderService) {
+    public PurchaseServiceImpl(CartServiceImpl cartServiceImpl,
+                               ExternalClientService externalClientService,
+                               ExternalAddressService externalAddressService,
+                               ExternalPaymentService externalPaymentService,
+                               ExternalOrderService externalOrderService) {
         this.cartServiceImpl = cartServiceImpl;
         this.externalClientService = externalClientService;
         this.externalAddressService = externalAddressService;
@@ -59,9 +63,9 @@ public class PurchaseServiceImpl implements PurchaseService {
             return Result.error("Cant Bring Payment Data");
         }
 
-        CartDTO cartDTO = cartServiceImpl.getCartByClientId(clientId);
+        Optional<CartDTO> optionalCartDTO = cartServiceImpl.getCartByClientId(clientId);
 
-        clientEcommerceDataDTO.setCartDTO(cartDTO);
+        clientEcommerceDataDTO.setCartDTO(optionalCartDTO.get());
         clientEcommerceDataDTO.setCardDTOS(cardResult.getData());
         clientEcommerceDataDTO.setClientDTO(clientDTOResult.getData());
         clientEcommerceDataDTO.setAddressDTOS(addressResult.getData());
@@ -71,12 +75,12 @@ public class PurchaseServiceImpl implements PurchaseService {
 
     @Override
     @Async
-    public void processPurchase(ClientEcommerceDataDTO clientEcommerceDataDTO, Long cardId, List<CartItemDTO> itemsToPurchase, Long addressId) {
-        createOrder(itemsToPurchase, clientEcommerceDataDTO, addressId);
-        initPayment(clientEcommerceDataDTO, cardId);
+    public void processPurchase(ClientEcommerceDataDTO clientEcommerceDataDTO, Long cardId, CartDTO cartDTO, Long addressId) {
+        Long orderId = createOrder(cartDTO, clientEcommerceDataDTO.clientDTO, addressId);
+        initPayment(clientEcommerceDataDTO, cardId, orderId);
     }
 
-    private void initPayment(ClientEcommerceDataDTO clientEcommerceDataDTO, Long cardId) {
+    private void initPayment(ClientEcommerceDataDTO clientEcommerceDataDTO, Long cardId, Long orderId) {
         CartDTO cartDTO = clientEcommerceDataDTO.getCartDTO();
         ClientDTO clientDTO = clientEcommerceDataDTO.getClientDTO();
         List<CardDTO> cardDTOS = clientEcommerceDataDTO.getCardDTOS();
@@ -87,26 +91,20 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         PaymentInsertDTO paymentInsertDTO = new PaymentInsertDTO();
         paymentInsertDTO.setPaymentMethod("CARD");
-        paymentInsertDTO.setAmount(cartDTO.getTotalPrice());
+        paymentInsertDTO.setSubtotal(cartDTO.getSubtotal());
+        paymentInsertDTO.setTotal(cartDTO.getSubtotal());
+        paymentInsertDTO.setDiscount(BigDecimal.ZERO);
         paymentInsertDTO.setClientId(clientDTO.getId());
         paymentInsertDTO.setCardId(cardDTO.getId());
+        paymentInsertDTO.setOrderId(orderId);
 
-        externalPaymentService.initPayment(paymentInsertDTO);
+        PaymentDTO paymentDTO = externalPaymentService.initPayment(paymentInsertDTO);
+        externalOrderService.addPaymentIdByOrderId(paymentDTO.getId(), orderId);
     }
 
-    private void createOrder(List<CartItemDTO> itemsToPurchase, ClientEcommerceDataDTO clientEcommerceDataDTO, Long addressId) {
-        List<AddressDTO> addressDTOS = clientEcommerceDataDTO.getAddressDTOS();
-        ClientDTO clientDTO = clientEcommerceDataDTO.clientDTO;
-
-        AddressDTO addressDTO = addressDTOS.stream()
-                .filter(address -> address.getId().equals(addressId))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Address with ID " + addressId + " not found"));
-
-        OrderInsertDTO orderInsertDTO = makeOrderInsertDTO(itemsToPurchase, clientDTO);
-        orderInsertDTO.setAddressDTO(addressDTO);
-
-        externalOrderService.createOrder(orderInsertDTO);
+    private Long createOrder(CartDTO cartDTO, ClientDTO clientDTO, Long addressId) {
+        OrderInsertDTO orderInsertDTO = makeOrderInsertDTO(cartDTO, clientDTO, addressId);
+        return externalOrderService.createOrderAndGetId(orderInsertDTO);
     }
 
     private Result<Void> ValidateAddress(ClientDTO clientDTO, AddressDTO addressDTO) {
@@ -118,22 +116,12 @@ public class PurchaseServiceImpl implements PurchaseService {
         return Result.success();
     }
 
-    private OrderInsertDTO makeOrderInsertDTO(List<CartItemDTO> itemsToPurchase, ClientDTO clientDTO) {
-            OrderInsertDTO orderInsertDTO = new OrderInsertDTO();
-            orderInsertDTO.setClientDTO(clientDTO);
+    private OrderInsertDTO makeOrderInsertDTO(CartDTO cartDTO, ClientDTO clientDTO, Long addressId) {
+        OrderInsertDTO orderInsertDTO = new OrderInsertDTO();
+        orderInsertDTO.setClientId(clientDTO.getId());
+        orderInsertDTO.setCartDTO(cartDTO);
+        orderInsertDTO.setAddressId(addressId);
 
-            List<OrderItemInsertDTO> orderItemInsertDTOS = new ArrayList<>();
-            for (CartItemDTO item : itemsToPurchase) {
-                OrderItemInsertDTO orderItemInsertDTO = new OrderItemInsertDTO();
-                orderItemInsertDTO.setProductId(item.getProductId());
-                orderItemInsertDTO.setQuantity(item.getQuantity());
-
-                orderItemInsertDTOS.add(orderItemInsertDTO);
-            }
-
-            orderInsertDTO.setItems(orderItemInsertDTOS);
-
-            return orderInsertDTO;
-        }
-
+        return orderInsertDTO;
+    }
 }

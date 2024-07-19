@@ -1,8 +1,9 @@
 package microservice.ecommerce_sale_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Cart.CartItemDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Order.OrderItemDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Sale.*;
 import at.backend.drugstore.microservice.common_models.ExternalService.Inventory.ExternalInventoryService;
+import at.backend.drugstore.microservice.common_models.Models.Sales.SaleStatus;
 import microservice.ecommerce_sale_service.Mappers.DigitalSaleItemMapper;
 import microservice.ecommerce_sale_service.Mappers.DigitalSaleMapper;
 import microservice.ecommerce_sale_service.Model.DigitalSale;
@@ -44,7 +45,7 @@ public class DigitalSaleServiceImpl implements  DigitalSaleService{
     @Transactional
     public DigitalSaleDTO createDigitalSale(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
         DigitalSale sale = mapAndSaveDigitalSale(digitalSaleItemInsertDTO);
-        List<DigitalSaleItem> saleItems = mapAndSaveSaleItems(digitalSaleItemInsertDTO.getItemsToPurchase(), sale);
+        List<DigitalSaleItem> saleItems = mapAndSaveSaleItems(digitalSaleItemInsertDTO.getOrderItemDTOS(), sale);
         return createDigitalSaleDTO(sale, saleItems);
     }
 
@@ -83,14 +84,13 @@ public class DigitalSaleServiceImpl implements  DigitalSaleService{
         return DigitalSaleHelper.saleToSummaryDTO(sales, startOfDay, endOfDay);
     }
 
-
     private DigitalSale mapAndSaveDigitalSale(DigitalSaleItemInsertDTO dto) {
-        DigitalSale sale = digitalSaleMapper.insertDTOToEntity(dto);
+        DigitalSale sale = digitalSaleMapper.insertDTOToEntity(dto.getPaymentDTO(), SaleStatus.PAID);
         return saleRepository.saveAndFlush(sale);
     }
 
-    private List<DigitalSaleItem> mapAndSaveSaleItems(List<CartItemDTO> cartItemDTOS, DigitalSale sale) {
-        return cartItemDTOS.stream()
+    private List<DigitalSaleItem> mapAndSaveSaleItems(List<OrderItemDTO> orderItemDTOS, DigitalSale sale) {
+        return orderItemDTOS.stream()
                 .map(cartItemDTO -> {
                     DigitalSaleItem saleItem = digitalSaleItemMapper.toEntity(cartItemDTO);
                     digitalSaleItemMapper.updateDigitalSale(sale, saleItem);

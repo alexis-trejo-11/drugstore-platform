@@ -142,10 +142,10 @@ public class SaleServiceImpl implements SaleService {
             total = total.add(itemPrice.multiply(BigDecimal.valueOf(quantity)));
         }
 
-        sale.setSubTotal(total);
+        sale.setSubtotal(total);
         sale.setTotal(total);
         sale.setDiscount(BigDecimal.ZERO);
-        sale.setSaleStatus(SaleStatus.PENDING_PAYMENT);
+        sale.setSaleStatus(SaleStatus.PAID);
 
         return sale;
     }
@@ -155,7 +155,7 @@ public class SaleServiceImpl implements SaleService {
         for (var saleItem : sale.getSaleItems()) {
             SaleItemDTO saleItemDTO = new SaleItemDTO();
             saleItemDTO.setProductId(saleItem.getProductId());
-            saleItemDTO.setQuantity(saleItem.getProductQuantity());
+            saleItemDTO.setProductQuantity(saleItem.getProductQuantity());
             saleItemDTOS.add(saleItemDTO);
         }
 

@@ -33,12 +33,8 @@ public interface SaleMapper {
     @Mapping(source = "clientId", target = "clientId")
     CreateSaleDTO saleToCreateSaleDTO(PhysicalSale sale);
 
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "saleDate", target = "saleDate")
-    @Mapping(source = "saleStatus", target = "saleStatus")
+
     @Mapping(source = "discount", target = "discount")
     @Mapping(source = "total", target = "total")
-    @Mapping(source = "clientId", target = "clientId")
-    @Mapping(source = "employeeId", target = "employeeId")
     ProcessSaleDTO paidSaleToProcessSaleDTO(PhysicalSale sale);
 }

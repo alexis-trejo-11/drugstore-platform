@@ -1,5 +1,7 @@
 package microservice.ecommerce_order_service.Service;
 
+import at.backend.drugstore.microservice.common_models.DTO.Cart.CartDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Cart.CartItemDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Order.*;
@@ -8,6 +10,7 @@ import at.backend.drugstore.microservice.common_models.ExternalService.Client.Ex
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import microservice.ecommerce_order_service.Mapper.OrderItemMapper;
 import microservice.ecommerce_order_service.Mapper.OrderMapper;
+import microservice.ecommerce_order_service.Model.CompleteOrderData;
 import microservice.ecommerce_order_service.Model.Order;
 import microservice.ecommerce_order_service.Model.OrderItem;
 import microservice.ecommerce_order_service.Model.ShippingData;
@@ -18,13 +21,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -32,11 +34,15 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
-    private final ExternalAddressService externalAddressService;
     private final ExternalClientService externalClientService;
+    private final ExternalAddressService externalAddressService;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, ExternalClientService externalClientService, OrderMapper orderMapper, OrderItemMapper orderItemMapper, ExternalAddressService externalAddressService) {
+    public OrderServiceImpl(OrderRepository orderRepository,
+                            ExternalClientService externalClientService,
+                            OrderMapper orderMapper,
+                            OrderItemMapper orderItemMapper,
+                            ExternalAddressService externalAddressService) {
         this.orderRepository = orderRepository;
         this.externalClientService = externalClientService;
         this.orderMapper = orderMapper;
@@ -48,61 +54,59 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Async
     @Transactional
-    public OrderDTO createOrder(OrderInsertDTO orderInsertDTO) {
-           Order order = orderMapper.insertDtoToEntity(orderInsertDTO);
-           List<OrderItem> orderItems = generateOrderItems(orderInsertDTO.getItems(), order);
+    public Order createOrder(OrderInsertDTO orderInsertDTO) {
+           Order order = orderMapper.insertDtoToEntity(orderInsertDTO.getAddressId(), orderInsertDTO.getClientId());
+           List<OrderItem> orderItems = generateOrderItems(orderInsertDTO.getCartDTO().getCartItems(), order);
            order.setItems(orderItems);
 
            orderRepository.saveAndFlush(order);
 
-           OrderDTO orderDTO = orderMapper.entityToDTO(order);
-           return orderDTO;
+           return order;
     }
 
-    @Override
+    public OrderDTO processOrderCreation(Order order, Long clientId, CartDTO cartDTO) {
+        order.setClientId(clientId);
+        order.setItems(generateOrderItems(cartDTO.getCartItems(),order));
+        return orderMapper.entityToDTO(order);
+    }
+
     @Async
     @Transactional
-    public Result<Void> createShippingData(ClientDTO clientDTO, OrderDTO orderDTO, AddressDTO addressDTO) {
-            if (orderDTO.getStatus() != OrderStatus.PAID) {
-                return new Result<>(false, null, "Order Not Paid!.");
-            }
-
+    public void createShippingData(ClientDTO clientDTO, OrderDTO orderDTO, AddressDTO addressDTO) {
             Optional<Order> optionalOrder = orderRepository.findById(orderDTO.getId());
-            if (optionalOrder.isEmpty()) {
-                return new Result<>(false, null, "Order Not Found");
-            }
             Order order = optionalOrder.get();
 
             ShippingData shippingData = generateShippingData(addressDTO, clientDTO);
             order.setShippingData(shippingData);
             orderRepository.saveAndFlush(order);
-
-            return Result.success();
     }
 
     @Override
     @Async
     @Transactional
-    public Result<Void> validateOrderPayment(boolean isOrderPaid, Long orderId) {
+    public void processOrderPayment(CompleteOrderRequest completeOrderRequest, AddressDTO addressDTO, ClientDTO clientDTO, OrderDTO orderDTO) {
+        updateOrderPaymentStatus(completeOrderRequest.getOrderId(), completeOrderRequest.isOrderPaid());
+        if (completeOrderRequest.isOrderPaid()) {
+            createShippingData(clientDTO, orderDTO, addressDTO);
+        }
+    }
+
+    private void updateOrderPaymentStatus(Long orderId, boolean isoOrderPaid) {
         Optional<Order> optionalOrder = orderRepository.findById(orderId);
         if (optionalOrder.isEmpty()) {
-            return Result.error("Order With Id " + orderId + " Not Found");
+            throw new EntityNotFoundException("Order Not Found");
         }
 
         Order order = optionalOrder.get();
 
-        if (!isOrderPaid) {
+        if (!isoOrderPaid) {
             order.setStatus(OrderStatus.PAID_FAILED);
             orderRepository.saveAndFlush(order);
-            return Result.success();
+        } else {
+            order.setStatus(OrderStatus.PAID);
+            orderRepository.saveAndFlush(order);
         }
-
-        order.setStatus(OrderStatus.PAID);
-        orderRepository.saveAndFlush(order);
-        return Result.success();
     }
-
-
 
     @Override
     @Async
@@ -128,7 +132,6 @@ public class OrderServiceImpl implements OrderService {
         Page<Order> orderPage = orderRepository.findByClientId(clientId, pageable);
         return orderPage.map(this::makeOrderDTO);
     }
-
 
     @Override
     @Async
@@ -166,6 +169,36 @@ public class OrderServiceImpl implements OrderService {
             return Result.success();
     }
 
+    @Async
+    @Transactional
+    public CompleteOrderData bringClientDataToCompleteOrder(CompleteOrderRequest completeOrderRequest) {
+        Long addressId = completeOrderRequest.getAddressId();
+        Long clientId = completeOrderRequest.getClientId();
+        Long orderId = completeOrderRequest.getOrderId();
+
+        CompleteOrderData completeOrderData = new CompleteOrderData();
+
+        Result<ClientDTO> clientDTOResult = externalClientService.findClientById(clientId);
+        completeOrderData.setClientDTO(clientDTOResult.getData());
+
+        Result<AddressDTO> addressResult = externalAddressService.getAddressId(addressId);
+        completeOrderData.setAddressDTO(addressResult.getData());
+
+        Optional<Order> optionalOrder = orderRepository.findById(orderId);
+        OrderDTO orderDTO = orderMapper.entityToDTO(optionalOrder.get());
+        completeOrderData.setOrderDTO(orderDTO);
+
+        return completeOrderData;
+    }
+
+    @Transactional
+    @Override
+    public void addPaymentIdByOrderId(Long orderId, Long paymentId) {
+        Optional<Order> orderOptional = orderRepository.findById(orderId);
+        orderOptional.get().setPaymentId(paymentId);
+        orderRepository.saveAndFlush(orderOptional.get());
+    }
+
     private String handleDelivery(Order order, boolean isOrderDelivered) {
         int deliveryTries = order.getDeliveryTries() + 1;
 
@@ -187,10 +220,7 @@ public class OrderServiceImpl implements OrderService {
 
     private Order findOrderById(Long orderId) {
         Optional<Order> orderOptional = orderRepository.findById(orderId);
-        if (orderOptional.isEmpty()) {
-            return null;
-        }
-        return orderOptional.get();
+        return orderOptional.orElse(null);
     }
 
     private ShippingData generateShippingData(AddressDTO addressDTO, ClientDTO clientDTO) {
@@ -233,30 +263,27 @@ public class OrderServiceImpl implements OrderService {
     private OrderDTO makeOrderDTO(Order order){
         OrderDTO orderDTO = orderMapper.entityToDTO(order);
 
+        Result<ClientDTO> clientDTOResult = externalClientService.findClientById(order.getClientId());
+        ClientDTO clientDTO = clientDTOResult.getData();
+
+        orderDTO.setClientName(clientDTO.getFirstName() + " " + clientDTO.getLastName());
+        orderDTO.setClientPhone(clientDTO.getPhone());
+        orderDTO.setItems(order.getItems().stream().map(orderItemMapper::entityToDTO).toList());
+
         if (order.getShippingData() != null) {
             ShippingData shippingData = order.getShippingData();
-            orderDTO.setShippingAddress(shippingData.getAddress());
+            orderDTO.setShippingAddress(shippingData.getAddress() + "," + shippingData.getCity() +  "," + shippingData.getState() + "," + shippingData.getCountry() + "," + shippingData.getPostalCode());
             orderDTO.setClientName(shippingData.getRecipientName());
             orderDTO.setClientPhone(shippingData.getPhoneNumber());
         }
 
-        orderDTO.setItems(order.getItems().stream().map(orderItemMapper::entityToDTO).toList());
-
         return orderDTO;
     }
 
-    private List<OrderItem> generateOrderItems(List<OrderItemInsertDTO> orderItemInsertDTOS, Order order) {
-        List<OrderItem> orderItems = new ArrayList<>();
-        for (var orderItemInsertDTO : orderItemInsertDTOS) {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setProductId(orderItemInsertDTO.getProductId());
-            orderItem.setOrder(order);
-            orderItem.setQuantity(orderItemInsertDTO.getQuantity());
-
-            orderItems.add(orderItem);
-        }
-
-        return orderItems;
+    private List<OrderItem> generateOrderItems(List<CartItemDTO> cartDTOS, Order order) {
+        return cartDTOS.stream()
+                .map(cartDTO -> orderItemMapper.cartItemDTOToOrderItem(cartDTO, order))
+                .collect(Collectors.toList());
     }
 }
 

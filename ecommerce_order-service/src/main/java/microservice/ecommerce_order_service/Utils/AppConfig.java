@@ -3,6 +3,8 @@ package microservice.ecommerce_order_service.Utils;
 import at.backend.drugstore.microservice.common_models.ExternalService.Adress.ExternalAddressService;
 import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientService;
 import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientServiceImpl;
+import at.backend.drugstore.microservice.common_models.ExternalService.Payment.ExternalPaymentService;
+import at.backend.drugstore.microservice.common_models.ExternalService.Payment.ExternalPaymentServiceServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -20,6 +22,11 @@ public class AppConfig {
     @Primary
     public ExternalClientService externalClientService(RestTemplate restTemplate) {
         return new ExternalClientServiceImpl(restTemplate);
+    }
+
+    @Bean
+        public ExternalPaymentService externalPaymentService(RestTemplate restTemplate) {
+        return new ExternalPaymentServiceServiceImpl(restTemplate);
     }
 
     @Bean

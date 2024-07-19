@@ -13,7 +13,6 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Table(name = "digital_sale_items")
 public class DigitalSaleItem extends SaleItem {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

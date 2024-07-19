@@ -185,7 +185,7 @@ public class ModelTransformer {
         ProcessSaleDTO processSaleDTO = new ProcessSaleDTO();
         processSaleDTO.setDiscount(sale.getDiscount());
         processSaleDTO.setAmountPaid(paySaleDTO.getMoneyProvided());
-        processSaleDTO.setSubTotal(sale.getSubTotal());
+        processSaleDTO.setSubTotal(sale.getSubtotal());
         processSaleDTO.setTotal(sale.getTotal());
         processSaleDTO.setPaymentMethod(String.valueOf(sale.getPayType()));
 

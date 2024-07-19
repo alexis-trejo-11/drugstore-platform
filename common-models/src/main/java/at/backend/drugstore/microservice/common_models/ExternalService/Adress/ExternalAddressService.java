@@ -1,20 +1,21 @@
 package at.backend.drugstore.microservice.common_models.ExternalService.Adress;
 
 import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class ExternalAddressService {
 
@@ -30,66 +31,60 @@ public class ExternalAddressService {
 
     @Async
     public Result<AddressDTO> getAddressId(Long addressId) {
-        String addressUrl = clientServiceUrl + "/address/" + addressId;
+        String addressUrl = clientServiceUrl + "/v1/api/clients/address/" + addressId;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<?> requestEntity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<ResponseWrapper<AddressDTO>> responseEntity = restTemplate.exchange(
+            log.info("Fetching address with ID: {}", addressId);
+            ResponseEntity<ApiResponse<AddressDTO>> responseEntity = restTemplate.exchange(
                     addressUrl,
                     HttpMethod.GET,
                     requestEntity,
-                    new ParameterizedTypeReference<ResponseWrapper<AddressDTO>>() {}
+                    new ParameterizedTypeReference<ApiResponse<AddressDTO>>() {}
             );
 
             if (responseEntity.getStatusCode() == HttpStatus.NOT_FOUND) {
-                return new Result<>(false, null, "Address with ID: " + addressId + " not found", HttpStatus.NOT_FOUND);
-            } else if (responseEntity.getStatusCode() != HttpStatus.OK) {
-                return new Result<>(false, null, "Failed to retrieve address for ID: " + addressId, responseEntity.getStatusCode());
+                log.warn("Address with ID: {} not found", addressId);
+                return new Result<>(false, null, "Address with ID: " + addressId + " not found");
             }
 
             AddressDTO addressDTO = Objects.requireNonNull(responseEntity.getBody()).getData();
+            log.info("Address with ID: {} successfully fetched", addressId);
             return Result.success(addressDTO);
 
-        } catch (HttpClientErrorException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                e.printStackTrace();
-                return new Result<>(false, null, "Address with ID: " + addressId + " not found", HttpStatus.NOT_FOUND);
-            } else {
-                return new Result<>(false, null, "Failed to retrieve address for ID: " + addressId, e.getStatusCode());
-            }
         } catch (Exception e) {
-            return new Result<>(false, null, "Exception occurred while retrieving address for ID: " + addressId + ": " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            log.error("Error fetching address with ID: {}", addressId, e);
+            throw new RuntimeException(e);
         }
     }
 
     @Async
     public Result<List<AddressDTO>> getAddressByClientId(Long clientId) {
-        String addressUrl = clientServiceUrl + "client/address-client/" + clientId;
+        String addressUrl = clientServiceUrl + "/v1/api/clients/address/client/" + clientId;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<?> requestEntity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<ResponseWrapper<List<AddressDTO>>> responseEntity = restTemplate.exchange(
+            ResponseEntity<ApiResponse<List<AddressDTO>>> responseEntity = restTemplate.exchange(
                     addressUrl,
                     HttpMethod.GET,
                     requestEntity,
-                    new ParameterizedTypeReference<ResponseWrapper<List<AddressDTO>>>() {}
+                    new ParameterizedTypeReference<ApiResponse<List<AddressDTO>>>() {}
             );
 
-            if (responseEntity.getStatusCode()  != HttpStatus.OK) {
+            if (responseEntity.getStatusCode()  == HttpStatus.NOT_FOUND &&  responseEntity.getBody() != null) {
                 return new Result<>(false, null, "Can't Get Addresses");
             }
-
             List<AddressDTO> addressDTO = Objects.requireNonNull(responseEntity.getBody()).getData();
             return Result.success(addressDTO);
         } catch (Exception e) {
             e.printStackTrace();
-            return new Result<>(false, null, "Exception occurred while retrieving address");
+            throw new RuntimeException(e);
         }
     }
 

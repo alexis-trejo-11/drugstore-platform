@@ -12,14 +12,13 @@ public interface PaymentMapper {
 
     @Mapping(target = "paymentMethod", source = "payment.paymentMethod", qualifiedByName = "mapPaymentMethodToString")
     @Mapping(target = "cardId", source = "payment.card.id")
-    @Mapping(target = "status", source = "payment.status", qualifiedByName = "mapStatusToString")
+    @Mapping(target = "paymentStatus", source = "payment.status", qualifiedByName = "mapStatusToString")
     PaymentDTO toDto(Payment payment);
 
-    @Mapping(target = "paymentCreatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "status", expression = "java(microservice.ecommerce_payment_service.Model.Payment.PaymentStatus.PENDING)")
     @Mapping(target = "paymentMethod", source = "paymentInsertDTO.paymentMethod", qualifiedByName = "mapStringToPaymentMethod")
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "paymentDate", ignore = true)
+    @Mapping(target = "paymentDate", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "card", ignore = true)
     Payment toEntity(PaymentInsertDTO paymentInsertDTO);
 

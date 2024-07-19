@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"microservice.ecommerce_cart_service", "at.backend.drugstore.microservice.common_models.ExternalService.Products" , "at.backend.drugstore.microservice.common_models.Validations"})
+@ComponentScan(basePackages = {"microservice.ecommerce_cart_service", "at.backend.drugstore.microservice.common_models.ExternalService.Clients" , "at.backend.drugstore.microservice.common_models.ExternalService.Products", "at.backend.drugstore.microservice.common_models.ExternalService.DigitalSale", "at.backend.drugstore.microservice.common_models.Validations"})
 public class EcommerceCartServiceApplication {
 
 	public static void main(String[] args) {
