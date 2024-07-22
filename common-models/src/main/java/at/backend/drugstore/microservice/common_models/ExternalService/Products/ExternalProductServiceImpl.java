@@ -34,7 +34,7 @@ public class ExternalProductServiceImpl implements ExternalProductService {
     }
 
     @Override
-    public Result<List<ProductDTO>> findProducts(List<Long> productIds) {
+    public Result<List<ProductDTO>> getProductsByIds(List<Long> productIds) {
         String productUrl = productServiceUrl + "/by-ids";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

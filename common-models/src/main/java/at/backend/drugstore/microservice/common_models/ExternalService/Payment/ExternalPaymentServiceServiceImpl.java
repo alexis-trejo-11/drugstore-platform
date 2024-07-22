@@ -3,8 +3,11 @@ package at.backend.drugstore.microservice.common_models.ExternalService.Payment;
 import at.backend.drugstore.microservice.common_models.DTO.Payment.CardDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentInsertDTO;
+import at.backend.drugstore.microservice.common_models.ExternalService.Order.ExternalOrderServiceImpl;
 import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -36,6 +39,11 @@ public class ExternalPaymentServiceServiceImpl implements ExternalPaymentService
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<PaymentInsertDTO> requestEntity = new HttpEntity<>(paymentInsertDTO, headers);
 
+        Logger logger = LoggerFactory.getLogger(ExternalOrderServiceImpl.class);
+
+        logger.info("Initializing payment with URL: {}", url);
+        logger.debug("PaymentInsertDTO: {}", paymentInsertDTO);
+
         try {
             ResponseEntity<ApiResponse<PaymentDTO>> responseEntity = restTemplate.exchange(
                     url,
@@ -46,12 +54,14 @@ public class ExternalPaymentServiceServiceImpl implements ExternalPaymentService
             );
 
             if (responseEntity.getStatusCode() == HttpStatus.CREATED && responseEntity.getBody() != null) {
+                logger.info("Payment initialization successful with status code: {}", responseEntity.getStatusCode());
                 return responseEntity.getBody().getData();
             } else {
+                logger.warn("Payment initialization failed with status code: {}", responseEntity.getStatusCode());
                 return null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception occurred during payment initialization", e);
             throw new RuntimeException(e);
         }
     }
