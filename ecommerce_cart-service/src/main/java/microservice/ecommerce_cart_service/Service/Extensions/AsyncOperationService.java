@@ -1,4 +1,4 @@
-package microservice.ecommerce_cart_service.Service.Factory;
+package microservice.ecommerce_cart_service.Service.Extensions;
 
 import microservice.ecommerce_cart_service.Model.Cart;
 import microservice.ecommerce_cart_service.Repository.CartRepository;

@@ -47,7 +47,7 @@ public class SaleServiceImpl implements SaleService {
     @Async
     @Transactional
     public Result<CreateSaleDTO> createSale(SaleProductsDTO saleProductsDTO) {
-        Result<List<ProductDTO>> productResult = externalProductService.findProducts(saleProductsDTO.getProductsId());
+        Result<List<ProductDTO>> productResult = externalProductService.getProductsByIds(saleProductsDTO.getProductsId());
         if (!productResult.isSuccess()) {
             return Result.error(productResult.getErrorMessage());
         }

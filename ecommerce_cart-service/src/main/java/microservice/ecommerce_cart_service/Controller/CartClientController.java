@@ -1,20 +1,20 @@
 package microservice.ecommerce_cart_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTO.Cart.CartDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Cart.CartItemInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Cart.ClientEcommerceDataDTO;
+import at.backend.drugstore.microservice.common_models.DTO.Cart.*;
 import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
-import at.backend.drugstore.microservice.common_models.Validations.ControllerValidation;
+import microservice.ecommerce_cart_service.Model.CartItem;
+import microservice.ecommerce_cart_service.Service.AfterwardsService;
+import microservice.ecommerce_cart_service.Service.Implementations.AfterwardsServiceImpl;
 import microservice.ecommerce_cart_service.Service.CartItemService;
 import microservice.ecommerce_cart_service.Service.CartService;
 import microservice.ecommerce_cart_service.Service.PurchaseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -26,18 +26,19 @@ public class CartClientController {
     private final CartService cartService;
     private final CartItemService cartItemService;
     private final PurchaseService purchaseService;
+    private final AfterwardsService afterwardsService;
 
-    public CartClientController(CartService cartService, CartItemService cartItemService, PurchaseService purchaseService) {
+    public CartClientController(CartService cartService,
+                                CartItemService cartItemService,
+                                PurchaseService purchaseService,
+                                AfterwardsServiceImpl afterwardsService) {
         this.cartService = cartService;
         this.cartItemService = cartItemService;
         this.purchaseService = purchaseService;
+        this.afterwardsService = afterwardsService;
     }
 
-    /**
-     * Get the cart for the specified client.
-     * @param clientId The ID of the client whose cart is to be retrieved.
-     * @return A ResponseEntity containing an ApiResponse with the client's cart.
-     */
+
     @GetMapping("/client/{clientId}")
     public ResponseEntity<ApiResponse<CartDTO>> getCartByClientId(@PathVariable Long clientId) {
         logger.info("Fetching cart for client ID: " + clientId);
@@ -51,17 +52,12 @@ public class CartClientController {
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, optionalCartDTO.get(), "Cart successfully fetched.", 200));
     }
 
-    /**
-     * Add a product to the client's cart.
-     *
-     * @param clientId  The ID of the client.
-     * @param productId The ID of the product to add to the cart.
-     * @param quantity  The quantity of the product to add to the cart.
-     * @return A ResponseEntity containing an ApiResponse with the result of the add operation.
-     */
-    @PostMapping("/product/{clientId}/{productId}/{quantity}")
-    public ResponseEntity<ApiResponse<Void>> addProductToCart(@PathVariable final Long clientId, @PathVariable final Long productId, @PathVariable final int quantity) {
+    @PostMapping("/product/{clientId}")
+    public ResponseEntity<ApiResponse<Void>> addProductToCart(@Valid @PathVariable final Long clientId, @RequestBody final CartItemInsertDTO cartItemInsertDTO) {
+        var productId = cartItemInsertDTO.getProductId();
+        var quantity = cartItemInsertDTO.getQuantity();
         logger.info("Adding product ID: " + productId + " with quantity: " + quantity + " to cart for client ID: " + clientId);
+
         Result<Void> cartResult = cartItemService.addProductsCart(clientId, productId, quantity);
         if (!cartResult.isSuccess()) {
             logger.warning("Failed to add product ID: " + productId + " to cart for client ID: " + clientId + ". Error: " + cartResult.getErrorMessage());
@@ -71,22 +67,9 @@ public class CartClientController {
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Products Successfully Added.", 200));
     }
 
-    /**
-     * Delete a product from the client's cart.
-     * @param clientId           The ID of the client.
-     * @param cartItemInsertDTO  The DTO containing the product details to be deleted from the cart.
-     * @param bindingResult      The binding result for validation errors.
-     * @return A ResponseEntity containing an ApiResponse with the result of the delete operation.
-     */
     @DeleteMapping("/product/{clientId}")
-    public ResponseEntity<ApiResponse<?>> deleteProductFromCart(@Valid @PathVariable final Long clientId, @RequestBody final CartItemInsertDTO cartItemInsertDTO, BindingResult bindingResult) {
+    public ResponseEntity<ApiResponse<Void>> deleteProductFromCart(@Valid @PathVariable final Long clientId, @RequestBody final CartItemInsertDTO cartItemInsertDTO) {
         logger.info("Deleting product from cart for client ID: " + clientId);
-        if (bindingResult.hasErrors()) {
-            var validationErrors = ControllerValidation.handleValidationError(bindingResult);
-            logger.warning("Validation errors while deleting product from cart for client ID: " + clientId + ". Errors: " + validationErrors);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, validationErrors, "Validation Errors", 400));
-        }
-
         Result<Void> deleteResult = cartItemService.deleteProductFromCart(clientId, cartItemInsertDTO);
         if (!deleteResult.isSuccess()) {
             logger.warning("Failed to delete product from cart for client ID: " + clientId + ". Error: " + deleteResult.getErrorMessage());
@@ -96,34 +79,47 @@ public class CartClientController {
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Product Successfully Deleted", 200));
     }
 
-
-    /**
-     * Purchase products from the client's cart.
-     * @param clientId  The ID of the client.
-     * @param addressId The ID of the address to ship the products to.
-     * @param cardId    The ID of the card to charge for the purchase.
-     * @return A ResponseEntity containing an ApiResponse with the result of the purchase operation.
-     */
     @PostMapping("/purchase")
-    public ResponseEntity<ApiResponse<?>> purchaseProductsFromCart(@RequestParam Long clientId,
-                                                                   @RequestParam Long addressId,
-                                                                   @RequestParam Long cardId) {
+    public ResponseEntity<ApiResponse<Void>> purchaseProductsFromCart(@Valid PurchaseFromCartDTO purchaseFromCartDTO) {
+        var clientId = purchaseFromCartDTO.getClientId();
         logger.info("Processing purchase for client ID: " + clientId);
+
         Result<ClientEcommerceDataDTO> ecommerceDataDTOResult = purchaseService.prepareClientData(clientId);
         if (!ecommerceDataDTOResult.isSuccess()) {
             logger.warning("Failed to prepare client data for purchase for client ID: " + clientId + ". Error: " + ecommerceDataDTOResult.getErrorMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, ecommerceDataDTOResult.getErrorMessage(), 404));
         }
 
-        Result<CartDTO> cartDTOResult  = cartItemService.processCartAndGetItems(ecommerceDataDTOResult.getData());
-        if (!cartDTOResult.isSuccess()) {
-            logger.warning("Failed to process cart items for purchase for client ID: " + clientId + ". Error: " + cartDTOResult.getErrorMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, null, cartDTOResult.getErrorMessage(), 400));
-        }
+        var purchaseData  = cartItemService.processCartAndGePurchaseData(ecommerceDataDTOResult.getData(), purchaseFromCartDTO);
+        var cardId = purchaseFromCartDTO.getCardId();
+        var addressId = purchaseFromCartDTO.getAddressId();
 
-        purchaseService.processPurchase(ecommerceDataDTOResult.getData(), cardId, cartDTOResult.getData(), addressId);
+        purchaseService.processPurchase(ecommerceDataDTOResult.getData(), cardId, purchaseData, addressId);
         logger.info("Successfully processed purchase for client ID: " + clientId);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Order Created Payment Will Be Validate Soon.", 200));
+    }
+
+    @PostMapping("/move-to-afterwards/{clientId}/{productId}")
+    public ResponseEntity<ApiResponse<Void>> moveProductToAfterwards(@Valid @PathVariable final Long clientId,  @PathVariable final Long productId) {
+        Result<Void> afterwardsResult = afterwardsService.moveProductToAfterwards(clientId, productId);
+        if (!afterwardsResult.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, null, afterwardsResult.getErrorMessage(), 400));
+        }
+        logger.info("Successfully move product ID: " + productId + " to afterwards for client ID: " + clientId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Product Successfully Move It To Afterwards", 200));
+    }
+
+    @DeleteMapping("/return-to-afterwards/{clientId}/{productId}")
+    public ResponseEntity<ApiResponse<Void>> returnProductToCart(@Valid @PathVariable final Long clientId,  @PathVariable final Long productId) {
+        afterwardsService.returnProductToCart(clientId, productId);
+        logger.info("Successfully move product ID: " + productId + " to afterwards for client ID: " + clientId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Product Successfully Returned To Cart.", 200));
+    }
+
+    @GetMapping("/client-afterwards/{clientId}")
+    public ResponseEntity<ApiResponse<List<CartItemDTO>>> getAfterwardProductsByClientId(@Valid @PathVariable final Long clientId) {
+        List<CartItemDTO> cartItemDTOS = afterwardsService.getAfterwardsByClientId(clientId);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, cartItemDTOS, "Afterward items successfully fetched!.", 200));
     }
 }

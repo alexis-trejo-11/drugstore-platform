@@ -22,11 +22,6 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    /**
-     * Create a new cart for the specified client.
-     * @param clientId The ID of the client for whom the cart is to be created.
-     * @return A ResponseEntity containing an ApiResponse with the result of the cart creation.
-     */
     @PostMapping("/create/{clientId}")
     public ResponseEntity<ApiResponse<Void>> createCart(@PathVariable final Long clientId) {
         logger.info("Creating cart for client ID: " + clientId);

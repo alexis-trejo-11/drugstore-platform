@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -22,20 +24,23 @@ public class CartItemManager {
         this.cartItemFactory = cartItemFactory;
     }
 
-    public CartItem addOrUpdateCartItem(Cart cart, ProductDTO productDTO, int quantity) {
-        Optional<CartItem> existingCartItem = cart.getCartItems().stream()
-                .filter(item -> item.getProductId().equals(productDTO.getId()))
-                .findFirst();
+    public Cart addOrUpdateCartItem(Cart cart, ProductDTO productDTO, int quantity) {
+     Optional<CartItem> existingCartItem = cart.getCartItems().stream()
+                    .filter(item -> item.getProductId().equals(productDTO.getId()))
+                    .findFirst();
 
-        if (existingCartItem.isPresent()) {
-            CartItem cartItem = existingCartItem.get();
-            cartItem.setQuantity(cartItem.getQuantity() + quantity);
-            cartItem.setItemTotal(cartItem.getProductPrice().multiply(new BigDecimal(cartItem.getQuantity())));
-            return cartItemRepository.save(cartItem);
-        } else {
-            CartItem newCartItem = cartItemFactory.createCartItem(productDTO, quantity, cart);
-            return cartItemRepository.save(newCartItem);
-        }
+            if (existingCartItem.isPresent()) {
+                CartItem cartItem = existingCartItem.get();
+                cartItem.setQuantity(cartItem.getQuantity() + quantity);
+                cartItem.setItemTotal(cartItem.getProductPrice().multiply(new BigDecimal(cartItem.getQuantity())));
+                cartItemRepository.save(cartItem);
+                return cart;
+            } else {
+                CartItem newCartItem = cartItemFactory.createCartItem(productDTO, quantity, cart);
+                cartItemRepository.save(newCartItem);
+                cart.getCartItems().add(newCartItem);
+                return cart;
+            }
     }
 
     public void removeCartItem(Cart cart, Long productId, int quantity) {

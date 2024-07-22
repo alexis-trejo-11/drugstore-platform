@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -17,6 +19,11 @@ public class PurchaseFromCartDTO {
     @Positive(message = "client_id must be positive")
     private Long clientId;
 
+    @JsonProperty("address_id")
+    @NotNull(message = "address_id is obligatory")
+    @Positive(message = "address_id must be positive")
+    private Long addressId;
+
     @JsonProperty("payment_method")
     @NotNull(message = "payment_method is obligatory")
     @NotBlank(message = "payment_method can not be empty")
@@ -24,4 +31,7 @@ public class PurchaseFromCartDTO {
 
     @JsonProperty("card_id")
     private Long cardId;
+
+    @JsonProperty("products_to_ommit")
+    private List<Long> productsToOmmit;
 }
