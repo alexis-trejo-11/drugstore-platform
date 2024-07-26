@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/v1/api/products")
@@ -31,154 +32,112 @@ public class ProductController {
         this.productServiceImpl = productServiceImpl;
     }
 
-    /**
-     * Retrieves all products.
-     *
-     * @return ResponseEntity with the list of product DTOs
-     */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProductDTO>>> getAllProducts() {
-        List<ProductDTO> productDTOS = productServiceImpl.getAllProducts();
-        logger.info("All products retrieved successfully");
-        return ResponseEntity.ok(new ApiResponse<>(true, productDTOS, "Products retrieved successfully", HttpStatus.OK.value()));
+    public CompletableFuture<ResponseEntity<ApiResponse<List<ProductDTO>>>> getAllProducts() {
+        return productServiceImpl.getAllProducts()
+                .thenApply(productDTOS -> {
+                    logger.info("All products retrieved successfully");
+                    return ResponseEntity.ok(new ApiResponse<>(true, productDTOS, "Products retrieved successfully", HttpStatus.OK.value()));
+                });
     }
 
-    /**
-     * Retrieves products by their IDs.
-     *
-     * @param request the list of product IDs
-     * @return ResponseEntity with the list of product DTOs
-     */
     @PostMapping("/by-ids")
-    public ResponseEntity<ApiResponse<List<ProductDTO>>> getProductsById(@RequestBody Map<String, List<Long>> request) {
+    public CompletableFuture<ResponseEntity<ApiResponse<List<ProductDTO>>>> getProductsById(@RequestBody Map<String, List<Long>> request) {
         List<Long> productIds = request.get("productIds");
-
-        List<ProductDTO> productDTOS = productServiceImpl.getProductsById(productIds);
-        logger.info("Products retrieved for IDs: {}", productIds);
-
-        return ResponseEntity.ok(new ApiResponse<>(true, productDTOS, "Products retrieved successfully", HttpStatus.OK.value()));
+        return productServiceImpl.getProductsById(productIds)
+                .thenApply(productDTOS -> {
+                    logger.info("Products retrieved for IDs: {}", productIds);
+                    return ResponseEntity.ok(new ApiResponse<>(true, productDTOS, "Products retrieved successfully", HttpStatus.OK.value()));
+                });
     }
 
-    /**
-     * Retrieves a product by ID.
-     *
-     * @param productId the ID of the product
-     * @return ResponseEntity with the product DTO
-     */
     @GetMapping("/{productId}")
-    public ResponseEntity<ApiResponse<ProductDTO>> getProductById(@PathVariable Long productId) {
-        ProductDTO productDTO = productServiceImpl.getProductById(productId);
-        if (productDTO == null) {
-            logger.warn("Product not found for ID: {}", productId);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
-        }
-        logger.info("Product found for ID: {}", productId);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, productDTO, "Product retrieved successfully", HttpStatus.OK.value()));
+    public CompletableFuture<ResponseEntity<ApiResponse<ProductDTO>>> getProductById(@PathVariable Long productId) {
+        return productServiceImpl.getProductById(productId)
+                .thenApply(productDTO -> {
+                    if (productDTO == null) {
+                        logger.warn("Product not found for ID: {}", productId);
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
+                    }
+                    logger.info("Product found for ID: {}", productId);
+                    return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, productDTO, "Product retrieved successfully", HttpStatus.OK.value()));
+                });
     }
 
-    /**
-     * Retrieves products by supplier ID.
-     * @param supplierId the ID of the supplier
-     * @return ResponseEntity with the list of product DTOs
-     */
     @GetMapping("/by-supplier/{supplierId}")
-    public ResponseEntity<ApiResponse<List<ProductDTO>>> getProductsBySupplier(@PathVariable Long supplierId) {
-        List<ProductDTO> productDTOS = productServiceImpl.FindProductsBySupplier(supplierId);
-        logger.info("Products retrieved for supplier ID: {}", supplierId);
-        return ResponseEntity.ok(new ApiResponse<>(true, productDTOS, "Products retrieved successfully", HttpStatus.OK.value()));
+    public CompletableFuture<ResponseEntity<ApiResponse<List<ProductDTO>>>> getProductsBySupplier(@PathVariable Long supplierId) {
+        return productServiceImpl.findProductsBySupplier(supplierId)
+                .thenApply(productDTOS -> {
+                    logger.info("Products retrieved for supplier ID: {}", supplierId);
+                    return ResponseEntity.ok(new ApiResponse<>(true, productDTOS, "Products retrieved successfully", HttpStatus.OK.value()));
+                });
     }
 
-    /**
-     * Retrieves products by category ID.
-     *
-     * @param categoryId the ID of the category
-     * @return ResponseEntity with the list of product DTOs
-     */
     @GetMapping("/by-category/{categoryId}")
-    public ResponseEntity<ApiResponse<List<ProductDTO>>> getProductsByCategory(@PathVariable Long categoryId) {
-        List<ProductDTO> productDTOS = productServiceImpl.findProductsByCategoryId(categoryId);
-        logger.info("Products retrieved for category ID: {}", categoryId);
-        return ResponseEntity.ok(new ApiResponse<>(true, productDTOS, "Products retrieved successfully", HttpStatus.OK.value()));
+    public CompletableFuture<ResponseEntity<ApiResponse<List<ProductDTO>>>> getProductsByCategory(@PathVariable Long categoryId) {
+        return productServiceImpl.findProductsByCategoryId(categoryId)
+                .thenApply(productDTOS -> {
+                    logger.info("Products retrieved for category ID: {}", categoryId);
+                    return ResponseEntity.ok(new ApiResponse<>(true, productDTOS, "Products retrieved successfully", HttpStatus.OK.value()));
+                });
     }
 
-    /**
-     * Retrieves products by subcategory ID.
-     *
-     * @param subcategoryId the ID of the subcategory
-     * @return ResponseEntity with the list of product DTOs
-     */
     @GetMapping("/by-subcategory/{subcategoryId}")
-    public ResponseEntity<ApiResponse<List<ProductDTO>>> getProductsBySubCategory(@PathVariable Long subcategoryId) {
-        List<ProductDTO> productDTOS = productServiceImpl.findProductsBySubCategory(subcategoryId);
-        logger.info("Products retrieved for subcategory ID: {}", subcategoryId);
-        return ResponseEntity.ok(new ApiResponse<>(true, productDTOS, "Products retrieved successfully", HttpStatus.OK.value()));
+    public CompletableFuture<ResponseEntity<ApiResponse<List<ProductDTO>>>> getProductsBySubCategory(@PathVariable Long subcategoryId) {
+        return productServiceImpl.findProductsBySubCategory(subcategoryId)
+                .thenApply(productDTOS -> {
+                    logger.info("Products retrieved for subcategory ID: {}", subcategoryId);
+                    return ResponseEntity.ok(new ApiResponse<>(true, productDTOS, "Products retrieved successfully", HttpStatus.OK.value()));
+                });
     }
 
-    /**
-     * Inserts a new product.
-     *
-     * @param productInsertDTO the product insert DTO
-     * @param bindingResult    the binding result for validation
-     * @return ResponseEntity with a status message
-     */
     @PostMapping
-    public ResponseEntity<ApiResponse<String>> insertProduct(@Valid @RequestBody ProductInsertDTO productInsertDTO, BindingResult bindingResult) {
+    public CompletableFuture<ResponseEntity<ApiResponse<String>>> insertProduct(@Valid @RequestBody ProductInsertDTO productInsertDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             var validationErrors = ControllerValidation.handleValidationError(bindingResult);
             logger.error("Invalid data provided for inserting product");
-            return ResponseEntity.badRequest().body(new ApiResponse<>(false, null, "Invalid data: " + validationErrors, HttpStatus.BAD_REQUEST.value()));
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(new ApiResponse<>(false, null, "Invalid data: " + validationErrors, HttpStatus.BAD_REQUEST.value())));
         }
 
-        Result<Void> insertResult = productServiceImpl.processInsertProduct(productInsertDTO);
-        if (!insertResult.isSuccess()) {
-            logger.error("Error inserting product: {}", insertResult.getErrorMessage());
-            return ResponseEntity.badRequest().body(new ApiResponse<>(false, null, insertResult.getErrorMessage(), HttpStatus.BAD_REQUEST.value()));
-        }
-
-        logger.info("Product inserted successfully: {}", productInsertDTO.getName());
-        return ResponseEntity.ok(new ApiResponse<>(true, null, "Product inserted successfully", HttpStatus.OK.value()));
+        return productServiceImpl.processInsertProduct(productInsertDTO)
+                .thenApply(result -> {
+                    if (!result.isSuccess()) {
+                        logger.error("Error inserting product: {}", result.getErrorMessage());
+                        return ResponseEntity.badRequest().body(new ApiResponse<>(false, null, result.getErrorMessage(), HttpStatus.BAD_REQUEST.value()));
+                    }
+                    logger.info("Product inserted successfully: {}", productInsertDTO.getName());
+                    return ResponseEntity.ok(new ApiResponse<>(true, null, "Product inserted successfully", HttpStatus.OK.value()));
+                });
     }
 
-    /**
-     * Updates an existing product.
-     *
-     * @param id               the ID of the product
-     * @param productInsertDTO the product insert DTO
-     * @param bindingResult    the binding result for validation
-     * @return ResponseEntity with a status message
-     */
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<String>> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductInsertDTO productInsertDTO, BindingResult bindingResult) {
+    public CompletableFuture<ResponseEntity<ApiResponse<String>>> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductInsertDTO productInsertDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             logger.error("Invalid data provided for updating product");
-            return ResponseEntity.badRequest().body(new ApiResponse<>(false, null, "Invalid data", HttpStatus.BAD_REQUEST.value()));
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(new ApiResponse<>(false, null, "Invalid data", HttpStatus.BAD_REQUEST.value())));
         }
 
-        Result<Void> updatedResult = productServiceImpl.updateProduct(id, productInsertDTO);
-        if (!updatedResult.isSuccess()) {
-            logger.warn("Product not found for update, ID: {}", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
-        }
-
-        logger.info("Product updated successfully, ID: {}", id);
-        return ResponseEntity.ok(new ApiResponse<>(true, null, "Product updated successfully", HttpStatus.OK.value()));
+        return productServiceImpl.updateProduct(id, productInsertDTO)
+                .thenApply(result -> {
+                    if (!result.isSuccess()) {
+                        logger.warn("Product not found for update, ID: {}", id);
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
+                    }
+                    logger.info("Product updated successfully, ID: {}", id);
+                    return ResponseEntity.ok(new ApiResponse<>(true, null, "Product updated successfully", HttpStatus.OK.value()));
+                });
     }
 
-    /**
-     * Deletes a product by ID.
-     *
-     * @param id the ID of the product
-     * @return ResponseEntity with a status message
-     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<String>> deleteProduct(@PathVariable Long id) {
-        boolean deleted = productServiceImpl.deleteProduct(id);
-        if (!deleted) {
-            logger.warn("Product not found for deletion, ID: {}", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
-        }
-
-        logger.info("Product deleted successfully, ID: {}", id);
-        return ResponseEntity.ok(new ApiResponse<>(true, null, "Product deleted successfully", HttpStatus.OK.value()));
+    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> deleteProduct(@PathVariable Long id) {
+        return productServiceImpl.deleteProduct(id)
+                .thenApply(deleted -> {
+                    if (!deleted) {
+                        logger.warn("Product not found for deletion, ID: {}", id);
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
+                    }
+                    logger.info("Product deleted successfully, ID: {}", id);
+                    return ResponseEntity.ok(new ApiResponse<>(true, null, "Product deleted successfully", HttpStatus.OK.value()));
+                });
     }
 }

@@ -1,0 +1,11 @@
+CREATE USER postgres WITH PASSWORD 'root';
+GRANT ALL PRIVILEGES ON DATABASE drugstore_clients TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE drugstore_employees TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE drugstore_inventory TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE drugstore_products TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE drugstore_sales TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE drugstore_users TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE drugstore_ecommerce_carts TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE drugstore_ecommerce_orders TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE drugstore_ecommerce_payments TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE drugstore_ecommerce_sales TO postgres;
