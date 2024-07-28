@@ -1,4 +1,4 @@
-package microservice.client_service.Utils;
+package microservice.client_service.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

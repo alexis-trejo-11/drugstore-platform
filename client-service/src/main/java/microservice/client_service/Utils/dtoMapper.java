@@ -1,18 +1,13 @@
 package microservice.client_service.Utils;
 
 import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
 import microservice.client_service.Model.Address;
-import microservice.client_service.Model.Client;
 
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 
-public class ModelTransformer {
+public class dtoMapper {
 
-    public static Address insertDtoUpdate(Address address, AddressInsertDTO addressInsertDTO) {
+    public static Address insertDtoToEntity(Address address, AddressInsertDTO addressInsertDTO) {
         Field[] fields = AddressInsertDTO.class.getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
