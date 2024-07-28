@@ -16,14 +16,17 @@ repositories {
 }
 
 dependencies {
+	// Spring
 	implementation 'org.springframework.boot:spring-boot-starter'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
 
+	// Flyway
+	implementation 'org.flywaydb:flyway-core:6.4.3'
+}
 
 tasks.named('test') {
 	useJUnitPlatform()
@@ -32,3 +35,4 @@ tasks.named('test') {
 bootJar {
 	enabled = false
 }
+

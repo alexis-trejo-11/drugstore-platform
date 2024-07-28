@@ -9,11 +9,13 @@ import microservice.ecommerce_cart_service.Repository.AfterwardsRepository;
 import microservice.ecommerce_cart_service.Repository.CartItemRepository;
 import microservice.ecommerce_cart_service.Repository.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Async;
 
 import javax.transaction.Transactional;
 import java.util.Optional;
 
+@Configuration
 public class AfterwardsProccesor {
 
     private final CartRepository cartRepository;

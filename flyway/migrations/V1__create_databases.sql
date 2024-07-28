@@ -1,0 +1,10 @@
+CREATE DATABASE drugstore_clients_db;
+CREATE DATABASE drugstore_employees_db;
+CREATE DATABASE drugstore_inventories_db;
+CREATE DATABASE drugstore_products_db;
+CREATE DATABASE drugstore_sales_db;
+CREATE DATABASE drugstore_users_db;
+CREATE DATABASE ecommerce_carts_db;
+CREATE DATABASE ecommerce_orders_db;
+CREATE DATABASE ecommerce_sales_db;
+CREATE DATABASE ecommerce_payments_db;

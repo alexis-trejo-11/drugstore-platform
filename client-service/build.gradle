@@ -63,3 +63,8 @@ tasks.named('test') {
 bootRun {
 	jvmArgs = []
 }
+
+bootJar {
+	archiveBaseName = 'client-service'
+	archiveVersion = '0.0.1-SNAPSHOT'
+}

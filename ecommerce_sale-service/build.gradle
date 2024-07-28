@@ -60,3 +60,7 @@ tasks.named('test') {
 bootRun {
 	jvmArgs = []
 }
+
+bootJar {
+	archiveFileName = 'ecommerce_sale-service.jar'
+}
