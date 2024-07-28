@@ -69,3 +69,7 @@ tasks.named('test') {
 bootRun {
 	jvmArgs = []
 }
+
+bootJar {
+	archiveFileName = 'user-service.jar'
+}

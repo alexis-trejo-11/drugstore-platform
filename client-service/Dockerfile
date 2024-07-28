@@ -1,14 +1,26 @@
 # Use an official OpenJDK runtime as a parent image
-FROM openjdk:17-jdk-slim
+FROM openjdk:17-jdk-slim as builder
 
-# Set the working directory in the container
+# Set the working directory in the builder container
 WORKDIR /app
 
-# Copy the executable JAR file from the host machine to the container
-COPY --from=build /app/build/libs/*.jar  /app/client-service.jar
+# Copy the entire project structure
+COPY .. .
 
-# Expose the port the application runs on
+# Install dependencies and build the specific project
+RUN ./gradlew :client-service:build -x test
+
+# Use a minimal base image for the final stage
+FROM openjdk:17-jdk-slim
+
+# Set the working directory in the final container
+WORKDIR /app/client-service
+
+# Copy the built jar file from the builder stage
+COPY --from=builder /app/client-service/build/libs/client-service-0.0.1-SNAPSHOT.jar ./build/libs/client-service-0.0.1-SNAPSHOT.jar
+
+# Expose the port the app runs on
 EXPOSE 8081
 
-# Set the entry point to run the JAR file
-ENTRYPOINT ["java", "-jar", "client-service.jar"]
+# Run the jar file
+ENTRYPOINT ["java", "-jar", "build/libs/client-service-0.0.1-SNAPSHOT.jar"]

@@ -1,147 +1,32 @@
 version: '3.8'
 
 services:
-  at-backend-api-ecommerce-drugstore:
-    build:
-      context: ./.
-      dockerfile: Dockerfile
-    ports:
-      - "8081:8081"
+  postgres:
+    image: postgres:12
+    container_name: drugstore_databases
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://client-service:5433/drugstore_clients
-      SPRING_DATASOURCE_USERNAME: your_username
-      SPRING_DATASOURCE_PASSWORD: your_password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5431:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf  # Monta el archivo postgresql.conf
+    networks:
+      - drugstore-network
+
+  flyway:
+    image: flyway/flyway:8.0.2
     depends_on:
-      - client-service
-
-  client-service:
-    image: postgres:12
-    environment:
-      POSTGRES_DB: drugstore_clients
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
+      - postgres
+    command: -url=jdbc:postgresql://postgres:5432/postgres -user=postgres -password=root migrate
     volumes:
-      - postgres_data_client_service:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5433:5432"
-
-  employee-service:
-    image: postgres:12
-    environment:
-      POSTGRES_DB: drugstore_employees
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-    volumes:
-      - postgres_data_employee_service:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5434:5432"
-
-  inventory-service:
-    image: postgres:12
-    environment:
-      POSTGRES_DB: drugstore_inventory
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-    volumes:
-      - postgres_data_inventory_service:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5435:5432"
-
-  product-service:
-    image: postgres:12
-    environment:
-      POSTGRES_DB: drugstore_products
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-    volumes:
-      - postgres_data_product_service:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5436:5432"
-
-  sale-service:
-    image: postgres:12
-    environment:
-      POSTGRES_DB: drugstore_sales
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-    volumes:
-      - postgres_data_sale_service:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5437:5432"
-
-  user-service:
-    image: postgres:12
-    environment:
-      POSTGRES_DB: drugstore_users
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-    volumes:
-      - postgres_data_user_service:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5438:5432"
-
-  ecommerce_cart-service:
-    image: postgres:12
-    environment:
-      POSTGRES_DB: drugstore_ecommerce_carts
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-    volumes:
-      - postgres_data_ecommerce_cart_service:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5439:5432"
-
-  ecommerce_order-service:
-    image: postgres:12
-    environment:
-      POSTGRES_DB: drugstore_ecommerce_orders
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-    volumes:
-      - postgres_data_ecommerce_order_service:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5440:5432"
-
-  ecommerce_payment-service:
-    image: postgres:12
-    environment:
-      POSTGRES_DB: drugstore_ecommerce_payments
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-    volumes:
-      - postgres_data_ecommerce_payment_service:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5441:5432"
-
-  ecommerce_sales-service:
-    image: postgres:12
-    environment:
-      POSTGRES_DB: drugstore_ecommerce_sales
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-    volumes:
-      - postgres_data_ecommerce_sales_service:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5442:5432"
+      - ./flyway/migrations:/flyway/sql
+    networks:
+      - drugstore-network
 
 volumes:
-  postgres_data_client_service:
-  postgres_data_employee_service:
-  postgres_data_inventory_service:
-  postgres_data_product_service:
-  postgres_data_sale_service:
-  postgres_data_user_service:
-  postgres_data_ecommerce_cart_service:
-  postgres_data_ecommerce_order_service:
-  postgres_data_ecommerce_payment_service:
-  postgres_data_ecommerce_sales_service:
+  postgres_data:
+
+networks:
+  drugstore-network:

@@ -1,8 +1,6 @@
 package microservice.client_service.Repository;
 
-
 import microservice.client_service.Model.Address;
-import microservice.client_service.Model.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

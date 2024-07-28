@@ -4,11 +4,17 @@ FROM openjdk:17-jdk-slim
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the executable JAR file from the host machine to the container
-COPY --from=build /app/build/libs/*.jar /app/employee-service.jar
+# Copy the entire project structure
+COPY .. .
 
-# Expose the port the application runs on
-EXPOSE 8081
+# Install dependencies and build the specific project
+RUN ./gradlew :inventory-service:build -x test
 
-# Set the entry point to run the JAR file
-ENTRYPOINT ["java", "-jar", "employee-service.jar"]
+# Set the working directory to the inventory-service for the runtime
+WORKDIR /app/inventory-service
+
+# Expose the port the app runs on
+EXPOSE 8082
+
+# Run the jar file
+ENTRYPOINT ["java", "-jar", "build/libs/inventory-service-0.0.1-SNAPSHOT.jar"]
