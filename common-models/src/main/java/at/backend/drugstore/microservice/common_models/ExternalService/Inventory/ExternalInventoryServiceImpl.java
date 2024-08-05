@@ -5,6 +5,7 @@ import at.backend.drugstore.microservice.common_models.Utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,7 +24,7 @@ public class ExternalInventoryServiceImpl implements ExternalInventoryService {
         this.restTemplate = restTemplate;
     }
 
-
+    @Async("taskExecutor")
     public Result<String> updateStockBySaleItemDTO(List<SaleItemDTO> saleItemDTOS) {
         // Prepare the URL and headers
         String updateUrl = inventoryServiceUrl + "/stock/update";

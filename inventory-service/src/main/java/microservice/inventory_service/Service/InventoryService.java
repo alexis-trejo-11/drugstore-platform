@@ -5,9 +5,10 @@ import at.backend.drugstore.microservice.common_models.DTO.Inventory.InventoryIn
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface InventoryService {
-    Result<Void> createInventory(InventoryInsertDTO inventoryInsertDTO);
-    List<InventoryDTO> getInventoriesByProductId(Long productId);
-    boolean deleteInventory(Long inventoryId);
+    CompletableFuture<Result<Void>> createInventory(InventoryInsertDTO inventoryInsertDTO);
+    CompletableFuture<List<InventoryDTO>> getInventoriesByProductId(Long productId);
+    CompletableFuture<Boolean> deleteInventory(Long inventoryId);
 }

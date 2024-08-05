@@ -5,8 +5,10 @@ import at.backend.drugstore.microservice.common_models.DTO.Client.ClientInsertDT
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.CompletableFuture;
+
 @Service
 public interface ExternalClientService {
-    Result<ClientDTO> createClient(ClientInsertDTO clientInsertDTO);
-    Result<ClientDTO> findClientById(Long clientId);
+    CompletableFuture<ClientDTO> createClient(ClientInsertDTO clientInsertDTO);
+    CompletableFuture<Result<ClientDTO>> findClientById(Long clientId);
 }

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("v1/api/employees")
@@ -29,56 +31,53 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> addEmployee(@RequestBody @Valid EmployeInsertDTO employeeDTO, BindingResult bindingResult) {
-        if (!bindingResult.hasErrors()) {
-        CustomControllerResponse validationError = ControllerValidation.handleValidationError(bindingResult);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, validationError, "Validation Error", 400));
-        }
-
-        employeeService.addEmployee(employeeDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, null, "Employee Successfully Created.", 201));
+    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> addEmployee(@RequestBody @Valid EmployeInsertDTO employeeDTO) {
+        return employeeService.addEmployee(employeeDTO).thenApply(voidResult ->
+                ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, null, "Employee Successfully Created.", 201))
+        );
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<EmployeeDTO>>> getAllEmployees() {
-        List<EmployeeDTO> employeeDTOS = employeeService.getAllEmployees();
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, employeeDTOS, "Employees Successfully Fetched.", 200));
+    public CompletableFuture<ResponseEntity<ApiResponse<List<EmployeeDTO>>>> getAllEmployees() {
+        return employeeService.getAllEmployees().thenApply(employeeDTOS ->
+                ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, employeeDTOS, "Employees Successfully Fetched.", 200))
+        );
     }
 
     @GetMapping("/{employeeId}")
-    public ResponseEntity<ApiResponse<EmployeeDTO>> getEmployeeById(@PathVariable Long employeeId) {
-        EmployeeDTO employeeDTO = employeeService.getEmployeeById(employeeId);
-        if (employeeDTO == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(true, null, "Employee With " + employeeId + " Not Found", 404));
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(false, employeeDTO, "Employee Successfully Fetched.", 200));
+    public CompletableFuture<ResponseEntity<ApiResponse<EmployeeDTO>>> getEmployeeById(@PathVariable Long employeeId) {
+        return employeeService.getEmployeeById(employeeId).thenApply(employeeDTO -> {
+            if (employeeDTO.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(true, null, "Employee With " + employeeId + " Not Found", 404));
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(false, employeeDTO.get(), "Employee Successfully Fetched.", 200));
+        });
     }
 
     @PutMapping
-    public ResponseEntity<ApiResponse<?>> updateEmployee(@RequestBody EmployeeUpdateDTO employeeUpdateDTO, BindingResult bindingResult) {
-        if (!bindingResult.hasErrors()) {
+    public CompletableFuture<ResponseEntity<ApiResponse<?>>> updateEmployee(@RequestBody @Valid EmployeeUpdateDTO employeeUpdateDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
             CustomControllerResponse validationError = ControllerValidation.handleValidationError(bindingResult);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, validationError, "Validation Error", 400));
+            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, validationError, "Validation Error", 400)));
         }
 
-        Result<Void> updateEmployeeResult = employeeService.updateEmployee(employeeUpdateDTO);
-        if (!updateEmployeeResult.isSuccess()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, updateEmployeeResult.getErrorMessage(), 404));
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Employee Successfully Updated.", 200));
+        return employeeService.updateEmployee(employeeUpdateDTO).thenApply(updateEmployeeResult -> {
+            if (!updateEmployeeResult.isSuccess()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, updateEmployeeResult.getErrorMessage(), 404));
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Employee Successfully Updated.", 200));
+        });
     }
 
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteEmployee(@PathVariable Long employeeId) {
-        EmployeeDTO employeeDTO = employeeService.getEmployeeById(employeeId);
-        if (employeeDTO == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Employee With " + employeeId + " Not Found", 404));
-        }
-
-        employeeService.deleteEmployee(employeeId);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Employee Successfully Deleted.", 200));
+    @DeleteMapping("/{employeeId}")
+    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> deleteEmployee(@PathVariable Long employeeId) {
+        return employeeService.getEmployeeById(employeeId).thenCompose(employeeDTO -> {
+            if (employeeDTO.isEmpty()) {
+                return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Employee With " + employeeId + " Not Found", 404)));
+            }
+            return employeeService.deleteEmployee(employeeId).thenApply(voidResult ->
+                    ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Employee Successfully Deleted.", 200))
+            );
+        });
     }
 }

@@ -51,6 +51,6 @@ public class ShippingData {
     @Column(name = "tracking_number")
     private String trackingNumber;
 
-    @OneToOne(mappedBy = "shippingData")
+    @OneToOne(mappedBy = "shippingData", cascade = CascadeType.ALL)
     private Order order;
 }

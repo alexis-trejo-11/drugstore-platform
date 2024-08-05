@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/v1/api/digital-sales")
@@ -27,30 +28,35 @@ public class EcommerceSaleController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<DigitalSaleDTO>> createDigitalSale(@Valid @RequestBody DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
-        DigitalSaleDTO digitalSaleDTO = digitalSaleService.createDigitalSale(digitalSaleItemInsertDTO);
-        digitalSaleService.updateInventory(digitalSaleDTO);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>(true, digitalSaleDTO, "Sale successfully created.", HttpStatus.CREATED.value()));
+    public CompletableFuture<ResponseEntity<ApiResponse<DigitalSaleDTO>>> createDigitalSale(@Valid @RequestBody DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
+        return digitalSaleService.createDigitalSale(digitalSaleItemInsertDTO).thenCompose(digitalSaleDTO -> {
+            return digitalSaleService.updateInventory(digitalSaleDTO).thenApply(voidResult -> {
+                return ResponseEntity.status(HttpStatus.CREATED)
+                        .body(new ApiResponse<>(true, digitalSaleDTO, "Sale successfully created.", HttpStatus.CREATED.value()));
+            });
+        });
     }
 
     @GetMapping("/{saleId}")
-    public ResponseEntity<ApiResponse<DigitalSaleDTO>> getSaleById(@PathVariable Long saleId) {
+    public CompletableFuture<ResponseEntity<ApiResponse<DigitalSaleDTO>>> getSaleById(@PathVariable Long saleId) {
         return digitalSaleService.getSaleById(saleId)
-                .map(digitalSaleDTO -> ResponseEntity.ok(new ApiResponse<>(true, digitalSaleDTO, "Sale successfully fetched.", HttpStatus.OK.value())))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ApiResponse<>(false, null, "Sale with Id " + saleId + " not found.", HttpStatus.NOT_FOUND.value())));
+                .thenApply(digitalSaleDTOOptional -> digitalSaleDTOOptional
+                        .map(digitalSaleDTO -> ResponseEntity.ok(new ApiResponse<>(true, digitalSaleDTO, "Sale successfully fetched.", HttpStatus.OK.value())))
+                        .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body(new ApiResponse<>(false, null, "Sale with Id " + saleId + " not found.", HttpStatus.NOT_FOUND.value()))));
     }
 
     @GetMapping("/today")
-    public ResponseEntity<ApiResponse<List<DigitalSaleDTO>>> getSalesFromToday() {
-        List<DigitalSaleDTO> todaySales = digitalSaleService.getTodaySales();
-        return ResponseEntity.ok(new ApiResponse<>(true, todaySales, "Sales successfully fetched", HttpStatus.OK.value()));
+    public CompletableFuture<ResponseEntity<ApiResponse<List<DigitalSaleDTO>>>> getSalesFromToday() {
+        return digitalSaleService.getTodaySales().thenApply(todaySales -> {
+            return ResponseEntity.ok(new ApiResponse<>(true, todaySales, "Sales successfully fetched", HttpStatus.OK.value()));
+        });
     }
 
     @GetMapping("/today/summary")
-    public ResponseEntity<ApiResponse<SalesSummaryDTO>> getSaleSummaryFromToday() {
-        SalesSummaryDTO summaryDTO = digitalSaleService.getTodaySummarySales();
-        return ResponseEntity.ok(new ApiResponse<>(true, summaryDTO, "Sale summary successfully fetched", HttpStatus.OK.value()));
+    public CompletableFuture<ResponseEntity<ApiResponse<SalesSummaryDTO>>> getSaleSummaryFromToday() {
+        return digitalSaleService.getTodaySummarySales().thenApply(summaryDTO -> {
+            return ResponseEntity.ok(new ApiResponse<>(true, summaryDTO, "Sale summary successfully fetched", HttpStatus.OK.value()));
+        });
     }
 }

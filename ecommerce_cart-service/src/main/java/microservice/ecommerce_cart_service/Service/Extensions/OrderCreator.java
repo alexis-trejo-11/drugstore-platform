@@ -6,7 +6,10 @@ import at.backend.drugstore.microservice.common_models.DTO.Order.OrderInsertDTO;
 import at.backend.drugstore.microservice.common_models.ExternalService.Order.ExternalOrderService;
 import microservice.ecommerce_cart_service.Service.Factory.OrderDTOFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class OrderCreator {
@@ -17,8 +20,14 @@ public class OrderCreator {
         this.externalOrderService = externalOrderService;
     }
 
-    public Long createOrder(CartDTO cartDTO, ClientDTO clientDTO, Long addressId) {
+    public CompletableFuture<Long> createOrder(CartDTO cartDTO, ClientDTO clientDTO, Long addressId) {
         OrderInsertDTO orderInsertDTO = OrderDTOFactory.createOrderInsertDTO(cartDTO, clientDTO, addressId);
-        return externalOrderService.createOrderAndGetId(orderInsertDTO);
+
+        // Call the asynchronous method and handle the result
+        return externalOrderService.createOrderAndGetId(orderInsertDTO)
+                .thenApply(orderId -> {
+                    // Optionally handle the result here
+                    return orderId;
+                });
     }
 }

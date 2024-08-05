@@ -17,13 +17,13 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.stream.Collectors;
-
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
-public class DigitalSaleServiceImpl implements  DigitalSaleService{
+public class DigitalSaleServiceImpl implements DigitalSaleService {
 
     private final DigitalSaleRepository saleRepository;
     private final DigitalSaleMapper digitalSaleMapper;
@@ -43,45 +43,50 @@ public class DigitalSaleServiceImpl implements  DigitalSaleService{
     @Override
     @Async
     @Transactional
-    public DigitalSaleDTO createDigitalSale(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
+    public CompletableFuture<DigitalSaleDTO> createDigitalSale(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
         DigitalSale sale = mapAndSaveDigitalSale(digitalSaleItemInsertDTO);
         List<DigitalSaleItem> saleItems = mapAndSaveSaleItems(digitalSaleItemInsertDTO.getOrderItemDTOS(), sale);
-        return createDigitalSaleDTO(sale, saleItems);
+        return CompletableFuture.completedFuture(createDigitalSaleDTO(sale, saleItems));
     }
 
     @Override
     @Async
     @Transactional
-    public void updateInventory(DigitalSaleDTO digitalSaleDTO) {
+    public CompletableFuture<Void> updateInventory(DigitalSaleDTO digitalSaleDTO) {
         externalInventoryService.updateStockBySaleItemDTO(digitalSaleDTO.getSaleItemDTOS());
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override
     @Async
-        public Optional<DigitalSaleDTO> getSaleById(Long saleId) {
-            return saleRepository.findById(saleId)
-                    .map(sale -> createDigitalSaleDTO(sale, sale.getSaleItems()));
-        }
+    public CompletableFuture<Optional<DigitalSaleDTO>> getSaleById(Long saleId) {
+        return CompletableFuture.completedFuture(
+                saleRepository.findById(saleId)
+                        .map(sale -> createDigitalSaleDTO(sale, sale.getSaleItems()))
+        );
+    }
 
     @Override
     @Async
     @Transactional
-    public List<DigitalSaleDTO> getTodaySales() {
+    public CompletableFuture<List<DigitalSaleDTO>> getTodaySales() {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
-        return saleRepository.findDigitalSalesByDate(startOfDay, endOfDay).stream()
-                .map(sale -> createDigitalSaleDTO(sale, sale.getSaleItems()))
-                .collect(Collectors.toList());
+        return CompletableFuture.completedFuture(
+                saleRepository.findDigitalSalesByDate(startOfDay, endOfDay).stream()
+                        .map(sale -> createDigitalSaleDTO(sale, sale.getSaleItems()))
+                        .collect(Collectors.toList())
+        );
     }
 
     @Override
     @Async
     @Transactional
-    public SalesSummaryDTO getTodaySummarySales() {
+    public CompletableFuture<SalesSummaryDTO> getTodaySummarySales() {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
         List<DigitalSale> sales = saleRepository.findDigitalSalesByDate(startOfDay, endOfDay);
-        return DigitalSaleHelper.saleToSummaryDTO(sales, startOfDay, endOfDay);
+        return CompletableFuture.completedFuture(DigitalSaleHelper.saleToSummaryDTO(sales, startOfDay, endOfDay));
     }
 
     private DigitalSale mapAndSaveDigitalSale(DigitalSaleItemInsertDTO dto) {
@@ -107,5 +112,4 @@ public class DigitalSaleServiceImpl implements  DigitalSaleService{
         digitalSaleDTO.setSaleItemDTOS(saleItemDTOS);
         return digitalSaleDTO;
     }
-
 }

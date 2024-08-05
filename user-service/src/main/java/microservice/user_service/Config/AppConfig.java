@@ -1,4 +1,4 @@
-package microservice.sale_service.Utils;
+package microservice.user_service.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

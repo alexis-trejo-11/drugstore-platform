@@ -6,11 +6,14 @@ import microservice.ecommerce_cart_service.Model.Cart;
 import microservice.ecommerce_cart_service.Repository.CartRepository;
 import microservice.ecommerce_cart_service.Service.Factory.CartDTOFactory;
 import microservice.ecommerce_cart_service.Service.CartService;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Async;
 
 import javax.transaction.Transactional;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -26,22 +29,28 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    public Result<Void> createCart(Long clientId) {
-        Optional<Cart> optionalCart = cartRepository.findByClientId(clientId);
-        if (optionalCart.isPresent()) {
-            return Result.error("Client Already Has a Cart");
-        }
+    @Async("taskExecutor")
+    public CompletableFuture<Result<Void>> createCart(Long clientId) {
+        return CompletableFuture.supplyAsync(() -> {
+            Optional<Cart> optionalCart = cartRepository.findByClientId(clientId);
+            if (optionalCart.isPresent()) {
+                return Result.error("Client Already Has a Cart");
+            }
 
-        Cart cart = new Cart(clientId);
-        cartRepository.saveAndFlush(cart);
+            Cart cart = new Cart(clientId);
+            cartRepository.saveAndFlush(cart);
 
-        return Result.success();
+            return Result.success();
+        });
     }
 
     @Override
-    @Transactional
-    public Optional<CartDTO> getCartByClientId(Long clientId) {
-        Optional<Cart> optionalCart = cartRepository.findByClientId(clientId);
-        return optionalCart.map(cartDTOFactory::createCartDTO);
+    @Async("taskExecutor")
+    public CompletableFuture<Optional<CartDTO>> getCartByClientId(Long clientId) {
+        return CompletableFuture.supplyAsync(() -> {
+            Optional<Cart> optionalCart = cartRepository.findByClientId(clientId);
+            optionalCart.ifPresent(cart -> Hibernate.initialize(cart.getCartItems()));
+            return optionalCart.map(cartDTOFactory::createCartDTO);
+        });
     }
 }

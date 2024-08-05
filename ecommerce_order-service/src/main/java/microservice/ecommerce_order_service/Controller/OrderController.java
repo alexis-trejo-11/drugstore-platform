@@ -3,18 +3,15 @@ package microservice.ecommerce_order_service.Controller;
 import at.backend.drugstore.microservice.common_models.DTO.Order.CompleteOrderRequest;
 import at.backend.drugstore.microservice.common_models.DTO.Order.OrderDTO;
 import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_order_service.Service.OrderService;
-import microservice.ecommerce_order_service.Service.OrderServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.RequestPath;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
@@ -24,53 +21,89 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    @Autowired
-    public OrderController(OrderServiceImpl orderService) {
+    public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
 
     @PutMapping("/complete-order")
-    public ResponseEntity<ApiResponse<?>> completeOrder(@Valid @RequestBody CompleteOrderRequest completeOrderRequest) {
+    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> completeOrder(@Valid @RequestBody CompleteOrderRequest completeOrderRequest) {
         log.info("Received request to complete order: {}", completeOrderRequest);
 
-        var clientData = orderService.bringClientDataToCompleteOrder(completeOrderRequest);
-        log.debug("Client data fetched successfully: {}", clientData);
+        if (!completeOrderRequest.isOrderPaid()) {
+            return orderService.processOrderNotPaid(completeOrderRequest.getOrderId())
+                    .thenApply(voidResult -> {
+                        log.info("Order payment processed as failed for order: {}", completeOrderRequest.getOrderId());
+                        return ResponseEntity.ok(new ApiResponse<>(true, null, "Order marked as not paid", 200));
+                    });
+        }
 
-        orderService.processOrderPayment(completeOrderRequest, clientData.getAddressDTO(), clientData.getClientDTO(), clientData.getOrderDTO());
-        log.info("Order payment processed successfully for order: {}", completeOrderRequest.getOrderId());
+        // Fetch client data needed to complete the order
+        return orderService.bringClientDataToCompleteOrder(completeOrderRequest)
+                .thenCompose(clientData -> {
+                    log.debug("Client data fetched successfully: {}", clientData);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Order completed", 200));
+                    // Process order payment with the fetched client data
+                    return orderService.processOrderPayment(completeOrderRequest, clientData.getAddressDTO(), clientData.getClientDTO(), clientData.getOrderDTO()
+                    ).thenApply(processResult -> {
+                        // Check if the payment process was successful
+                        if (!processResult.isSuccess()) {
+                            log.warn("Order payment processing failed: {}", processResult.getErrorMessage());
+                            // Return a bad request response with the error message
+                            return ResponseEntity.badRequest()
+                                    .body(new ApiResponse<>(false, null, processResult.getErrorMessage(), 400));
+                        }
+
+                        log.info("Order payment processed successfully for order: {}", completeOrderRequest.getOrderId());
+                        // Return a success response indicating the order is completed
+                        return ResponseEntity.ok()
+                                .body(new ApiResponse<>(true, null, "Order completed", 200));
+                    });
+                });
+
     }
 
+
     @PutMapping("/{orderId}/payment/{paymentId}")
-    public ResponseEntity<ApiResponse<Void>> addPaymentIdByOrderId(@Valid @PathVariable Long orderId, @PathVariable Long paymentId) {
-        orderService.addPaymentIdByOrderId(orderId, paymentId);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, "Order Updated", 200));
+    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> addPaymentIdByOrderId(@PathVariable Long orderId, @PathVariable Long paymentId) {
+        return CompletableFuture.runAsync(() -> orderService.addPaymentIdByOrderId(orderId, paymentId))
+                .thenApply(v -> ResponseEntity.ok()
+                        .body(new ApiResponse<>(true, null, "Order Updated", 200))
+                );
+
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<ApiResponse<OrderDTO>> getOrderById(@PathVariable Long orderId) {
-        OrderDTO orderDTO = orderService.getOrderById(orderId);
-        if (orderDTO == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Order with ID " + orderId + " not found",404));
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, orderDTO, "Orders successfully fetched.", 200));
+    public CompletableFuture<ResponseEntity<ApiResponse<OrderDTO>>> getOrderById(@PathVariable Long orderId) {
+        return orderService.getOrderById(orderId)
+                .thenApply(orderOpt -> orderOpt
+                        .map(orderDTO -> ResponseEntity.ok()
+                                .body(new ApiResponse<>(true, orderDTO, "Order successfully fetched.", 200)))
+                        .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body(new ApiResponse<>(false, null, "Order with ID " + orderId + " not found", 404)))
+                );
+
     }
 
     @PutMapping("/deliver/{orderId}")
-    public ResponseEntity<ApiResponse<Void>> deliverOrder(@PathVariable Long orderId, @RequestParam boolean isDelivered) {
-        OrderDTO orderDTO = orderService.getOrderById(orderId);
-        if (orderDTO == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Order with ID " + orderId.toString() + " not found.", 404 ));
-        }
+    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> deliverOrder(@PathVariable Long orderId, @RequestParam boolean isDelivered) {
+        return orderService.getOrderById(orderId)
+                .thenCompose(orderOpt -> {
+                    if (orderOpt.isEmpty()) {
+                        return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body(new ApiResponse<>(false, null, "Order with ID " + orderId + " not found.", 404)));
+                    }
 
-        Result<Void> validateResult = orderService.validateOrderForDelivery(orderDTO);
-        if (!validateResult.isSuccess()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, null, validateResult.getErrorMessage(), 400));
-        }
+                    return orderService.validateOrderForDelivery(orderOpt.get())
+                            .thenCompose(validateResult -> {
+                                if (!validateResult.isSuccess()) {
+                                    return CompletableFuture.completedFuture(ResponseEntity.badRequest()
+                                            .body(new ApiResponse<>(false, null, validateResult.getErrorMessage(), 400)));
+                                }
 
-        String deliveryStatus = orderService.deliveryOrder(orderId, isDelivered);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, null, deliveryStatus, 200));
+                                return orderService.deliveryOrder(orderId, isDelivered)
+                                        .thenApply(deliveryStatus -> ResponseEntity.ok()
+                                                .body(new ApiResponse<Void>(true, null, deliveryStatus, 200)));
+                            });
+                });
     }
-
 }

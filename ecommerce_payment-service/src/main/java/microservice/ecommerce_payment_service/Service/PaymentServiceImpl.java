@@ -9,32 +9,34 @@ import at.backend.drugstore.microservice.common_models.ExternalService.DigitalSa
 import at.backend.drugstore.microservice.common_models.ExternalService.Order.ExternalOrderService;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_payment_service.Automappers.PaymentMapper;
-import microservice.ecommerce_payment_service.Controller.PaymentController;
 import microservice.ecommerce_payment_service.Model.Card;
 import microservice.ecommerce_payment_service.Model.Payment;
 import microservice.ecommerce_payment_service.Repository.PaymentRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class PaymentServiceImpl implements PaymentService {
-    private static final Logger logger = LoggerFactory.getLogger(PaymentServiceImpl.class);
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
     private final ExternalOrderService externalOrderService;
     private final ExternalDigitalSaleImpl externalDigitalSale;
 
     @Autowired
-    public PaymentServiceImpl(PaymentRepository paymentRepository, PaymentMapper paymentMapper, ExternalOrderService externalOrderService, ExternalDigitalSaleImpl externalDigitalSale) {
+    public PaymentServiceImpl(PaymentRepository paymentRepository,
+                              PaymentMapper paymentMapper,
+                              ExternalOrderService externalOrderService,
+                              ExternalDigitalSaleImpl externalDigitalSale) {
         this.paymentRepository = paymentRepository;
         this.paymentMapper = paymentMapper;
         this.externalOrderService = externalOrderService;
@@ -42,95 +44,117 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Async
-    @Transactional
-    public Optional<PaymentDTO> getPaymentById(Long paymentId) {
-        Optional<Payment> optionalPayment = paymentRepository.findById(paymentId);
-        return optionalPayment.map(paymentMapper::toDto);
-    }
-
-    @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional(readOnly = true)
-    public List<PaymentDTO> getCompletedPaymentsByClientId(Long clientId) {
-        List<Payment> payments = paymentRepository.findCompletedPaymentsByClientId(clientId);
-        return payments.stream()
-                .map(paymentMapper::toDto)
-                .collect(Collectors.toList());
+    public CompletableFuture<Optional<PaymentDTO>> getPaymentById(Long paymentId) {
+        return CompletableFuture.supplyAsync(() ->
+                paymentRepository.findById(paymentId).map(paymentMapper::toDto)
+        );
     }
 
     @Override
-    @Async
-    @Transactional
-    public void processPaymentCompleted(Long paymentId) {
-        Optional<PaymentDTO> optionalPaymentDTO = paymentRepository.findById(paymentId)
-                .map(paymentMapper::toDto);
-        if (optionalPaymentDTO.isEmpty()) {
-            throw new RuntimeException(optionalPaymentDTO.toString());
-        }
-
-        PaymentDTO paymentDTO = optionalPaymentDTO.get();
-
-        Optional<OrderDTO> optionalOrderDTO = externalOrderService.getOrderById(paymentDTO.getOrderId());
-        if (optionalOrderDTO.isEmpty()) {
-            throw new RuntimeException(optionalOrderDTO.toString());
-        }
-        OrderDTO orderDTO = optionalOrderDTO.get();
-
-        Long saleId = crateDigitalSaleAndGetId(paymentDTO, orderDTO.getItems());
-        completeSuccessfullPayment(paymentId, orderDTO.getId(), saleId);
-        externalOrderService.completeOrder(true, orderDTO.getId(), orderDTO.getAddressId(), orderDTO.getClientId());
-    }
-
-
-    @Override
-    @Async
-    @Transactional
-    public void processPaymentFailed(Long paymentId) {
-        Optional<PaymentDTO> optionalPaymentDTO =  paymentRepository.findById(paymentId)
-                .map(paymentMapper::toDto);
-        completeNotPaidPayment(paymentId);
+    @Async("taskExecutor")
+    @Transactional(readOnly = true)
+    public CompletableFuture<List<PaymentDTO>> getCompletedPaymentsByClientId(Long clientId) {
+        return CompletableFuture.supplyAsync(() ->
+                paymentRepository.findCompletedPaymentsByClientId(clientId).stream()
+                        .map(paymentMapper::toDto)
+                        .collect(Collectors.toList())
+        );
     }
 
     @Override
-    @Async
-    @Transactional
-    public PaymentDTO initPaymentFromCart(PaymentInsertDTO paymentInsertDTO) {
-        Payment payment = paymentMapper.toEntity(paymentInsertDTO);
+    @Async("taskExecutor")
+    public CompletableFuture<Void> processPayment(Long paymentId, boolean isPaid) {
+          if (!isPaid) {
+              return processPaymentFailed(paymentId);
+          }
 
-        if (paymentInsertDTO.getCardId() != null) {
-            handleCartData(payment, paymentInsertDTO);
-        }
-
-        paymentRepository.saveAndFlush(payment);
-
-        return paymentMapper.toDto(payment);
+          return processPaymentCompleted(paymentId);
     }
 
-    private Long crateDigitalSaleAndGetId(PaymentDTO paymentDTO, List<OrderItemDTO> orderItemDTOS) {
-        var dto = new DigitalSaleItemInsertDTO();
-        dto.setPaymentDTO(paymentDTO);
-        dto.setOrderItemDTOS(orderItemDTOS);
-        return externalDigitalSale.makeDigitalSaleAndGetID(dto);
+
+    @Async("taskExecutor")
+    private CompletableFuture<Void> processPaymentAndOrder(PaymentDTO paymentDTO, OrderDTO orderDTO) {
+        return crateDigitalSaleAndGetId(paymentDTO, orderDTO.getItems())
+                .thenCompose(saleId -> {
+                    completeSuccessfullPayment(paymentDTO.getId(), orderDTO.getId(), saleId);
+                    return externalOrderService.completeOrder(true, orderDTO.getId(), orderDTO.getAddressId(), orderDTO.getClientId());
+                });
+    }
+
+    @Override
+    @Transactional
+    public CompletableFuture<PaymentDTO> initPaymentFromCart(PaymentInsertDTO paymentInsertDTO) {
+        return CompletableFuture.supplyAsync(() -> {
+            Payment payment = paymentMapper.toEntity(paymentInsertDTO);
+
+            if (paymentInsertDTO.getCardId() != null) {
+                handleCartData(payment, paymentInsertDTO);
+            }
+
+            payment = paymentRepository.saveAndFlush(payment);
+
+            return paymentMapper.toDto(payment);
+        });
+    }
+
+    @Async("taskExecutor")
+    @Transactional
+    public CompletableFuture<Long> crateDigitalSaleAndGetId(PaymentDTO paymentDTO, List<OrderItemDTO> orderItemDTOS) {
+        return CompletableFuture.supplyAsync(() -> {
+            var dto = new DigitalSaleItemInsertDTO();
+            dto.setPaymentDTO(paymentDTO);
+            dto.setOrderItemDTOS(orderItemDTOS);
+            return dto;
+        }).thenCompose(externalDigitalSale::makeDigitalSaleAndGetID);
+    }
+
+    private CompletableFuture<Void> processPaymentFailed(Long paymentId) {
+        return CompletableFuture.runAsync(() -> {
+            Optional<Payment> optionalPayment = paymentRepository.findById(paymentId);
+
+            completeNotPaidPayment(paymentId);
+            var orderFuture = externalOrderService.completeOrder(false, optionalPayment.get().getOrderId(), null, null);
+            orderFuture.join();
+        });
     }
 
     private void completeSuccessfullPayment(Long paymentId, Long orderId, Long saleId) {
-        Optional<Payment> optionalPayment = paymentRepository.findById(paymentId);
-        Payment payment = optionalPayment.get();
-
-        payment.setPaymentDate(LocalDateTime.now());
-        payment.setStatus(Payment.PaymentStatus.SUCCESS);
-        payment.setOrderId(orderId);
-        payment.setSaleId(saleId);
-        paymentRepository.save(payment);
+        paymentRepository.findById(paymentId).ifPresent(payment -> {
+            payment.setPaymentDate(LocalDateTime.now());
+            payment.setStatus(Payment.PaymentStatus.SUCCESS);
+            payment.setOrderId(orderId);
+            payment.setSaleId(saleId);
+            paymentRepository.save(payment);
+        });
     }
 
     private void completeNotPaidPayment(Long paymentId) {
-        Optional<Payment> optionalPayment = paymentRepository.findById(paymentId);
-        Payment payment = optionalPayment.get();
-        payment.setPaymentDate(LocalDateTime.now());
-        payment.setStatus(Payment.PaymentStatus.FAILURE);
-        paymentRepository.save(payment);
+        paymentRepository.findById(paymentId).ifPresent(payment -> {
+            payment.setPaymentDate(LocalDateTime.now());
+            payment.setStatus(Payment.PaymentStatus.FAILURE);
+            paymentRepository.save(payment);
+        });
+    }
+
+    private CompletableFuture<Void> processPaymentCompleted(Long paymentId) {
+        return CompletableFuture.supplyAsync(() -> paymentRepository.findById(paymentId))
+                .thenApply(paymentOpt -> paymentOpt.map(paymentMapper::toDto)
+                        .orElseThrow(() -> new EntityNotFoundException("Payment not found with id: " + paymentId)))
+
+                .thenCompose(paymentDTO ->
+                        externalOrderService.getOrderById(paymentDTO.getOrderId())
+                                .thenApply(orderDTO -> {
+                                    if (orderDTO == null) {
+                                        throw new EntityNotFoundException("Order not found for payment id: " + paymentId);
+                                    }
+
+                                    CompletableFuture<Void> future = processPaymentAndOrder(paymentDTO, orderDTO);
+                                    future.join();
+                                    return null;
+                                })
+                );
     }
 
     private void handleCartData(Payment payment, PaymentInsertDTO paymentInsertDTO) {

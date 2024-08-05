@@ -6,11 +6,12 @@ import at.backend.drugstore.microservice.common_models.Utils.Result;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public interface ExternalOrderService {
-    Long createOrderAndGetId(OrderInsertDTO orderInsertDTO);
-    Result<Void> completeOrder(boolean isOrderPaid, Long orderId, Long addressId, Long clientId);
-    void addPaymentIdByOrderId(Long paymentId, Long orderId);
-    Optional<OrderDTO> getOrderById(Long orderId);
+    CompletableFuture<Long> createOrderAndGetId(OrderInsertDTO orderInsertDTO);
+    CompletableFuture<Void> completeOrder(boolean isOrderPaid, Long orderId, Long addressId, Long clientId);
+    CompletableFuture<Void> addPaymentIdByOrderId(Long paymentId, Long orderId);
+    CompletableFuture<OrderDTO> getOrderById(Long orderId);
 }

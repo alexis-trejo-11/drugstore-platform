@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("v1/api/cards")
@@ -30,16 +31,19 @@ public class CardController {
     }
 
     @GetMapping("/{cardId}")
-    public ResponseEntity<ApiResponse<CardDTO>> getCardById(@PathVariable Long cardId) {
-        Optional<CardDTO> optionalCardDTO = cardService.getCardById(cardId);
-        if (optionalCardDTO.isEmpty()) {
-            ApiResponse<CardDTO> errorResponse = new ApiResponse<>(false, null, "Card with ID " + cardId + " not found", 404);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-        }
+    public CompletableFuture<ResponseEntity<ApiResponse<CardDTO>>> getCardById(@PathVariable Long cardId) {
+        return cardService.getCardById(cardId)
+                .thenApply(optionalCardDTO -> {
+                    if (optionalCardDTO.isEmpty()) {
+                        ApiResponse<CardDTO> errorResponse = new ApiResponse<>(false, null, "Card with ID " + cardId + " not found", 404);
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+                    }
 
-        CardDTO dto = optionalCardDTO.get();
-        ApiResponse<CardDTO> successResponse = new ApiResponse<>(true, dto, "Card Retrieved Successfully!", 200);
-        return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+                    CardDTO dto = optionalCardDTO.get();
+                    ApiResponse<CardDTO> successResponse = new ApiResponse<>(true, dto, "Card Retrieved Successfully!", 200);
+                    return ResponseEntity.status(HttpStatus.OK).body(successResponse);
+                });
+
     }
 }
 

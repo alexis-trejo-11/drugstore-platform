@@ -1,5 +1,6 @@
 package microservice.sale_service.Mappers;
 
+import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeeDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Sale.CreateSaleDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Sale.ProcessSaleDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Sale.SaleDTO;
@@ -37,4 +38,12 @@ public interface SaleMapper {
     @Mapping(source = "discount", target = "discount")
     @Mapping(source = "total", target = "total")
     ProcessSaleDTO paidSaleToProcessSaleDTO(PhysicalSale sale);
+
+    @Mapping(target = "saleDate", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "employeeName", expression = "java(combineEmployeeName(employeeDTO))")
+    PhysicalSale employeeDTOtoEntity(EmployeeDTO employeeDTO);
+
+    default String combineEmployeeName(EmployeeDTO employeeDTO) {
+        return employeeDTO.getFirstName() + " " + employeeDTO.getLastName();
+    }
 }

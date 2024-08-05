@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class ClientDataAggregator {
@@ -26,49 +27,66 @@ public class ClientDataAggregator {
     private final ExternalAddressService externalAddressService;
     private final ExternalPaymentService externalPaymentService;
     private final CartService cartService;
-    private final CartItemRepository cartItemRepository;
 
     @Autowired
     public ClientDataAggregator(ExternalClientService externalClientService,
                                 ExternalAddressService externalAddressService,
                                 ExternalPaymentService externalPaymentService,
-                                CartService cartService, CartItemService cartItemService, CartItemRepository cartItemRepository) {
+                                CartService cartService) {
         this.externalClientService = externalClientService;
         this.externalAddressService = externalAddressService;
         this.externalPaymentService = externalPaymentService;
         this.cartService = cartService;
-        this.cartItemRepository = cartItemRepository;
     }
 
     @Transactional
-    @Async
-    public Result<ClientEcommerceDataDTO> aggregateClientData(Long clientId) {
-        ClientEcommerceDataDTO clientEcommerceDataDTO = new ClientEcommerceDataDTO();
+    @Async("taskExecutor")
+    public CompletableFuture<Result<ClientEcommerceDataDTO>> aggregateClientData(Long clientId) {
+        // Start fetching data asynchronously
+        CompletableFuture<Result<ClientDTO>> clientFuture = externalClientService.findClientById(clientId);
 
-        Result<ClientDTO> clientResult = externalClientService.findClientById(clientId);
-        if (!clientResult.isSuccess()) {
-            return Result.error("Can't retrieve Client data");
-        }
-        clientEcommerceDataDTO.setClientDTO(clientResult.getData());
+        CompletableFuture<Result<List<AddressDTO>>> addressFuture = externalAddressService.getAddressByClientId(clientId);
 
-        Result<List<AddressDTO>> addressResult = externalAddressService.getAddressByClientId(clientId);
-        if (!addressResult.isSuccess()) {
-            return Result.error("Can't retrieve Addresses");
-        }
-        clientEcommerceDataDTO.setAddressDTOS(addressResult.getData());
+        CompletableFuture<Result<List<CardDTO>>> cardFuture = externalPaymentService.getCardByClientId(clientId);
 
-        Result<List<CardDTO>> cardResult = externalPaymentService.getCardByClientId(clientId);
-        if (!cardResult.isSuccess()) {
-            return Result.error("Can't retrieve Payment data");
-        }
-        clientEcommerceDataDTO.setCardDTOS(cardResult.getData());
+        CompletableFuture<Optional<CartDTO>> cartFuture = cartService.getCartByClientId(clientId);
 
-        Optional<CartDTO> cartResult = cartService.getCartByClientId(clientId);
-        if (cartResult.isEmpty()) {
-            return Result.error("Can't retrieve Cart data");
-        }
-        clientEcommerceDataDTO.setCartDTO(cartResult.get());
+        // Combine all futures
+        return CompletableFuture.allOf(clientFuture, addressFuture, cardFuture, cartFuture)
+                .thenCompose(v -> {
+                        // Check all results and map them
+                        Result<ClientDTO> clientResult = clientFuture.join();
+                        if (!clientResult.isSuccess()) {
+                            return CompletableFuture.completedFuture(Result.error("Can't retrieve Client data"));
+                        }
 
-        return Result.success(clientEcommerceDataDTO);
+                        Optional<CartDTO> cartResult = cartFuture.join();
+                        if (cartResult.isEmpty()) {
+                            return CompletableFuture.completedFuture(Result.error("Can't retrieve Cart data"));
+                        } else if (cartResult.get().getCartItems().isEmpty()) {
+                            return CompletableFuture.completedFuture(Result.error("Cart has no products"));
+                        }
+
+                        Result<List<AddressDTO>> addressResult = addressFuture.join();
+                        if (!addressResult.isSuccess()) {
+                            return CompletableFuture.completedFuture(Result.error("Can't retrieve Addresses"));
+                        }
+
+                        Result<List<CardDTO>> cardResult = cardFuture.join();
+                        if (!cardResult.isSuccess()) {
+                            return CompletableFuture.completedFuture(Result.error("Can't retrieve Payment data"));
+                        }
+
+                        // Create and populate the result DTO
+                        ClientEcommerceDataDTO clientEcommerceDataDTO = new ClientEcommerceDataDTO();
+                        clientEcommerceDataDTO.setClientDTO(clientResult.getData());
+                        clientEcommerceDataDTO.setAddressDTOS(addressResult.getData());
+                        clientEcommerceDataDTO.setCardDTOS(cardResult.getData());
+                        clientEcommerceDataDTO.setCartDTO(cartResult.get());
+
+
+                        return CompletableFuture.completedFuture(Result.success(clientEcommerceDataDTO));
+                });
     }
+
 }

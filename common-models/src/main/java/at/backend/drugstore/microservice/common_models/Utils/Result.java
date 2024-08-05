@@ -42,4 +42,5 @@ public class Result<T> {
     public static Result<Void> success() {
         return new Result<>(true, null, null);
     }
+
 }

@@ -6,10 +6,8 @@ import at.backend.drugstore.microservice.common_models.ExternalService.Products.
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import microservice.ecommerce_cart_service.Mappers.CartItemMapper;
 import microservice.ecommerce_cart_service.Mappers.CartMapper;
-import microservice.ecommerce_cart_service.Model.Afterward;
 import microservice.ecommerce_cart_service.Model.Cart;
 import microservice.ecommerce_cart_service.Model.CartItem;
-import microservice.ecommerce_cart_service.Repository.AfterwardsRepository;
 import microservice.ecommerce_cart_service.Repository.CartItemRepository;
 import microservice.ecommerce_cart_service.Repository.CartRepository;
 import microservice.ecommerce_cart_service.Service.Extensions.CartCalculator;
@@ -22,6 +20,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +35,8 @@ public class CartItemServiceImpl implements CartItemService {
     private final CartItemMapper cartItemMapper;
 
     @Autowired
-    public CartItemServiceImpl(CartRepository cartRepository, CartItemRepository cartItemRepository,
+    public CartItemServiceImpl(CartRepository cartRepository,
+                               CartItemRepository cartItemRepository,
                                ExternalProductService productService,
                                CartItemManager cartItemManager,
                                CartCalculator cartCalculator,
@@ -52,58 +52,76 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
-    public Result<Void> addProductsCart(Long clientId, Long productId, int quantity) {
-        Optional<Cart> cartOptional = cartRepository.findByClientId(clientId);
-        if (cartOptional.isEmpty()) {
-            return Result.error("Cart With Client Id: " + clientId + " Not Found");
-        }
+    public CompletableFuture<Result<Void>> addProductsCart(Long clientId, Long productId, int quantity) {
+        // Fetch cart by client ID asynchronously
+        CompletableFuture<Optional<Cart>> cartFuture = CompletableFuture.supplyAsync(() -> cartRepository.findByClientId(clientId));
 
-        Result<ProductDTO> productResult = productService.getProductById(productId);
-        if (!productResult.isSuccess()) {
-            return Result.error(productResult.getErrorMessage());
-        }
+        // Fetch product details asynchronously
+        CompletableFuture<Result<ProductDTO>> productFuture = productService.getProductById(productId);
 
-        Cart cart = cartOptional.get();
-        ProductDTO productDTO = productResult.getData();
+        // Combine the results and process them
+        return cartFuture.thenCombine(productFuture, (cartOptional, productResult) -> {
+            if (cartOptional.isEmpty()) {
+                return Result.error("Cart with Client ID: " + clientId + " not found");
+            }
+            if (!productResult.isSuccess()) {
+                return Result.error(productResult.getErrorMessage());
+            }
 
-        Cart cartUpdated = cartItemManager.addOrUpdateCartItem(cart, productDTO, quantity);
-        if (cart.getCartItems().isEmpty()) {
-            return Result.error("No items");
-        }
+            Cart cart = cartOptional.get();
+            ProductDTO productDTO = productResult.getData();
 
-        cartCalculator.calculateCartNumbers(cartUpdated);
-        cartRepository.save(cartUpdated);
-
-        return Result.success();
+            // Process cart update asynchronously
+            return CompletableFuture.runAsync(() -> {
+                        Cart cartUpdated = cartItemManager.addOrUpdateCartItem(cart, productDTO, quantity);
+                        if (cartUpdated.getCartItems().isEmpty()) {
+                            throw new RuntimeException("No items in cart");
+                        }
+                        cartCalculator.calculateCartNumbers(cartUpdated);
+                        cartRepository.save(cartUpdated);
+                    }).thenApply(v -> Result.success())
+                    .exceptionally(ex -> Result.error("An error occurred: " + ex.getMessage()))
+                    .join(); // Ensure this is executed synchronously to return Result<Void>
+        });
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
-    public Result<Void> deleteProductFromCart(Long clientId, CartItemInsertDTO cartItemInsertDTO) {
-        Optional<Cart> cartOptional = cartRepository.findByClientId(clientId);
-        if (cartOptional.isEmpty()) {
-            return Result.error("Cart not found for client id: " + clientId);
-        }
+    public CompletableFuture<Result<?>> deleteProductFromCart(Long clientId, CartItemInsertDTO cartItemInsertDTO) {
+        // Fetch the cart asynchronously
+        CompletableFuture<Optional<Cart>> cartFuture = CompletableFuture.supplyAsync(() -> cartRepository.findByClientId(clientId));
 
-        Cart cart = cartOptional.get();
-        cartItemManager.removeCartItem(cart, cartItemInsertDTO.getProductId(), cartItemInsertDTO.getQuantity());
+        // Process cart update asynchronously
+        return cartFuture.thenApply(cartOptional -> {
+            if (cartOptional.isEmpty()) {
+                return Result.error("Cart not found for client id: " + clientId);
+            }
 
-        cartCalculator.calculateCartNumbers(cart);
-        cartRepository.save(cart);
+            Cart cart = cartOptional.get();
+            cartItemManager.removeCartItem(cart, cartItemInsertDTO.getProductId(), cartItemInsertDTO.getQuantity());
 
-        return Result.success();
+            cartCalculator.calculateCartNumbers(cart);
+            cartRepository.save(cart);
+
+            return Result.success();
+        }).exceptionally(ex -> {
+            // Handle exceptions and return an error result
+            return Result.error("An error occurred: " + ex.getMessage());
+        });
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
-    public CartDTO processCartAndGePurchaseData(ClientEcommerceDataDTO clientEcommerceDataDTO, PurchaseFromCartDTO purchaseFromCartDTO) {
-        Cart cart = getCartByClientId(clientEcommerceDataDTO.getCartDTO().getClientId());
+    public CompletableFuture<CartDTO> processCartAndGePurchaseData(ClientEcommerceDataDTO clientEcommerceDataDTO, PurchaseFromCartDTO purchaseFromCartDTO) {
+        return CompletableFuture.supplyAsync(() ->  {
+            Cart cart = getCartByClientId(clientEcommerceDataDTO.getCartDTO().getClientId());
+            return purchaseAllItems(cart);
+        });
 
-        return purchaseAllItems(cart);
     }
 
     private Cart getCartByClientId(Long clientId) {

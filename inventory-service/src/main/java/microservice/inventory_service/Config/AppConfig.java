@@ -1,4 +1,4 @@
-package microservice.inventory_service.Utils;
+package microservice.inventory_service.Config;
 
 import at.backend.drugstore.microservice.common_models.ExternalService.Employee.ExternalEmployeeService;
 import at.backend.drugstore.microservice.common_models.ExternalService.Employee.ExternalEmployeeServiceImpl;

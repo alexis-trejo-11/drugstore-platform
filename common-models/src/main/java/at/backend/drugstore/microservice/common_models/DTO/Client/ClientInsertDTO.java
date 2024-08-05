@@ -3,8 +3,6 @@ package at.backend.drugstore.microservice.common_models.DTO.Client;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
-
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

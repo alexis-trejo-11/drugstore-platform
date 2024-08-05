@@ -5,8 +5,10 @@ import at.backend.drugstore.microservice.common_models.DTO.Sale.SaleProductsDTO;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.CompletableFuture;
+
 @Service
 public interface ExternalEmployeeService {
-    Result<EmployeeDTO> getEmployeeBySaleProductsDTO(SaleProductsDTO saleProductsDTO);
-    Result<EmployeeDTO> findEmployeeById(Long employeeId);
+    CompletableFuture<Result<EmployeeDTO>> getEmployeeBySaleProductsDTO(SaleProductsDTO saleProductsDTO);
+    CompletableFuture<Result<EmployeeDTO>> findEmployeeById(Long employeeId);
 }

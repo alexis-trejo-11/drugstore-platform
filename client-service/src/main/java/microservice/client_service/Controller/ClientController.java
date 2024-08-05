@@ -3,13 +3,10 @@ package microservice.client_service.Controller;
 import at.backend.drugstore.microservice.common_models.DTO.Client.ClientInsertDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
 import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
-import at.backend.drugstore.microservice.common_models.Validations.ControllerValidation;
 import microservice.client_service.Service.ClientService;
-import microservice.client_service.Service.ClientServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -23,7 +20,7 @@ public class ClientController {
     private final ClientService clientService;
 
     @Autowired
-    public ClientController(ClientServiceImpl clientService) {
+    public ClientController(ClientService clientService) {
         this.clientService = clientService;
     }
 

@@ -10,8 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ExternalDigitalSaleImpl {
@@ -27,6 +30,7 @@ public class ExternalDigitalSaleImpl {
         this.restTemplate = restTemplate;
     }
 
+    @Async("taskExecutor")
     public Result<Void> initSale(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
         try {
             String digitalSaleURL = digitalSaleServiceUrl + "/init";
@@ -63,7 +67,8 @@ public class ExternalDigitalSaleImpl {
         }
     }
 
-    public Long makeDigitalSaleAndGetID(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
+    @Async("taskExecutor")
+    public CompletableFuture<Long> makeDigitalSaleAndGetID(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
         String digitalSaleURL = digitalSaleServiceUrl + "/v1/api/digital-sales";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
@@ -73,22 +78,24 @@ public class ExternalDigitalSaleImpl {
         log.info("Sending POST request to {}", digitalSaleURL);
         log.info("Request Payload: {}", digitalSaleItemInsertDTO);
 
-        ResponseEntity<ApiResponse<DigitalSaleDTO>> response = restTemplate
-                .exchange(digitalSaleURL,
-                        HttpMethod.POST,
-                        request,
-                        new ParameterizedTypeReference<ApiResponse<DigitalSaleDTO>>() {
-                        }
-                );
+        return CompletableFuture.supplyAsync(() ->  {
+            ResponseEntity<ApiResponse<DigitalSaleDTO>> response = restTemplate
+                    .exchange(digitalSaleURL,
+                            HttpMethod.POST,
+                            request,
+                            new ParameterizedTypeReference<ApiResponse<DigitalSaleDTO>>() {
+                            }
+                    );
 
-        log.info("Response Status: {}", response.getStatusCode());
-        log.info("Response Body: {}", response.getBody());
+            log.info("Response Status: {}", response.getStatusCode());
+            log.info("Response Body: {}", response.getBody());
 
-        var responseStatusCode = response.getStatusCode();
-        if (responseStatusCode != HttpStatus.CREATED) {
-            throw new RuntimeException();
-        }
+            var responseStatusCode = response.getStatusCode();
+            if (responseStatusCode != HttpStatus.CREATED) {
+                throw new RuntimeException();
+            }
 
-        return response.getBody().getData().getId();
+            return response.getBody().getData().getId();
+        });
     }
 }

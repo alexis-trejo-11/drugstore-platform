@@ -3,7 +3,6 @@ package microservice.ecommerce_payment_service.Service;
 import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Payment.CardDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Payment.CardInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentInsertDTO;
 import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientService;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import microservice.ecommerce_payment_service.Automappers.CardMapper;
@@ -21,6 +20,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class CardServiceImpl implements CardService {
@@ -30,7 +30,6 @@ public class CardServiceImpl implements CardService {
     private final CardMapper cardMapper;
     private static final Logger logger = LoggerFactory.getLogger(CardServiceImpl.class);
 
-
     @Autowired
     public CardServiceImpl(CardRepository cardRepository, ExternalClientService externalClientService, CardMapper cardMapper) {
         this.cardRepository = cardRepository;
@@ -38,66 +37,62 @@ public class CardServiceImpl implements CardService {
         this.cardMapper = cardMapper;
     }
 
+    @Async("taskExecutor")
     @Override
-    @Async
     @Transactional
-    public boolean validateClient(Long clientId) {
-        Result<ClientDTO> clientDTOResult = externalClientService.findClientById(clientId);
-        return clientDTOResult.isSuccess();
+    public CompletableFuture<Boolean> validateClient(Long clientId) {
+        return externalClientService.findClientById(clientId)
+                .thenApply(Result::isSuccess);
+    }
+    @Override
+    @Transactional
+    public CompletableFuture<Boolean> validateCardData(Long cardId, Long clientId) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<Card> cards = cardRepository.findByClientId(clientId);
+            return cards.stream().anyMatch(card -> card.getId().equals(cardId));
+        });
     }
 
     @Override
-    @Async
     @Transactional
-    public boolean validateCardData(Long cardId, Long clientId) {
-        List<Card> cards = cardRepository.findByClientId(clientId);
-
-        Optional<Card> cardFounded = cards.stream().filter(card -> card.getId().equals(cardId)).findFirst();
-        return cardFounded.isPresent();
-    }
-
-    @Override
-    @Async
-    @Transactional
-    public void addCardToClient(CardInsertDTO cardInsertDTO) {
+    public CompletableFuture<Void> addCardToClient(CardInsertDTO cardInsertDTO) {
+        return CompletableFuture.runAsync(() -> {
             Card card = cardMapper.toEntity(cardInsertDTO);
             encryptSensitiveData(card);
             cardRepository.saveAndFlush(card);
+        });
     }
 
-    @Async
-    public Optional<CardDTO> getCardById(Long cardId) {
+    @Override
+    public CompletableFuture<Optional<CardDTO>> getCardById(Long cardId) {
+        return CompletableFuture.supplyAsync(() -> {
             Optional<Card> optionalCard = cardRepository.findById(cardId);
-            if(optionalCard.isEmpty()) {
-                return Optional.empty();
-            }
-            Card card = optionalCard.get();
-
-            CardDTO cardDTO = cardMapper.toDto(card);
-            decryptAndCensureSensitiveData(cardDTO);
-
-            return Optional.of(cardDTO);
+            return optionalCard.map(card -> {
+                CardDTO cardDTO = cardMapper.toDto(card);
+                decryptAndCensureSensitiveData(cardDTO);
+                return cardDTO;
+            });
+        });
     }
 
-    @Async
-    public List<CardDTO> getCardByClientId(Long clientId) {
+    @Override
+    public CompletableFuture<List<CardDTO>> getCardByClientId(Long clientId) {
+        return CompletableFuture.supplyAsync(() -> {
             List<Card> cards = cardRepository.findByClientId(clientId);
-            if (cards.isEmpty()) {
-                return new ArrayList<>();
-            }
-
             List<CardDTO> cardDTOS = new ArrayList<>();
-            for (Card card : cards ) {
+            for (Card card : cards) {
                 CardDTO cardDTO = cardMapper.toDto(card);
                 decryptAndCensureSensitiveData(cardDTO);
                 cardDTOS.add(cardDTO);
             }
             return cardDTOS;
+        });
     }
 
-    @Async
     @Override
-    public boolean deleteCardById(Long cardId) {
+    @Transactional
+    public CompletableFuture<Boolean> deleteCardById(Long cardId) {
+        return CompletableFuture.supplyAsync(() -> {
             Optional<Card> optionalCard = cardRepository.findById(cardId);
             if (optionalCard.isEmpty()) {
                 return false;
@@ -105,20 +100,17 @@ public class CardServiceImpl implements CardService {
 
             cardRepository.deleteById(cardId);
             return true;
+        });
     }
 
     private void decryptAndCensureSensitiveData(CardDTO cardDTO) {
-        // Decrypt the card number and CVV
         String cardNumber = EncryptionConfig.decrypt(cardDTO.getCardNumber());
-
-        // Mask the card number except the last 4 digits
         String lastNumbers = cardNumber.substring(cardNumber.length() - 4);
         String cardNumberCensured = "**** **** **** " + lastNumbers;
 
         cardDTO.setCardNumber(cardNumberCensured);
         cardDTO.setCvv("***");
     }
-
 
     private void encryptSensitiveData(Card card) {
         card.setCardNumber(EncryptionConfig.encrypt(card.getCardNumber()));

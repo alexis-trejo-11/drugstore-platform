@@ -1,7 +1,5 @@
 package microservice.employee_service.Repository;
 
-
-
 import microservice.employee_service.Model.Employee;
 import microservice.employee_service.Model.Position;
 import microservice.employee_service.Model.enums.Genre;

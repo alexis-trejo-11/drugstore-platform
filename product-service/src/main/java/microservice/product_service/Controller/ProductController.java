@@ -59,13 +59,13 @@ public class ProductController {
                         logger.warn("Product not found for ID: {}", productId);
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
                     }
-                    logger.info("Product found for ID: {}", productId);
-                    return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, productDTO, "Product retrieved successfully", HttpStatus.OK.value()));
+                    logger.info("Product retrieved for ID: {}", productId);
+                    return ResponseEntity.ok(new ApiResponse<>(true, productDTO, "Product retrieved successfully", HttpStatus.OK.value()));
                 });
     }
 
     @GetMapping("/by-supplier/{supplierId}")
-    public CompletableFuture<ResponseEntity<ApiResponse<List<ProductDTO>>>> getProductsBySupplier(@PathVariable Long supplierId) {
+    public CompletableFuture<ResponseEntity<ApiResponse<List<ProductDTO>>>> findProductsBySupplier(@PathVariable Long supplierId) {
         return productServiceImpl.findProductsBySupplier(supplierId)
                 .thenApply(productDTOS -> {
                     logger.info("Products retrieved for supplier ID: {}", supplierId);
@@ -74,7 +74,7 @@ public class ProductController {
     }
 
     @GetMapping("/by-category/{categoryId}")
-    public CompletableFuture<ResponseEntity<ApiResponse<List<ProductDTO>>>> getProductsByCategory(@PathVariable Long categoryId) {
+    public CompletableFuture<ResponseEntity<ApiResponse<List<ProductDTO>>>> findProductsByCategoryId(@PathVariable Long categoryId) {
         return productServiceImpl.findProductsByCategoryId(categoryId)
                 .thenApply(productDTOS -> {
                     logger.info("Products retrieved for category ID: {}", categoryId);
@@ -83,7 +83,7 @@ public class ProductController {
     }
 
     @GetMapping("/by-subcategory/{subcategoryId}")
-    public CompletableFuture<ResponseEntity<ApiResponse<List<ProductDTO>>>> getProductsBySubCategory(@PathVariable Long subcategoryId) {
+    public CompletableFuture<ResponseEntity<ApiResponse<List<ProductDTO>>>> findProductsBySubCategory(@PathVariable Long subcategoryId) {
         return productServiceImpl.findProductsBySubCategory(subcategoryId)
                 .thenApply(productDTOS -> {
                     logger.info("Products retrieved for subcategory ID: {}", subcategoryId);
@@ -92,52 +92,46 @@ public class ProductController {
     }
 
     @PostMapping
-    public CompletableFuture<ResponseEntity<ApiResponse<String>>> insertProduct(@Valid @RequestBody ProductInsertDTO productInsertDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            var validationErrors = ControllerValidation.handleValidationError(bindingResult);
-            logger.error("Invalid data provided for inserting product");
-            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(new ApiResponse<>(false, null, "Invalid data: " + validationErrors, HttpStatus.BAD_REQUEST.value())));
-        }
-
+    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> createProduct(@Valid @RequestBody ProductInsertDTO productInsertDTO) {
         return productServiceImpl.processInsertProduct(productInsertDTO)
                 .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        logger.error("Error inserting product: {}", result.getErrorMessage());
-                        return ResponseEntity.badRequest().body(new ApiResponse<>(false, null, result.getErrorMessage(), HttpStatus.BAD_REQUEST.value()));
+                    if (result.isSuccess()) {
+                        logger.info("Product created successfully");
+                        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, null, "Product created successfully", HttpStatus.CREATED.value()));
+                    } else {
+                        logger.error("Failed to create product: {}", result.getErrorMessage());
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, null, result.getErrorMessage(), HttpStatus.BAD_REQUEST.value()));
                     }
-                    logger.info("Product inserted successfully: {}", productInsertDTO.getName());
-                    return ResponseEntity.ok(new ApiResponse<>(true, null, "Product inserted successfully", HttpStatus.OK.value()));
                 });
     }
 
-    @PutMapping("/{id}")
-    public CompletableFuture<ResponseEntity<ApiResponse<String>>> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductInsertDTO productInsertDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            logger.error("Invalid data provided for updating product");
-            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(new ApiResponse<>(false, null, "Invalid data", HttpStatus.BAD_REQUEST.value())));
-        }
+    @PutMapping("/{productId}")
+    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> updateProduct(@PathVariable Long productId,
+                                                                              @Valid @RequestBody ProductInsertDTO productInsertDTO) {
 
-        return productServiceImpl.updateProduct(id, productInsertDTO)
+        return productServiceImpl.updateProduct(productId, productInsertDTO)
                 .thenApply(result -> {
-                    if (!result.isSuccess()) {
-                        logger.warn("Product not found for update, ID: {}", id);
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
+                    if (result.isSuccess()) {
+                        logger.info("Product updated successfully for ID: {}", productId);
+                        return ResponseEntity.ok(new ApiResponse<>(true, null, "Product updated successfully", HttpStatus.OK.value()));
+                    } else {
+                        logger.error("Failed to update product for ID: {}: {}", productId, result.getErrorMessage());
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, null, result.getErrorMessage(), HttpStatus.BAD_REQUEST.value()));
                     }
-                    logger.info("Product updated successfully, ID: {}", id);
-                    return ResponseEntity.ok(new ApiResponse<>(true, null, "Product updated successfully", HttpStatus.OK.value()));
                 });
     }
 
-    @DeleteMapping("/{id}")
-    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> deleteProduct(@PathVariable Long id) {
-        return productServiceImpl.deleteProduct(id)
+    @DeleteMapping("/{productId}")
+    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> deleteProduct(@PathVariable Long productId) {
+        return productServiceImpl.deleteProduct(productId)
                 .thenApply(deleted -> {
-                    if (!deleted) {
-                        logger.warn("Product not found for deletion, ID: {}", id);
+                    if (deleted) {
+                        logger.info("Product deleted successfully for ID: {}", productId);
+                        return ResponseEntity.ok(new ApiResponse<>(true, null, "Product deleted successfully", HttpStatus.OK.value()));
+                    } else {
+                        logger.warn("Failed to delete product for ID: {}", productId);
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
                     }
-                    logger.info("Product deleted successfully, ID: {}", id);
-                    return ResponseEntity.ok(new ApiResponse<>(true, null, "Product deleted successfully", HttpStatus.OK.value()));
                 });
     }
 }

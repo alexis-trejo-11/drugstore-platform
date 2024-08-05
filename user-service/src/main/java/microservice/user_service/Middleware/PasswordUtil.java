@@ -1,5 +1,6 @@
 package microservice.user_service.Middleware;
 
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class PasswordUtil {
@@ -25,6 +26,6 @@ public class PasswordUtil {
      * @return true if the passwords match, false otherwise
      */
     public static boolean validatePassword(String plainPassword, String hashedPassword) {
-        return passwordEncoder.matches(plainPassword, hashedPassword);
+        return BCrypt.checkpw(plainPassword, hashedPassword);
     }
 }
