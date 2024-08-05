@@ -1,16 +1,15 @@
 package microservice.employee_service.Service;
 
-
-import at.backend.drugstore.microservice.common_models.Utils.Result;
 import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeInsertDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeeDTO;
 import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeeUpdateDTO;
+import at.backend.drugstore.microservice.common_models.Utils.Result;
 import microservice.employee_service.Mappers.EmployeeMapper;
 import microservice.employee_service.Model.Employee;
 import microservice.employee_service.Model.Position;
 import microservice.employee_service.Repository.EmployeeRepository;
-
 import microservice.employee_service.Repository.PositionRepository;
+import microservice.employee_service.Service.EmployeeService;
 import microservice.employee_service.Utils.CompanyHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,65 +30,74 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeMapper employeeMapper;
 
     @Autowired
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository, CompanyHelper companyHelper, PositionRepository positionRepository, EmployeeMapper employeeMapperl) {
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository,
+                               CompanyHelper companyHelper,
+                               PositionRepository positionRepository,
+                               EmployeeMapper employeeMapper) {
         this.employeeRepository = employeeRepository;
         this.companyHelper = companyHelper;
         this.positionRepository = positionRepository;
-        this.employeeMapper = employeeMapperl;
-    }
-
-
-    @Override
-    @Async
-    @Transactional
-    public void addEmployee(EmployeInsertDTO employeeDTO) {
-        Employee employee = new Employee(employeeDTO);
-
-        String employeeEmail = companyHelper.companyEmailGenerator(employee.getFirstName(), employee.getLastName());
-        employee.setCompanyEmail(employeeEmail);
-
-        employeeRepository.saveAndFlush(employee);
-
-        String phoneNumber = companyHelper.getAndAssignCompanyPhone(employee);
-        if (phoneNumber != null) {
-            employee.setCompanyPhone(phoneNumber);
-        }
-
-        employeeRepository.saveAndFlush(employee);
+        this.employeeMapper = employeeMapper;
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
-    public List<EmployeeDTO> getAllEmployees() {
-        List<Employee> employees = employeeRepository.findAll();
-        return employees.stream()
-                .map(employeeMapper::employeeToDTO)
-                .collect(Collectors.toList());
+    public CompletableFuture<Void> addEmployee(EmployeInsertDTO employeeDTO) {
+        return CompletableFuture.runAsync(() -> {
+            Employee employee = new Employee(employeeDTO);
+
+            String employeeEmail = companyHelper.companyEmailGenerator(employee.getFirstName(), employee.getLastName());
+            employee.setCompanyEmail(employeeEmail);
+
+            employeeRepository.saveAndFlush(employee);
+
+            String phoneNumber = companyHelper.getAndAssignCompanyPhone(employee);
+            if (phoneNumber != null) {
+                employee.setCompanyPhone(phoneNumber);
+            }
+
+            employeeRepository.saveAndFlush(employee);
+        });
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
-    public EmployeeDTO getEmployeeById(Long id) {
-        Optional<Employee> optionalEmployee = employeeRepository.findById(id);
-        return optionalEmployee.map(employeeMapper::employeeToDTO).orElse(null);
+    public CompletableFuture<List<EmployeeDTO>> getAllEmployees() {
+        return CompletableFuture.supplyAsync(() -> {
+            List<Employee> employees = employeeRepository.findAll();
+            return employees.stream()
+                    .map(employeeMapper::employeeToDTO)
+                    .collect(Collectors.toList());
+        });
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
-    public  Result<Void> updateEmployee(EmployeeUpdateDTO employeeUpdateDTO) {
+    public CompletableFuture<Optional<EmployeeDTO>> getEmployeeById(Long id) {
+        return CompletableFuture.supplyAsync(() -> {
+            Optional<Employee> optionalEmployee = employeeRepository.findById(id);
+            return optionalEmployee.map(employeeMapper::employeeToDTO);
+        });
+    }
+
+    @Override
+    @Async("taskExecutor")
+    @Transactional
+    public CompletableFuture<Result<Void>> updateEmployee(EmployeeUpdateDTO employeeUpdateDTO) {
+        return CompletableFuture.supplyAsync(() -> {
             Optional<Employee> employee = employeeRepository.findById(employeeUpdateDTO.getId());
             if (employee.isEmpty()) {
-                return Result.error("Employee With Id: " + employeeUpdateDTO.getId() + "Not Found");
+                return Result.error("Employee With Id: " + employeeUpdateDTO.getId() + " Not Found");
             }
 
             Employee existingEmployee = employee.get();
             updateEmployeeFields(existingEmployee, employeeUpdateDTO);
 
             if(employeeUpdateDTO.getPositionId() != null) {
-               Optional<Position> position = positionRepository.findById(employeeUpdateDTO.getPositionId());
+                Optional<Position> position = positionRepository.findById(employeeUpdateDTO.getPositionId());
                 if (position.isEmpty()) {
                     return Result.error("Position With Id: " + employeeUpdateDTO.getPositionId() + " Not Found");
                 } else {
@@ -99,15 +108,15 @@ public class EmployeeServiceImpl implements EmployeeService {
             employeeRepository.saveAndFlush(existingEmployee);
 
             return Result.success();
+        });
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
-    public void deleteEmployee(Long id) {
-        employeeRepository.deleteById(id);;
+    public CompletableFuture<Void> deleteEmployee(Long id) {
+        return CompletableFuture.runAsync(() -> employeeRepository.deleteById(id));
     }
-
 
     private void updateEmployeeFields(Employee existingEmployee, EmployeeUpdateDTO employeeUpdateDTO) {
         if (employeeUpdateDTO.getFirstName() != null) {
@@ -136,4 +145,3 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
     }
 }
-

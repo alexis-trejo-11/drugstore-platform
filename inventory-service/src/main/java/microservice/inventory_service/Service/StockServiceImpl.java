@@ -16,6 +16,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class StockServiceImpl implements StockService {
@@ -30,21 +31,22 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
-    public Result<ProductDTO> validateExistingProduct(Long productId) {
-        Result<ProductDTO> productResult = externalProductService.getProductById(productId);
-        if (!productResult.isSuccess()) {
-            new Result<>(false, null, productResult.getErrorMessage());
-        }
-
-        return Result.success(productResult.getData());
+    public CompletableFuture<Result<ProductDTO>> validateExistingProduct(Long productId) {
+        return externalProductService.getProductById(productId)
+                .thenApplyAsync(productResult -> {
+                    if (!productResult.isSuccess()) {
+                        return new Result<>(false, null, productResult.getErrorMessage());
+                    }
+                    return Result.success(productResult.getData());
+                });
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
-    public Result<Void> updateStockFromSale(List<SaleItemDTO> saleItemDTOS) {
+    public CompletableFuture<Result<Void>> updateStockFromSale(List<SaleItemDTO> saleItemDTOS) {
         for (var saleItemDTO : saleItemDTOS) {
             List<Inventory> inventories = inventoryRepository.findByProductId(saleItemDTO.getProductId());
 
@@ -74,23 +76,22 @@ public class StockServiceImpl implements StockService {
             }
 
             if (!processed) {
-                return Result.error("Not enough inventory for product ID: " + saleItemDTO.getProductId());
+                return CompletableFuture.completedFuture(Result.error("Not enough inventory for product ID: " + saleItemDTO.getProductId()));
             }
         }
-        return Result.success();
+        return CompletableFuture.completedFuture(Result.success());
     }
 
-
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
-    public ProductStockDTO getCurrentStockByProduct(Long productId, ProductDTO productDTO) {
+    public CompletableFuture<ProductStockDTO> getCurrentStockByProduct(Long productId, ProductDTO productDTO) {
         List<Inventory> inventories = inventoryRepository.findByProductId(productId);
         if (inventories.isEmpty()) {
-            return null;
+            return CompletableFuture.completedFuture(null);
         }
 
-        return makeProductStockDTO(inventories, productDTO);
+        return CompletableFuture.completedFuture(makeProductStockDTO(inventories, productDTO));
     }
 
     private ProductStockDTO makeProductStockDTO(List<Inventory> inventories, ProductDTO productDTO) {
@@ -116,10 +117,4 @@ public class StockServiceImpl implements StockService {
 
         return productStockDTO;
     }
-
 }
-
-
-
-
-

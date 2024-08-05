@@ -8,7 +8,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.Date;
 
-
 @Data
 @NoArgsConstructor
 public class InventoryInsertDTO {
@@ -17,7 +16,7 @@ public class InventoryInsertDTO {
     @JsonProperty("batch_number")
     private String batchNumber;
 
-    @Min(value = 1, message = "Quantity must be at least 1")
+    @NotNull(message = "quantity is obligatory")
     private int quantity;
 
     @Future(message = "Expiration date must be in the future")

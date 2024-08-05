@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 
 @Service
@@ -34,30 +35,29 @@ public class ExternalClientServiceImpl implements  ExternalClientService {
         this.restTemplate = restTemplate;
     }
 
-    @Async
-    public Result<ClientDTO> createClient(ClientInsertDTO clientInsertDTO) {
-        String url = clientServiceUrl + "/clients/add";
-        try {
-            ResponseEntity<ApiResponse<ClientDTO>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    new HttpEntity<>(clientInsertDTO),
-                    new ParameterizedTypeReference<ApiResponse<ClientDTO>>() {}
-            );
+    @Async("taskExecutor")
+    public CompletableFuture<ClientDTO> createClient(ClientInsertDTO clientInsertDTO) {
+        String url = clientServiceUrl + "/v1/api/clients/add";
+            return CompletableFuture.supplyAsync(() -> {
+                ResponseEntity<ApiResponse<ClientDTO>> response = restTemplate.exchange(
+                        url,
+                        HttpMethod.POST,
+                        new HttpEntity<>(clientInsertDTO),
+                        new ParameterizedTypeReference<ApiResponse<ClientDTO>>() {
+                        }
+                );
+                if (response.getStatusCode() != HttpStatus.CREATED) {
+                    throw new RuntimeException();
+                } else {
+                    return Objects.requireNonNull(response.getBody()).getData();
+                }
 
-             if (response.getStatusCode() != HttpStatus.CREATED) {
-                 return Result.success(Objects.requireNonNull(response.getBody()).getData());
-             } else {
-                 return new Result<>(false, null, Objects.requireNonNull(response.getBody()).getMessage());
-             }
-        } catch (Exception e) {
-            logger.error("Error occurred while creating client", e);
-            throw new RuntimeException(e);
-        }
+        });
     }
 
 
-    public Result<ClientDTO> findClientById(Long clientId) {
+    @Async("taskExecutor")
+    public CompletableFuture<Result<ClientDTO>> findClientById(Long clientId) {
         String url = clientServiceUrl + "/v1/api/clients/" + clientId;
         try {
             ResponseEntity<ApiResponse<ClientDTO>> response = restTemplate.exchange(
@@ -69,7 +69,7 @@ public class ExternalClientServiceImpl implements  ExternalClientService {
             );
             ApiResponse<ClientDTO> responseBody = response.getBody();
             HttpStatus statusCode = response.getStatusCode();
-
+            return CompletableFuture.supplyAsync(() -> {
                 // Handle Status Code using switch statement
                 if (statusCode == HttpStatus.OK) {
                     assert responseBody != null;
@@ -82,6 +82,7 @@ public class ExternalClientServiceImpl implements  ExternalClientService {
                     assert responseBody != null;
                     return new Result<>(false, null, responseBody.getMessage());
                 }
+            });
         } catch (Exception e) {
             logger.error("Error occurred while finding client", e);
             throw new RuntimeException(e);

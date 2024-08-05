@@ -26,6 +26,9 @@ dependencies {
 
 	// Flyway
 	implementation 'org.flywaydb:flyway-core:6.4.3'
+
+	// Open Api
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
 }
 
 tasks.named('test') {

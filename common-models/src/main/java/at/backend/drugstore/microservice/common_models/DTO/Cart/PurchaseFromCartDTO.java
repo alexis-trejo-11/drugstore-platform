@@ -8,7 +8,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.List;
-import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -32,6 +31,6 @@ public class PurchaseFromCartDTO {
     @JsonProperty("card_id")
     private Long cardId;
 
-    @JsonProperty("products_to_ommit")
-    private List<Long> productsToOmmit;
-}
+    @JsonProperty("products_to_omit")
+    private List<Long> productsToOmit;
+    }

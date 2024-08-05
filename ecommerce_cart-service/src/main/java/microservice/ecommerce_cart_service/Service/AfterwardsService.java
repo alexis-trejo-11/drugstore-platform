@@ -6,10 +6,11 @@ import microservice.ecommerce_cart_service.Model.CartItem;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public interface AfterwardsService {
-    Result<Void> moveProductToAfterwards(Long clientId, Long productId);
-    void returnProductToCart(Long clientId, Long productId);
-    List<CartItemDTO> getAfterwardsByClientId(Long clientId);
-    Optional<CartItemDTO> getAfterwardsBytId(Long afterwardsId);
+    CompletableFuture<Result<Void>> moveProductToAfterwards(Long clientId, Long productId);
+    CompletableFuture<Result<Void>> returnProductToCart(Long clientId, Long productId);
+    CompletableFuture<List<CartItemDTO>> getAfterwardsByClientId(Long clientId);
+    CompletableFuture<Optional<CartItemDTO>> getAfterwardsBytId(Long afterwardsId);
 }

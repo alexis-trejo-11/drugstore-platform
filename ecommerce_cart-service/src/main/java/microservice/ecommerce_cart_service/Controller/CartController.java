@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 @RestController
@@ -23,14 +24,16 @@ public class CartController {
     }
 
     @PostMapping("/create/{clientId}")
-    public ResponseEntity<ApiResponse<Void>> createCart(@PathVariable final Long clientId) {
+    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> createCart(@PathVariable final Long clientId) {
         logger.info("Creating cart for client ID: " + clientId);
-        Result<Void> cartResult = cartService.createCart(clientId);
-        if (!cartResult.isSuccess()) {
-            logger.warning("Failed to create cart for client ID: " + clientId + ". Error: " + cartResult.getErrorMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(false, null, cartResult.getErrorMessage(), 409));
-        }
-        logger.info("Successfully created cart for client ID: " + clientId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, null, "Cart Successfully Created.", 201));
+        return cartService.createCart(clientId).thenApply(cartResult -> {
+            if (!cartResult.isSuccess()) {
+                logger.warning("Failed to create cart for client ID: " + clientId + ". Error: " + cartResult.getErrorMessage());
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(false, null, cartResult.getErrorMessage(), 409));
+            }
+
+            logger.info("Successfully created cart for client ID: " + clientId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, null, "Cart Successfully Created.", 201));
+        });
     }
 }

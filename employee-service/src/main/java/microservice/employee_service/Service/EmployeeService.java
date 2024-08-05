@@ -6,11 +6,13 @@ import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeeUpda
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public interface EmployeeService {
-    void addEmployee(EmployeInsertDTO employeeDTO);
-    List<EmployeeDTO> getAllEmployees();
-    EmployeeDTO getEmployeeById(Long id);
-    Result<Void> updateEmployee(EmployeeUpdateDTO employeeUpdateDTO);
-    void deleteEmployee(Long id);
+    CompletableFuture<Void> addEmployee(EmployeInsertDTO employeeDTO);
+    CompletableFuture<List<EmployeeDTO>> getAllEmployees();
+    CompletableFuture<Optional<EmployeeDTO>> getEmployeeById(Long id);
+    CompletableFuture<Result<Void>> updateEmployee(EmployeeUpdateDTO employeeUpdateDTO);
+    CompletableFuture<Void> deleteEmployee(Long id);
 }

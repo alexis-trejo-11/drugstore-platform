@@ -7,9 +7,10 @@ import at.backend.drugstore.microservice.common_models.Utils.Result;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public interface ExternalPaymentService {
-    PaymentDTO initPayment(PaymentInsertDTO paymentInsertDTO);
-    Result<List<CardDTO>> getCardByClientId(Long clientId);
+    CompletableFuture<PaymentDTO> initPayment(PaymentInsertDTO paymentInsertDTO);
+    CompletableFuture<Result<List<CardDTO>>> getCardByClientId(Long clientId);
 }

@@ -1,4 +1,4 @@
-package microservice.ecommerce_order_service.Utils;
+package microservice.ecommerce_order_service.Config;
 
 import at.backend.drugstore.microservice.common_models.ExternalService.Adress.ExternalAddressService;
 import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientService;

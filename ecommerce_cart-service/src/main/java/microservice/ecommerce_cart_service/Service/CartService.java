@@ -4,8 +4,9 @@ import at.backend.drugstore.microservice.common_models.DTO.Cart.CartDTO;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public interface CartService {
-    Result<Void> createCart(Long clientId);
-    Optional<CartDTO> getCartByClientId(Long clientId);
+    CompletableFuture<Result<Void>> createCart(Long clientId);
+    CompletableFuture<Optional<CartDTO>> getCartByClientId(Long clientId);
 }

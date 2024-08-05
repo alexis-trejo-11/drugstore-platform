@@ -6,12 +6,13 @@ import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentInsert
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public interface CardService {
-    void addCardToClient(CardInsertDTO cardInsertDTO);
-    List<CardDTO> getCardByClientId(Long clientId);
-    Optional<CardDTO> getCardById(Long cardId);
-    boolean deleteCardById(Long cardId);
-    boolean validateClient(Long clientId);
-    boolean validateCardData(Long cardId, Long clientId);
+    CompletableFuture<Void> addCardToClient(CardInsertDTO cardInsertDTO);
+    CompletableFuture<List<CardDTO> >getCardByClientId(Long clientId);
+    CompletableFuture<Optional<CardDTO>> getCardById(Long cardId);
+    CompletableFuture<Boolean> deleteCardById(Long cardId);
+    CompletableFuture<Boolean> validateClient(Long clientId);
+    CompletableFuture<Boolean> validateCardData(Long cardId, Long clientId);
     }

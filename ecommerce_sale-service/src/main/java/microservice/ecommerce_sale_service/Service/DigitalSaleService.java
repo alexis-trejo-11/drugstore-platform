@@ -5,11 +5,12 @@ import at.backend.drugstore.microservice.common_models.DTO.Sale.DigitalSaleItemI
 import at.backend.drugstore.microservice.common_models.DTO.Sale.SalesSummaryDTO;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public interface DigitalSaleService {
-    DigitalSaleDTO createDigitalSale(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO);
-    void updateInventory(DigitalSaleDTO digitalSaleDTO);
-    Optional<DigitalSaleDTO> getSaleById(Long saleId);
-    List<DigitalSaleDTO> getTodaySales();
-    SalesSummaryDTO getTodaySummarySales();
+    CompletableFuture<DigitalSaleDTO> createDigitalSale(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO);
+    CompletableFuture<Void> updateInventory(DigitalSaleDTO digitalSaleDTO);
+    CompletableFuture<Optional<DigitalSaleDTO>> getSaleById(Long saleId);
+    CompletableFuture<List<DigitalSaleDTO>> getTodaySales();
+    CompletableFuture<SalesSummaryDTO> getTodaySummarySales();
 }

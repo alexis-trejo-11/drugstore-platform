@@ -13,12 +13,12 @@ import microservice.inventory_service.Model.InventoryTransaction;
 import microservice.inventory_service.Repository.InventoryRepository;
 import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,55 +37,75 @@ public class InventoryServiceImpl implements InventoryService {
         this.inventoryMapper = inventoryMapper;
     }
 
-    @Async
+    @Override
+    @Async("taskExecutor")
     @Transactional
-    public Result<Void> createInventory(InventoryInsertDTO inventoryInsertDTO) {
-        Inventory inventory = new Inventory(inventoryInsertDTO);
+    public CompletableFuture<Result<Void>> createInventory(InventoryInsertDTO inventoryInsertDTO) {
+        return externalProductService.getProductById(inventoryInsertDTO.getProductId())
+                .thenCombineAsync(externalEmployeeService.findEmployeeById(inventoryInsertDTO.getInventoryTransactionInsertDTO().getEmployeeId()),
+                        (productResult, employeeResult) -> {
+                            if (!productResult.isSuccess()) {
+                                return Result.error(productResult.getErrorMessage());
+                            }
 
-        Result<ProductDTO> productResult = externalProductService.getProductById(inventoryInsertDTO.getProductId());
-        if (!productResult.isSuccess()) {
-            return Result.error(productResult.getErrorMessage());
-        }
+                            if (!employeeResult.isSuccess()) {
+                                return Result.error(employeeResult.getErrorMessage());
+                            }
 
-        Result<EmployeeDTO> employeeResult = externalEmployeeService.findEmployeeById(inventoryInsertDTO.getInventoryTransactionInsertDTO().getEmployeeId());
-        if (!productResult.isSuccess()) {
-            return Result.error(employeeResult.getErrorMessage());
-        }
+                            Inventory inventory = new Inventory(inventoryInsertDTO);
+                            ProductDTO productDTO = productResult.getData();
+                            inventory.setProductId(productDTO.getId());
 
-        ProductDTO productDTO = productResult.getData();
-        inventory.setProductId(productDTO.getId());
+                            InventoryTransaction inventoryTransaction = new InventoryTransaction(inventoryInsertDTO.getInventoryTransactionInsertDTO(), employeeResult.getData().getId());
+                            inventoryTransaction.setInventory(inventory);
 
-        InventoryTransaction inventoryTransaction = new InventoryTransaction(inventoryInsertDTO.getInventoryTransactionInsertDTO(), employeeResult.getData().getId());
-        inventoryTransaction.setInventory(inventory);
+                            if (inventory.getTransactions() == null) {
+                                List<InventoryTransaction> inventoryTransactionList = new ArrayList<>();
+                                inventoryTransactionList.add(inventoryTransaction);
+                                inventory.setTransactions(inventoryTransactionList);
+                            } else {
+                                inventory.getTransactions().add(inventoryTransaction);
+                            }
 
-        if (inventory.getTransactions() == null) {
-            List<InventoryTransaction> inventoryTransactionList = new ArrayList<>();
-            inventoryTransactionList.add(inventoryTransaction);
-            inventory.setTransactions(inventoryTransactionList);
-        } else {
-            inventory.getTransactions().add(inventoryTransaction);
-        }
-
-        inventoryRepository.saveAndFlush(inventory);
-
-        return Result.success();
+                            inventoryRepository.saveAndFlush(inventory);
+                            return Result.success();
+                        });
     }
 
-    @Async
+
+    @Override
+    @Async("taskExecutor")
     @Transactional
-    public List<InventoryDTO> getInventoriesByProductId(Long productId) {
-        Result<ProductDTO> productResult = externalProductService.getProductById(productId);
-        if (!productResult.isSuccess()) {
-            return null;
-        }
+    public CompletableFuture<List<InventoryDTO>> getInventoriesByProductId(Long productId) {
+        return externalProductService.getProductById(productId)
+                .thenApplyAsync(productResult -> {
+                    if (!productResult.isSuccess()) {
+                        return Collections.emptyList();
+                    }
 
-        ProductDTO productDTO = productResult.getData();
+                    ProductDTO productDTO = productResult.getData();
+                    List<Inventory> inventories = inventoryRepository.findByProductId(productDTO.getId());
 
-        List<Inventory> inventories = inventoryRepository.findByProductId(productDTO.getId());
+                    return inventories.stream()
+                            .map(inventory -> mapInventoryToDTO(inventory, productDTO.getName()))
+                            .collect(Collectors.toList());
+                });
+    }
 
-        return inventories.stream()
-                .map(inventory -> mapInventoryToDTO(inventory, productDTO.getName()))
-                .collect(Collectors.toList());
+
+    @Override
+    @Async("taskExecutor")
+    @Transactional
+    public CompletableFuture<Boolean> deleteInventory(Long inventoryId) {
+        return CompletableFuture.supplyAsync(() -> {
+            Optional<Inventory> inventory = inventoryRepository.findById(inventoryId);
+            if (!inventory.isPresent()) {
+                return false;
+            }
+
+            inventoryRepository.deleteById(inventoryId);
+            return true;
+        });
     }
 
     private InventoryDTO mapInventoryToDTO(Inventory inventory, String productName) {
@@ -96,45 +116,4 @@ public class InventoryServiceImpl implements InventoryService {
         inventoryDTO.setInventoryTransactionDTOS(inventoryTransactionDTOS);
         return inventoryDTO;
     }
-
-
-    /*
-    public Result<List<InventoryDTO>> getInventoryCreatedBetween(LocalDateTime startDate, LocalDateTime endDate) {
-        try {
-            List<Inventory> inventories = inventoryRepository.findByCreatedAtBetween(startDate, endDate);
-            List<InventoryDTO> inventoryReturnDTOS = inventories.stream()
-                    .map(inventory -> inventoryToReturnDTO(inventory, inventory.getProduct().getName()))
-                    .collect(Collectors.toList());
-            return Result.success(inventoryReturnDTOS);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch inventory: " + e.getMessage());
-        }
-    }
-
-    public Result<List<InventoryDTO>> getInventoryCreatedAfter(LocalDateTime date) {
-        try {
-            List<Inventory> inventories = inventoryRepository.findByCreatedAtAfter(date);
-            List<InventoryDTO> inventoryReturnDTOS = inventories.stream()
-                    .map(inventory -> inventoryToReturnDTO(inventory, inventory.getProduct().getName()))
-                    .collect(Collectors.toList());
-            return Result.success(inventoryReturnDTOS);
-        } catch (Exception e) {
-            return Result.error("Failed to fetch inventory: " + e.getMessage());
-        }
-    }
-     */
-
-    @Async
-    @Transactional
-    public boolean deleteInventory(Long inventoryId) {
-        Optional<Inventory> inventory = inventoryRepository.findById(inventoryId);
-        if (inventory.isPresent()) {
-            return false;
-        }
-
-        inventoryRepository.findById(inventoryId);
-
-        return  true;
-    }
 }
-

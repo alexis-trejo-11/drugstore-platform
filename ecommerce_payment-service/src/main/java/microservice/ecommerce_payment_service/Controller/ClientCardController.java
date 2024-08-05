@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("v1/api/client-cards")
@@ -24,44 +25,52 @@ public class ClientCardController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse<?>> addCard(@Valid @RequestBody CardInsertDTO cardInsertDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            var validationError = ControllerValidation.handleValidationError(bindingResult);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, validationError, "Validation Error.", 400));
-        }
+    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> addCard(@Valid @RequestBody CardInsertDTO cardInsertDTO) {
+        return cardService.validateClient(cardInsertDTO.getClientId())
+                .thenCompose(isClientValidated -> {
+                    if (!isClientValidated) {
+                        return CompletableFuture.completedFuture(
+                                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "User with ID " + cardInsertDTO.getClientId() + " Not Found.", 404))
+                        );
+                    }
 
-        boolean isClientValidated = cardService.validateClient(cardInsertDTO.getClientId());
-        if (!isClientValidated) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "User with ID " + cardInsertDTO.getClientId() + " Not Found.", 404));
-        }
-
-        cardService.addCardToClient(cardInsertDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, null, "Card Successfully Added!", 201));
+                    return cardService.addCardToClient(cardInsertDTO)
+                            .thenApply(v -> ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, null, "Card Successfully Added!", 201)));
+                });
     }
 
     @GetMapping("/client/{clientId}")
-    public ResponseEntity<ApiResponse<List<CardDTO>>> getCardsByClientId(@PathVariable Long clientId) {
-        boolean isClientValidated = cardService.validateClient(clientId);
-        if (!isClientValidated) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "User with ID " + clientId + " Not Found.", 404));
-        }
+    public CompletableFuture<ResponseEntity<ApiResponse<List<CardDTO>>>> getCardsByClientId(@PathVariable Long clientId) {
+        return cardService.validateClient(clientId)
+                .thenCompose(isClientValidated -> {
+                    if (!isClientValidated) {
+                        return CompletableFuture.completedFuture(
+                                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<List<CardDTO>>(false, null, "User with ID " + clientId + " Not Found.", 404))
+                        );
+                    }
 
-        List<CardDTO> cardDTOS = cardService.getCardByClientId(clientId);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, cardDTOS, "Cards Retrieved Successfully!", 200));
+                    return cardService.getCardByClientId(clientId)
+                            .thenApply(cardDTOS -> ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>(true, cardDTOS, "Cards Retrieved Successfully!", 200)));
+                });
     }
 
     @DeleteMapping("/{cardId}")
-    public ResponseEntity<ApiResponse<Void>> deleteCardById(@PathVariable Long cardId, @RequestParam Long clientId) {
-        boolean isClientValidated = cardService.validateClient(clientId);
-        if (!isClientValidated) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "User with ID " + clientId + " Not Found.", 404));
-        }
+    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> deleteCardById(@PathVariable Long cardId, @RequestParam Long clientId) {
+        return cardService.validateClient(clientId)
+                .thenCompose(isClientValidated -> {
+                    if (!isClientValidated) {
+                        return CompletableFuture.completedFuture(
+                                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<Void>(false, null, "User with ID " + clientId + " Not Found.", 404))
+                        );
+                    }
 
-        boolean isCardDeleted = cardService.deleteCardById(cardId);
-        if (!isCardDeleted) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, "Card with ID " + cardId + " not found", 400));
-        }
-
-        return ResponseEntity.ok(new ApiResponse<>(true, null, "Card Deleted Successfully!", 200));
+                    return cardService.deleteCardById(cardId)
+                            .thenApply(isCardDeleted -> {
+                                if (!isCardDeleted) {
+                                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<Void>(false, null, "Card with ID " + cardId + " not found", 400));
+                                }
+                                return ResponseEntity.ok(new ApiResponse<Void>(true, null, "Card Deleted Successfully!", 200));
+                            });
+                });
     }
 }

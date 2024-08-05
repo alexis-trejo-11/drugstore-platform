@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ExternalPaymentServiceServiceImpl implements ExternalPaymentService {
@@ -33,7 +34,8 @@ public class ExternalPaymentServiceServiceImpl implements ExternalPaymentService
     }
 
     @Override
-    public PaymentDTO initPayment(PaymentInsertDTO paymentInsertDTO) {
+    @Async("taskExecutor")
+    public CompletableFuture<PaymentDTO>  initPayment(PaymentInsertDTO paymentInsertDTO) {
         String url = paymentServiceUrl + "/v1/api/payments/init";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -53,22 +55,24 @@ public class ExternalPaymentServiceServiceImpl implements ExternalPaymentService
                     }
             );
 
-            if (responseEntity.getStatusCode() == HttpStatus.CREATED && responseEntity.getBody() != null) {
-                logger.info("Payment initialization successful with status code: {}", responseEntity.getStatusCode());
-                return responseEntity.getBody().getData();
-            } else {
-                logger.warn("Payment initialization failed with status code: {}", responseEntity.getStatusCode());
-                return null;
-            }
+            return CompletableFuture.supplyAsync(() -> {
+                if (responseEntity.getStatusCode() == HttpStatus.CREATED && responseEntity.getBody() != null) {
+                    logger.info("Payment initialization successful with status code: {}", responseEntity.getStatusCode());
+                    return responseEntity.getBody().getData();
+                } else {
+                    logger.warn("Payment initialization failed with status code: {}", responseEntity.getStatusCode());
+                    return null;
+                }
+            });
         } catch (Exception e) {
             logger.error("Exception occurred during payment initialization", e);
             throw new RuntimeException(e);
         }
     }
 
-    @Async
     @Override
-    public Result<List<CardDTO>> getCardByClientId(Long clientId) {
+    @Async("taskExecutor")
+    public CompletableFuture<Result<List<CardDTO>>> getCardByClientId(Long clientId) {
         String addressUrl = paymentServiceUrl + "/v1/api/client-cards/client/" + clientId;
 
         HttpHeaders headers = new HttpHeaders();
@@ -82,13 +86,14 @@ public class ExternalPaymentServiceServiceImpl implements ExternalPaymentService
                     requestEntity,
                     new ParameterizedTypeReference<ApiResponse<List<CardDTO>>>() {}
             );
+            return CompletableFuture.supplyAsync(() -> {
+                if (responseEntity.getStatusCode()  == HttpStatus.NOT_FOUND && responseEntity.getBody() != null) {
+                    return new Result<>(false, null, "Can't Get Addresses");
+                }
 
-            if (responseEntity.getStatusCode()  == HttpStatus.NOT_FOUND && responseEntity.getBody() != null) {
-                return new Result<>(false, null, "Can't Get Addresses");
-            }
-
-            List<CardDTO> addressDTO = Objects.requireNonNull(responseEntity.getBody()).getData();
-            return Result.success(addressDTO);
+                List<CardDTO> addressDTO = Objects.requireNonNull(responseEntity.getBody()).getData();
+                return Result.success(addressDTO);
+            });
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);

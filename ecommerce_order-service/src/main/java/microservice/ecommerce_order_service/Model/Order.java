@@ -38,7 +38,7 @@ public class Order {
 
     private int deliveryTries;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<OrderItem> items;
 
     @OneToOne(cascade = CascadeType.ALL)

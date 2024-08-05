@@ -44,89 +44,96 @@ public class ProductServiceImpl implements ProductService {
         this.productMapper = productMapper;
     }
 
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<List<ProductDTO>> getAllProducts() {
-        List<Product> products = productRepository.findAll();
-        List<ProductDTO> productDTOs = products.stream()
-                .map(productMapper::productToDTO)
-                .collect(Collectors.toList());
-        return CompletableFuture.completedFuture(productDTOs);
+        return CompletableFuture.supplyAsync(() -> {
+            List<Product> products = productRepository.findAll();
+            return products.stream()
+                    .map(productMapper::productToDTO)
+                    .collect(Collectors.toList());
+        });
     }
 
-    @Async
+    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<List<ProductDTO>> getProductsById(List<Long> productId) {
-        List<Product> products = productRepository.findByIdIn(productId);
-        List<ProductDTO> productDTOs = products.stream()
-                .map(productMapper::productToDTO)
-                .collect(Collectors.toList());
-        return CompletableFuture.completedFuture(productDTOs);
+    public CompletableFuture<List<ProductDTO>> getProductsById(List<Long> productIds) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<Product> products = productRepository.findByIdIn(productIds);
+            return products.stream()
+                    .map(productMapper::productToDTO)
+                    .collect(Collectors.toList());
+        });
     }
 
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<ProductDTO> getProductById(Long productId) {
-        Optional<Product> productOptional = productRepository.findById(productId);
-        if (productOptional.isEmpty()) {
-            return CompletableFuture.completedFuture(null);
-        }
-        Product product = productOptional.get();
-        return CompletableFuture.completedFuture(productMapper.productToDTO(product));
+        return CompletableFuture.supplyAsync(() -> {
+            Optional<Product> productOptional = productRepository.findById(productId);
+            return productOptional.map(productMapper::productToDTO).orElse(null);
+        });
     }
 
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<List<ProductDTO>> findProductsBySupplier(Long supplierId) {
-        List<Product> products = productRepository.findBySupplier_Id(supplierId);
-        List<ProductDTO> productDTOs = products.stream()
-                .map(productMapper::productToDTO)
-                .collect(Collectors.toList());
-        return CompletableFuture.completedFuture(productDTOs);
+        return CompletableFuture.supplyAsync(() -> {
+            List<Product> products = productRepository.findBySupplier_Id(supplierId);
+            return products.stream()
+                    .map(productMapper::productToDTO)
+                    .collect(Collectors.toList());
+        });
     }
 
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<List<ProductDTO>> findProductsByCategoryId(Long categoryId) {
-        List<Product> products = productRepository.findByCategory_Id(categoryId);
-        List<ProductDTO> productDTOs = products.stream()
-                .map(productMapper::productToDTO)
-                .collect(Collectors.toList());
-        return CompletableFuture.completedFuture(productDTOs);
+        return CompletableFuture.supplyAsync(() -> {
+            List<Product> products = productRepository.findByCategory_Id(categoryId);
+            return products.stream()
+                    .map(productMapper::productToDTO)
+                    .collect(Collectors.toList());
+        });
     }
 
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<List<ProductDTO>> findProductsBySubCategory(Long subcategoryId) {
-        List<Product> products = productRepository.findBySubcategory_Id(subcategoryId);
-        List<ProductDTO> productDTOs = products.stream()
-                .map(productMapper::productToDTO)
-                .collect(Collectors.toList());
-        return CompletableFuture.completedFuture(productDTOs);
+        return CompletableFuture.supplyAsync(() -> {
+            List<Product> products = productRepository.findBySubcategory_Id(subcategoryId);
+            return products.stream()
+                    .map(productMapper::productToDTO)
+                    .collect(Collectors.toList());
+        });
     }
 
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<Result<Void>> processInsertProduct(ProductInsertDTO productInsertDTO) {
-        Product product = productMapper.insertDtoToProduct(productInsertDTO);
+        return CompletableFuture.supplyAsync(() -> {
+            Product product = productMapper.insertDtoToProduct(productInsertDTO);
 
-        // Validate And Set Relationship Values In Model Created
-        Result<Void> relationshipResult = handleRelationShips(productInsertDTO, product);
-        if (!relationshipResult.isSuccess()) {
-            return CompletableFuture.completedFuture(Result.error(relationshipResult.getErrorMessage()));
-        }
+            // Validate And Set Relationship Values In Model Created
+            /*
+            Result<Void> relationshipResult = handleRelationShips(productInsertDTO, product);
+            if (!relationshipResult.isSuccess()) {
+                return Result.error(relationshipResult.getErrorMessage());
+            }
+             */
 
-        addProduct(productInsertDTO);
-        return CompletableFuture.completedFuture(Result.success());
+            addProduct(productInsertDTO);
+            return Result.success();
+        });
     }
 
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<Result<Void>> updateProduct(Long productId, ProductInsertDTO productInsertDTO) {
-        try {
+        return CompletableFuture.supplyAsync(() -> {
             Optional<Product> optionalProduct = productRepository.findById(productId);
             if (optionalProduct.isEmpty()) {
-                return CompletableFuture.completedFuture(Result.error("Product Not Found"));
+                return Result.error("Product Not Found");
             }
 
             Long productFoundedId = optionalProduct.get().getId();
@@ -136,27 +143,26 @@ public class ProductServiceImpl implements ProductService {
 
             Result<Void> relationshipResult = handleRelationShips(productInsertDTO, product);
             if (!relationshipResult.isSuccess()) {
-                return CompletableFuture.completedFuture(Result.error(relationshipResult.getErrorMessage()));
+                return Result.error(relationshipResult.getErrorMessage());
             }
 
             productRepository.saveAndFlush(product);
-            return CompletableFuture.completedFuture(Result.success());
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+            return Result.success();
+        });
     }
 
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<Boolean> deleteProduct(Long productId) {
-        Optional<Product> optionalProduct = productRepository.findById(productId);
-        if (optionalProduct.isEmpty()) {
-            return CompletableFuture.completedFuture(false);
-        }
+        return CompletableFuture.supplyAsync(() -> {
+            Optional<Product> optionalProduct = productRepository.findById(productId);
+            if (optionalProduct.isEmpty()) {
+                return false;
+            }
 
-        productRepository.deleteById(productId);
-        return CompletableFuture.completedFuture(true);
-
+            productRepository.deleteById(productId);
+            return true;
+        });
     }
 
     private Result<Void> handleRelationShips(ProductInsertDTO productInsertDTO, Product product) {
@@ -194,14 +200,11 @@ public class ProductServiceImpl implements ProductService {
         productRepository.saveAndFlush(product);
     }
 
-    private void addRelationship(Product product , MainCategory mainCategory, Category category, Subcategory subcategory, Supplier supplier, Brand brand) {
+    private void addRelationship(Product product, MainCategory mainCategory, Category category, Subcategory subcategory, Supplier supplier, Brand brand) {
         product.setMainCategory(mainCategory);
         product.setCategory(category);
         product.setSubcategory(subcategory);
         product.setSupplier(supplier);
         product.setBrand(brand);
     }
-
 }
-
-

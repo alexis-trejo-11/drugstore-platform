@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,36 +33,42 @@ public class ExternalOrderServiceImpl implements ExternalOrderService {
         this.restTemplate = restTemplate;
     }
 
-    @Async
-    public Long createOrderAndGetId(OrderInsertDTO orderInsertDTO) {
+    @Override
+    @Async("taskExecutor")
+    public CompletableFuture<Long> createOrderAndGetId(OrderInsertDTO orderInsertDTO) {
         String url = orderServiceUrl + "/v1/api/client-orders/create";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<OrderInsertDTO> requestEntity = new HttpEntity<>(orderInsertDTO, headers);
 
         logger.info("Creating order with URL: {}", url);
-        try {
-            ResponseEntity<ApiResponse<OrderDTO>> responseEntity = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    requestEntity,
-                    new ParameterizedTypeReference<ApiResponse<OrderDTO>>() {
-                    }
-            );
 
-            ApiResponse<OrderDTO> apiResponse = responseEntity.getBody();
-            Long orderId = apiResponse.getData().getId();
-            logger.info("Order created with ID: {}", orderId);
-            return orderId;
+        // Perform the HTTP request asynchronously
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                ResponseEntity<ApiResponse<OrderDTO>> responseEntity = restTemplate.exchange(
+                        url,
+                        HttpMethod.POST,
+                        requestEntity,
+                        new ParameterizedTypeReference<ApiResponse<OrderDTO>>() {}
+                );
 
-        } catch (Exception e) {
-            logger.error("Error creating order: {}", e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
+                ApiResponse<OrderDTO> apiResponse = responseEntity.getBody();
+                Long orderId = apiResponse.getData().getId();
+                logger.info("Order created with ID: {}", orderId);
+                return orderId;
+
+            } catch (Exception e) {
+                logger.error("Error creating order: {}", e.getMessage(), e);
+                throw new RuntimeException(e); // Ensure the exception is properly propagated
+            }
+        });
     }
 
-    @Async
-    public Result<Void> completeOrder(boolean isOrderPaid, Long orderId, Long addressId, Long clientId) {
+
+    @Override
+    @Async("taskExecutor")
+    public CompletableFuture<Void> completeOrder(boolean isOrderPaid, Long orderId, Long addressId, Long clientId) {
         String url = orderServiceUrl + "/v1/api/orders/complete-order";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -69,30 +77,31 @@ public class ExternalOrderServiceImpl implements ExternalOrderService {
         HttpEntity<CompleteOrderRequest> requestEntity = new HttpEntity<>(completeOrderRequest, headers);
 
         logger.info("Completing order with ID: {}", orderId);
-        try {
-            ResponseEntity<ApiResponse<Void>> responseEntity = restTemplate.exchange(
-                    url,
-                    HttpMethod.PUT,
-                    requestEntity,
-                    new ParameterizedTypeReference<ApiResponse<Void>>() {
-                    }
-            );
 
-            if (responseEntity.getStatusCode() == HttpStatus.NOT_FOUND && responseEntity.getBody() != null) {
-                logger.warn("Order with ID {} not found.", orderId);
-                return Result.error("Order not found.");
-            } else {
-                logger.info("Order with ID {} completed successfully.", orderId);
-                return new Result<>(true, null, responseEntity.getBody().getMessage() + responseEntity.getStatusCode());
+        return CompletableFuture.runAsync(() -> {
+            try {
+                ResponseEntity<ApiResponse<Void>> responseEntity = restTemplate.exchange(
+                        url,
+                        HttpMethod.PUT,
+                        requestEntity,
+                        new ParameterizedTypeReference<ApiResponse<Void>>() {
+                        }
+                );
+
+                if (responseEntity.getStatusCode() == HttpStatus.NOT_FOUND && responseEntity.getBody() != null) {
+                    logger.warn("Order with ID {} not found.", orderId);
+                    throw new RuntimeException("Order not found.");
+                }
+            } catch (Exception e) {
+                logger.error("Error completing order with ID {}: {}", orderId, e.getMessage(), e);
+                throw new RuntimeException(e);
             }
-        } catch (Exception e) {
-            logger.error("Error completing order with ID {}: {}", orderId, e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
+        });
     }
 
     @Override
-    public void addPaymentIdByOrderId(Long paymentId, Long orderId) {
+    @Async("taskExecutor")
+    public CompletableFuture<Void> addPaymentIdByOrderId(Long paymentId, Long orderId) {
         String url = orderServiceUrl + "/v1/api/orders/" + orderId + "/payment/" + paymentId;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -100,6 +109,8 @@ public class ExternalOrderServiceImpl implements ExternalOrderService {
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
         logger.info("Adding payment ID {} to order ID {}", paymentId, orderId);
+
+        return CompletableFuture.runAsync(() -> {
         try {
             ResponseEntity<ApiResponse<Void>> responseEntity = restTemplate.exchange(
                     url,
@@ -109,18 +120,21 @@ public class ExternalOrderServiceImpl implements ExternalOrderService {
                     }
             );
 
-            if (responseEntity.getStatusCode() != HttpStatus.OK) {
-                logger.error("Failed to add payment ID {} to order ID {}", paymentId, orderId);
-                throw new RuntimeException("Internal Server Error");
-            }
+                if (responseEntity.getStatusCode() != HttpStatus.OK) {
+                    logger.error("Failed to add payment ID {} to order ID {}", paymentId, orderId);
+                    throw new RuntimeException("Internal Server Error");
+                }
+
         } catch (Exception e) {
             logger.error("Error adding payment ID {} to order ID {}: {}", paymentId, orderId, e.getMessage(), e);
             throw new RuntimeException(e);
         }
+        });
     }
 
     @Override
-    public Optional<OrderDTO> getOrderById(Long orderId) {
+    @Async("taskExecutor")
+    public CompletableFuture<OrderDTO> getOrderById(Long orderId) {
         String url = orderServiceUrl + "/v1/api/orders/" + orderId;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -128,26 +142,30 @@ public class ExternalOrderServiceImpl implements ExternalOrderService {
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
         logger.info("Fetching order with ID: {}", orderId);
-        try {
-            ResponseEntity<ApiResponse<OrderDTO>> responseEntity = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    entity,
-                    new ParameterizedTypeReference<ApiResponse<OrderDTO>>() {
-                    }
-            );
 
-            if (responseEntity.getStatusCode() == HttpStatus.NOT_FOUND && responseEntity.getBody() != null) {
-                logger.warn("Order with ID {} not found.", orderId);
-                return Optional.empty();
+        // Supply the async task and return the CompletableFuture
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                ResponseEntity<ApiResponse<OrderDTO>> responseEntity = restTemplate.exchange(
+                        url,
+                        HttpMethod.GET,
+                        entity,
+                        new ParameterizedTypeReference<ApiResponse<OrderDTO>>() {
+                        }
+                );
+
+                if (responseEntity.getStatusCode() == HttpStatus.NOT_FOUND && responseEntity.getBody() != null) {
+                    logger.warn("Order with ID {} not found.", orderId);
+                    return null;
+                } else {
+                    OrderDTO orderDTO = responseEntity.getBody().getData();
+                    logger.info("Order with ID {} fetched successfully.", orderId);
+                    return orderDTO;
+                }
+            } catch (Exception e) {
+                logger.error("Error fetching order with ID {}: {}", orderId, e.getMessage(), e);
+                throw new RuntimeException(e);
             }
-
-            OrderDTO orderDTO = responseEntity.getBody().getData();
-            logger.info("Order with ID {} fetched successfully.", orderId);
-            return Optional.of(orderDTO);
-        } catch (Exception e) {
-            logger.error("Error fetching order with ID {}: {}", orderId, e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
+        });
     }
 }

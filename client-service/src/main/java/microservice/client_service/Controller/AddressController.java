@@ -25,7 +25,7 @@ public class AddressController {
     }
 
     @PostMapping("/add")
-    public CompletableFuture<ResponseEntity<ApiResponse<?>>> insertAddress(@Valid @RequestBody AddressInsertDTO addressInsertDTO,
+    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> insertAddress(@Valid @RequestBody AddressInsertDTO addressInsertDTO,
                                                                            @RequestParam Long clientId) {
         return addressService.addAddress(addressInsertDTO, clientId)
                 .thenApply(result -> {

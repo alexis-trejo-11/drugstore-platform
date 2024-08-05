@@ -8,13 +8,13 @@ WORKDIR /app
 COPY .. .
 
 # Install dependencies and build the specific project
-RUN ./gradlew :ecommerce_order-service:build -x test
+RUN ./gradlew :ecommerce_sale-service:build -x test
 
-# Set the working directory to the ecommerce_order-service for the runtime
-WORKDIR /app/ecommerce_order-service
+# Set the working directory to the ecommerce_sale-service for the runtime
+WORKDIR /app/ecommerce_sale-service
 
 # Expose the port the app runs on
 EXPOSE 8082
 
 # Run the jar file
-ENTRYPOINT ["java", "-jar", "build/libs/ecommerce_order-service-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "build/libs/ecommerce_sale-service-0.0.1-SNAPSHOT.jar"]

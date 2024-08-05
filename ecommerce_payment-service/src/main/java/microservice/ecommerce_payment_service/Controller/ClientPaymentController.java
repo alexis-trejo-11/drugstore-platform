@@ -5,10 +5,12 @@ import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
 import microservice.ecommerce_payment_service.Service.PaymentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/v1/api/user-payments")
@@ -21,8 +23,10 @@ public class ClientPaymentController {
     }
 
     @GetMapping("/client/{clientId}/completed")
-    public ResponseEntity<ApiResponse<List<PaymentDTO>>> getCompletedPaymentsByClientId(Long clientId) {
-        List<PaymentDTO> payments = paymentService.getCompletedPaymentsByClientId(clientId);
-        return ResponseEntity.ok(new ApiResponse<>(true, payments, "Completed payments correctly fetched.", 200));
+    public CompletableFuture<ResponseEntity<ApiResponse<List<PaymentDTO>>>> getCompletedPaymentsByClientId(@PathVariable Long clientId) {
+        return paymentService.getCompletedPaymentsByClientId(clientId)
+                .thenApply(payments ->
+                        ResponseEntity.ok(new ApiResponse<>(true, payments, "Completed payments correctly fetched.", 200))
+                );
     }
 }
