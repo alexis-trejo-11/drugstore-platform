@@ -50,15 +50,9 @@ dependencies {
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	implementation 'org.modelmapper:modelmapper:2.4.4'
 
-	// Resilience4j
-	implementation "io.github.resilience4j:resilience4j-spring-boot2:${resilience4jVersion}"
-	implementation "io.github.resilience4j:resilience4j-all:${resilience4jVersion}"
-	implementation "io.github.resilience4j:resilience4j-ratelimiter:${resilience4jVersion}"
-	implementation "io.github.resilience4j:resilience4j-circuitbreaker:${resilience4jVersion}"
-	implementation "io.github.resilience4j:resilience4j-bulkhead:${resilience4jVersion}"
-	implementation "io.github.resilience4j:resilience4j-retry:${resilience4jVersion}"
-	implementation "io.github.resilience4j:resilience4j-timelimiter:${resilience4jVersion}"
-	implementation 'org.springframework.boot:spring-boot-starter-aop'
+	// Rate Limiter
+	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
+	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-jcache:7.6.0'
 
 	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'

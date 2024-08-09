@@ -2,7 +2,6 @@ package microservice.ecommerce_order_service.Controller;
 
 import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderDTO;
 import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_order_service.Service.ClientOrderService;
@@ -25,7 +24,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @Slf4j
 @RestController
 @RequestMapping("v1/api/client-orders")
-@RateLimiter(name = "orderApiLimiter")
 public class ClientOrderController {
 
     private final ClientOrderService clientOrderService;

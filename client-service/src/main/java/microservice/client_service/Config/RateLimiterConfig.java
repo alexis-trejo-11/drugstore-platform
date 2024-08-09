@@ -1,8 +1,8 @@
-package microservice.user_service.Config;
+package microservice.client_service.Config;
 
+import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
-import io.github.bucket4j.Bandwidth;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
