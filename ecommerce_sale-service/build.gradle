@@ -46,14 +46,12 @@ dependencies {
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	implementation 'org.modelmapper:modelmapper:2.4.4'
 
+	// Rate Limiter
+	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
+	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-jcache:7.6.0'
+
 	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
-
-	// Web Config
-	dependencies {
-		implementation 'org.springframework.boot:spring-boot-starter-webflux'
-		implementation 'io.projectreactor.netty:reactor-netty'
-	}
 
 	// Eureka
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'

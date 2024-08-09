@@ -4,7 +4,6 @@ import at.backend.drugstore.microservice.common_models.DTOs.Order.CompleteOrderR
 import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderDTO;
 import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderInsertDTO;
 import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,7 +20,6 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @RestController
 @RequestMapping("v1/api/orders")
-@RateLimiter(name = "orderApiLimiter")
 public class OrderController {
 
     private final OrderService orderService;

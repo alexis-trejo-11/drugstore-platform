@@ -5,7 +5,6 @@ import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Clien
 import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeServiceImpl;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Order.OrderFacadeService;
 import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Order.OrderFacadeServiceImpl;
 import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Payment.EPaymentFacadeService;
