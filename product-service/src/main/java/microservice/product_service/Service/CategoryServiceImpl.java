@@ -1,8 +1,8 @@
 package microservice.product_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.SubcategoryDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.CategoryDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.Category.SubcategoryDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.Category.CategoryDTO;
 import microservice.product_service.Mappers.CategoryMapper;
 import microservice.product_service.Mappers.ProductMapper;
 import microservice.product_service.Mappers.SubCategoryMapper;

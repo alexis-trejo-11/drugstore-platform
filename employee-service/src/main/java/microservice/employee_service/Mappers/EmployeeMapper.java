@@ -1,7 +1,7 @@
 package microservice.employee_service.Mappers;
 
-import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeeDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Employee.EmployeInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Employee.EmployeeDTO;
 import microservice.employee_service.Model.Employee;
 import microservice.employee_service.Model.enums.Genre;
 import org.mapstruct.Mapper;

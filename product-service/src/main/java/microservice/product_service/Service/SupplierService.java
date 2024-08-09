@@ -1,7 +1,7 @@
 package microservice.product_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Supplier.SupplierInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Supplier.SupplierReturnDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Supplier.SupplierInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Supplier.SupplierReturnDTO;
 
 import java.util.List;
 

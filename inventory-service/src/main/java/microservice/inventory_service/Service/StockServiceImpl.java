@@ -1,10 +1,10 @@
 package microservice.inventory_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Inventory.InventoryStockDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Inventory.ProductStockDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Sale.SaleItemDTO;
-import at.backend.drugstore.microservice.common_models.ExternalService.Products.ExternalProductService;
+import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryStockDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Inventory.ProductStockDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Sale.SaleItemDTO;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Products.ProductFacadeService;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import microservice.inventory_service.Model.Inventory;
 import microservice.inventory_service.Repository.InventoryRepository;
@@ -22,19 +22,19 @@ import java.util.concurrent.CompletableFuture;
 public class StockServiceImpl implements StockService {
 
     private final InventoryRepository inventoryRepository;
-    private final ExternalProductService externalProductService;
+    private final ProductFacadeService productFacadeService;
 
     @Autowired
-    public StockServiceImpl(InventoryRepository inventoryRepository, ExternalProductService externalProductService) {
+    public StockServiceImpl(InventoryRepository inventoryRepository, ProductFacadeService productFacadeService) {
         this.inventoryRepository = inventoryRepository;
-        this.externalProductService = externalProductService;
+        this.productFacadeService = productFacadeService;
     }
 
     @Override
     @Async("taskExecutor")
     @Transactional
     public CompletableFuture<Result<ProductDTO>> validateExistingProduct(Long productId) {
-        return externalProductService.getProductById(productId)
+        return productFacadeService.getProductById(productId)
                 .thenApplyAsync(productResult -> {
                     if (!productResult.isSuccess()) {
                         return new Result<>(false, null, productResult.getErrorMessage());

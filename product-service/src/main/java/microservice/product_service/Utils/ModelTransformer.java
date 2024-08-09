@@ -1,9 +1,7 @@
 package microservice.product_service.Utils;
 
-import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
 import microservice.product_service.Model.*;
-
-import java.time.LocalDateTime;
 
 import static java.lang.String.valueOf;
 

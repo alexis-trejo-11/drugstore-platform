@@ -1,7 +1,7 @@
 package microservice.client_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressDTO;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import microservice.client_service.Mappers.AddressMapper;
 import microservice.client_service.Model.Address;
@@ -33,7 +33,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<Result<Void>> addAddress(AddressInsertDTO addressInsertDTO, Long clientId) {
         return CompletableFuture.supplyAsync(() -> {
@@ -52,7 +52,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     public CompletableFuture<Result<AddressDTO>> getAddressById(Long addressId) {
         return CompletableFuture.supplyAsync(() -> {
             Optional<Address> address = addressRepository.findById(addressId);
@@ -65,7 +65,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     public CompletableFuture<Result<List<AddressDTO>>> getAddressesByClientId(Long clientId) {
         return CompletableFuture.supplyAsync(() -> {
             Optional<Client> client = clientRepository.findById(clientId);
@@ -84,15 +84,15 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<Result<Void>> updateAddressById(AddressInsertDTO addressInsertDTO, Long addressId) {
         return CompletableFuture.supplyAsync(() -> {
-            Optional<Address> addressFounded = addressRepository.findById(addressId);
-            if (addressFounded.isEmpty()) {
+            Optional<Address> optionalAddress = addressRepository.findById(addressId);
+            if (optionalAddress.isEmpty()) {
                 return Result.error("Address with Id:" + addressId + " Not Found");
             }
-            Address addressUpdated = dtoMapper.insertDtoToEntity(addressFounded.get(), addressInsertDTO);
+            Address addressUpdated = dtoMapper.insertDtoToEntity(optionalAddress.get(), addressInsertDTO);
 
             addressRepository.saveAndFlush(addressUpdated);
 
@@ -101,7 +101,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<Result<String>> deleteAddressById(Long addressId) {
         return CompletableFuture.supplyAsync(() -> {

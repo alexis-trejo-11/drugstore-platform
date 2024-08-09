@@ -1,21 +1,23 @@
 package microservice.inventory_service.Config;
 
-import at.backend.drugstore.microservice.common_models.ExternalService.Employee.ExternalEmployeeService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Employee.ExternalEmployeeServiceImpl;
-import at.backend.drugstore.microservice.common_models.ExternalService.Products.ExternalProductService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Products.ExternalProductServiceImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Employee.ExternalEmployeeService;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Employee.ExternalEmployeeServiceImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Products.ProductFacadeService;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Products.ProductFacadeServiceImpl;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class AppConfig {
 
     @Bean
     @Primary
-    public ExternalProductService externalProductService(RestTemplate restTemplate) {
-        return new ExternalProductServiceImpl(restTemplate);
+    public ProductFacadeService externalProductService(RestTemplate restTemplate) {
+        return new ProductFacadeServiceImpl(restTemplate);
     }
 
     @Bean
@@ -24,6 +26,7 @@ public class AppConfig {
     }
 
     @Bean
+    @LoadBalanced
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }

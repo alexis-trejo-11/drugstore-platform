@@ -1,7 +1,7 @@
 package microservice.ecommerce_order_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_order_service.Model.ShippingData;
 import org.springframework.stereotype.Service;

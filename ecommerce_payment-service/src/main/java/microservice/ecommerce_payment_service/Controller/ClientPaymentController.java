@@ -1,7 +1,7 @@
 package microservice.ecommerce_payment_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
+import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentDTO;
+import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
 import microservice.ecommerce_payment_service.Service.PaymentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,10 +23,10 @@ public class ClientPaymentController {
     }
 
     @GetMapping("/client/{clientId}/completed")
-    public CompletableFuture<ResponseEntity<ApiResponse<List<PaymentDTO>>>> getCompletedPaymentsByClientId(@PathVariable Long clientId) {
+    public CompletableFuture<ResponseEntity<ResponseWrapper<List<PaymentDTO>>>> getCompletedPaymentsByClientId(@PathVariable Long clientId) {
         return paymentService.getCompletedPaymentsByClientId(clientId)
                 .thenApply(payments ->
-                        ResponseEntity.ok(new ApiResponse<>(true, payments, "Completed payments correctly fetched.", 200))
+                        ResponseEntity.ok(new ResponseWrapper<>(true, payments, "Completed payments correctly fetched.", 200))
                 );
     }
 }

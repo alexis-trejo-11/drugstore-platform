@@ -1,7 +1,7 @@
 package microservice.product_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Product.ProductInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductInsertDTO;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 
 import java.util.List;
@@ -16,4 +16,5 @@ public interface ProductService {
     CompletableFuture<List<ProductDTO>> findProductsBySubCategory(Long subcategoryId);
     CompletableFuture<Result<Void>> processInsertProduct(ProductInsertDTO productInsertDTO);
     CompletableFuture<Boolean> deleteProduct(Long productId);
+    CompletableFuture<Result<Void>> updateProduct(Long productId, ProductInsertDTO productInsertDTO);
     }

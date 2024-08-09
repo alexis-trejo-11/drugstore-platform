@@ -1,7 +1,9 @@
 package microservice.inventory_service.Model;
 
 
-import at.backend.drugstore.microservice.common_models.DTO.Inventory.InventoryTransactionInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryTransactionInsertDTO;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
@@ -11,6 +13,8 @@ import java.util.Date;
 
 @Entity
 @Table(name = "inventory_transaction")
+@Data
+@NoArgsConstructor
 public class InventoryTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,10 +37,6 @@ public class InventoryTransaction {
     @Column(name = "employee_id")
     private Long employeeId;
 
-    // Constructor
-    public InventoryTransaction() {
-    }
-
     public InventoryTransaction(InventoryTransactionInsertDTO inventoryTransactionInsertDTO, Long employeeId) {
         this.transactionType = inventoryTransactionInsertDTO.getTransactionType();
         this.quantity = inventoryTransactionInsertDTO.getQuantity();
@@ -45,62 +45,5 @@ public class InventoryTransaction {
         this.createdAt = LocalDateTime.now();
         this.employeeId = employeeId;
 
-    }
-
-    // Getters and setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTransactionType() {
-        return transactionType;
-    }
-
-    public void setTransactionType(String transactionType) {
-        this.transactionType = transactionType;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public Inventory getInventory() {
-        return inventory;
-    }
-
-    public void setInventory(Inventory inventory) {
-        this.inventory = inventory;
-    }
-
-    public Long getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 }

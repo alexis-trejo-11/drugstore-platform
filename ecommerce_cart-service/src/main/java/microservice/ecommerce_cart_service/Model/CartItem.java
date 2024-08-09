@@ -1,5 +1,6 @@
 package microservice.ecommerce_cart_service.Model;
 
+import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -56,6 +57,17 @@ public class CartItem {
         if (o == null || getClass() != o.getClass()) return false;
         CartItem cartItem = (CartItem) o;
         return Objects.equals(productId, cartItem.productId);
+    }
+
+    public CartItem createCartItem(ProductDTO productDTO, int quantity, Cart cart) {
+        CartItem cartItem = new CartItem();
+        cartItem.setProductId(productDTO.getId());
+        cartItem.setProductName(productDTO.getName());
+        cartItem.setProductPrice(productDTO.getPrice());
+        cartItem.setQuantity(quantity);
+        cartItem.setItemTotal(productDTO.getPrice().multiply(new BigDecimal(quantity)));
+        cartItem.setCart(cart);
+        return cartItem;
     }
 
     @Override

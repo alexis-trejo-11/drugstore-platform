@@ -1,7 +1,7 @@
 package microservice.client_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
 import microservice.client_service.Mappers.ClientMapper;
 import microservice.client_service.Model.Client;
 import microservice.client_service.Repository.ClientRepository;
@@ -28,7 +28,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<ClientDTO> createClient(ClientInsertDTO clientInsertDTO) {
         return CompletableFuture.supplyAsync(() -> {
@@ -39,7 +39,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     public CompletableFuture<ClientDTO> getClientById(Long clientId) {
         return CompletableFuture.supplyAsync(() -> {
             Optional<Client> client = clientRepository.findById(clientId);
@@ -48,7 +48,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     public CompletableFuture<List<ClientDTO>> getAllClients() {
         return CompletableFuture.supplyAsync(() -> {
             List<Client> clients = clientRepository.findAll();
@@ -59,7 +59,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<Boolean> deleteClient(Long clientId) {
         return CompletableFuture.supplyAsync(() -> {

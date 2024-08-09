@@ -1,7 +1,7 @@
 package microservice.ecommerce_order_service.Mapper;
 
-import at.backend.drugstore.microservice.common_models.DTO.Cart.CartItemDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Order.OrderItemDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartItemDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderItemDTO;
 import microservice.ecommerce_order_service.Model.Order;
 import microservice.ecommerce_order_service.Model.OrderItem;
 import org.mapstruct.Mapper;

@@ -1,7 +1,7 @@
 package microservice.product_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Product.ProductInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import microservice.product_service.Mappers.ProductMapper;
 import microservice.product_service.Model.*;

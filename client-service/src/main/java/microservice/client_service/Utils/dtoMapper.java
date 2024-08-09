@@ -1,6 +1,6 @@
 package microservice.client_service.Utils;
 
-import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressInsertDTO;
 import microservice.client_service.Model.Address;
 
 import java.lang.reflect.Field;

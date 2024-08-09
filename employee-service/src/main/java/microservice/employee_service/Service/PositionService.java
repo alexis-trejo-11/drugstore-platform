@@ -1,8 +1,8 @@
 package microservice.employee_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Employee.Postion.PositionDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Employee.Postion.PositionInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Employee.Postion.PositionUpdateDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Employee.Postion.PositionDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Employee.Postion.PositionInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Employee.Postion.PositionUpdateDTO;
 
 import java.util.List;
 

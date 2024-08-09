@@ -1,7 +1,6 @@
 package microservice.ecommerce_cart_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
 import microservice.ecommerce_cart_service.Service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,16 +23,16 @@ public class CartController {
     }
 
     @PostMapping("/create/{clientId}")
-    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> createCart(@PathVariable final Long clientId) {
+    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> createCart(@PathVariable final Long clientId) {
         logger.info("Creating cart for client ID: " + clientId);
         return cartService.createCart(clientId).thenApply(cartResult -> {
             if (!cartResult.isSuccess()) {
                 logger.warning("Failed to create cart for client ID: " + clientId + ". Error: " + cartResult.getErrorMessage());
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(false, null, cartResult.getErrorMessage(), 409));
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseWrapper<>(false, null, cartResult.getErrorMessage(), 409));
             }
 
             logger.info("Successfully created cart for client ID: " + clientId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, null, "Cart Successfully Created.", 201));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper<>(true, null, "Cart Successfully Created.", 201));
         });
     }
 }

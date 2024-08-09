@@ -1,9 +1,8 @@
 package microservice.ecommerce_payment_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Payment.CardDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Payment.CardInsertDTO;
-import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientService;
+import at.backend.drugstore.microservice.common_models.DTOs.Payment.CardDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Payment.CardInsertDTO;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeService;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import microservice.ecommerce_payment_service.Automappers.CardMapper;
 import microservice.ecommerce_payment_service.Config.EncryptionConfig;
@@ -26,22 +25,26 @@ import java.util.concurrent.CompletableFuture;
 public class CardServiceImpl implements CardService {
 
     private final CardRepository cardRepository;
-    private final ExternalClientService externalClientService;
+    private final ClientFacadeService clientFacadeService;
     private final CardMapper cardMapper;
-    private static final Logger logger = LoggerFactory.getLogger(CardServiceImpl.class);
+    private final CardDomainService cardDomainService;
 
     @Autowired
-    public CardServiceImpl(CardRepository cardRepository, ExternalClientService externalClientService, CardMapper cardMapper) {
+    public CardServiceImpl(CardRepository cardRepository,
+                           ClientFacadeService clientFacadeService,
+                           CardMapper cardMapper,
+                           CardDomainService cardDomainService) {
         this.cardRepository = cardRepository;
-        this.externalClientService = externalClientService;
+        this.clientFacadeService = clientFacadeService;
         this.cardMapper = cardMapper;
+        this.cardDomainService = cardDomainService;
     }
 
     @Async("taskExecutor")
     @Override
     @Transactional
     public CompletableFuture<Boolean> validateClient(Long clientId) {
-        return externalClientService.findClientById(clientId)
+        return clientFacadeService.findClientById(clientId)
                 .thenApply(Result::isSuccess);
     }
     @Override
@@ -58,7 +61,7 @@ public class CardServiceImpl implements CardService {
     public CompletableFuture<Void> addCardToClient(CardInsertDTO cardInsertDTO) {
         return CompletableFuture.runAsync(() -> {
             Card card = cardMapper.toEntity(cardInsertDTO);
-            encryptSensitiveData(card);
+            cardDomainService.encryptSensitiveData(card);
             cardRepository.saveAndFlush(card);
         });
     }
@@ -69,7 +72,7 @@ public class CardServiceImpl implements CardService {
             Optional<Card> optionalCard = cardRepository.findById(cardId);
             return optionalCard.map(card -> {
                 CardDTO cardDTO = cardMapper.toDto(card);
-                decryptAndCensureSensitiveData(cardDTO);
+                cardDomainService.decryptAndCensureSensitiveData(cardDTO);
                 return cardDTO;
             });
         });
@@ -82,7 +85,7 @@ public class CardServiceImpl implements CardService {
             List<CardDTO> cardDTOS = new ArrayList<>();
             for (Card card : cards) {
                 CardDTO cardDTO = cardMapper.toDto(card);
-                decryptAndCensureSensitiveData(cardDTO);
+                cardDomainService.decryptAndCensureSensitiveData(cardDTO);
                 cardDTOS.add(cardDTO);
             }
             return cardDTOS;
@@ -103,17 +106,5 @@ public class CardServiceImpl implements CardService {
         });
     }
 
-    private void decryptAndCensureSensitiveData(CardDTO cardDTO) {
-        String cardNumber = EncryptionConfig.decrypt(cardDTO.getCardNumber());
-        String lastNumbers = cardNumber.substring(cardNumber.length() - 4);
-        String cardNumberCensured = "**** **** **** " + lastNumbers;
 
-        cardDTO.setCardNumber(cardNumberCensured);
-        cardDTO.setCvv("***");
-    }
-
-    private void encryptSensitiveData(Card card) {
-        card.setCardNumber(EncryptionConfig.encrypt(card.getCardNumber()));
-        card.setCvv(EncryptionConfig.encrypt(card.getCvv()));
-    }
 }

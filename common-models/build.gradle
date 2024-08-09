@@ -11,6 +11,10 @@ java {
 	sourceCompatibility = '17'
 }
 
+ext {
+	set('springCloudVersion', "2021.0.4")
+}
+
 repositories {
 	mavenCentral()
 }
@@ -26,10 +30,30 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
+	// Swagger
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
 
 	// Rate Limiter
 	implementation 'io.github.resilience4j:resilience4j-spring-boot2:1.7.1'
 	implementation 'io.github.resilience4j:resilience4j-ratelimiter:1.7.1'
+
+	// Web Config
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'io.projectreactor.netty:reactor-netty'
+
+	// JWT
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// Eureka
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
 }
 
 tasks.named('test') {

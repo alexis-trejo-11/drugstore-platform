@@ -1,49 +1,52 @@
 package microservice.ecommerce_cart_service.Config;
 
-import at.backend.drugstore.microservice.common_models.ExternalService.Adress.ExternalAddressService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientServiceImpl;
-import at.backend.drugstore.microservice.common_models.ExternalService.Order.ExternalOrderService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Order.ExternalOrderServiceImpl;
-import at.backend.drugstore.microservice.common_models.ExternalService.Payment.ExternalPaymentService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Payment.ExternalPaymentServiceServiceImpl;
-import at.backend.drugstore.microservice.common_models.ExternalService.Products.ExternalProductService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Products.ExternalProductServiceImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Adress.AddressFacadeServiceImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeService;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeServiceImpl;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Order.OrderFacadeService;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Order.OrderFacadeServiceImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Payment.EPaymentFacadeService;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Payment.EPaymentServiceFacadeServiceImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Products.ProductFacadeService;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Products.ProductFacadeServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class AppConfig {
 
     @Bean
     @Primary
-    public ExternalProductService externalProductService(RestTemplate restTemplate) {
-        return new ExternalProductServiceImpl(restTemplate);
+    public ProductFacadeService externalProductService(RestTemplate restTemplate) {
+        return new ProductFacadeServiceImpl(restTemplate);
     }
 
     @Bean
-    public ExternalOrderService externalOrderService(RestTemplate restTemplate) {
-        return new ExternalOrderServiceImpl(restTemplate);
+    public OrderFacadeService externalOrderService(RestTemplate restTemplate) {
+        return new OrderFacadeServiceImpl(restTemplate);
     }
 
     @Bean
-    public ExternalClientService externalClientService(RestTemplate restTemplate) {
-        return new ExternalClientServiceImpl(restTemplate);
+    public ClientFacadeService externalClientService(RestTemplate restTemplate) {
+        return new ClientFacadeServiceImpl(restTemplate);
     }
 
     @Bean
-    public ExternalAddressService externalAddressService(RestTemplate restTemplate) {
-        return new ExternalAddressService(restTemplate);
+    public AddressFacadeServiceImpl externalAddressService(RestTemplate restTemplate) {
+        return new AddressFacadeServiceImpl(restTemplate);
     }
 
     @Bean
-    public ExternalPaymentService externalPaymentService(RestTemplate restTemplate) {
-        return new ExternalPaymentServiceServiceImpl(restTemplate);
+    public EPaymentFacadeService externalPaymentService(RestTemplate restTemplate) {
+        return new EPaymentServiceFacadeServiceImpl(restTemplate);
     }
 
     @Bean
+    @LoadBalanced
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }

@@ -1,7 +1,7 @@
 package microservice.ecommerce_payment_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Payment.PaymentInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentInsertDTO;
 
 import java.util.List;
 import java.util.Optional;

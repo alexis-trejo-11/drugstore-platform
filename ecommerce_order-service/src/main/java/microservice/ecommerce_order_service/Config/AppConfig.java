@@ -1,37 +1,40 @@
 package microservice.ecommerce_order_service.Config;
 
-import at.backend.drugstore.microservice.common_models.ExternalService.Adress.ExternalAddressService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientServiceImpl;
-import at.backend.drugstore.microservice.common_models.ExternalService.Payment.ExternalPaymentService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Payment.ExternalPaymentServiceServiceImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Adress.AddressFacadeServiceImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeService;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeServiceImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Payment.EPaymentFacadeService;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Payment.EPaymentServiceFacadeServiceImpl;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class AppConfig {
 
+
     @Bean
+    public ClientFacadeService externalClientService(RestTemplate restTemplate) {
+        return new ClientFacadeServiceImpl(restTemplate);
+    }
+
+    @Bean
+        public EPaymentFacadeService externalPaymentService(RestTemplate restTemplate) {
+        return new EPaymentServiceFacadeServiceImpl(restTemplate);
+    }
+
+    @Bean
+    @Primary
+    public AddressFacadeServiceImpl externalAddressService(RestTemplate restTemplate) {
+        return new AddressFacadeServiceImpl(restTemplate);
+    }
+
+    @Bean
+    @LoadBalanced
     public RestTemplate restTemplate() {
         return new RestTemplate();
-    }
-
-    @Bean
-    @Primary
-    public ExternalClientService externalClientService(RestTemplate restTemplate) {
-        return new ExternalClientServiceImpl(restTemplate);
-    }
-
-    @Bean
-        public ExternalPaymentService externalPaymentService(RestTemplate restTemplate) {
-        return new ExternalPaymentServiceServiceImpl(restTemplate);
-    }
-
-    @Bean
-    @Primary
-    public ExternalAddressService externalAddressService(RestTemplate restTemplate) {
-        return new ExternalAddressService(restTemplate);
     }
 }

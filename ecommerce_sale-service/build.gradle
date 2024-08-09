@@ -17,8 +17,9 @@ repositories {
 }
 
 ext {
-	set('springCloudVersion', "2023.0.2")
+	set('springCloudVersion', "2021.0.4")
 }
+
 
 dependencies {
 	// Spring Boot
@@ -47,6 +48,15 @@ dependencies {
 
 	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
+
+	// Web Config
+	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter-webflux'
+		implementation 'io.projectreactor.netty:reactor-netty'
+	}
+
+	// Eureka
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
 }
 
 dependencyManagement {

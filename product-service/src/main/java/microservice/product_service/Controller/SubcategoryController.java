@@ -1,6 +1,6 @@
 package microservice.product_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.SubcategoryDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.Category.SubcategoryDTO;
 import microservice.product_service.Service.SubcategoryServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ public class SubcategoryController {
     /**
      * Inserts a new subcategory.
      *
-     * @param subcategoryDTO the subcategory DTO
+     * @param subcategoryDTO the subcategory DTOs
      * @param bindingResult  the binding result for validation
      * @return ResponseEntity with a status message
      */
@@ -59,7 +59,7 @@ public class SubcategoryController {
      * Retrieves a subcategory by ID along with its products.
      *
      * @param id the ID of the subcategory
-     * @return ResponseEntity with the subcategory DTO
+     * @return ResponseEntity with the subcategory DTOs
      */
     @GetMapping("/{id}")
     public ResponseEntity<SubcategoryDTO> getSubCategoryById(@PathVariable Long id) {
@@ -76,7 +76,7 @@ public class SubcategoryController {
      * Updates an existing subcategory.
      *
      * @param id             the ID of the subcategory
-     * @param subcategoryDTO the subcategory DTO
+     * @param subcategoryDTO the subcategory DTOs
      * @param bindingResult  the binding result for validation
      * @return ResponseEntity with a status message
      */

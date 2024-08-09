@@ -1,46 +1,43 @@
 package microservice.ecommerce_payment_service.Config;
 
-import at.backend.drugstore.microservice.common_models.ExternalService.Adress.ExternalAddressService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientServiceImpl;
-import at.backend.drugstore.microservice.common_models.ExternalService.DigitalSale.ExternalDigitalSaleImpl;
-import at.backend.drugstore.microservice.common_models.ExternalService.Order.ExternalOrderService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Order.ExternalOrderServiceImpl;
-import at.backend.drugstore.microservice.common_models.ExternalService.Payment.ExternalPaymentService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Payment.ExternalPaymentServiceServiceImpl;
-import at.backend.drugstore.microservice.common_models.ExternalService.Products.ExternalProductService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Products.ExternalProductServiceImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Adress.AddressFacadeServiceImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeService;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeServiceImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.ESale.ESaleFacadeImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Order.OrderFacadeService;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Order.OrderFacadeServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class AppConfig {
 
+    @Primary
+    @Bean
+    public ClientFacadeService externalClientService(RestTemplate restTemplate) {
+        return new ClientFacadeServiceImpl(restTemplate);
+    }
+
+    @Bean
+    public AddressFacadeServiceImpl externalAddressService(RestTemplate restTemplate) {
+        return new AddressFacadeServiceImpl(restTemplate);
+    }
+
+    @Bean
+    public OrderFacadeService externalOrderService(RestTemplate restTemplate) {
+        return new OrderFacadeServiceImpl(restTemplate);
+    }
+
+    @Bean
+    public ESaleFacadeImpl externalDigitalSale(RestTemplate restTemplate) {
+        return new ESaleFacadeImpl(restTemplate);
+    }
+
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
-    }
-
-    @Bean
-    @Primary
-    public ExternalClientService externalClientService(RestTemplate restTemplate) {
-        return new ExternalClientServiceImpl(restTemplate);
-    }
-
-    @Bean
-    public ExternalAddressService externalAddressService(RestTemplate restTemplate) {
-        return new ExternalAddressService(restTemplate);
-    }
-
-    @Bean
-    public ExternalOrderService externalOrderService(RestTemplate restTemplate) {
-        return new ExternalOrderServiceImpl(restTemplate);
-    }
-
-    @Bean
-    public ExternalDigitalSaleImpl externalDigitalSale(RestTemplate restTemplate) {
-        return new ExternalDigitalSaleImpl(restTemplate);
     }
 }

@@ -1,7 +1,6 @@
     package microservice.ecommerce_order_service.Mapper;
 
-    import at.backend.drugstore.microservice.common_models.DTO.Order.OrderDTO;
-    import at.backend.drugstore.microservice.common_models.DTO.Order.OrderInsertDTO;
+    import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderDTO;
     import microservice.ecommerce_order_service.Model.Order;
     import org.mapstruct.Mapper;
     import org.mapstruct.Mapping;
@@ -12,7 +11,7 @@
     public interface OrderMapper {
 
         @Mappings({
-                @Mapping(target = "status", expression = "java(at.backend.drugstore.microservice.common_models.DTO.Order.OrderStatus.PENDING)"),
+                @Mapping(target = "status", expression = "java(at.backend.drugstore.microservice.common_models.DTOs.Order.OrderStatus.PENDING_PAYMENT)"),
                 @Mapping(target = "orderDate", expression = "java(java.time.LocalDateTime.now())"),
                 @Mapping(target = "lastOrderUpdate", expression = "java(java.time.LocalDateTime.now())"),
                 @Mapping(target = "deliveryTries", constant = "0"),

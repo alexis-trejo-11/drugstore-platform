@@ -1,18 +1,15 @@
 package microservice.user_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.User.ClientLoginDTO;
-import at.backend.drugstore.microservice.common_models.DTO.User.ClientSignUpDTO;
-import at.backend.drugstore.microservice.common_models.DTO.User.UserLoginDTO;
-import at.backend.drugstore.microservice.common_models.ExternalService.Cart.ExternalCartService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Client.ExternalClientService;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.User.ClientLoginDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.User.ClientSignUpDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.User.UserLoginDTO;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Cart.CartFacadeService;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeService;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import microservice.user_service.Mappers.UserMapper;
-import microservice.user_service.Middleware.JwtUtil;
-import microservice.user_service.Model.Role;
 import microservice.user_service.Model.User;
-import microservice.user_service.Repository.RoleRepository;
 import microservice.user_service.Repository.UserRepository;
 import microservice.user_service.Middleware.PasswordUtil;
 import org.hibernate.Hibernate;
@@ -22,35 +19,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private final ExternalCartService externalCartService;
+    private final CartFacadeService cartFacadeService;
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
-    private final ExternalClientService externalClientService;
-    private final RoleRepository roleRepository;
+    private final ClientFacadeService clientFacadeService;
     private final UserMapper userMapper;
+    private final AuthDomainService authDomainService;
 
     @Autowired
-    public AuthServiceImpl(ExternalCartService externalCartService,
+    public AuthServiceImpl(CartFacadeService cartFacadeService,
                            UserRepository userRepository,
-                           JwtUtil jwtUtil,
-                           ExternalClientService externalClientService,
-                           RoleRepository roleRepository,
-                           UserMapper userMapper) {
-        this.externalCartService = externalCartService;
+                           ClientFacadeService clientFacadeService,
+                           UserMapper userMapper,
+                           AuthDomainService authDomainService) {
+        this.cartFacadeService = cartFacadeService;
         this.userRepository = userRepository;
-        this.jwtUtil = jwtUtil;
-        this.externalClientService = externalClientService;
-        this.roleRepository = roleRepository;
+        this.clientFacadeService = clientFacadeService;
         this.userMapper = userMapper;
+        this.authDomainService = authDomainService;
     }
 
     @Override
@@ -74,25 +65,19 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Async("taskExecutor")
-    @Transactional
     public CompletableFuture<String> processSignup(ClientSignUpDTO clientSignUpDTO) {
         ClientInsertDTO clientInsertDTO = userMapper.clientSignupDtoToClientInsertDTO(clientSignUpDTO);
 
-        // Crear cliente de manera asíncrona
-        CompletableFuture<ClientDTO> clientFuture = externalClientService.createClient(clientInsertDTO);
+        CompletableFuture<ClientDTO> clientFuture = clientFacadeService.createClient(clientInsertDTO);
 
-        // Crear carrito de cliente en paralelo con la creación del cliente
         CompletableFuture<Void> clientCartFuture = clientFuture.thenCompose(clientDTO ->
-                externalCartService.createClientCart(clientDTO.getId())
+                cartFacadeService.createClientCart(clientDTO.getId())
         );
 
-        // Procesar usuario una vez que el cliente se ha creado y el carrito se ha creado
         return clientFuture
                 .thenCombine(clientCartFuture, (clientDTO, voidResult) -> clientDTO)
-                .thenCompose(clientDTO -> processUser(clientSignUpDTO, clientDTO));
+                .thenCompose(clientDTO -> authDomainService.processUserCreation(clientSignUpDTO, clientDTO));
     }
-
-
 
     @Override
     @Async("taskExecutor")
@@ -114,74 +99,26 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Async("taskExecutor")
-    public CompletableFuture<Result<Void>> checkPassword(String plainPassword, String hashPassword) {
-        boolean isPasswordCorrect = PasswordUtil.validatePassword(plainPassword, hashPassword);
-        return CompletableFuture.completedFuture(
-                isPasswordCorrect ? Result.success() : Result.error("Wrong Password, Try Again.")
-        );
+    public CompletableFuture<Result<Void>> validateLogin(String plainPassword, String hashPassword) {
+    return authDomainService.checkPassword(plainPassword, hashPassword)
+            .thenApply(isPasswordCorrect -> isPasswordCorrect ? Result.success() : Result.error("Incorrect Password"));
     }
-
-
 
     @Override
     @Async("taskExecutor")
-    @Transactional
     public CompletableFuture<String> processLogin(UserLoginDTO userDTO) {
-        CompletableFuture<Optional<User>> userFuture = CompletableFuture.supplyAsync(() ->
-                userRepository.findById(userDTO.getId())
-        );
+        Optional<User> optionalUser = userRepository.findById(userDTO.getId());
+        if (optionalUser.isEmpty()) {
+            return CompletableFuture.completedFuture("");
+        }
 
-        return userFuture.thenCompose(userOptional -> {
-            if (userOptional.isEmpty()) {
-                return CompletableFuture.completedFuture("");
-            }
+        User user = optionalUser.get();
 
-            User user = userOptional.get();
-            Hibernate.initialize(user.getRoles());
+        // Process User While JWT Token is getting generated
+        CompletableFuture<Void> userProcessFuture = authDomainService.processUserAction(user);
+        CompletableFuture<String> jwtFuture =  authDomainService.generateJWToken(user);
 
-            user.setLastLogin(LocalDateTime.now());
-            return CompletableFuture.supplyAsync(() -> {
-                userRepository.saveAndFlush(user);
-
-                List<String> rolesToString = user.getRoles().stream()
-                        .map(Role::getName)
-                        .collect(Collectors.toList());
-
-                return jwtUtil.GenerateToken(user.getId(), rolesToString);
-            });
-        });
-    }
-
-
-    @Async("taskExecutor")
-    private CompletableFuture<String> processUser(ClientSignUpDTO clientSignUpDTO, ClientDTO clientDTO) {
-        return CompletableFuture.supplyAsync(() -> {
-            User user = userMapper.signupDtoToEntity(clientSignUpDTO);
-            user.setClientId(clientDTO.getId());
-
-            String hashedPassword = PasswordUtil.hashPassword(clientSignUpDTO.getPassword());
-            user.setPassword(hashedPassword);
-
-            String jwtToken = "";
-
-            Optional<Role> roleOptional = roleRepository.findByName("common_user");
-            if (roleOptional.isPresent()) {
-                List<Role> roles = new ArrayList<>();
-                roles.add(roleOptional.get());
-                user.setRoles(roles);
-
-                // Create JWToken
-                List<String> rolesToString = new ArrayList<>();
-                for (var role : user.getRoles()) {
-                    rolesToString.add(role.getName());
-                }
-
-                jwtToken = jwtUtil.GenerateToken(user.getId(), rolesToString);
-            }
-
-            userRepository.saveAndFlush(user);
-
-            return jwtToken;
-        });
+        // Combine both futures ensuring they both complete before returning the JWT future
+        return userProcessFuture.thenCombine(jwtFuture, (voidResult, jwt) -> jwt);
     }
 }
