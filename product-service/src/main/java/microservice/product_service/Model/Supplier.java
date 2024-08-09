@@ -1,7 +1,6 @@
 package microservice.product_service.Model;
 
 
-import at.backend.drugstore.microservice.common_models.DTO.Product.ProductInsertDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,7 +8,6 @@ import javax.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "supplier")

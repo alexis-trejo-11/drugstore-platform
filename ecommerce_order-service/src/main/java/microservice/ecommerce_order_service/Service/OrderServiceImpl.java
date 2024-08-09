@@ -1,12 +1,14 @@
 package microservice.ecommerce_order_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Cart.CartDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Order.CompleteOrderRequest;
-import at.backend.drugstore.microservice.common_models.DTO.Order.OrderDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Order.OrderInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Order.OrderStatus;
+import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Order.CompleteOrderRequest;
+import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderStatus;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Adress.AddressFacadeServiceImpl;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeService;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_order_service.Mapper.OrderItemMapper;
@@ -16,21 +18,14 @@ import microservice.ecommerce_order_service.Model.Order;
 import microservice.ecommerce_order_service.Model.ShippingData;
 import microservice.ecommerce_order_service.Repository.OrderItemRepository;
 import microservice.ecommerce_order_service.Repository.OrderRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -40,24 +35,27 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
-    private final ExternalServiceFacade externalServiceFacade;
+    private final ClientFacadeService clientFacadeServiceFacade;
     private final OrderDomainService orderDomainService;
     private final ShippingService shippingService;
+    private final AddressFacadeServiceImpl addressFacadeServiceImpl;
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             OrderItemRepository orderItemRepository,
                             OrderMapper orderMapper,
                             OrderItemMapper orderItemMapper,
-                            ExternalServiceFacade externalServiceFacade,
+                            ClientFacadeService clientFacadeServiceFacade,
                             OrderDomainService orderDomainService,
-                            ShippingService shippingService) {
+                            ShippingService shippingService,
+                            AddressFacadeServiceImpl addressFacadeServiceImpl) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.orderMapper = orderMapper;
         this.orderItemMapper = orderItemMapper;
-        this.externalServiceFacade = externalServiceFacade;
+        this.clientFacadeServiceFacade = clientFacadeServiceFacade;
         this.orderDomainService = orderDomainService;
         this.shippingService = shippingService;
+        this.addressFacadeServiceImpl = addressFacadeServiceImpl;
     }
 
 
@@ -87,7 +85,7 @@ public class OrderServiceImpl implements OrderService {
         return CompletableFuture.runAsync(() ->  {
             ShippingData shippingData = shippingService.generateShippingData(addressDTO, clientDTO);
 
-            order.setStatus(OrderStatus.PAID);
+            order.setStatus(OrderStatus.TO_BE_DELIVERED);
             order.setLastOrderUpdate(LocalDateTime.now());
             order.setShippingData(shippingData);
             orderRepository.saveAndFlush(order);
@@ -120,7 +118,7 @@ public class OrderServiceImpl implements OrderService {
             }
 
             Order order = optionalOrder.get();
-            if (order.getStatus() != OrderStatus.PENDING) {
+            if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
                 return Result.error("Order already processed");
             }
 
@@ -137,46 +135,7 @@ public class OrderServiceImpl implements OrderService {
     public CompletableFuture<Optional<OrderDTO>> getOrderById(Long orderId) {
         return CompletableFuture.supplyAsync(() -> {
             Optional<Order> optionalOrder = orderRepository.findById(orderId);
-            return optionalOrder.map(this::makeOrderDTO).map(CompletableFuture::join);
-        });
-    }
-
-    @Override
-    @Async("taskExecutor")
-    @Transactional
-    public CompletableFuture<Boolean> validateExistingClient(Long clientId) {
-        return externalServiceFacade.getClientById(clientId)
-                .thenApply(Result::isSuccess);
-    }
-
-    @Override
-    @Async("taskExecutor")
-    @Transactional
-    public CompletableFuture<Page<OrderDTO>> getCurrentOrdersByClientId(Long clientId, Pageable pageable) {
-        return CompletableFuture.supplyAsync(() -> {
-            Page<Order> orderPage = orderRepository.findByClientIdAndStatus(clientId, OrderStatus.PENDING ,pageable);
-            List<OrderDTO> orderDTOs = orderPage.getContent().stream()
-                    .map(this::makeOrderDTO)
-                    .map(CompletableFuture::join)
-                    .collect(Collectors.toList());
-            return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
-        });
-    }
-
-
-    @Override
-    @Async("taskExecutor")
-    @Transactional
-    public CompletableFuture<Page<OrderDTO>> getCompletedOrdersByClientId(Long clientId, Pageable pageable) {
-        return CompletableFuture.supplyAsync(() -> {
-             Page<Order> orderPage = orderRepository.findByClientIdAndStatusIn(clientId, Arrays.asList(OrderStatus.PAID, OrderStatus.PAID_FAILED), pageable);
-
-             List<OrderDTO> orderDTOs = orderPage.getContent().stream()
-                    .map(this::makeOrderDTO)
-                    .map(CompletableFuture::join)
-                    .collect(Collectors.toList());
-
-            return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
+            return optionalOrder.map(orderDomainService::makeOrderDTO).map(CompletableFuture::join);
         });
     }
 
@@ -196,26 +155,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public CompletableFuture<Result<Void>> validateOrderForDelivery(OrderDTO orderDTO) {
         return CompletableFuture.supplyAsync(() ->
-                orderDTO.getStatus() == OrderStatus.PAID ? Result.success() : Result.error("Invalid Order"));
-    }
-
-    @Override
-    @Transactional
-    public CompletableFuture<Result<Void>> cancelOrder(Long orderId) {
-        return CompletableFuture.supplyAsync(() -> {
-            Order order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-
-            return orderDomainService.cancelOrder(order);
-        });
+                orderDTO.getStatus() != OrderStatus.PENDING_PAYMENT ? Result.success() : Result.error("Invalid Order"));
     }
 
     @Override
     @Async("taskExecutor")
     @Transactional
     public CompletableFuture<CompleteOrderData> bringClientDataToCompleteOrder(CompleteOrderRequest completeOrderRequest) {
-        CompletableFuture<Result<ClientDTO>> clientFuture = externalServiceFacade.getClientById(completeOrderRequest.getClientId());
-        CompletableFuture<Result<AddressDTO>> addressFuture = externalServiceFacade.getAddressById(completeOrderRequest.getAddressId());
+        CompletableFuture<Result<ClientDTO>> clientFuture = clientFacadeServiceFacade.findClientById(completeOrderRequest.getClientId());
+        CompletableFuture<Result<AddressDTO>> addressFuture = addressFacadeServiceImpl.getAddressById(completeOrderRequest.getAddressId());
         CompletableFuture<Optional<Order>> orderFuture = CompletableFuture.supplyAsync(() -> orderRepository.findById(completeOrderRequest.getOrderId()));
 
         return CompletableFuture.allOf(clientFuture, addressFuture, orderFuture)
@@ -233,14 +181,5 @@ public class OrderServiceImpl implements OrderService {
                 });
     }
 
-    private CompletableFuture<OrderDTO> makeOrderDTO(Order order) {
-        return externalServiceFacade.getClientById(order.getClientId())
-                .thenApply(clientResult -> {
-                    if (clientResult.isSuccess()) {
-                        return orderDomainService.createOrderDTO(order, clientResult.getData(), orderMapper, orderItemMapper);
-                    } else {
-                        throw new RuntimeException("Failed to fetch client data: " + clientResult.getErrorMessage());
-                    }
-                });
-    }
+
 }

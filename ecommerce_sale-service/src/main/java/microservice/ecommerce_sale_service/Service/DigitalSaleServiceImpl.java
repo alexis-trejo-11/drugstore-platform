@@ -1,115 +1,81 @@
 package microservice.ecommerce_sale_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Order.OrderItemDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Sale.*;
-import at.backend.drugstore.microservice.common_models.ExternalService.Inventory.ExternalInventoryService;
-import at.backend.drugstore.microservice.common_models.Models.Sales.SaleStatus;
-import microservice.ecommerce_sale_service.Mappers.DigitalSaleItemMapper;
-import microservice.ecommerce_sale_service.Mappers.DigitalSaleMapper;
+import at.backend.drugstore.microservice.common_models.DTOs.Sale.*;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Inventory.InventoryFacadeService;
+import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_sale_service.Model.DigitalSale;
-import microservice.ecommerce_sale_service.Model.DigitalSaleItem;
 import microservice.ecommerce_sale_service.Repository.DigitalSaleRepository;
-import microservice.ecommerce_sale_service.Utils.DigitalSaleHelper;
+import microservice.ecommerce_sale_service.Service.DomainService.DigitalSaleDomainService;
+import microservice.ecommerce_sale_service.Utils.DigitalSaleValidator;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class DigitalSaleServiceImpl implements DigitalSaleService {
 
     private final DigitalSaleRepository saleRepository;
-    private final DigitalSaleMapper digitalSaleMapper;
-    private final DigitalSaleItemMapper digitalSaleItemMapper;
-    private final ExternalInventoryService externalInventoryService;
+    private final DigitalSaleValidator validator;
+    private final DigitalSaleDomainService domainService;
+    private final InventoryFacadeService  inventoryFacadeService;
 
     public DigitalSaleServiceImpl(DigitalSaleRepository saleRepository,
-                                  DigitalSaleMapper digitalSaleMapper,
-                                  DigitalSaleItemMapper digitalSaleItemMapper,
-                                  ExternalInventoryService externalInventoryService) {
+                                  DigitalSaleValidator validator,
+                                  DigitalSaleDomainService domainService,
+                                  InventoryFacadeService inventoryFacadeService) {
         this.saleRepository = saleRepository;
-        this.digitalSaleMapper = digitalSaleMapper;
-        this.digitalSaleItemMapper = digitalSaleItemMapper;
-        this.externalInventoryService = externalInventoryService;
+        this.validator = validator;
+        this.domainService = domainService;
+        this.inventoryFacadeService = inventoryFacadeService;
     }
 
     @Override
-    @Async
-    @Transactional
-    public CompletableFuture<DigitalSaleDTO> createDigitalSale(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
-        DigitalSale sale = mapAndSaveDigitalSale(digitalSaleItemInsertDTO);
-        List<DigitalSaleItem> saleItems = mapAndSaveSaleItems(digitalSaleItemInsertDTO.getOrderItemDTOS(), sale);
-        return CompletableFuture.completedFuture(createDigitalSaleDTO(sale, saleItems));
+    @Async("taskExecutor")
+    public CompletableFuture<DigitalSaleDTO> createDigitalSale(DigitalSaleItemInsertDTO dto) {
+        return CompletableFuture.supplyAsync(() ->  {
+            log.info("Creating digital sale");
+            validator.validateSaleCreation(dto);
+
+            DigitalSale sale = domainService.createSale(dto);
+            DigitalSaleDTO saleDTO = domainService.toDTO(sale);
+
+            inventoryFacadeService.updateStockBySaleItemDTO(saleDTO.getSaleItemDTOS());
+            return saleDTO;
+        });
     }
 
     @Override
-    @Async
-    @Transactional
-    public CompletableFuture<Void> updateInventory(DigitalSaleDTO digitalSaleDTO) {
-        externalInventoryService.updateStockBySaleItemDTO(digitalSaleDTO.getSaleItemDTOS());
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Override
-    @Async
+    @Async("taskExecutor")
     public CompletableFuture<Optional<DigitalSaleDTO>> getSaleById(Long saleId) {
-        return CompletableFuture.completedFuture(
-                saleRepository.findById(saleId)
-                        .map(sale -> createDigitalSaleDTO(sale, sale.getSaleItems()))
-        );
+        return CompletableFuture.supplyAsync(() -> {
+            log.info("Fetching sale with id: {}", saleId);
+            return saleRepository.findById(saleId)
+                .map(domainService::toDTO);
+        });
     }
 
     @Override
-    @Async
-    @Transactional
+    @Async("taskExecutor")
     public CompletableFuture<List<DigitalSaleDTO>> getTodaySales() {
-        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
-        return CompletableFuture.completedFuture(
-                saleRepository.findDigitalSalesByDate(startOfDay, endOfDay).stream()
-                        .map(sale -> createDigitalSaleDTO(sale, sale.getSaleItems()))
-                        .collect(Collectors.toList())
-        );
+        return CompletableFuture.supplyAsync(() -> {
+            log.info("Fetching today's sales");
+            return domainService.getTodaySales();
+        });
     }
 
     @Override
     @Async
-    @Transactional
+    @Cacheable("todaySalesSummary")
     public CompletableFuture<SalesSummaryDTO> getTodaySummarySales() {
-        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
-        List<DigitalSale> sales = saleRepository.findDigitalSalesByDate(startOfDay, endOfDay);
-        return CompletableFuture.completedFuture(DigitalSaleHelper.saleToSummaryDTO(sales, startOfDay, endOfDay));
+        return CompletableFuture.supplyAsync(() -> {
+            log.info("Fetching today's sales summary");
+            return domainService.getTodaySalesSummary();
+        });
     }
 
-    private DigitalSale mapAndSaveDigitalSale(DigitalSaleItemInsertDTO dto) {
-        DigitalSale sale = digitalSaleMapper.insertDTOToEntity(dto.getPaymentDTO(), SaleStatus.PAID);
-        return saleRepository.saveAndFlush(sale);
-    }
-
-    private List<DigitalSaleItem> mapAndSaveSaleItems(List<OrderItemDTO> orderItemDTOS, DigitalSale sale) {
-        return orderItemDTOS.stream()
-                .map(cartItemDTO -> {
-                    DigitalSaleItem saleItem = digitalSaleItemMapper.toEntity(cartItemDTO);
-                    digitalSaleItemMapper.updateDigitalSale(sale, saleItem);
-                    return saleItem;
-                })
-                .collect(Collectors.toList());
-    }
-
-    private DigitalSaleDTO createDigitalSaleDTO(DigitalSale sale, List<DigitalSaleItem> saleItems) {
-        DigitalSaleDTO digitalSaleDTO = digitalSaleMapper.entityToDTO(sale);
-        List<SaleItemDTO> saleItemDTOS = saleItems.stream()
-                .map(digitalSaleItemMapper::entityToDTO)
-                .collect(Collectors.toList());
-        digitalSaleDTO.setSaleItemDTOS(saleItemDTOS);
-        return digitalSaleDTO;
-    }
 }

@@ -1,6 +1,6 @@
 package microservice.ecommerce_cart_service.Mappers;
 
-import at.backend.drugstore.microservice.common_models.DTO.Cart.CartItemDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartItemDTO;
 import microservice.ecommerce_cart_service.Model.Afterward;
 import microservice.ecommerce_cart_service.Model.CartItem;
 import org.mapstruct.Mapper;

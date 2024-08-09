@@ -1,9 +1,9 @@
 package microservice.user_service.Mappers;
 
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.User.ClientSignUpDTO;
-import at.backend.drugstore.microservice.common_models.DTO.User.UserDTO;
-import at.backend.drugstore.microservice.common_models.DTO.User.UserLoginDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.User.ClientSignUpDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.User.UserDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.User.UserLoginDTO;
 import microservice.user_service.Model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

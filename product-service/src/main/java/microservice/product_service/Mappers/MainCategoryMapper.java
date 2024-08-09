@@ -1,6 +1,6 @@
 package microservice.product_service.Mappers;
 
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.MainCategoryDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.Category.MainCategoryDTO;
 import microservice.product_service.Model.MainCategory;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

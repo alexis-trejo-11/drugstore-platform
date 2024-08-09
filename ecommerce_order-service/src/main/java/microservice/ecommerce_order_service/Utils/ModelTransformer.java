@@ -1,8 +1,8 @@
 package microservice.ecommerce_order_service.Utils;
 
-import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Order.*;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Order.*;
 import microservice.ecommerce_order_service.Model.Order;
 import microservice.ecommerce_order_service.Model.OrderItem;
 import microservice.ecommerce_order_service.Model.ShippingData;
@@ -17,7 +17,7 @@ public class ModelTransformer {
 
     public static Order InsertDtoToOrder(OrderInsertDTO orderInsertDTO) {
         Order order = new Order();
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(OrderStatus.PENDING_PAYMENT);
         order.setOrderDate(LocalDateTime.now());
         order.setLastOrderUpdate(LocalDateTime.now());
         order.setDeliveryTries(0);

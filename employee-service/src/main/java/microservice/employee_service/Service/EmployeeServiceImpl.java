@@ -1,15 +1,14 @@
 package microservice.employee_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeeDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeeUpdateDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Employee.EmployeInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Employee.EmployeeDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Employee.EmployeeUpdateDTO;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import microservice.employee_service.Mappers.EmployeeMapper;
 import microservice.employee_service.Model.Employee;
 import microservice.employee_service.Model.Position;
 import microservice.employee_service.Repository.EmployeeRepository;
 import microservice.employee_service.Repository.PositionRepository;
-import microservice.employee_service.Service.EmployeeService;
 import microservice.employee_service.Utils.CompanyHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;

@@ -1,47 +1,22 @@
 package at.backend.drugstore.microservice.common_models.Utils;
 
-import org.springframework.http.HttpStatus;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
 public class ResponseWrapper<T> {
+    private boolean success;
     private T data;
     private String message;
-    private HttpStatus status;
+    private int statusCode;
 
-    public ResponseWrapper() {
-    }
-
-    public ResponseWrapper(T data, String message) {
+    public ResponseWrapper(boolean success, T data, String message, int statusCode) {
+        this.success = success;
         this.data = data;
         this.message = message;
+        this.statusCode = statusCode;
     }
 
-    public ResponseWrapper(T data, String message, HttpStatus status) {
-        this.data = data;
-        this.message = message;
-        this.status = status;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(HttpStatus status) {
-        this.status = status;
-    }
 }
+

@@ -1,6 +1,6 @@
 package microservice.product_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.CategoryDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.Category.CategoryDTO;
 import at.backend.drugstore.microservice.common_models.Validations.ControllerValidation;
 import microservice.product_service.Service.CategoryServiceImpl;
 import org.slf4j.Logger;

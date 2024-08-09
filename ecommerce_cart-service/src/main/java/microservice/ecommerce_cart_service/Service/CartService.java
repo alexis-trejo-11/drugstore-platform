@@ -1,6 +1,6 @@
 package microservice.ecommerce_cart_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Cart.CartDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartDTO;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 
 import java.util.Optional;

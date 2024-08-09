@@ -1,6 +1,6 @@
 package microservice.inventory_service.Model;
 
-import at.backend.drugstore.microservice.common_models.DTO.Inventory.InventoryInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryInsertDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

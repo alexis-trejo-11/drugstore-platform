@@ -1,6 +1,6 @@
 package microservice.product_service.Model;
 
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.CategoryDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.Category.CategoryDTO;
 
 import javax.persistence.*;
 
@@ -44,7 +44,7 @@ public class Category {
     public Category() {
     }
 
-    // Constructor to transform from DTO to Model
+    // Constructor to transform from DTOs to Model
     public Category(CategoryDTO categoryDTO) {
         this.id = categoryDTO.getId();
         this.name = categoryDTO.getName();

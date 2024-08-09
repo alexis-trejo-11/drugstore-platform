@@ -1,7 +1,7 @@
 package microservice.client_service.Mappers;
 
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientInsertDTO;
 import microservice.client_service.Model.Client;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

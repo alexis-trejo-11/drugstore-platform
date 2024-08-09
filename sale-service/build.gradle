@@ -17,7 +17,7 @@ repositories {
 }
 
 ext {
-	set('springCloudVersion', "2023.0.2")
+	set('springCloudVersion', "2021.0.4")
 }
 
 dependencies {
@@ -49,6 +49,9 @@ dependencies {
 
 	// Open Api
 	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
+
+	// Eureka
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
 }
 
 dependencyManagement {

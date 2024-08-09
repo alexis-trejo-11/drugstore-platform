@@ -1,7 +1,7 @@
 package microservice.client_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientInsertDTO;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

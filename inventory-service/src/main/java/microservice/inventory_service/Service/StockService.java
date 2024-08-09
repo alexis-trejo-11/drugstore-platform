@@ -1,8 +1,8 @@
 package microservice.inventory_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Inventory.ProductStockDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Sale.SaleItemDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Inventory.ProductStockDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Sale.SaleItemDTO;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 
 import java.util.List;

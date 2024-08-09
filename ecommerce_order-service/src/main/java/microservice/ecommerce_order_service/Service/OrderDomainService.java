@@ -1,11 +1,12 @@
 package microservice.ecommerce_order_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Cart.CartItemDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Order.OrderDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Order.OrderInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Order.OrderStatus;
+import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartItemDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderStatus;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeService;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_order_service.Mapper.OrderItemMapper;
@@ -14,16 +15,29 @@ import microservice.ecommerce_order_service.Model.CompleteOrderData;
 import microservice.ecommerce_order_service.Model.Order;
 import microservice.ecommerce_order_service.Model.OrderItem;
 import microservice.ecommerce_order_service.Model.ShippingData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class OrderDomainService {
+
+    private final ClientFacadeService clientFacadeService;
+    private final OrderMapper orderMapper;
+    private final OrderItemMapper orderItemMapper;
+
+    @Autowired
+    public OrderDomainService(ClientFacadeService clientFacadeService, OrderMapper orderMapper, OrderItemMapper orderItemMapper) {
+        this.clientFacadeService = clientFacadeService;
+        this.orderMapper = orderMapper;
+        this.orderItemMapper = orderItemMapper;
+    }
 
     public Order createOrder(OrderInsertDTO orderInsertDTO, OrderMapper orderMapper, OrderItemMapper orderItemMapper) {
         Order order = orderMapper.insertDtoToEntity(orderInsertDTO.getAddressId(), orderInsertDTO.getClientId());
@@ -32,7 +46,7 @@ public class OrderDomainService {
     }
 
     public void updateOrderPaymentStatus(Order order, boolean isOrderPaid) {
-        order.setStatus(isOrderPaid ? OrderStatus.PAID : OrderStatus.PAID_FAILED);
+        order.setStatus(isOrderPaid ? OrderStatus.TO_BE_DELIVERED : OrderStatus.PAID_FAILED);
     }
 
     public String handleDelivery(Order order, boolean isOrderDelivered) {
@@ -51,7 +65,7 @@ public class OrderDomainService {
     }
 
     public Result<Void> cancelOrder(Order order) {
-        if (order.getStatus() != OrderStatus.PENDING) {
+        if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
             return Result.error("Order With Id " + order.getId() + " Can Not Be Canceled");
         }
 
@@ -79,20 +93,31 @@ public class OrderDomainService {
         return completeOrderData;
     }
 
-    public OrderDTO createOrderDTO(Order order, ClientDTO clientDTO, OrderMapper orderMapper, OrderItemMapper orderItemMapper) {
-        OrderDTO orderDTO = orderMapper.entityToDTO(order);
+    public CompletableFuture<OrderDTO> makeOrderDTO(Order order) {
+        return clientFacadeService.findClientById(order.getClientId())
+                .thenApply(clientResult -> {
+                    if (clientResult.isSuccess()) {
+                        return createOrderDTO(order, clientResult.getData());
+                    } else {
+                        throw new RuntimeException("Failed to fetch client data: " + clientResult.getErrorMessage());
+                    }
+                });
+    }
 
-        orderDTO.setClientName(clientDTO.getFirstName() + " " + clientDTO.getLastName());
-        orderDTO.setClientPhone(clientDTO.getPhone());
-        orderDTO.setItems(order.getItems().stream().map(orderItemMapper::entityToDTO).toList());
+    private OrderDTO createOrderDTO(Order order, ClientDTO clientDTO) {
+            OrderDTO orderDTO = orderMapper.entityToDTO(order);
 
-        if (order.getShippingData() != null) {
-            ShippingData shippingData = order.getShippingData();
-            orderDTO.setShippingAddress(shippingData.getAddress() + "," + shippingData.getCity() + "," + shippingData.getState() + "," + shippingData.getCountry() + "," + shippingData.getPostalCode());
-            orderDTO.setClientName(shippingData.getRecipientName());
-            orderDTO.setClientPhone(shippingData.getPhoneNumber());
-        }
+            orderDTO.setClientName(clientDTO.getFirstName() + " " + clientDTO.getLastName());
+            orderDTO.setClientPhone(clientDTO.getPhone());
+            orderDTO.setItems(order.getItems().stream().map(orderItemMapper::entityToDTO).toList());
 
-        return orderDTO;
+            if (order.getShippingData() != null) {
+                ShippingData shippingData = order.getShippingData();
+                orderDTO.setShippingAddress(shippingData.getAddress() + "," + shippingData.getCity() + "," + shippingData.getState() + "," + shippingData.getCountry() + "," + shippingData.getPostalCode());
+                orderDTO.setClientName(shippingData.getRecipientName());
+                orderDTO.setClientPhone(shippingData.getPhoneNumber());
+            }
+
+            return orderDTO;
     }
 }

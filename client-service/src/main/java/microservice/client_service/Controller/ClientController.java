@@ -1,8 +1,8 @@
 package microservice.client_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ApiResponse;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
 import microservice.client_service.Service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,42 +25,42 @@ public class ClientController {
     }
 
     @PostMapping("/add")
-    public CompletableFuture<ResponseEntity<ApiResponse<ClientDTO>>> createClient(@Valid @RequestBody ClientInsertDTO clientInsertDTO) {
+    public CompletableFuture<ResponseEntity<ResponseWrapper<ClientDTO>>> createClient(@Valid @RequestBody ClientInsertDTO clientInsertDTO) {
         return clientService.createClient(clientInsertDTO)
                 .thenApply(clientDTO -> ResponseEntity.status(HttpStatus.CREATED)
-                        .body(new ApiResponse<>(true, clientDTO, "Client Successfully Created.", 201)));
+                        .body(new ResponseWrapper<>(true, clientDTO, "Client Successfully Created.", 201)));
     }
 
     @GetMapping("/{clientId}")
-    public CompletableFuture<ResponseEntity<ApiResponse<ClientDTO>>> getClientById(@PathVariable Long clientId) {
+    public CompletableFuture<ResponseEntity<ResponseWrapper<ClientDTO>>> getClientById(@PathVariable Long clientId) {
         return clientService.getClientById(clientId)
                 .thenApply(clientDTO -> {
                     if (clientDTO == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body(new ApiResponse<>(false, null, "Client Not Found", 404));
+                                .body(new ResponseWrapper<>(false, null, "Client Not Found", 404));
                     }
                     return ResponseEntity.status(HttpStatus.OK)
-                            .body(new ApiResponse<>(true, clientDTO, "Client Successfully Fetched", 200));
+                            .body(new ResponseWrapper<>(true, clientDTO, "Client Successfully Fetched", 200));
                 });
     }
 
     @GetMapping("/all")
-    public CompletableFuture<ResponseEntity<ApiResponse<List<ClientDTO>>>> getAllClients() {
+    public CompletableFuture<ResponseEntity<ResponseWrapper<List<ClientDTO>>>> getAllClients() {
         return clientService.getAllClients()
                 .thenApply(clientDTOS -> ResponseEntity.status(HttpStatus.OK)
-                        .body(new ApiResponse<>(true, clientDTOS, "Clients Successfully Fetched", 200)));
+                        .body(new ResponseWrapper<>(true, clientDTOS, "Clients Successfully Fetched", 200)));
     }
 
     @DeleteMapping("/remove/{clientId}")
-    public CompletableFuture<ResponseEntity<ApiResponse<Void>>> deleteClientById(@PathVariable Long clientId) {
+    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> deleteClientById(@PathVariable Long clientId) {
         return clientService.deleteClient(clientId)
                 .thenApply(isClientDeleted -> {
                     if (!isClientDeleted) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body(new ApiResponse<>(false, null, "Client Not Found", 404));
+                                .body(new ResponseWrapper<>(false, null, "Client Not Found", 404));
                     }
                     return ResponseEntity.status(HttpStatus.OK)
-                            .body(new ApiResponse<>(true, null, "Client Successfully Deleted", 200));
+                            .body(new ResponseWrapper<>(true, null, "Client Successfully Deleted", 200));
                 });
     }
 }

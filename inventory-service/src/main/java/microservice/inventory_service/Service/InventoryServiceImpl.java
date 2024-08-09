@@ -1,17 +1,19 @@
 package microservice.inventory_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTO.Employee.EmployeeDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Inventory.InventoryTransactionDTO;
-import at.backend.drugstore.microservice.common_models.ExternalService.Employee.ExternalEmployeeService;
-import at.backend.drugstore.microservice.common_models.ExternalService.Products.ExternalProductService;
+import at.backend.drugstore.microservice.common_models.DTOs.Employee.EmployeeDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryTransactionDTO;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Employee.ExternalEmployeeService;
+import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Products.ProductFacadeService;
 import at.backend.drugstore.microservice.common_models.Utils.Result;
-import at.backend.drugstore.microservice.common_models.DTO.Inventory.InventoryInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTO.Inventory.InventoryDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryInsertDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryDTO;
+import microservice.inventory_service.Mapppers.DtoMappers;
 import microservice.inventory_service.Mapppers.InventoryMapper;
 import microservice.inventory_service.Model.Inventory;
 import microservice.inventory_service.Model.InventoryTransaction;
 import microservice.inventory_service.Repository.InventoryRepository;
-import at.backend.drugstore.microservice.common_models.DTO.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
+import microservice.inventory_service.Service.DomainService.InventoryDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -25,59 +27,56 @@ import java.util.stream.Collectors;
 public class InventoryServiceImpl implements InventoryService {
 
     private final InventoryRepository inventoryRepository;
-    private final ExternalProductService externalProductService;
+    private final ProductFacadeService productFacadeService;
     private final ExternalEmployeeService externalEmployeeService;
-    private final InventoryMapper inventoryMapper;
+    private final DtoMappers dtoMappers;
+    private final InventoryDomainService inventoryDomainService;
 
     @Autowired
-    public InventoryServiceImpl(InventoryRepository inventoryRepository, ExternalProductService externalProductService, ExternalEmployeeService externalEmployeeService, InventoryMapper inventoryMapper) {
+    public InventoryServiceImpl(InventoryRepository inventoryRepository,
+                                ProductFacadeService productFacadeService,
+                                ExternalEmployeeService externalEmployeeService,
+                                DtoMappers dtoMappers,
+                                InventoryDomainService inventoryDomainService) {
         this.inventoryRepository = inventoryRepository;
-        this.externalProductService = externalProductService;
+        this.productFacadeService = productFacadeService;
         this.externalEmployeeService = externalEmployeeService;
-        this.inventoryMapper = inventoryMapper;
+        this.dtoMappers = dtoMappers;
+        this.inventoryDomainService = inventoryDomainService;
     }
 
     @Override
     @Async("taskExecutor")
     @Transactional
     public CompletableFuture<Result<Void>> createInventory(InventoryInsertDTO inventoryInsertDTO) {
-        return externalProductService.getProductById(inventoryInsertDTO.getProductId())
-                .thenCombineAsync(externalEmployeeService.findEmployeeById(inventoryInsertDTO.getInventoryTransactionInsertDTO().getEmployeeId()),
-                        (productResult, employeeResult) -> {
-                            if (!productResult.isSuccess()) {
-                                return Result.error(productResult.getErrorMessage());
-                            }
+        CompletableFuture<Result<ProductDTO>> productFuture = productFacadeService.getProductById(inventoryInsertDTO.getProductId());
+        CompletableFuture<Result<EmployeeDTO>> employeeFuture = externalEmployeeService.findEmployeeById(inventoryInsertDTO.getInventoryTransactionInsertDTO().getEmployeeId());
 
-                            if (!employeeResult.isSuccess()) {
-                                return Result.error(employeeResult.getErrorMessage());
-                            }
+        return CompletableFuture.allOf(productFuture, employeeFuture)
+                .thenCompose(v -> {
+                    Result<ProductDTO> productResult = productFuture.join();
+                    Result<EmployeeDTO> employeeResult = employeeFuture.join();
 
-                            Inventory inventory = new Inventory(inventoryInsertDTO);
-                            ProductDTO productDTO = productResult.getData();
-                            inventory.setProductId(productDTO.getId());
+                    if (!productResult.isSuccess()) {
+                        return CompletableFuture.completedFuture(Result.error(productResult.getErrorMessage()));
+                    }
+                    ProductDTO productDTO = productResult.getData();
 
-                            InventoryTransaction inventoryTransaction = new InventoryTransaction(inventoryInsertDTO.getInventoryTransactionInsertDTO(), employeeResult.getData().getId());
-                            inventoryTransaction.setInventory(inventory);
+                    if (!employeeResult.isSuccess()) {
+                        return CompletableFuture.completedFuture(Result.error(employeeResult.getErrorMessage()));
+                    }
+                    Long employeeId = employeeResult.getData().getId();
 
-                            if (inventory.getTransactions() == null) {
-                                List<InventoryTransaction> inventoryTransactionList = new ArrayList<>();
-                                inventoryTransactionList.add(inventoryTransaction);
-                                inventory.setTransactions(inventoryTransactionList);
-                            } else {
-                                inventory.getTransactions().add(inventoryTransaction);
-                            }
-
-                            inventoryRepository.saveAndFlush(inventory);
-                            return Result.success();
-                        });
+                    inventoryDomainService.processInventoryInsert(inventoryInsertDTO, productDTO, employeeId);
+                    return CompletableFuture.completedFuture(Result.success());
+                });
     }
-
 
     @Override
     @Async("taskExecutor")
     @Transactional
     public CompletableFuture<List<InventoryDTO>> getInventoriesByProductId(Long productId) {
-        return externalProductService.getProductById(productId)
+        return productFacadeService.getProductById(productId)
                 .thenApplyAsync(productResult -> {
                     if (!productResult.isSuccess()) {
                         return Collections.emptyList();
@@ -87,7 +86,7 @@ public class InventoryServiceImpl implements InventoryService {
                     List<Inventory> inventories = inventoryRepository.findByProductId(productDTO.getId());
 
                     return inventories.stream()
-                            .map(inventory -> mapInventoryToDTO(inventory, productDTO.getName()))
+                            .map(inventory ->  dtoMappers.mapInventoryToDTO(inventory, productDTO.getName()))
                             .collect(Collectors.toList());
                 });
     }
@@ -99,7 +98,7 @@ public class InventoryServiceImpl implements InventoryService {
     public CompletableFuture<Boolean> deleteInventory(Long inventoryId) {
         return CompletableFuture.supplyAsync(() -> {
             Optional<Inventory> inventory = inventoryRepository.findById(inventoryId);
-            if (!inventory.isPresent()) {
+            if (inventory.isEmpty()) {
                 return false;
             }
 
@@ -108,12 +107,5 @@ public class InventoryServiceImpl implements InventoryService {
         });
     }
 
-    private InventoryDTO mapInventoryToDTO(Inventory inventory, String productName) {
-        InventoryDTO inventoryDTO = inventoryMapper.inventoryToDTO(inventory, productName);
-        List<InventoryTransactionDTO> inventoryTransactionDTOS = inventory.getTransactions().stream()
-                .map(inventoryMapper::inventoryTransactionToDTO)
-                .collect(Collectors.toList());
-        inventoryDTO.setInventoryTransactionDTOS(inventoryTransactionDTOS);
-        return inventoryDTO;
-    }
+
 }

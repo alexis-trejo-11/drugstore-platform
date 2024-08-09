@@ -1,6 +1,6 @@
 package microservice.product_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTO.Product.Category.MainCategoryDTO;
+import at.backend.drugstore.microservice.common_models.DTOs.Product.Category.MainCategoryDTO;
 import microservice.product_service.Service.MainCategoryServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ public class MainCategoryController {
     /**
      * Inserts a new main category.
      *
-     * @param mainCategoryDTO the main category DTO
+     * @param mainCategoryDTO the main category DTOs
      * @param bindingResult   the binding result for validation
      * @return ResponseEntity with a status message
      */
@@ -46,7 +46,7 @@ public class MainCategoryController {
      * Retrieves a main category by ID along with its subcategories.
      *
      * @param id the ID of the main category
-     * @return ResponseEntity with the main category DTO
+     * @return ResponseEntity with the main category DTOs
      */
     @GetMapping("/{id}")
     public ResponseEntity<MainCategoryDTO> getMainCategoryById(@PathVariable Long id) {
@@ -63,7 +63,7 @@ public class MainCategoryController {
      * Retrieves a main category by ID along with its products.
      *
      * @param id the ID of the main category
-     * @return ResponseEntity with the main category DTO
+     * @return ResponseEntity with the main category DTOs
      */
     @GetMapping("/{id}/products")
     public ResponseEntity<MainCategoryDTO> getMainCategoryByIdWithProducts(@PathVariable Long id) {
@@ -79,7 +79,7 @@ public class MainCategoryController {
     /**
      * Updates an existing main category.
      *
-     * @param mainCategoryDTO the main category DTO
+     * @param mainCategoryDTO the main category DTOs
      * @param bindingResult   the binding result for validation
      * @return ResponseEntity with a status message
      */

@@ -16,6 +16,7 @@
             <option value="$PROJECT_DIR$/ecommerce_payment-service" />
             <option value="$PROJECT_DIR$/ecommerce_sale-service" />
             <option value="$PROJECT_DIR$/employee-service" />
+            <option value="$PROJECT_DIR$/eureka-server" />
             <option value="$PROJECT_DIR$/inventory-service" />
             <option value="$PROJECT_DIR$/product-service" />
             <option value="$PROJECT_DIR$/sale-service" />
