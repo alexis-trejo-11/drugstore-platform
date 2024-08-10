@@ -9,6 +9,7 @@ import microservice.ecommerce_cart_service.Service.ClientCartService;
 import microservice.ecommerce_cart_service.Service.CartService;
 import microservice.ecommerce_cart_service.Service.FacadeService.PurchaseServiceFacade;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,7 +46,8 @@ public class CartClientController {
         this.authSecurity = authSecurity;
     }
 
-    @GetMapping("/client")
+
+    @GetMapping(value = "/client" , produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ResponseEntity<ResponseWrapper<CartDTO>>> getCartByClientId(HttpServletRequest request) {
         Long clientId = authSecurity.getClientIdFromToken(request);
         logger.info("Fetching cart for client ID: " + clientId);
@@ -64,7 +66,7 @@ public class CartClientController {
     }
 
 
-    @PostMapping("/product/{clientId}")
+    @PostMapping(value = "/product/{clientId}" , produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> addProductToCart(
             @Valid @RequestBody final CartItemInsertDTO cartItemInsertDTO,
             @PathVariable final Long clientId) {
