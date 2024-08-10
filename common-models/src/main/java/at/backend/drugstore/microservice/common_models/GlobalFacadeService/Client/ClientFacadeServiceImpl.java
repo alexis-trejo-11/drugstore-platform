@@ -22,7 +22,7 @@ public class ClientFacadeServiceImpl implements ClientFacadeService {
     private final RestTemplate restTemplate;
     private final Logger logger = LoggerFactory.getLogger(ClientFacadeServiceImpl.class);
 
-    private final String clientServiceUrl = "http://10.212.82.114:8081" ;
+    private final String clientServiceUrl = "http://client-service:8081" ;
 
     public ClientFacadeServiceImpl(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -58,7 +58,7 @@ public class ClientFacadeServiceImpl implements ClientFacadeService {
                 }
             } catch (Exception e) {
                 logger.error("Error occurred while creating client", e);
-                throw new RuntimeException("Error occurred while creating client", e);
+                throw new RuntimeException(e);
             }
         });
     }

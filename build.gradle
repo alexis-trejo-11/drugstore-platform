@@ -19,22 +19,18 @@ dependencies {
 	// Spring
 	implementation 'org.springframework.boot:spring-boot-starter'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	implementation('org.springframework.boot:spring-boot-starter-web') {
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-data-rest'
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-hateoas'
+	}
+
 	// Flyway
 	implementation 'org.flywaydb:flyway-core:6.4.3'
 
-	// Open Api
-	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
-
-	// Web Config
-	dependencies {
-		implementation 'org.springframework.boot:spring-boot-starter-webflux'
-		implementation 'io.projectreactor.netty:reactor-netty'
-	}
 
 }
 

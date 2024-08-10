@@ -20,6 +20,7 @@
             <option value="$PROJECT_DIR$/inventory-service" />
             <option value="$PROJECT_DIR$/product-service" />
             <option value="$PROJECT_DIR$/sale-service" />
+            <option value="$PROJECT_DIR$/test-service" />
             <option value="$PROJECT_DIR$/user-service" />
           </set>
         </option>

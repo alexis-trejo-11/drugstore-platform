@@ -1,0 +1,78 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '2.7.0'
+	id 'io.spring.dependency-management' version '1.1.5'
+}
+
+group = 'at.backend.drugstore.microservice'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+	targetCompatibility = '17'
+}
+
+repositories {
+	mavenCentral()
+}
+
+ext {
+	set('springCloudVersion', "2021.0.4")
+}
+
+dependencies {
+	// Spring Boot
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+
+	// Validations
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// Common Models
+	implementation project(':common-models')
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	// AutoMappers
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+	implementation 'org.modelmapper:modelmapper:2.4.4'
+
+	// Rate Limiter
+	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
+	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-jcache:7.6.0'
+
+	// Open Api
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
+
+	// Eureka
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+
+	// Postgres
+	implementation 'org.postgresql:postgresql'
+	runtimeOnly 'org.postgresql:postgresql'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+bootRun {
+	jvmArgs = []
+}
+
+bootJar {
+	archiveFileName = 'sale-service.jar'
+}

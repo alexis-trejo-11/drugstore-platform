@@ -19,7 +19,7 @@ public class CartFacadeFacadeServiceImpl implements CartFacadeService {
     private final RestTemplate restTemplate;
     private final Logger logger = LoggerFactory.getLogger(CartFacadeFacadeServiceImpl.class);
 
-    private final String cartServiceUrl = "http://10.212.82.114:8086";
+    private final String cartServiceUrl = "http://ecommercer_cart-service:8086";
 
     public CartFacadeFacadeServiceImpl(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
