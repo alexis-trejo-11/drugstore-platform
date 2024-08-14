@@ -1,8 +1,8 @@
 package microservice.ecommerce_cart_service.Service.DomainService;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartItemDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartItemDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
 import microservice.ecommerce_cart_service.Mappers.CartDtoMapper;
 import microservice.ecommerce_cart_service.Mappers.CartItemMapper;
 import microservice.ecommerce_cart_service.Mappers.CartMapper;
@@ -33,7 +33,8 @@ public class CartDomainServiceImpl implements CartDomainService {
     public CartDomainServiceImpl(CartMapper cartMapper,
                                  CartItemMapper cartItemMapper,
                                  CartItemRepository cartItemRepository,
-                                 CartRepository cartRepository, CartDtoMapper cartDtoMapper) {
+                                 CartRepository cartRepository,
+                                 CartDtoMapper cartDtoMapper) {
         this.cartMapper = cartMapper;
         this.cartItemMapper = cartItemMapper;
         this.cartItemRepository = cartItemRepository;

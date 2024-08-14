@@ -1,8 +1,8 @@
 package microservice.ecommerce_order_service.Utils;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.*;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.*;
 import microservice.ecommerce_order_service.Model.Order;
 import microservice.ecommerce_order_service.Model.OrderItem;
 import microservice.ecommerce_order_service.Model.ShippingData;

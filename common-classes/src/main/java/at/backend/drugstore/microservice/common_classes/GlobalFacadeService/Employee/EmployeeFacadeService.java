@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
 
-@Service
-public interface ExternalEmployeeService {
+public interface EmployeeFacadeService {
     CompletableFuture<Result<EmployeeDTO>> getEmployeeBySaleProductsDTO(SaleProductsDTO saleProductsDTO);
     CompletableFuture<Result<EmployeeDTO>> findEmployeeById(Long employeeId);
 }

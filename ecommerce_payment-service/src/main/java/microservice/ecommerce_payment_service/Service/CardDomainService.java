@@ -1,6 +1,6 @@
 package microservice.ecommerce_payment_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.CardDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardDTO;
 import microservice.ecommerce_payment_service.Config.EncryptionConfig;
 import microservice.ecommerce_payment_service.Model.Card;
 import org.springframework.stereotype.Service;

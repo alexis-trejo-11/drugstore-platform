@@ -1,24 +1,22 @@
 package microservice.user_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.User.ClientLoginDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.User.ClientSignUpDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.User.UserLoginDTO;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Cart.CartFacadeService;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeService;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.User.ClientLoginDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.User.ClientSignUpDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.User.UserLoginDTO;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Cart.CartFacadeService;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.ClientFacadeService;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.user_service.Mappers.UserMapper;
 import microservice.user_service.Model.User;
 import microservice.user_service.Repository.UserRepository;
-import microservice.user_service.Middleware.PasswordUtil;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -34,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     public AuthServiceImpl(CartFacadeService cartFacadeService,
                            UserRepository userRepository,
-                           ClientFacadeService clientFacadeService,
+                           @Qualifier("clientFacadeService") ClientFacadeService clientFacadeService,
                            UserMapper userMapper,
                            AuthDomainService authDomainService) {
         this.cartFacadeService = cartFacadeService;

@@ -1,8 +1,8 @@
 package microservice.client_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import microservice.client_service.Service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -1,11 +1,12 @@
 package microservice.ecommerce_order_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderStatus;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeService;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderStatus;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.ClientFacadeService;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.ecommerce_order_service.Model.Order;
 import microservice.ecommerce_order_service.Repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -28,10 +29,10 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
     public ClientOrderServiceImpl(OrderRepository orderRepository,
                                   OrderDomainService orderDomainService,
-                                  ClientFacadeService clientFacadeServiceFacade) {
+                                  @Qualifier("clientFacadeService") ClientFacadeService clientFacadeService) {
         this.orderRepository = orderRepository;
         this.orderDomainService = orderDomainService;
-        this.clientFacadeServiceFacade = clientFacadeServiceFacade;
+        this.clientFacadeServiceFacade = clientFacadeService;
     }
 
     @Override

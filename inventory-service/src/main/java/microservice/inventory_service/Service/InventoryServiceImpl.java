@@ -1,20 +1,18 @@
 package microservice.inventory_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Employee.EmployeeDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryTransactionDTO;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Employee.ExternalEmployeeService;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Products.ProductFacadeService;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
-import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDTO;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Employee.EmployeeFacadeService;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Products.ProductFacadeService;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.Inventory.InventoryInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Inventory.InventoryDTO;
 import microservice.inventory_service.Mapppers.DtoMappers;
-import microservice.inventory_service.Mapppers.InventoryMapper;
 import microservice.inventory_service.Model.Inventory;
-import microservice.inventory_service.Model.InventoryTransaction;
 import microservice.inventory_service.Repository.InventoryRepository;
-import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
 import microservice.inventory_service.Service.DomainService.InventoryDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -28,19 +26,19 @@ public class InventoryServiceImpl implements InventoryService {
 
     private final InventoryRepository inventoryRepository;
     private final ProductFacadeService productFacadeService;
-    private final ExternalEmployeeService externalEmployeeService;
+    private final EmployeeFacadeService employeeFacadeService;
     private final DtoMappers dtoMappers;
     private final InventoryDomainService inventoryDomainService;
 
     @Autowired
     public InventoryServiceImpl(InventoryRepository inventoryRepository,
                                 ProductFacadeService productFacadeService,
-                                ExternalEmployeeService externalEmployeeService,
+                                @Qualifier("employeeFacadeService") EmployeeFacadeService employeeFacadeService,
                                 DtoMappers dtoMappers,
                                 InventoryDomainService inventoryDomainService) {
         this.inventoryRepository = inventoryRepository;
         this.productFacadeService = productFacadeService;
-        this.externalEmployeeService = externalEmployeeService;
+        this.employeeFacadeService = employeeFacadeService;
         this.dtoMappers = dtoMappers;
         this.inventoryDomainService = inventoryDomainService;
     }
@@ -50,7 +48,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     public CompletableFuture<Result<Void>> createInventory(InventoryInsertDTO inventoryInsertDTO) {
         CompletableFuture<Result<ProductDTO>> productFuture = productFacadeService.getProductById(inventoryInsertDTO.getProductId());
-        CompletableFuture<Result<EmployeeDTO>> employeeFuture = externalEmployeeService.findEmployeeById(inventoryInsertDTO.getInventoryTransactionInsertDTO().getEmployeeId());
+        CompletableFuture<Result<EmployeeDTO>> employeeFuture = employeeFacadeService.findEmployeeById(inventoryInsertDTO.getInventoryTransactionInsertDTO().getEmployeeId());
 
         return CompletableFuture.allOf(productFuture, employeeFuture)
                 .thenCompose(v -> {

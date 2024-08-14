@@ -1,11 +1,11 @@
 package microservice.inventory_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryStockDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Inventory.ProductStockDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.SaleItemDTO;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Products.ProductFacadeService;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.Inventory.InventoryStockDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Inventory.ProductStockDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.SaleItemDTO;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Products.ProductFacadeService;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.inventory_service.Model.Inventory;
 import microservice.inventory_service.Repository.InventoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;

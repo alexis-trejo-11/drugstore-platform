@@ -10,7 +10,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @SpringBootApplication
 @EnableWebMvc
 @EnableEurekaServer
-@ComponentScan(basePackages = {"microservice.inventory_service", "at.backend.drugstore.microservice.common_models.GlobalFacadeService.Products", "at.backend.drugstore.microservice.common_models.GlobalFacadeService.Employee", "at.backend.drugstore.microservice.common_models.Validations"})
+@ComponentScan(basePackages = {"microservice.inventory_service", "at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Products", "at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Employee", "at.backend.drugstore.microservice.common_classes.Validations"})
 public class InventoryServiceApplication {
 
 	public static void main(String[] args) {

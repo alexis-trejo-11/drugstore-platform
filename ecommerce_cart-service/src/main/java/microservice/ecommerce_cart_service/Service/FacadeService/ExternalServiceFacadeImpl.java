@@ -1,19 +1,21 @@
 package microservice.ecommerce_cart_service.Service.FacadeService;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.ClientEcommerceDataDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.CardDTO;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Adress.AddressFacadeServiceImpl;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeService;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Order.OrderFacadeService;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Payment.EPaymentFacadeService;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.ClientEcommerceDataDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardDTO;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.AddressFacadeService;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.AddressFacadeServiceImpl;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.ClientFacadeService;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Order.OrderFacadeService;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Payment.EPaymentFacadeService;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.ecommerce_cart_service.Mappers.OrderDtoMapper;
 import microservice.ecommerce_cart_service.Mappers.PaymentDtoMapper;
 import microservice.ecommerce_cart_service.Service.CartService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -27,22 +29,22 @@ public class ExternalServiceFacadeImpl implements ExternalServiceFacade {
 
     private final EPaymentFacadeService ePaymentFacadeService;
     private final ClientFacadeService clientFacadeService;
-    private final AddressFacadeServiceImpl addressFacadeServiceImpl;
+    private final AddressFacadeService addressFacadeService;
     private final OrderFacadeService orderFacadeService;
     private final PaymentDtoMapper paymentDtoMapper;
     private final CartService cartService;
     private final OrderDtoMapper orderDtoMapper;
 
     public ExternalServiceFacadeImpl(EPaymentFacadeService ePaymentFacadeService,
-                                     ClientFacadeService clientFacadeService,
-                                     AddressFacadeServiceImpl addressFacadeServiceImpl,
+                                     @Qualifier("clientFacadeService") ClientFacadeService clientFacadeService,
+                                     AddressFacadeService addressFacadeService,
                                      OrderFacadeService orderFacadeService,
                                      PaymentDtoMapper paymentDtoMapper,
                                      CartService cartService,
                                      OrderDtoMapper orderDtoMapper) {
         this.ePaymentFacadeService = ePaymentFacadeService;
         this.clientFacadeService = clientFacadeService;
-        this.addressFacadeServiceImpl = addressFacadeServiceImpl;
+        this.addressFacadeService = addressFacadeService;
         this.orderFacadeService = orderFacadeService;
         this.paymentDtoMapper = paymentDtoMapper;
         this.cartService = cartService;
@@ -77,7 +79,7 @@ public class ExternalServiceFacadeImpl implements ExternalServiceFacade {
         // Start fetching data asynchronously
         CompletableFuture<Result<ClientDTO>> clientFuture = clientFacadeService.findClientById(clientId);
 
-        CompletableFuture<Result<List<AddressDTO>>> addressFuture = addressFacadeServiceImpl.getAddressesByClientId(clientId);
+        CompletableFuture<Result<List<AddressDTO>>> addressFuture = addressFacadeService.getAddressesByClientId(clientId);
 
         CompletableFuture<Result<List<CardDTO>>> cardFuture = ePaymentFacadeService.getCardByClientId(clientId);
 

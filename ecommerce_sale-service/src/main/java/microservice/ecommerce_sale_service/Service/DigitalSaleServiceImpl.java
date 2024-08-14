@@ -1,7 +1,7 @@
 package microservice.ecommerce_sale_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.*;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Inventory.InventoryFacadeService;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.*;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Inventory.InventoryFacadeService;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_sale_service.Model.DigitalSale;
 import microservice.ecommerce_sale_service.Repository.DigitalSaleRepository;

@@ -1,9 +1,9 @@
 package microservice.user_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.User.ClientLoginDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.User.ClientSignUpDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.User.UserLoginDTO;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.User.ClientLoginDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.User.ClientSignUpDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.User.UserLoginDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 
 import java.util.concurrent.CompletableFuture;
 

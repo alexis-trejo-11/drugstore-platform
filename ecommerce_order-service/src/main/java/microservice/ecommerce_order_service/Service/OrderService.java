@@ -1,12 +1,12 @@
 package microservice.ecommerce_order_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.CompleteOrderRequest;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderInsertDTO;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.CompleteOrderRequest;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderInsertDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.ecommerce_order_service.Model.CompleteOrderData;
 import microservice.ecommerce_order_service.Model.Order;
 

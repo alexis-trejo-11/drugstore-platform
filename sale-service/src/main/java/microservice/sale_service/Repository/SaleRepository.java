@@ -1,6 +1,6 @@
 package microservice.sale_service.Repository;
 
-import at.backend.drugstore.microservice.common_models.Models.Sales.SaleStatus;
+import at.backend.drugstore.microservice.common_classes.Models.Sales.SaleStatus;
 import microservice.sale_service.Model.PhysicalSale;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

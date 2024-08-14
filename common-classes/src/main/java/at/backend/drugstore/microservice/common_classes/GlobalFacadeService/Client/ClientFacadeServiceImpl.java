@@ -5,8 +5,8 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientInsert
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import java.util.function.Supplier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -17,12 +17,12 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Service
 public class ClientFacadeServiceImpl implements ClientFacadeService {
 
     private final RestTemplate restTemplate;
     private final Supplier<String> clientServiceUrlProvider;
-    private final Logger logger = LoggerFactory.getLogger(ClientFacadeServiceImpl.class);
 
     public ClientFacadeServiceImpl(RestTemplate restTemplate,
                                    Supplier<String> clientServiceUrlProvider) {
@@ -36,7 +36,7 @@ public class ClientFacadeServiceImpl implements ClientFacadeService {
     public CompletableFuture<ClientDTO> createClient(ClientInsertDTO clientInsertDTO) {
          return CompletableFuture.supplyAsync(() -> {
             String url = clientServiceUrlProvider.get() + "/v1/api/clients/add";
-            logger.info("Sending client data to URL: {}", url);
+            log.info("Sending client data to URL: {}", url);
 
                 ResponseEntity<ResponseWrapper<ClientDTO>> responseEntity = restTemplate.exchange(
                         url,
@@ -49,16 +49,16 @@ public class ClientFacadeServiceImpl implements ClientFacadeService {
                 if (responseEntity.getStatusCode().is2xxSuccessful()) {
                     ResponseWrapper<ClientDTO> responseBody = responseEntity.getBody();
                     if (responseBody != null) {
-                        logger.info("Client created successfully");
+                        log.info("Client created successfully");
                         return responseBody.getData();
                     } else {
-                        logger.error("Response body is null");
+                        log.error("Response body is null");
                         throw new RuntimeException("Client creation failed");
                     }
                 } else {
                     String errorMessage = String.format("Failed to create client, status code: %s",
                             responseEntity.getStatusCode());
-                    logger.error(errorMessage);
+                    log.error(errorMessage);
                     throw new RuntimeException(errorMessage);
                 }
         });
@@ -80,19 +80,19 @@ public class ClientFacadeServiceImpl implements ClientFacadeService {
                 if (responseEntity.getStatusCode().is2xxSuccessful()) {
                     ResponseWrapper<ClientDTO> responseBody = (ResponseWrapper<ClientDTO>) responseEntity.getBody();
                     if (responseBody != null) {
-                        logger.info("Client found successfully: {}", clientId);
+                        log.info("Client found successfully: {}", clientId);
                         return new Result<>(true, responseBody.getData(), responseBody.getMessage());
                     } else {
-                        logger.warn("Client not found: {}, status code: {}", clientId, responseEntity.getStatusCode());
+                        log.warn("Client not found: {}, status code: {}", clientId, responseEntity.getStatusCode());
                         return new Result<>(false, null, "Client not found");
                     }
                 } else {
                     String message = responseEntity.getBody() != null ? ((ResponseWrapper<ClientDTO>) responseEntity.getBody()).getMessage() : "Client not found";
-                    logger.warn("Client not found: {}, status code: {}", clientId, responseEntity.getStatusCode());
+                    log.warn("Client not found: {}, status code: {}", clientId, responseEntity.getStatusCode());
                     return new Result<>(false, null, message);
                 }
             } catch (Exception e) {
-                logger.error("Error occurred while finding client", e);
+                log.error("Error occurred while finding client", e);
                 return new Result<>(false, null, "An error occurred");
             }
         });

@@ -1,11 +1,9 @@
 package microservice.employee_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
-import at.backend.drugstore.microservice.common_models.DTOs.Employee.EmployeInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Employee.EmployeeDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Employee.EmployeeUpdateDTO;
-import at.backend.drugstore.microservice.common_models.Validations.ControllerValidation;
-import at.backend.drugstore.microservice.common_models.Validations.CustomControllerResponse;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeUpdateDTO;
 import microservice.employee_service.Service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -53,12 +51,7 @@ public class EmployeeController {
     }
 
     @PutMapping
-    public CompletableFuture<ResponseEntity<ResponseWrapper<?>>> updateEmployee(@RequestBody @Valid EmployeeUpdateDTO employeeUpdateDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            CustomControllerResponse validationError = ControllerValidation.handleValidationError(bindingResult);
-            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(false, validationError, "Validation Error", 400)));
-        }
-
+    public CompletableFuture<ResponseEntity<ResponseWrapper<?>>> updateEmployee(@RequestBody @Valid EmployeeUpdateDTO employeeUpdateDTO) {
         return employeeService.updateEmployee(employeeUpdateDTO).thenApply(updateEmployeeResult -> {
             if (!updateEmployeeResult.isSuccess()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, updateEmployeeResult.getErrorMessage(), 404));

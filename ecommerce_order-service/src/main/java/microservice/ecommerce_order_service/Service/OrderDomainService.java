@@ -1,13 +1,13 @@
 package microservice.ecommerce_order_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartItemDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderStatus;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeService;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartItemDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderStatus;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.ClientFacadeService;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_order_service.Mapper.OrderItemMapper;
 import microservice.ecommerce_order_service.Mapper.OrderMapper;

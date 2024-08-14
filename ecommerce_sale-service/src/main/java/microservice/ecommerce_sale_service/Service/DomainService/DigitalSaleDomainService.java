@@ -1,8 +1,8 @@
 package microservice.ecommerce_sale_service.Service.DomainService;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderItemDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.*;
-import at.backend.drugstore.microservice.common_models.Models.Sales.SaleStatus;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderItemDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.*;
+import at.backend.drugstore.microservice.common_classes.Models.Sales.SaleStatus;
 import microservice.ecommerce_sale_service.Mappers.DigitalSaleMapper;
 import microservice.ecommerce_sale_service.Mappers.DigitalSaleItemMapper;
 import microservice.ecommerce_sale_service.Model.DigitalSale;

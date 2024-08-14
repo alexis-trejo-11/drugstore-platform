@@ -1,15 +1,9 @@
 package microservice.ecommerce_payment_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderItemDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.DigitalSaleItemInsertDTO;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.ESale.ESaleFacadeImpl;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Order.OrderFacadeService;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentInsertDTO;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_payment_service.Automappers.PaymentMapper;
-import microservice.ecommerce_payment_service.Model.Card;
 import microservice.ecommerce_payment_service.Model.Payment;
 import microservice.ecommerce_payment_service.Repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +11,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityNotFoundException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

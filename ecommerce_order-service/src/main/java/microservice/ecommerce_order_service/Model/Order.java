@@ -1,6 +1,7 @@
 package microservice.ecommerce_order_service.Model;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderStatus;
+
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

@@ -1,11 +1,11 @@
 package microservice.sale_service.Service.DomainServices;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.ProductSummaryDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.SaleItemInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.SalesSummaryDTO;
-import at.backend.drugstore.microservice.common_models.Models.Sales.SaleItem;
-import at.backend.drugstore.microservice.common_models.Models.Sales.SaleStatus;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.ProductSummaryDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.SaleItemInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.SalesSummaryDTO;
+import at.backend.drugstore.microservice.common_classes.Models.Sales.SaleItem;
+import at.backend.drugstore.microservice.common_classes.Models.Sales.SaleStatus;
 import microservice.sale_service.Model.PhysicalSale;
 import microservice.sale_service.Model.PhysicalSaleItem;
 import org.springframework.stereotype.Service;

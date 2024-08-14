@@ -3,8 +3,8 @@ package at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Pro
 import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
@@ -17,23 +17,24 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.function.Supplier;
 
+@Slf4j
 @Service
 public class ProductFacadeServiceImpl implements ProductFacadeService {
 
     private final RestTemplate restTemplate;
-    private static final Logger logger = LoggerFactory.getLogger(ProductFacadeServiceImpl.class);
+    private final Supplier<String> productServiceUrlProvider;
 
-    private final String productServiceUrl = "http://product-service:8083";
-
-    public ProductFacadeServiceImpl(RestTemplate restTemplate) {
+    public ProductFacadeServiceImpl(RestTemplate restTemplate, Supplier<String> productServiceUrlProvider) {
         this.restTemplate = restTemplate;
+        this.productServiceUrlProvider = productServiceUrlProvider;
     }
 
     @Override
     @Async("taskExecutor")
     public CompletableFuture<List<ProductDTO>> getProductsByIds(List<Long> productIds) {
-        String url = productServiceUrl + "/v1/api/products/by-ids";
+        String url = productServiceUrlProvider.get() + "/v1/api/products/by-ids";
 
         Map<String, List<Long>> request = new HashMap<>();
         request.put("productIds", productIds);
@@ -48,14 +49,14 @@ public class ProductFacadeServiceImpl implements ProductFacadeService {
                 );
 
                 if (response.getStatusCode() == HttpStatus.OK) {
-                    logger.info("Received response from Product Service");
+                    log.info("Received response from Product Service");
                     return Objects.requireNonNull(response.getBody()).getData();
                 } else {
-                    logger.error("Error response from Product Service: {}", response.getStatusCode());
+                    log.error("Error response from Product Service: {}", response.getStatusCode());
                     throw new CompletionException(new RuntimeException("Error response from Product Service"));
                 }
             } catch (Exception e) {
-                logger.error("An error occurred while fetching products: {}", e.getMessage());
+                log.error("An error occurred while fetching products: {}", e.getMessage());
                 throw new CompletionException(e);
             }
         });
@@ -64,7 +65,7 @@ public class ProductFacadeServiceImpl implements ProductFacadeService {
     @Override
     @Async("taskExecutor")
     public CompletableFuture<Result<ProductDTO>> getProductById(Long productId) {
-        String url = productServiceUrl + "/v1/api/products/" + productId;
+        String url = productServiceUrlProvider.get() + "/v1/api/products/" + productId;
 
         return CompletableFuture.supplyAsync(() -> {
                 ResponseWrapper<ProductDTO> response = restTemplate.exchange(
@@ -76,11 +77,11 @@ public class ProductFacadeServiceImpl implements ProductFacadeService {
             assert response != null;
 
             if (response.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
-                    logger.warn("Product with ID {} not found", productId);
+                    log.warn("Product with ID {} not found", productId);
                     return Result.error(response.getMessage());
             }
 
-            logger.info("Product information retrieved successfully for product ID: {}", productId);
+            log.info("Product information retrieved successfully for product ID: {}", productId);
             return Result.success(response.getData());
         });
     }

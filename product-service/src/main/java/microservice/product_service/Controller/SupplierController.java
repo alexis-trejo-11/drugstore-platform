@@ -1,7 +1,7 @@
 package microservice.product_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Supplier.SupplierInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Supplier.SupplierReturnDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Supplier.SupplierInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Supplier.SupplierReturnDTO;
 import microservice.product_service.Service.SupplierServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

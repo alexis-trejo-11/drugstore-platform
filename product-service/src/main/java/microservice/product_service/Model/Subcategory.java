@@ -1,6 +1,6 @@
 package microservice.product_service.Model;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Product.Category.SubcategoryDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.Category.SubcategoryDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

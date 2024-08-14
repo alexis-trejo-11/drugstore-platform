@@ -1,9 +1,9 @@
 package microservice.sale_service.Mappers;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Employee.EmployeeDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.CreateSaleDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.ProcessSaleDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.SaleDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.CreateSaleDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.ProcessSaleDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.SaleDTO;
 import microservice.sale_service.Model.PhysicalSale;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

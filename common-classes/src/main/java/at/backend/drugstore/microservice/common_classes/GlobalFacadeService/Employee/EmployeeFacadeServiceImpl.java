@@ -4,8 +4,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDT
 import at.backend.drugstore.microservice.common_classes.DTOs.Sale.SaleProductsDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -16,17 +15,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
+@Slf4j
 @Service
-public class ExternalEmployeeServiceImpl implements ExternalEmployeeService {
+public class EmployeeFacadeServiceImpl implements EmployeeFacadeService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExternalEmployeeServiceImpl.class);
     private final RestTemplate restTemplate;
+    private final Supplier<String> employeeServiceUrlProvider;
 
-    private final String employeeServiceUrl = "http://employee-service:8082";
-
-    public ExternalEmployeeServiceImpl(RestTemplate restTemplate) {
+    public EmployeeFacadeServiceImpl(RestTemplate restTemplate, Supplier<String> employeeServiceUrlProvider) {
         this.restTemplate = restTemplate;
+        this.employeeServiceUrlProvider = employeeServiceUrlProvider;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class ExternalEmployeeServiceImpl implements ExternalEmployeeService {
     public CompletableFuture<Result<EmployeeDTO>> getEmployeeBySaleProductsDTO(SaleProductsDTO saleProductsDTO) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                String url = employeeServiceUrl + "/v1/api/employees/" + saleProductsDTO.getCashierId();
+                String url = employeeServiceUrlProvider.get() + "/v1/api/employees/" + saleProductsDTO.getCashierId();
                 ResponseEntity<ResponseWrapper> responseEntity = restTemplate.exchange(
                         url,
                         HttpMethod.GET,
@@ -48,17 +48,17 @@ public class ExternalEmployeeServiceImpl implements ExternalEmployeeService {
                         return Result.success(employeeDTO.getData());
                     } else {
                         String errorMessage = "EXTERNAL SERVICE: Employee data not found for ID: " + saleProductsDTO.getCashierId();
-                        logger.warn(errorMessage);
+                        log.warn(errorMessage);
                         return Result.error(errorMessage);
                     }
                 } else {
                     String errorMessage = "EXTERNAL SERVICE: Failed to fetch employee data, status code: " + responseEntity.getStatusCode();
-                    logger.warn(errorMessage);
+                    log.warn(errorMessage);
                     return Result.error(errorMessage);
                 }
             } catch (Exception ex) {
                 String errorMessage = "EXTERNAL SERVICE: Unexpected error: " + ex.getMessage();
-                logger.error(errorMessage, ex);
+                log.error(errorMessage, ex);
                 return Result.error(errorMessage);
             }
         });
@@ -68,8 +68,8 @@ public class ExternalEmployeeServiceImpl implements ExternalEmployeeService {
     @Async("taskExecutor")
     public CompletableFuture<Result<EmployeeDTO>> findEmployeeById(Long employeeId) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = employeeServiceUrl + "/v1/api/employees/" + employeeId;
-            logger.info("Fetching employee data from URL: {}", url);
+            String url = employeeServiceUrlProvider.get() + "/v1/api/employees/" + employeeId;
+            log.info("Fetching employee data from URL: {}", url);
 
             ResponseWrapper<EmployeeDTO> response = restTemplate.exchange(
                     url,
@@ -85,7 +85,7 @@ public class ExternalEmployeeServiceImpl implements ExternalEmployeeService {
             }
 
             // Found (200)
-            logger.info("Received response with status code: {}", response.getStatusCode());
+            log.info("Received response with status code: {}", response.getStatusCode());
             return Result.success(response.getData());
         });
     }

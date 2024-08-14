@@ -4,8 +4,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Sale.DigitalSaleDTO
 import at.backend.drugstore.microservice.common_classes.DTOs.Sale.DigitalSaleItemInsertDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -14,17 +13,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
+@Slf4j
 @Service
-public class ESaleFacadeImpl implements ESaleFacadeService {
+public class ESaleFacadeServiceImpl implements ESaleFacadeService {
 
-    private static final Logger log = LoggerFactory.getLogger(ESaleFacadeImpl.class);
     private final RestTemplate restTemplate;
+    private final Supplier<String> eSaleServiceUrlProvider;
 
-    private final String digitalSaleServiceUrl = "http://ecommerce_sale-service:8089";
 
-    public ESaleFacadeImpl(RestTemplate restTemplate) {
+    public ESaleFacadeServiceImpl(RestTemplate restTemplate,
+                                  Supplier<String> eSaleServiceUrlProvider) {
         this.restTemplate = restTemplate;
+        this.eSaleServiceUrlProvider = eSaleServiceUrlProvider;
     }
 
     @Override
@@ -32,7 +34,7 @@ public class ESaleFacadeImpl implements ESaleFacadeService {
     public CompletableFuture<Result<Void>> initSale(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                String url = digitalSaleServiceUrl + "/init";
+                String url = eSaleServiceUrlProvider.get() + "/init";
                 log.info("Sending POST request to {}", url);
                 log.info("Request Payload: {}", digitalSaleItemInsertDTO);
 
@@ -68,7 +70,7 @@ public class ESaleFacadeImpl implements ESaleFacadeService {
     public CompletableFuture<Long> makeDigitalSaleAndGetID(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                String url = digitalSaleServiceUrl + "/v1/api/digital-sales";
+                String url = eSaleServiceUrlProvider.get() + "/v1/api/digital-sales";
                 log.info("Sending POST request to {}", url);
                 log.info("Request Payload: {}", digitalSaleItemInsertDTO);
 

@@ -1,6 +1,6 @@
 package microservice.ecommerce_sale_service.Utils;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.DigitalSaleItemInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.DigitalSaleItemInsertDTO;
 import org.springframework.stereotype.Component;
 
 @Component

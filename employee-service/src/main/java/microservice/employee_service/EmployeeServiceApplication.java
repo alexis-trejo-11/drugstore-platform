@@ -7,9 +7,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @SpringBootApplication
-@EnableWebMvc
 @EnableEurekaServer
-@ComponentScan(basePackages = {"microservice.employee_service", "at.backend.drugstore.microservice.common_models.Validations"})
+@ComponentScan(basePackages = {"microservice.employee_service",
+		"at.backend.drugstore.microservice.common_classes.GlobalExceptions"})
 public class EmployeeServiceApplication {
 
 	public static void main(String[] args) {

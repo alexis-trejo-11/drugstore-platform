@@ -1,8 +1,8 @@
 package microservice.client_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import microservice.client_service.Service.AddressServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -1,8 +1,11 @@
 package microservice.ecommerce_cart_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.*;
-import at.backend.drugstore.microservice.common_models.Middleware.AuthSecurity;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartItemDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartItemInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.PurchaseFromCartDTO;
+import at.backend.drugstore.microservice.common_classes.Middleware.AuthSecurity;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import microservice.ecommerce_cart_service.Service.AfterwardsService;
 import microservice.ecommerce_cart_service.Service.AfterwardsServiceImpl;
 import microservice.ecommerce_cart_service.Service.ClientCartService;
@@ -12,10 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;

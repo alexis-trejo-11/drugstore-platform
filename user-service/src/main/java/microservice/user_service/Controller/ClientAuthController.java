@@ -1,9 +1,10 @@
 package microservice.user_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTOs.User.ClientLoginDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.User.ClientSignUpDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.User.UserLoginDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.DTOs.User.ClientLoginDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.User.ClientSignUpDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.User.UserLoginDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
+
 import microservice.user_service.Service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

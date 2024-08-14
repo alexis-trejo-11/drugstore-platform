@@ -1,13 +1,12 @@
 package microservice.sale_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Employee.EmployeeDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.*;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Employee.ExternalEmployeeService;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Inventory.InventoryFacadeService;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Products.ProductFacadeService;
-import at.backend.drugstore.microservice.common_models.Models.Sales.SaleStatus;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.*;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Employee.EmployeeFacadeService;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Products.ProductFacadeService;
+import at.backend.drugstore.microservice.common_classes.Models.Sales.SaleStatus;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.sale_service.Mappers.SaleMapper;
 import microservice.sale_service.Model.PhysicalSale;
 import microservice.sale_service.Model.PhysicalSaleItem;
@@ -15,6 +14,7 @@ import microservice.sale_service.Repository.SaleRepository;
 import microservice.sale_service.Service.DomainServices.SaleDomainService;
 import microservice.sale_service.Mappers.DtoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +23,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -34,7 +33,7 @@ public class SaleServiceImpl implements SaleService {
     private final SaleMapper saleMapper;
     private final SaleRepository saleRepository;
     private final ProductFacadeService productFacadeService;
-    private final ExternalEmployeeService externalEmployeeService;
+    private final EmployeeFacadeService externalEmployeeService;
     private final InventoryService inventoryService;
 
 
@@ -42,7 +41,7 @@ public class SaleServiceImpl implements SaleService {
     public SaleServiceImpl(SaleMapper saleMapper,
                            SaleRepository saleRepository,
                            ProductFacadeService productFacadeService,
-                           ExternalEmployeeService externalEmployeeService,
+                           @Qualifier("employeeFacadeService") EmployeeFacadeService externalEmployeeService,
                            InventoryService inventoryService) {
         this.saleMapper = saleMapper;
         this.saleRepository = saleRepository;

@@ -1,16 +1,13 @@
 package microservice.ecommerce_payment_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.CardDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.CardInsertDTO;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeService;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardInsertDTO;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.ClientFacadeService;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.ecommerce_payment_service.Automappers.CardMapper;
-import microservice.ecommerce_payment_service.Config.EncryptionConfig;
 import microservice.ecommerce_payment_service.Model.Card;
 import microservice.ecommerce_payment_service.Repository.CardRepository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;

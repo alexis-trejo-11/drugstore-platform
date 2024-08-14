@@ -11,8 +11,9 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 @EnableEurekaServer
 @EnableAspectJAutoProxy
 @ComponentScan(basePackages = {"microservice.ecommerce_order_service",
-		"at.backend.drugstore.microservice.common_models.GlobalFacadeService.Inventory",
-		"at.backend.drugstore.microservice.common_models.Validations"})
+		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Inventory",
+		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client",
+		"at.backend.drugstore.microservice.common_classes.GlobalExceptions"})
 public class EcommerceOrderServiceApplication {
 
 	public static void main(String[] args) {

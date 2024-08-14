@@ -1,15 +1,16 @@
 package microservice.ecommerce_order_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.CompleteOrderRequest;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderStatus;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Adress.AddressFacadeServiceImpl;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Client.ClientFacadeService;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.CompleteOrderRequest;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderStatus;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.AddressFacadeService;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.AddressFacadeServiceImpl;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.ClientFacadeService;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_order_service.Mapper.OrderItemMapper;
 import microservice.ecommerce_order_service.Mapper.OrderMapper;
@@ -18,6 +19,7 @@ import microservice.ecommerce_order_service.Model.Order;
 import microservice.ecommerce_order_service.Model.ShippingData;
 import microservice.ecommerce_order_service.Repository.OrderItemRepository;
 import microservice.ecommerce_order_service.Repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -38,13 +40,13 @@ public class OrderServiceImpl implements OrderService {
     private final ClientFacadeService clientFacadeServiceFacade;
     private final OrderDomainService orderDomainService;
     private final ShippingService shippingService;
-    private final AddressFacadeServiceImpl addressFacadeServiceImpl;
+    private final AddressFacadeService addressFacadeServiceImpl;
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             OrderItemRepository orderItemRepository,
                             OrderMapper orderMapper,
                             OrderItemMapper orderItemMapper,
-                            ClientFacadeService clientFacadeServiceFacade,
+                            @Qualifier("clientFacadeService") ClientFacadeService clientFacadeService,
                             OrderDomainService orderDomainService,
                             ShippingService shippingService,
                             AddressFacadeServiceImpl addressFacadeServiceImpl) {
@@ -52,7 +54,7 @@ public class OrderServiceImpl implements OrderService {
         this.orderItemRepository = orderItemRepository;
         this.orderMapper = orderMapper;
         this.orderItemMapper = orderItemMapper;
-        this.clientFacadeServiceFacade = clientFacadeServiceFacade;
+        this.clientFacadeServiceFacade = clientFacadeService;
         this.orderDomainService = orderDomainService;
         this.shippingService = shippingService;
         this.addressFacadeServiceImpl = addressFacadeServiceImpl;

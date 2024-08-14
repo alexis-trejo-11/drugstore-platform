@@ -1,6 +1,6 @@
 package microservice.ecommerce_cart_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import microservice.ecommerce_cart_service.Service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

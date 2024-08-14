@@ -1,9 +1,9 @@
 package microservice.ecommerce_cart_service.Mappers;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartItemDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
 import microservice.ecommerce_cart_service.Model.Cart;
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartItemDTO;
 import microservice.ecommerce_cart_service.Model.CartItem;
 import org.springframework.stereotype.Component;
 

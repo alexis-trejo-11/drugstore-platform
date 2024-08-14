@@ -1,7 +1,7 @@
 package microservice.ecommerce_payment_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import microservice.ecommerce_payment_service.Service.PaymentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

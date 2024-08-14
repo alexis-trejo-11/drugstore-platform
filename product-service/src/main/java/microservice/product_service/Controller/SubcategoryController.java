@@ -1,115 +1,74 @@
 package microservice.product_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Product.Category.SubcategoryDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.Category.SubcategoryDTO;
+import lombok.extern.slf4j.Slf4j;
 import microservice.product_service.Service.SubcategoryServiceImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/v1/api/products/subcategories")
 public class SubcategoryController {
 
     private final SubcategoryServiceImpl subcategoryServiceImpl;
-    private static final Logger logger = LoggerFactory.getLogger(SubcategoryController.class);
 
     @Autowired
     public SubcategoryController(SubcategoryServiceImpl subcategoryServiceImpl) {
         this.subcategoryServiceImpl = subcategoryServiceImpl;
     }
 
-    /**
-     * Inserts a new subcategory.
-     *
-     * @param subcategoryDTO the subcategory DTOs
-     * @param bindingResult  the binding result for validation
-     * @return ResponseEntity with a status message
-     */
     @PostMapping
-    public ResponseEntity<String> insertCategory(@Valid @RequestBody SubcategoryDTO subcategoryDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            logger.error("Invalid data provided for inserting subcategory");
-            return ResponseEntity.badRequest().body("Invalid data");
-        }
-
+    public ResponseEntity<String> insertCategory(@Valid @RequestBody SubcategoryDTO subcategoryDTO) {
         subcategoryServiceImpl.insertCategory(subcategoryDTO);
-        logger.info("Subcategory inserted successfully: {}", subcategoryDTO.getName());
+        log.info("Subcategory inserted successfully: {}", subcategoryDTO.getName());
         return ResponseEntity.ok("Subcategory inserted successfully");
     }
 
-    /**
-     * Retrieves all subcategories.
-     *
-     * @return ResponseEntity with the list of subcategory DTOs
-     */
+
     @GetMapping
     public ResponseEntity<List<SubcategoryDTO>> getAllSubCategories() {
         List<SubcategoryDTO> subcategoryReturnDTOS = subcategoryServiceImpl.findAllSubCategories();
-        logger.info("All subcategories retrieved successfully");
+        log.info("All subcategories retrieved successfully");
         return ResponseEntity.ok(subcategoryReturnDTOS);
     }
 
-    /**
-     * Retrieves a subcategory by ID along with its products.
-     *
-     * @param id the ID of the subcategory
-     * @return ResponseEntity with the subcategory DTOs
-     */
+
     @GetMapping("/{id}")
     public ResponseEntity<SubcategoryDTO> getSubCategoryById(@PathVariable Long id) {
         SubcategoryDTO subcategoryReturnDTO = subcategoryServiceImpl.findSubCategoryByIdWithProducts(id);
         if (subcategoryReturnDTO == null) {
-            logger.warn("Subcategory not found for ID: {}", id);
+            log.warn("Subcategory not found for ID: {}", id);
             return ResponseEntity.notFound().build();
         }
-        logger.info("Subcategory found for ID: {}", id);
+        log.info("Subcategory found for ID: {}", id);
         return ResponseEntity.ok(subcategoryReturnDTO);
     }
 
-    /**
-     * Updates an existing subcategory.
-     *
-     * @param id             the ID of the subcategory
-     * @param subcategoryDTO the subcategory DTOs
-     * @param bindingResult  the binding result for validation
-     * @return ResponseEntity with a status message
-     */
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCategory(@PathVariable Long id, @Valid @RequestBody SubcategoryDTO subcategoryDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            logger.error("Invalid data provided for updating subcategory");
-            return ResponseEntity.badRequest().body("Invalid data");
-        }
-
+    public ResponseEntity<String> updateCategory(@PathVariable Long id, @Valid @RequestBody SubcategoryDTO subcategoryDTO) {
         SubcategoryDTO updatedSubcategory = subcategoryServiceImpl.updateCategory(id, subcategoryDTO);
         if (updatedSubcategory == null) {
-            logger.warn("Subcategory not found for ID: {}", id);
+            log.warn("Subcategory not found for ID: {}", id);
             return ResponseEntity.notFound().build();
         }
-        logger.info("Subcategory updated successfully: {}", id);
+        log.info("Subcategory updated successfully: {}", id);
         return ResponseEntity.ok("Subcategory updated successfully");
     }
 
-    /**
-     * Deletes a subcategory by ID.
-     *
-     * @param id the ID of the subcategory
-     * @return ResponseEntity with a status message
-     */
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
         SubcategoryDTO subcategoryReturnDTO = subcategoryServiceImpl.deleteCategory(id);
         if (subcategoryReturnDTO == null) {
-            logger.warn("Subcategory not found for deletion, ID: {}", id);
+            log.warn("Subcategory not found for deletion, ID: {}", id);
             return ResponseEntity.notFound().build();
         }
-        logger.info("Subcategory deleted successfully, ID: {}", id);
+        log.info("Subcategory deleted successfully, ID: {}", id);
         return ResponseEntity.ok("Subcategory deleted successfully");
     }
 }

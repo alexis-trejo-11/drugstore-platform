@@ -1,6 +1,6 @@
 package microservice.ecommerce_sale_service.Model;
 
-import at.backend.drugstore.microservice.common_models.Models.Sales.Sale;
+import at.backend.drugstore.microservice.common_classes.Models.Sales.Sale;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import javax.persistence.*;

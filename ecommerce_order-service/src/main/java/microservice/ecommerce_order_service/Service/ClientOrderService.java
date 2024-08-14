@@ -1,7 +1,7 @@
 package microservice.ecommerce_order_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderDTO;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

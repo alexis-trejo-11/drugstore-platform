@@ -1,9 +1,9 @@
 package microservice.ecommerce_cart_service.Mappers;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.CardDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentInsertDTO;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

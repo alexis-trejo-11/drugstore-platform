@@ -1,7 +1,7 @@
 package microservice.inventory_service.Mapppers;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryTransactionDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Inventory.InventoryDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Inventory.InventoryTransactionDTO;
 import microservice.inventory_service.Model.Inventory;
 import microservice.inventory_service.Model.InventoryTransaction;
 import org.mapstruct.Mapper;

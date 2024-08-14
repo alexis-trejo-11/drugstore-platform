@@ -4,8 +4,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Order.CompleteOrder
 import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderInsertDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,26 +15,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
+@Slf4j
 @Service
 public class OrderFacadeServiceImpl implements OrderFacadeService {
 
-    private static final Logger logger = LoggerFactory.getLogger(OrderFacadeServiceImpl.class);
     private final RestTemplate restTemplate;
+    private final Supplier<String> orderServiceUrlProvider;
 
-    private final String orderServiceUrl = "http://ecommerce_order-service:8088";
-
-    public OrderFacadeServiceImpl(RestTemplate restTemplate) {
+    public OrderFacadeServiceImpl(RestTemplate restTemplate, Supplier<String> orderServiceUrlProvider) {
         this.restTemplate = restTemplate;
+        this.orderServiceUrlProvider = orderServiceUrlProvider;
     }
 
     @Override
     @Async("taskExecutor")
     public CompletableFuture<Long> createOrderAndGetId(OrderInsertDTO orderInsertDTO) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = orderServiceUrl + "/v1/api/orders/create";
-            logger.info("Creating order with URL: {}", url);
-            logger.info("Request Payload: {}", orderInsertDTO);
+            String url = orderServiceUrlProvider.get() + "/v1/api/orders/create";
+            log.info("Creating order with URL: {}", url);
+            log.info("Request Payload: {}", orderInsertDTO);
 
             try {
                 HttpHeaders headers = new HttpHeaders();
@@ -53,14 +53,14 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
 
                 if (response != null && response.getData() != null) {
                     Long orderId = response.getData().getId();
-                    logger.info("Order created with ID: {}", orderId);
+                    log.info("Order created with ID: {}", orderId);
                     return orderId;
                 } else {
-                    logger.error("Failed to create order.");
+                    log.error("Failed to create order.");
                     return null;
                 }
             } catch (Exception e) {
-                logger.error("Error creating order: {}", e.getMessage(), e);
+                log.error("Error creating order: {}", e.getMessage(), e);
                 throw new RuntimeException(e);
             }
         });
@@ -70,10 +70,10 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Void> completeOrder(boolean isOrderPaid, Long orderId, Long addressId, Long clientId) {
         return CompletableFuture.runAsync(() -> {
-            String url = orderServiceUrl + "/v1/api/orders/complete-order";
+            String url = orderServiceUrlProvider.get() + "/v1/api/orders/complete-order";
             CompleteOrderRequest completeOrderRequest = new CompleteOrderRequest(isOrderPaid, orderId, addressId, clientId);
 
-            logger.info("Completing order with ID: {}", orderId);
+            log.info("Completing order with ID: {}", orderId);
 
             try {
                 HttpHeaders headers = new HttpHeaders();
@@ -87,7 +87,7 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
                         Void.class
                 );
             } catch (Exception e) {
-                logger.error("Error completing order with ID {}: {}", orderId, e.getMessage(), e);
+                log.error("Error completing order with ID {}: {}", orderId, e.getMessage(), e);
                 throw new RuntimeException(e);
             }
         });
@@ -97,9 +97,9 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Void> addPaymentIdByOrderId(Long paymentId, Long orderId) {
         return CompletableFuture.runAsync(() -> {
-            String url = orderServiceUrl + "/v1/api/orders/" + orderId + "/payment/" + paymentId;
+            String url = orderServiceUrlProvider.get() + "/v1/api/orders/" + orderId + "/payment/" + paymentId;
 
-            logger.info("Adding payment ID {} to order ID {}", paymentId, orderId);
+            log.info("Adding payment ID {} to order ID {}", paymentId, orderId);
 
             try {
                 restTemplate.exchange(
@@ -108,9 +108,9 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
                         null,
                         Void.class
                 );
-                logger.info("Successfully added payment ID {} to order ID {}", paymentId, orderId);
+                log.info("Successfully added payment ID {} to order ID {}", paymentId, orderId);
             } catch (Exception e) {
-                logger.error("Error adding payment ID {} to order ID {}: {}", paymentId, orderId, e.getMessage(), e);
+                log.error("Error adding payment ID {} to order ID {}: {}", paymentId, orderId, e.getMessage(), e);
                 throw new RuntimeException(e);
             }
         });
@@ -120,9 +120,9 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<OrderDTO> getOrderById(Long orderId) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = orderServiceUrl + "/v1/api/orders/" + orderId;
+            String url = orderServiceUrlProvider.get() + "/v1/api/orders/" + orderId;
 
-            logger.info("Fetching order with ID: {}", orderId);
+            log.info("Fetching order with ID: {}", orderId);
 
             try {
                 ResponseEntity<ResponseWrapper<OrderDTO>> responseEntity = restTemplate.exchange(
@@ -135,14 +135,14 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
                 ResponseWrapper<OrderDTO> response = responseEntity.getBody();
 
                 if (response != null && response.getData() != null) {
-                    logger.info("Order with ID {} fetched successfully.", orderId);
+                    log.info("Order with ID {} fetched successfully.", orderId);
                     return response.getData();
                 } else {
-                    logger.error("Failed to fetch order with ID {}.", orderId);
+                    log.error("Failed to fetch order with ID {}.", orderId);
                     return null;
                 }
             } catch (Exception e) {
-                logger.error("Error fetching order with ID {}: {}", orderId, e.getMessage(), e);
+                log.error("Error fetching order with ID {}: {}", orderId, e.getMessage(), e);
                 throw new RuntimeException(e);
             }
         });

@@ -1,7 +1,7 @@
 package microservice.client_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
 import microservice.client_service.Mappers.ClientMapper;
 import microservice.client_service.Model.Client;
 import microservice.client_service.Repository.ClientRepository;
