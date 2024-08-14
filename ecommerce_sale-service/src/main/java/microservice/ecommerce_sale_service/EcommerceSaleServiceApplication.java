@@ -8,9 +8,10 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
 
 @SpringBootApplication
-@EnableWebMvc
 @EnableEurekaServer
-@ComponentScan(basePackages = {"microservice.ecommerce_sale_service", "at.backend.drugstore.microservice.common_models.GlobalFacadeService.Inventory", "at.backend.drugstore.microservice.common_models.Validations"})
+@ComponentScan(basePackages = {"microservice.ecommerce_sale_service",
+		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Inventory",
+		"at.backend.drugstore.microservice.common_classes.GlobalExceptions"})
 
 public class EcommerceSaleServiceApplication {
 

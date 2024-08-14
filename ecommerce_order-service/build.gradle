@@ -38,7 +38,7 @@ dependencies {
 	implementation 'org.postgresql:postgresql'
 
 	// Common Models
-	implementation project(':common-models')
+	implementation project(':common-classes')
 
 	// Postgres
 	compileOnly 'org.projectlombok:lombok'

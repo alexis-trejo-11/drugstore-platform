@@ -1,7 +1,7 @@
 package microservice.client_service.Mappers;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressInsertDTO;
 import microservice.client_service.Model.Address;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

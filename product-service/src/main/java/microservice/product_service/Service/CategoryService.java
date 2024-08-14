@@ -1,6 +1,6 @@
 package microservice.product_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Product.Category.CategoryDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.Category.CategoryDTO;
 
 public interface CategoryService {
     void insertCategory(CategoryDTO categoryDTO);

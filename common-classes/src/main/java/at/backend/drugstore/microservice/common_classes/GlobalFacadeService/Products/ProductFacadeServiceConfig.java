@@ -1,8 +1,7 @@
-package at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Adress;
+package at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Products;
 
-import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.ClientFacadeService;
-import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.ClientFacadeServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.annotation.Bean;
@@ -13,25 +12,29 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @Configuration
-public class AddressFacadeServiceConfig {
+public class ProductFacadeServiceConfig {
 
     @Autowired
     private DiscoveryClient discoveryClient;
 
     @Bean
-    public Supplier<String> addressServiceUrlProvider() {
+    @Qualifier("productServiceUrlProvider")
+    public Supplier<String> productServiceUrlProvider() {
         return () -> {
-            List<ServiceInstance> instances = discoveryClient.getInstances("CLIENT-SERVICE");
+            List<ServiceInstance> instances = discoveryClient.getInstances("PRODUCT-SERVICE");
             if (instances.isEmpty()) {
-                throw new IllegalStateException("Address service is not available");
+                throw new IllegalStateException("Product service is not available");
             }
             return instances.get(0).getUri().toString();
         };
     }
 
     @Bean
-    public ClientFacadeService addressFacadeService(RestTemplate restTemplate) {
-        return new ClientFacadeServiceImpl(restTemplate, addressServiceUrlProvider()) {
+    @Qualifier("productFacadeService")
+    public ProductFacadeService productFacadeService(
+            RestTemplate restTemplate,
+            @Qualifier("productServiceUrlProvider") Supplier<String> productServiceUrlProvider) {
+        return new ProductFacadeServiceImpl(restTemplate, productServiceUrlProvider) {
         };
     }
 }

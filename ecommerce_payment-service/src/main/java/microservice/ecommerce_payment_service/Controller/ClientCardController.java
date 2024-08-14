@@ -1,8 +1,8 @@
 package microservice.ecommerce_payment_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.CardDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.CardInsertDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardInsertDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import microservice.ecommerce_payment_service.Service.CardService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

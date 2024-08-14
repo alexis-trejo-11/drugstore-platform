@@ -1,7 +1,7 @@
 package microservice.ecommerce_cart_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartItemDTO;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartItemDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.ecommerce_cart_service.Mappers.AfterwardMapper;
 import microservice.ecommerce_cart_service.Model.Afterward;
 import microservice.ecommerce_cart_service.Model.Cart;

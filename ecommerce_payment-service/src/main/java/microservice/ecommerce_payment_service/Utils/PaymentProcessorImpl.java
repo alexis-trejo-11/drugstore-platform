@@ -1,12 +1,12 @@
 package microservice.ecommerce_payment_service.Utils;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderItemDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.DigitalSaleItemInsertDTO;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.ESale.ESaleFacadeImpl;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Order.OrderFacadeService;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderItemDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.DigitalSaleItemInsertDTO;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.ESale.ESaleFacadeService;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Order.OrderFacadeService;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_payment_service.Automappers.PaymentMapper;
 import microservice.ecommerce_payment_service.Model.Card;
@@ -26,15 +26,15 @@ import java.util.concurrent.CompletableFuture;
 public class PaymentProcessorImpl implements PaymentProcessor {
     private final PaymentRepository paymentRepository;
     private final OrderFacadeService orderFacadeService;
-    private final ESaleFacadeImpl externalDigitalSale;
+    private final ESaleFacadeService eSaleFacadeService;
     private final PaymentMapper paymentMapper;
 
     @Autowired
-    public PaymentProcessorImpl(PaymentRepository paymentRepository, PaymentMapper paymentMapper, OrderFacadeService orderFacadeService, ESaleFacadeImpl externalDigitalSale) {
+    public PaymentProcessorImpl(PaymentRepository paymentRepository, PaymentMapper paymentMapper, OrderFacadeService orderFacadeService, ESaleFacadeService eSaleFacadeService) {
         this.paymentRepository = paymentRepository;
         this.paymentMapper = paymentMapper;
         this.orderFacadeService = orderFacadeService;
-        this.externalDigitalSale = externalDigitalSale;
+        this.eSaleFacadeService = eSaleFacadeService;
     }
 
     @Async("taskExecutor")
@@ -91,7 +91,7 @@ public class PaymentProcessorImpl implements PaymentProcessor {
         var dto = new DigitalSaleItemInsertDTO();
         dto.setPaymentDTO(paymentDTO);
         dto.setOrderItemDTOS(orderItemDTOS);
-        return externalDigitalSale.makeDigitalSaleAndGetID(dto);
+        return eSaleFacadeService.makeDigitalSaleAndGetID(dto);
     }
 
     @Async("taskExecutor")

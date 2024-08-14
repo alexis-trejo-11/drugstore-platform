@@ -1,7 +1,7 @@
 package microservice.ecommerce_payment_service.Automappers;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.CardDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.CardInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardInsertDTO;
 import microservice.ecommerce_payment_service.Model.Card;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

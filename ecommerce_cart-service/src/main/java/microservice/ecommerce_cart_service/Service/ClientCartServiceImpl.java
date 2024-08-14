@@ -1,17 +1,17 @@
-package microservice.test_service.Service;
+package microservice.ecommerce_cart_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.CartItemInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.ClientEcommerceDataDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Cart.PurchaseFromCartDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Products.ProductFacadeService;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
-
-import microservice.test_service.Service.DomainService.CartDomainService;
-import microservice.test_service.Model.Cart;
-import microservice.test_service.Repository.CartRepository;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartItemInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.ClientEcommerceDataDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Cart.PurchaseFromCartDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Products.ProductFacadeService;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
+import microservice.ecommerce_cart_service.Model.Cart;
+import microservice.ecommerce_cart_service.Repository.CartRepository;
+import microservice.ecommerce_cart_service.Service.DomainService.CartDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -20,19 +20,19 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Service
-public class ClientClientCartServiceImpl implements ClientCartService {
+public class ClientCartServiceImpl implements ClientCartService {
 
     private final CartRepository cartRepository;
-    private final ProductFacadeService productService;
+    private final ProductFacadeService productFacadeService;
     private final CartDomainService cartDomainService;
 
 
     @Autowired
-    public ClientClientCartServiceImpl(CartRepository cartRepository,
-                                       ProductFacadeService productService,
-                                       CartDomainService cartDomainService) {
+    public ClientCartServiceImpl(CartRepository cartRepository,
+                                 @Qualifier("productFacadeService") ProductFacadeService productFacadeService,
+                                 CartDomainService cartDomainService) {
         this.cartRepository = cartRepository;
-        this.productService = productService;
+        this.productFacadeService = productFacadeService;
         this.cartDomainService = cartDomainService;
     }
 
@@ -44,7 +44,7 @@ public class ClientClientCartServiceImpl implements ClientCartService {
         CompletableFuture<Optional<Cart>> cartFuture = CompletableFuture.supplyAsync(() -> cartRepository.findByClientId(clientId));
 
         // Fetch product details asynchronously
-        CompletableFuture<Result<ProductDTO>> productFuture = productService.getProductById(productId);
+        CompletableFuture<Result<ProductDTO>> productFuture = productFacadeService.getProductById(productId);
 
         // Combine the results and process them
         return cartFuture.thenCombine(productFuture, (cartOptional, productResult) -> {

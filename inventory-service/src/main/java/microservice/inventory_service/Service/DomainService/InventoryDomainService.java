@@ -1,12 +1,10 @@
 package microservice.inventory_service.Service.DomainService;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Inventory.InventoryInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
 import microservice.inventory_service.Model.Inventory;
 import microservice.inventory_service.Model.InventoryTransaction;
 import microservice.inventory_service.Repository.InventoryRepository;
-import microservice.inventory_service.Service.InventoryService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

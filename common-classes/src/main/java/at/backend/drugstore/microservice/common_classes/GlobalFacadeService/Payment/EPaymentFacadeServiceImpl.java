@@ -6,8 +6,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentInse
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,12 +25,13 @@ import java.util.function.Supplier;
 
 @Service
 @Slf4j
-public class EPaymentServiceServiceFacadeServiceImpl implements EPaymentServiceFacadeService {
+public class EPaymentFacadeServiceImpl implements EPaymentFacadeService {
 
     private final RestTemplate restTemplate;
     private final Supplier<String> paymentServiceUrlProvider;
 
-    public EPaymentServiceServiceFacadeServiceImpl(RestTemplate restTemplate, Supplier<String> paymentServiceUrlProvider) {
+    public EPaymentFacadeServiceImpl(RestTemplate restTemplate,
+                                     @Qualifier("ePaymentServiceUrlProvider") Supplier<String> paymentServiceUrlProvider) {
         this.restTemplate = restTemplate;
         this.paymentServiceUrlProvider = paymentServiceUrlProvider;
     }

@@ -1,17 +1,18 @@
 package microservice.ecommerce_payment_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Order.OrderItemDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.DigitalSaleItemInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderItemDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.DigitalSaleItemInsertDTO;
 
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.ESale.ESaleFacadeService;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Order.OrderFacadeService;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.ESale.ESaleFacadeService;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Order.OrderFacadeService;
 import microservice.ecommerce_payment_service.Automappers.PaymentMapper;
 import microservice.ecommerce_payment_service.Model.Card;
 import microservice.ecommerce_payment_service.Model.Payment;
 import microservice.ecommerce_payment_service.Repository.PaymentRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,10 @@ public class PaymentDomainService {
     private final PaymentMapper paymentMapper;
     private final ESaleFacadeService eSaleFacadeService;
 
-    public PaymentDomainService(OrderFacadeService orderFacadeService, PaymentRepository paymentRepository, PaymentMapper paymentMapper, ESaleFacadeService eSaleFacadeService) {
+    public PaymentDomainService(@Qualifier("orderFacadeService") OrderFacadeService orderFacadeService,
+                                PaymentRepository paymentRepository,
+                                PaymentMapper paymentMapper,
+                                ESaleFacadeService eSaleFacadeService) {
         this.orderFacadeService = orderFacadeService;
         this.paymentRepository = paymentRepository;
         this.paymentMapper = paymentMapper;

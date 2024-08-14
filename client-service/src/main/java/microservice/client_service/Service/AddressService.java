@@ -1,8 +1,8 @@
 package microservice.client_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Client.Adress.AddressInsertDTO;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressInsertDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

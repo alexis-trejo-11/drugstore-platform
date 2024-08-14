@@ -8,14 +8,15 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 
 @SpringBootApplication
-@EnableWebMvc
 @EnableEurekaServer
 @ComponentScan(basePackages = {"microservice.ecommerce_cart_service",
-		"at.backend.drugstore.microservice.common_models.GlobalFacadeService.Clients" ,
-		"at.backend.drugstore.microservice.common_models.GlobalFacadeService.Products",
-		"at.backend.drugstore.microservice.common_models.GlobalFacadeService.ESale",
-		"at.backend.drugstore.microservice.common_models.Validations",
-		"at.backend.drugstore.microservice.common_models.Middleware"})
+		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client" ,
+		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Order",
+		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Products",
+		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.ESale",
+		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Payment",
+		"at.backend.drugstore.microservice.common_classes.GlobalExceptions",
+		"at.backend.drugstore.microservice.common_classes.Middleware"})
 public class EcommerceCartServiceApplication {
 
 	public static void main(String[] args) {

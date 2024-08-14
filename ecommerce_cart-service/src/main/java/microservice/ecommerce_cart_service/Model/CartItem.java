@@ -1,6 +1,6 @@
 package microservice.ecommerce_cart_service.Model;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Product.ProductDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

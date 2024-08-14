@@ -1,6 +1,6 @@
 package microservice.ecommerce_sale_service.Utils;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.*;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.*;
 import microservice.ecommerce_sale_service.Model.DigitalSale;
 import microservice.ecommerce_sale_service.Model.DigitalSaleItem;
 

@@ -1,9 +1,9 @@
 package microservice.ecommerce_sale_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.DigitalSaleDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.DigitalSaleItemInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.SalesSummaryDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.DigitalSaleDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.DigitalSaleItemInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.SalesSummaryDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

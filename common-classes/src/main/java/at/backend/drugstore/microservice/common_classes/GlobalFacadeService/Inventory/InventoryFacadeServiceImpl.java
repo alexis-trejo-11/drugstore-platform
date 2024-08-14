@@ -2,8 +2,7 @@ package at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Inv
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Sale.SaleItemDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -13,25 +12,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.function.Supplier;
 
+@Slf4j
 @Service
 public class InventoryFacadeServiceImpl implements InventoryFacadeService {
 
-    private static final Logger logger = LoggerFactory.getLogger(InventoryFacadeServiceImpl.class);
     private final RestTemplate restTemplate;
+    private final Supplier<String> inventoryServiceUrlProvider;
 
-    private final String inventoryServiceUrl = "http://inventory-service:8083";
-
-    public InventoryFacadeServiceImpl(RestTemplate restTemplate) {
+    public InventoryFacadeServiceImpl(RestTemplate restTemplate, Supplier<String> inventoryServiceUrlProvider) {
         this.restTemplate = restTemplate;
+        this.inventoryServiceUrlProvider = inventoryServiceUrlProvider;
     }
 
     @Override
     @Async("taskExecutor")
     public Result<String> updateStockBySaleItemDTO(List<SaleItemDTO> saleItemDTOS) {
-            String updateUrl = inventoryServiceUrl + "/stock/update";
-            logger.info("Updating stock with URL: {}", updateUrl);
-            logger.info("Request Payload: {}", saleItemDTOS);
+            String updateUrl = inventoryServiceUrlProvider.get() + "/stock/update";
+            log.info("Updating stock with URL: {}", updateUrl);
+            log.info("Request Payload: {}", saleItemDTOS);
 
             try {
                 HttpHeaders headers = new HttpHeaders();
@@ -49,11 +49,11 @@ public class InventoryFacadeServiceImpl implements InventoryFacadeService {
                     return Result.success("Stock updated successfully");
                 } else {
                     String errorMessage = "Error response from Inventory Service: " + responseEntity.getStatusCode();
-                    logger.error(errorMessage);
+                    log.error(errorMessage);
                     return Result.error(errorMessage);
                 }
             } catch (Exception e) {
-                logger.error("An error occurred while updating stock: {}", e.getMessage(), e);
+                log.error("An error occurred while updating stock: {}", e.getMessage(), e);
                 return Result.error("An error occurred while updating stock: " + e.getMessage());
             }
     }

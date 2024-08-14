@@ -1,8 +1,8 @@
 package microservice.ecommerce_sale_service.Mappers;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.DigitalSaleDTO;
-import at.backend.drugstore.microservice.common_models.Models.Sales.SaleStatus;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.DigitalSaleDTO;
+import at.backend.drugstore.microservice.common_classes.Models.Sales.SaleStatus;
 import microservice.ecommerce_sale_service.Model.DigitalSale;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,6 +1,6 @@
 package microservice.employee_service.Model;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Employee.EmployeInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeInsertDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import microservice.employee_service.Model.enums.Genre;

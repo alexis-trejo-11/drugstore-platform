@@ -1,8 +1,8 @@
 package microservice.inventory_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
-import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Inventory.InventoryDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.DTOs.Inventory.InventoryInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Inventory.InventoryDTO;
 import microservice.inventory_service.Service.InventoryServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

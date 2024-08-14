@@ -1,7 +1,7 @@
 package microservice.product_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Supplier.SupplierInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Supplier.SupplierReturnDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Supplier.SupplierInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Supplier.SupplierReturnDTO;
 import microservice.product_service.Mappers.SupplierMapper;
 import microservice.product_service.Model.Supplier;
 import microservice.product_service.Repository.SupplierRepository;

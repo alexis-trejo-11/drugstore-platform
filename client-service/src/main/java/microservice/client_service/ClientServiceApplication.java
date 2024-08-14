@@ -8,9 +8,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
-@EnableWebMvc
 @EnableEurekaServer
-@ComponentScan(basePackages = {"at.backend.drugstore.microservice.common_models.Validations",
+@ComponentScan(basePackages = {"at.backend.drugstore.microservice.common_classes.GlobalExceptions",
 		"microservice.client_service"})
 public class ClientServiceApplication implements WebMvcConfigurer {
 

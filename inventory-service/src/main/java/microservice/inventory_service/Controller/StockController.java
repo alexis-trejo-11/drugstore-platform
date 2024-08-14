@@ -1,8 +1,8 @@
 package microservice.inventory_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Inventory.ProductStockDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.SaleItemDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.DTOs.Inventory.ProductStockDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.SaleItemDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import microservice.inventory_service.Service.StockServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

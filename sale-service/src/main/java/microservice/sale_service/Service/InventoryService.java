@@ -1,8 +1,8 @@
 package microservice.sale_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.SaleItemDTO;
-import at.backend.drugstore.microservice.common_models.GlobalFacadeService.Inventory.InventoryFacadeService;
-import at.backend.drugstore.microservice.common_models.Utils.Result;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.SaleItemDTO;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Inventory.InventoryFacadeService;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.sale_service.Model.PhysicalSale;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

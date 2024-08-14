@@ -1,8 +1,8 @@
 package microservice.ecommerce_payment_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Payment.PaymentInsertDTO;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentInsertDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import microservice.ecommerce_payment_service.Service.CardService;
 import microservice.ecommerce_payment_service.Service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;

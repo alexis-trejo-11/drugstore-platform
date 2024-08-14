@@ -1,7 +1,7 @@
 package microservice.sale_service.Controller;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Sale.*;
-import at.backend.drugstore.microservice.common_models.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.*;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import microservice.sale_service.Service.SaleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

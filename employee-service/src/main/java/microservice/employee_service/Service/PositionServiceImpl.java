@@ -1,8 +1,8 @@
 package microservice.employee_service.Service;
 
-import at.backend.drugstore.microservice.common_models.DTOs.Employee.Postion.PositionInsertDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Employee.Postion.PositionDTO;
-import at.backend.drugstore.microservice.common_models.DTOs.Employee.Postion.PositionUpdateDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.Postion.PositionInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.Postion.PositionDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.Postion.PositionUpdateDTO;
 import microservice.employee_service.Mappers.PositionMapper;
 import microservice.employee_service.Model.Position;
 import microservice.employee_service.Model.enums.ClassificationWorkday;
