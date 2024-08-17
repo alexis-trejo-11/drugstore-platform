@@ -2,7 +2,7 @@ package microservice.product_service.Model;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Product.Category.CategoryDTO;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

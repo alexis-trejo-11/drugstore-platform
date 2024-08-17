@@ -4,7 +4,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;

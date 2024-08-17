@@ -5,56 +5,29 @@
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.24/13a394eed5c4f9efb2a6d956e2086f1d81e857d9/lombok-1.18.24.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.34/ec547ef414ab1d2c040118fb9c1c265ada63af14/lombok-1.18.34.jar" />
         </processorPath>
-        <module name="backend.drugstore.product-service.test" />
-        <module name="backend.drugstore.inventory-service.test" />
-        <module name="backend.drugstore.common-models.test" />
-        <module name="backend.drugstore.user-service.test" />
-        <module name="backend.drugstore.common-models.main" />
-        <module name="backend.drugstore.ecommerce_cart-service.test" />
-        <module name="backend.drugstore.ecommerce_order-service.test" />
-        <module name="backend.drugstore.ecommerce_sale-service.test" />
-        <module name="backend.drugstore.ecommerce_payment-service.test" />
-        <module name="backend.drugstore.sale-service.test" />
-        <module name="backend.drugstore.client-service.test" />
-        <module name="backend.drugstore.employee-service.test" />
-        <module name="backend.drugstore.test-service.test" />
+        <module name="at.backend.drugstore.microservice.backend.drugstore.admin-service.test" />
+        <module name="API_Drugstore_Microservices.backend.drugstore.common-classes.main~1" />
+        <module name="API_Drugstore_Microservices.backend.drugstore.common-classes.test~1" />
+        <module name="at.backend.drugstore.microservice.backend.drugstore.test" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.34/ec547ef414ab1d2c040118fb9c1c265ada63af14/lombok-1.18.34.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.mapstruct/mapstruct-processor/1.5.5.Final/897f6f115930b936287bef552bf5fe28cc64717d/mapstruct-processor-1.5.5.Final.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok-mapstruct-binding/0.2.0/2f1cf9ced7b720ba4996c942b816669e63f0fa4f/lombok-mapstruct-binding-0.2.0.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.24/13a394eed5c4f9efb2a6d956e2086f1d81e857d9/lombok-1.18.24.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-configuration-processor/2.7.0/d8b66c3d68ff21cb10bb908cd873c4a6ecd8880f/spring-boot-configuration-processor-2.7.0.jar" />
         </processorPath>
-        <module name="backend.drugstore.ecommerce_payment-service.main" />
+        <module name="at.backend.drugstore.microservice.backend.drugstore.main" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.24/13a394eed5c4f9efb2a6d956e2086f1d81e857d9/lombok-1.18.24.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.34/ec547ef414ab1d2c040118fb9c1c265ada63af14/lombok-1.18.34.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok-mapstruct-binding/0.2.0/2f1cf9ced7b720ba4996c942b816669e63f0fa4f/lombok-mapstruct-binding-0.2.0.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.mapstruct/mapstruct-processor/1.5.5.Final/897f6f115930b936287bef552bf5fe28cc64717d/mapstruct-processor-1.5.5.Final.jar" />
         </processorPath>
-        <module name="backend.drugstore.client-service.main" />
-      </profile>
-      <profile name="Gradle Imported" enabled="true">
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.24/13a394eed5c4f9efb2a6d956e2086f1d81e857d9/lombok-1.18.24.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.mapstruct/mapstruct-processor/1.5.5.Final/897f6f115930b936287bef552bf5fe28cc64717d/mapstruct-processor-1.5.5.Final.jar" />
-        </processorPath>
-        <module name="backend.drugstore.ecommerce_order-service.main" />
-        <module name="backend.drugstore.product-service.main" />
-        <module name="backend.drugstore.test-service.main" />
-        <module name="backend.drugstore.ecommerce_cart-service.main" />
-        <module name="backend.drugstore.ecommerce_sale-service.main" />
-        <module name="backend.drugstore.user-service.main" />
-        <module name="backend.drugstore.inventory-service.main" />
-        <module name="backend.drugstore.employee-service.main" />
-        <module name="backend.drugstore.sale-service.main" />
+        <module name="at.backend.drugstore.microservice.backend.drugstore.admin-service.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="17" />

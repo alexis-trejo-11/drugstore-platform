@@ -16,8 +16,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -46,7 +46,7 @@ public class CartClientController {
     }
 
 
-    @GetMapping(value = "/client" , produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/client")
     public CompletableFuture<ResponseEntity<ResponseWrapper<CartDTO>>> getCartByClientId(HttpServletRequest request) {
         Long clientId = authSecurity.getClientIdFromToken(request);
         logger.info("Fetching cart for client ID: " + clientId);

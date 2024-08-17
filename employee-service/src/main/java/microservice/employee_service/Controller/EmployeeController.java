@@ -1,17 +1,16 @@
 package microservice.employee_service.Controller;
 
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeInsertDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
-import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeInsertDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeUpdateDTO;
 import microservice.employee_service.Service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,7 +26,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> addEmployee(@RequestBody @Valid EmployeInsertDTO employeeDTO) {
+    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> addEmployee(@RequestBody @Valid EmployeeInsertDTO employeeDTO) {
         return employeeService.addEmployee(employeeDTO).thenApply(voidResult ->
                 ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper<>(true, null, "Employee Successfully Created.", 201))
         );

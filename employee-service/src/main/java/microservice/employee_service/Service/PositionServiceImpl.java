@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -33,9 +33,6 @@ public class PositionServiceImpl implements PositionService {
         this.positionMapper = positionMapper;
     }
 
-    /**
-     * Asynchronously create a new position.
-     */
     @Override
     @Async
     @Transactional
@@ -45,9 +42,6 @@ public class PositionServiceImpl implements PositionService {
         logger.info("Position created: {}", position);
     }
 
-    /**
-     * Asynchronously get all positions.
-     */
     @Override
     @Async
     public List<PositionDTO> getAllPositions() {
@@ -91,9 +85,6 @@ public class PositionServiceImpl implements PositionService {
         return true;
     }
 
-    /**
-     * Asynchronously delete a position by ID.
-     */
     @Override
     @Async
     @Transactional
