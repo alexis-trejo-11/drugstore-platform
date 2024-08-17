@@ -7,7 +7,6 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderInsertDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardDTO;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.AddressFacadeService;
-import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.AddressFacadeServiceImpl;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.ClientFacadeService;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Order.OrderFacadeService;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Payment.EPaymentFacadeService;
@@ -19,7 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

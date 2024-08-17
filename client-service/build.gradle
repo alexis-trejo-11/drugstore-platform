@@ -1,15 +1,14 @@
 plugins {
+	id 'java-library'
 	id 'java'
-	id 'org.springframework.boot' version '2.7.0'
-	id 'io.spring.dependency-management' version '1.1.5'
+	id 'org.springframework.boot' version '3.3.2'
+	id 'io.spring.dependency-management' version '1.1.6'
 }
 
-group = 'at.backend.drugstore.microservice'
-version = '0.0.1-SNAPSHOT'
-
 java {
-	sourceCompatibility = '17'
-	targetCompatibility = '17'
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
 }
 
 repositories {
@@ -17,9 +16,8 @@ repositories {
 }
 
 ext {
-	set('springCloudVersion', "2021.0.4")
+	set('springCloudVersion', "2023.0.3")
 }
-
 
 dependencies {
 	// Spring Boot
@@ -27,15 +25,17 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// Config Server
+	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
 	// Postgres
 	runtimeOnly 'org.postgresql:postgresql'
 	implementation 'org.postgresql:postgresql'
 
-	// Validation
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-	// Common Models
+	// Common Classes
 	implementation project(':common-classes')
 
 	// Lombok
@@ -70,11 +70,3 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-bootRun {
-	jvmArgs = []
-}
-
-bootJar {
-	archiveBaseName = 'client-service'
-	archiveVersion = '0.0.1-SNAPSHOT'
-}

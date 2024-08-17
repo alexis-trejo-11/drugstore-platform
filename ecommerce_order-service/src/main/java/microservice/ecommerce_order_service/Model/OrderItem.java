@@ -4,7 +4,7 @@ import at.backend.drugstore.microservice.common_classes.Models.Sales.SaleItem;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity

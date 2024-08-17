@@ -1,4 +1,4 @@
-package microservice.ecommerce_payment_service.Config;
+package microservice.client_service.Config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;

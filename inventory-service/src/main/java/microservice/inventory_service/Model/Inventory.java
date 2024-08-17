@@ -4,7 +4,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Inventory.Inventory
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.Date;

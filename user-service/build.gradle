@@ -1,15 +1,16 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '2.7.0'
-	id 'io.spring.dependency-management' version '1.1.5'
+	id 'org.springframework.boot' version '3.3.2'
+	id 'io.spring.dependency-management' version '1.1.6'
 }
 
 group = 'at.backend.drugstore.microservice'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '17'
-	targetCompatibility = '17'
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
 }
 
 repositories {
@@ -17,7 +18,8 @@ repositories {
 }
 
 ext {
-	set('springCloudVersion', "2021.0.4")
+	set('springBootAdminVersion', "3.3.2")
+	set('springCloudVersion', "2023.0.3")
 }
 
 dependencies {
@@ -27,43 +29,43 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-
 	// Spring Security
-	implementation "org.springframework.boot:spring-boot-starter-security"
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 
-	// Common Models
-	implementation project(':common-classes')
-
-	// JWT
-	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
-	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	// Config Server
+	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
 	// Postgres
 	runtimeOnly 'org.postgresql:postgresql'
 	implementation 'org.postgresql:postgresql'
 
+	// Validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// Common Classes
+	implementation project(':common-classes')
+
 	// Lombok
-	testAnnotationProcessor 'org.projectlombok:lombok'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 
-	// Mapper
+	// AutoMappers
 	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	implementation 'org.modelmapper:modelmapper:2.4.4'
-
-	// Open Api
-	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
 
 	// Rate Limiter
 	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
 	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-jcache:7.6.0'
 
+	// Open Api
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
+
 	// Eureka
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
-
 }
 
 dependencyManagement {
@@ -74,12 +76,4 @@ dependencyManagement {
 
 tasks.named('test') {
 	useJUnitPlatform()
-}
-
-bootRun {
-	jvmArgs = []
-}
-
-bootJar {
-	archiveFileName = 'user-service.jar'
 }

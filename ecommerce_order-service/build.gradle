@@ -1,27 +1,25 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '2.7.0'
-	id 'io.spring.dependency-management' version '1.1.5'
+	id 'org.springframework.boot' version '3.3.2'
+	id 'io.spring.dependency-management' version '1.1.6'
 }
 
 group = 'at.backend.drugstore.microservice'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '17'
-	targetCompatibility = '17'
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
 }
 
 repositories {
 	mavenCentral()
 }
 
-def springCloudVersion = "2021.0.3"
-def resilience4jVersion = "1.7.0"
-
-
 ext {
-	set('springCloudVersion', "2021.0.4")
+	set('springBootAdminVersion', "3.3.2")
+	set('springCloudVersion', "2023.0.3")
 }
 
 dependencies {
@@ -31,13 +29,16 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+	// Config Server
+	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
 	// Postgres
 	runtimeOnly 'org.postgresql:postgresql'
 	implementation 'org.postgresql:postgresql'
 
-	// Common Models
+	// Common Classes
 	implementation project(':common-classes')
 
 	// Postgres
@@ -59,17 +60,8 @@ dependencies {
 
 	// Eureka
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
-
-	/* Testing */
-
-	// JUnit Jupiter API for writing tests
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-
-	// Mockito for mocking
-	testImplementation 'org.mockito:mockito-core:4.0.0'
-	testImplementation 'org.mockito:mockito-junit-jupiter:4.0.0'
 }
+
 
 dependencyManagement {
 	imports {
@@ -79,12 +71,4 @@ dependencyManagement {
 
 tasks.named('test') {
 	useJUnitPlatform()
-}
-
-bootRun {
-	jvmArgs = []
-}
-
-bootJar {
-	archiveFileName = 'ecommerce_sale-service.jar'
 }

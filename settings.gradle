@@ -1,4 +1,4 @@
 rootProject.name = 'backend.drugstore'
 
-include 'employee-service', 'common-classes', 'inventory-service', 'product-service', 'client-service' , 'sale-service' , 'user-service' , 'ecommerce_cart-service', 'ecommerce_order-service' , 'ecommerce_sale-service' ,'ecommerce_payment-service', 'eureka-server', 'config-service'
+include 'client-service', 'common-classes' , 'config-server' , 'admin-service' , 'user-service' , 'sale-service', 'product-service', 'inventory-service', 'eureka-server', 'employee-service', 'ecommerce_sale-service', 'ecommerce_cart-service' , 'ecommerce_order-service', 'ecommerce_payment-service'
 

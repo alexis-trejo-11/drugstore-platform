@@ -1,7 +1,8 @@
 package microservice.employee_service.Service;
 
-import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeInsertDTO;
+
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeInsertDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeUpdateDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.employee_service.Mappers.EmployeeMapper;
@@ -14,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -42,7 +43,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Void> addEmployee(EmployeInsertDTO employeeDTO) {
+    public CompletableFuture<Void> addEmployee(EmployeeInsertDTO employeeDTO) {
         return CompletableFuture.runAsync(() -> {
             Employee employee = new Employee(employeeDTO);
 

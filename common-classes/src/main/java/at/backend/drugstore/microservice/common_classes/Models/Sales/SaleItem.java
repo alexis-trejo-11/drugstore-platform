@@ -1,9 +1,10 @@
 package at.backend.drugstore.microservice.common_classes.Models.Sales;
 
+import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.MappedSuperclass;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 

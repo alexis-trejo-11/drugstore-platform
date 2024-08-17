@@ -4,7 +4,7 @@ package microservice.product_service.Model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "category_specification")

@@ -1,7 +1,7 @@
 package microservice.product_service.Model;
 
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "product_attribute")

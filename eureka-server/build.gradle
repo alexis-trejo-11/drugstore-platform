@@ -1,22 +1,20 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '2.7.0'
-	id 'io.spring.dependency-management' version '1.1.5'
+	id 'org.springframework.boot' version '3.3.2'
+	id 'io.spring.dependency-management' version '1.1.6'
 }
 
 group = 'at.backend.drugstore.microservice'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '17'
-	targetCompatibility = '17'
-}
-repositories {
-	mavenCentral()
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
 }
 
-ext {
-	set('springCloudVersion', "2021.0.4")
+repositories {
+	mavenCentral()
 }
 
 dependencies {

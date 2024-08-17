@@ -1,12 +1,11 @@
 package at.backend.drugstore.microservice.common_classes.DTOs.Product.Category;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
-import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Data

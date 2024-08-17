@@ -1,11 +1,11 @@
 package microservice.employee_service.Model;
 
-import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeInsertDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import microservice.employee_service.Model.enums.Genre;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -62,7 +62,7 @@ public class Employee implements Serializable {
     @OneToOne(mappedBy = "employee")
     private PhoneNumber phoneNumber;
 
-    public Employee(EmployeInsertDTO employeInsertDTO) {
+    public Employee(EmployeeInsertDTO employeInsertDTO) {
         this.firstName = employeInsertDTO.getFirstName();
         this.lastName = employeInsertDTO.getLastName();
         this.birthDate = employeInsertDTO.getBirthDate();

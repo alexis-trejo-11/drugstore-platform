@@ -5,7 +5,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
