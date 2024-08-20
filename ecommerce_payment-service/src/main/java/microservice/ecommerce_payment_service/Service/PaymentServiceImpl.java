@@ -3,7 +3,7 @@ package microservice.ecommerce_payment_service.Service;
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentInsertDTO;
 import lombok.extern.slf4j.Slf4j;
-import microservice.ecommerce_payment_service.Automappers.PaymentMapper;
+import microservice.ecommerce_payment_service.Mappers.PaymentMapper;
 import microservice.ecommerce_payment_service.Model.Payment;
 import microservice.ecommerce_payment_service.Repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;

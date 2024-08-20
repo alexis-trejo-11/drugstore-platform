@@ -1,75 +1,53 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.3.2'
 	id 'io.spring.dependency-management' version '1.1.6'
 }
 
-group = 'at.backend.drugstore.microservice'
-version = '0.0.1-SNAPSHOT'
+allprojects {
+	group = 'at.backend.drugstore'
+	version = '1.0.0'
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
+	repositories {
+		mavenCentral()
+	}
+
+	dependencyManagement {
+		imports {
+			mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.3"
+		}
+	}
+
+	// Apply common configurations
+	java {
+		toolchain {
+			languageVersion = JavaLanguageVersion.of(17)
+		}
 	}
 }
 
-repositories {
-	mavenCentral()
-}
+// Configuration specific to all subprojects
+subprojects {
+	apply plugin: 'java'
 
-ext {
-	set('springBootAdminVersion', "3.3.2")
-	set('springCloudVersion', "2023.0.3")
-}
+	// Common dependencies
+	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	}
 
-dependencies {
-	// Spring Boot
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-
-	// Common Models
-	implementation project(':common-classes')
-
-	// JWT
-	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
-	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
-	// Postgres
-	runtimeOnly 'org.postgresql:postgresql'
-	implementation 'org.postgresql:postgresql'
-
-	// Lombok
-	testAnnotationProcessor 'org.projectlombok:lombok'
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-
-	// Mapper
-	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-	implementation 'org.modelmapper:modelmapper:2.4.4'
-
-	// Open Api
-	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
-
-	// Rate Limiter
-	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0'
-	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-jcache:7.6.0'
-
-	// Eureka
-	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
-}
-
-
-dependencyManagement {
-	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	// Configure tasks specific to each subproject
+	tasks.named('test') {
+		useJUnitPlatform()
 	}
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+// Configuration specific to Spring Boot projects
+configure(subprojects.findAll { it.plugins.hasPlugin('org.springframework.boot') }) {
+	tasks.named('bootJar').configure {
+		enabled = false // Disable bootJar task for libraries
+	}
+
+	tasks.named('jar').configure {
+		enabled = true // Ensure jar task is enabled
+	}
 }

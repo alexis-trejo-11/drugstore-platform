@@ -1,7 +1,9 @@
 package at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Cart;
 
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -28,26 +30,19 @@ public class CartFacadeFacadeServiceImpl implements CartFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Void> createClientCart(Long clientId) {
         return CompletableFuture.runAsync(() -> {
-            try {
                 String url = cartServiceUrlProvider.get() + "/v1/api/ecommerce/carts/create/{clientId}";
-                ResponseEntity<ResponseWrapper> responseEntity = restTemplate.exchange(
+                ResponseEntity<ResponseWrapper<Void>> responseEntity = restTemplate.exchange(
                         url,
                         HttpMethod.POST,
                         HttpEntity.EMPTY,
-                        ResponseWrapper.class,
+                        new ParameterizedTypeReference<ResponseWrapper<Void>>() {},
                         clientId
                 );
-
-                if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                    log.info("Successfully created client cart for client ID: {}", clientId);
-                } else {
+                if (responseEntity.getStatusCode().is4xxClientError() && responseEntity.getBody() != null) {
                     log.error("Failed to create client cart with status code: {}", responseEntity.getStatusCode());
-                    throw new RuntimeException("Failed to create client cart");
+                    throw new RuntimeException(responseEntity.getBody().getMessage());
                 }
-            } catch (Exception e) {
-                log.error("Failed to create client cart: {}", e.getMessage());
-                throw new RuntimeException("Failed to create client cart", e);
-            }
+                log.info("Successfully created client cart for client ID: {}", clientId);
         });
     }
 }

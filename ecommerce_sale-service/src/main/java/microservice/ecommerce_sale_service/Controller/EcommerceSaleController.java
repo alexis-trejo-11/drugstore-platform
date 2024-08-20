@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_sale_service.Service.DigitalSaleService;
 import org.springframework.http.HttpStatus;
@@ -19,9 +20,10 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @RestController
 @RequestMapping("/v1/api/digital-sales")
-@Slf4j
+@Tag(name = "Drugstore Microservice API (E-Sale Service)", description = "Service for managing electronic sales")
 public class EcommerceSaleController {
 
     private final DigitalSaleService digitalSaleService;
@@ -29,8 +31,6 @@ public class EcommerceSaleController {
     public EcommerceSaleController(DigitalSaleService digitalSaleService) {
         this.digitalSaleService = digitalSaleService;
     }
-
-
 
     @PostMapping
     @Operation(summary = "Create a new digital sale", description = "Creates a new digital sale and updates inventory")
@@ -44,8 +44,6 @@ public class EcommerceSaleController {
                 .thenApply(digitalSaleDTO -> ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ResponseWrapper<>(true, digitalSaleDTO, "Sale successfully created.", HttpStatus.CREATED.value())));
     }
-
-
 
     @GetMapping("/{saleId}")
     @Operation(summary = "Get a sale by ID", description = "Retrieves a digital sale by its ID")
@@ -62,8 +60,6 @@ public class EcommerceSaleController {
                                 .body(new ResponseWrapper<>(false, null, "Sale with Id " + saleId + " not found.", HttpStatus.NOT_FOUND.value()))));
     }
 
-
-
     @GetMapping("/today")
     @Operation(summary = "Get today's sales", description = "Retrieves all digital sales made today")
     @ApiResponses(value = {
@@ -76,8 +72,6 @@ public class EcommerceSaleController {
         });
     }
 
-
-
     @GetMapping("/today/summary")
     @Operation(summary = "Get today's sales summary", description = "Retrieves a summary of all digital sales made today")
     @ApiResponses(value = {
@@ -85,8 +79,8 @@ public class EcommerceSaleController {
                     content = @Content(schema = @Schema(implementation = ResponseWrapper.class)))
     })
     public CompletableFuture<ResponseEntity<ResponseWrapper<SalesSummaryDTO>>> getSaleSummaryFromToday() {
-        return digitalSaleService.getTodaySummarySales().thenApply(summaryDTO -> {
-            return ResponseEntity.ok(new ResponseWrapper<>(true, summaryDTO, "Sale summary successfully fetched", HttpStatus.OK.value()));
-        });
+        return digitalSaleService.getTodaySummarySales().thenApply(summaryDTO ->
+                ResponseEntity.ok(new ResponseWrapper<>(true, summaryDTO, "Sale summary successfully fetched", HttpStatus.OK.value()))
+        );
     }
 }

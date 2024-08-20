@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-
 @Slf4j
 @RestController
 @RequestMapping("v1/api/client-orders")
@@ -42,11 +41,9 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
     @GetMapping("/current/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Page<OrderDTO>>>> getCancelledOrdersByClientId(
-            @Parameter(description = "ID of the client to retrieve cancelled orders for") @PathVariable Long clientId,
-            @Parameter(description = "Page number for pagination") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int size) {
-
+    public CompletableFuture<ResponseEntity<ResponseWrapper<Page<OrderDTO>>>> getCancelledOrdersByClientId(@PathVariable Long clientId,
+                                                                                                           @RequestParam(defaultValue = "0") int page,
+                                                                                                           @RequestParam(defaultValue = "10") int size) {
         return clientOrderService.validateExistingClient(clientId)
                 .thenCompose(isClientValidate -> {
                     if (!isClientValidate) {
@@ -61,8 +58,6 @@ public class ClientOrderController {
                 });
     }
 
-
-
     @Cacheable(value = "orderCache", key = "#clientId + '-' + #page + '-' + #size")
     @Operation(summary = "Get orders to be delivered by client ID",
             description = "Retrieve a paginated list of orders to be delivered for a specific client.")
@@ -71,11 +66,9 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
     @GetMapping("/delivering/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Page<OrderDTO>>>> getOrdersToBeDeliveredByClientId(
-            @Parameter(description = "ID of the client to retrieve orders to be delivered for") @PathVariable Long clientId,
-            @Parameter(description = "Page number for pagination") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int size) {
-
+    public CompletableFuture<ResponseEntity<ResponseWrapper<Page<OrderDTO>>>> getOrdersToBeDeliveredByClientId(@PathVariable Long clientId,
+                                                                                                               @RequestParam(defaultValue = "0") int page,
+                                                                                                               @RequestParam(defaultValue = "10") int size) {
         return clientOrderService.validateExistingClient(clientId)
                 .thenCompose(isClientValidate -> {
                     if (!isClientValidate) {
@@ -91,7 +84,6 @@ public class ClientOrderController {
     }
 
 
-
     @Cacheable(value = "orderCache", key = "#clientId + '-' + #page + '-' + #size")
     @Operation(summary = "Get completed orders by client ID",
             description = "Retrieve a paginated list of completed orders for a specific client.")
@@ -100,11 +92,9 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
     @GetMapping("/completed/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Page<OrderDTO>>>> getCompletedOrdersByClientId(
-            @Parameter(description = "ID of the client to retrieve completed orders for") @PathVariable Long clientId,
-            @Parameter(description = "Page number for pagination") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int size) {
-
+    public CompletableFuture<ResponseEntity<ResponseWrapper<Page<OrderDTO>>>> getCompletedOrdersByClientId(@PathVariable Long clientId,
+                                                                                                           @RequestParam(defaultValue = "0") int page,
+                                                                                                           @RequestParam(defaultValue = "10") int size) {
         return clientOrderService.validateExistingClient(clientId)
                 .thenCompose(isClientValidate -> {
                     if (!isClientValidate) {
@@ -120,7 +110,6 @@ public class ClientOrderController {
     }
 
 
-
     @Cacheable(value = "orderCache", key = "#clientId + '-' + #page + '-' + #size")
     @Operation(summary = "Get pending payment orders by client ID",
             description = "Retrieve a paginated list of orders pending payment for a specific client.")
@@ -129,11 +118,9 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
     @GetMapping("/pending/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Page<OrderDTO>>>> getPendingPaymentOrdersByClientId(
-            @Parameter(description = "ID of the client to retrieve pending payment orders for") @PathVariable Long clientId,
-            @Parameter(description = "Page number for pagination") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int size) {
-
+    public CompletableFuture<ResponseEntity<ResponseWrapper<Page<OrderDTO>>>> getPendingPaymentOrdersByClientId(@PathVariable Long clientId,
+                                                                                                                @RequestParam(defaultValue = "0") int page,
+                                                                                                                @RequestParam(defaultValue = "10") int size) {
         return clientOrderService.validateExistingClient(clientId)
                 .thenCompose(isClientValidate -> {
                     if (!isClientValidate) {
@@ -148,8 +135,6 @@ public class ClientOrderController {
                 });
     }
 
-
-
     @Operation(summary = "Cancel an order by ID",
             description = "Cancel a specific order based on the provided order ID.")
     @ApiResponses(value = {
@@ -158,9 +143,7 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "409", description = "Conflict occurred while cancelling the order")
     })
     @GetMapping("/cancel/{orderId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> cancelOrder(
-            @Parameter(description = "ID of the order to be cancelled") @PathVariable Long orderId) {
-
+    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> cancelOrder(@PathVariable Long orderId) {
         return orderService.getOrderById(orderId)
                 .thenCompose(optionalOrderDTO -> {
                     if (optionalOrderDTO.isEmpty()) {

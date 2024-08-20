@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -34,28 +35,21 @@ public class AddressFacadeServiceImpl implements AddressFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Result<AddressDTO>> getAddressById(Long addressId) {
         String addressUrl = clientServiceUrlProvider.get() + "/v1/api/clients/address/" + addressId;
-
         return CompletableFuture.supplyAsync(() -> {
-            try {
                 ResponseEntity<ResponseWrapper<AddressDTO>> responseEntity = restTemplate.exchange(
                         addressUrl,
                         HttpMethod.GET,
                         null,
                         new ParameterizedTypeReference<ResponseWrapper<AddressDTO>>() {});
 
-                if (responseEntity.getStatusCode() == HttpStatus.OK) {
-                    ResponseWrapper<AddressDTO> responseWrapper = responseEntity.getBody();
-                    AddressDTO addressDTO = responseWrapper.getData();
-                    log.info("Address with ID: {} successfully fetched", addressId);
-                    return Result.success(addressDTO);
-                } else {
+                if (responseEntity.getStatusCode().is4xxClientError() && responseEntity.getBody() != null) {
                     log.warn("Address with ID: {} not found", addressId);
-                    return new Result<>(false, null, "Address with ID: " + addressId + " not found");
+                    return new Result<>(false, null, responseEntity.getBody().getMessage());
                 }
-            } catch (Exception e) {
-                log.error("Error fetching address with ID: {}", addressId, e);
-                return new Result<>(false, null, "Error fetching address");
-            }
+
+            AddressDTO addressDTO = Objects.requireNonNull(responseEntity.getBody()).getData();
+            log.info("Address with ID: {} successfully fetched", addressId);
+            return Result.success(addressDTO);
         });
     }
 
@@ -63,28 +57,23 @@ public class AddressFacadeServiceImpl implements AddressFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Result<List<AddressDTO>>> getAddressesByClientId(Long clientId) {
         String addressUrl = clientServiceUrlProvider.get() + "/v1/api/clients/address/client/" + clientId;
-
         return CompletableFuture.supplyAsync(() -> {
-            try {
                 ResponseEntity<ResponseWrapper<List<AddressDTO>>> responseEntity = restTemplate.exchange(
                         addressUrl,
                         HttpMethod.GET,
                         null,
                         new ParameterizedTypeReference<ResponseWrapper<List<AddressDTO>>>() {});
 
-                if (responseEntity.getStatusCode() == HttpStatus.OK) {
-                    ResponseWrapper<List<AddressDTO>> responseWrapper = responseEntity.getBody();
-                    List<AddressDTO> addressDTOs = responseWrapper.getData();
-                    log.info("Addresses for client ID: {} successfully fetched", clientId);
-                    return Result.success(addressDTOs);
-                } else {
-                    log.warn("Cannot get addresses for client ID: {}", clientId);
-                    return new Result<>(false, null, "Can't get addresses for client ID: " + clientId);
+                if (responseEntity.getStatusCode() == HttpStatus.NOT_FOUND && responseEntity.getBody() != null) {
+                    log.warn("Client ID {} not found", clientId);
+                    return new Result<>(false, null, "client with ID " + clientId + " not found.");
                 }
-            } catch (Exception e) {
-                log.error("Error fetching addresses for client ID: {}", clientId, e);
-                return new Result<>(false, null, "Error fetching addresses");
-            }
+
+            assert responseEntity.getBody() != null;
+            List<AddressDTO> addressDTOs = responseEntity.getBody().getData();
+
+            log.info("Addresses for client ID: {} successfully fetched", clientId);
+            return Result.success(addressDTOs);
         });
     }
 }

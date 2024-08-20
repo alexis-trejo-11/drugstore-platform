@@ -28,15 +28,13 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-
     @Operation(summary = "Create a new order", description = "Creates a new order based on the provided order details.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Order created successfully."),
             @ApiResponse(responseCode = "400", description = "Invalid order details.")
     })
     @PostMapping("/create")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<OrderDTO>>> createOrder(
-            @Valid @RequestBody @Parameter(description = "Details of the order to be created") OrderInsertDTO orderInsertDTO) {
+    public CompletableFuture<ResponseEntity<ResponseWrapper<OrderDTO>>> createOrder(@Valid @RequestBody OrderInsertDTO orderInsertDTO) {
         log.info("Received create order request: {}", orderInsertDTO);
         return orderService.createOrderAsync(orderInsertDTO)
                 .thenApply(order -> {
@@ -48,16 +46,13 @@ public class OrderController {
                 });
     }
 
-
-
     @Operation(summary = "Complete an order", description = "Completes an order by processing payment and updating the order status.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Order marked as completed successfully."),
             @ApiResponse(responseCode = "400", description = "Failed to process payment or invalid order details.")
     })
     @PutMapping("/complete-order")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> completeOrder(
-            @Valid @RequestBody @Parameter(description = "Details of the order to be completed") CompleteOrderRequest completeOrderRequest) {
+    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> completeOrder(@Valid @RequestBody CompleteOrderRequest completeOrderRequest) {
         log.info("Received request to complete order: {}", completeOrderRequest);
 
         if (!completeOrderRequest.isOrderPaid()) {
@@ -92,24 +87,19 @@ public class OrderController {
                 });
     }
 
-
-
     @Operation(summary = "Add payment ID to an order", description = "Associates a payment ID with an existing order.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Order updated with payment ID successfully."),
             @ApiResponse(responseCode = "404", description = "Order not found.")
     })
     @PutMapping("/{orderId}/payment/{paymentId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> addPaymentIdByOrderId(
-            @PathVariable @Parameter(description = "ID of the order to update") Long orderId,
-            @PathVariable @Parameter(description = "ID of the payment to associate with the order") Long paymentId) {
+    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> addPaymentIdByOrderId(@PathVariable Long orderId,
+                                                                                          @PathVariable Long paymentId) {
         return CompletableFuture.runAsync(() -> orderService.addPaymentIdByOrderId(orderId, paymentId))
                 .thenApply(v -> ResponseEntity.ok()
                         .body(new ResponseWrapper<>(true, null, "Order Updated", 200))
                 );
     }
-
-
 
     @Operation(summary = "Get an order by ID", description = "Retrieves the details of an order by its ID.")
     @ApiResponses(value = {
@@ -117,8 +107,7 @@ public class OrderController {
             @ApiResponse(responseCode = "404", description = "Order not found.")
     })
     @GetMapping("/{orderId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<OrderDTO>>> getOrderById(
-            @PathVariable @Parameter(description = "ID of the order to retrieve") Long orderId) {
+    public CompletableFuture<ResponseEntity<ResponseWrapper<OrderDTO>>> getOrderById(@PathVariable Long orderId) {
         return orderService.getOrderById(orderId)
                 .thenApply(orderOpt -> orderOpt
                         .map(orderDTO -> ResponseEntity.ok()
@@ -128,7 +117,6 @@ public class OrderController {
                 );
     }
 
-
     @Operation(summary = "Deliver an order", description = "Updates the delivery status of an order.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Order delivery status updated successfully."),
@@ -136,9 +124,8 @@ public class OrderController {
             @ApiResponse(responseCode = "404", description = "Order not found.")
     })
     @PutMapping("/deliver/{orderId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> deliverOrder(
-            @PathVariable @Parameter(description = "ID of the order to update") Long orderId,
-            @RequestParam @Parameter(description = "Indicates if the order is delivered") boolean isDelivered) {
+    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> deliverOrder(@PathVariable Long orderId,
+                                                                                 @RequestParam boolean isDelivered) {
         return orderService.getOrderById(orderId)
                 .thenCompose(orderOpt -> {
                     if (orderOpt.isEmpty()) {

@@ -6,10 +6,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderInsertDT
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -37,32 +34,26 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
             log.info("Creating order with URL: {}", url);
             log.info("Request Payload: {}", orderInsertDTO);
 
-            try {
-                HttpHeaders headers = new HttpHeaders();
-                headers.set(HttpHeaders.CONTENT_TYPE, "application/json");
-                HttpEntity<OrderInsertDTO> requestEntity = new HttpEntity<>(orderInsertDTO, headers);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(HttpHeaders.CONTENT_TYPE, "application/json");
+            HttpEntity<OrderInsertDTO> requestEntity = new HttpEntity<>(orderInsertDTO, headers);
 
-                ResponseEntity<ResponseWrapper<OrderDTO>> responseEntity = restTemplate.exchange(
-                        url,
-                        HttpMethod.POST,
-                        requestEntity,
-                        new ParameterizedTypeReference<ResponseWrapper<OrderDTO>>() {}
-                );
+            ResponseEntity<ResponseWrapper<OrderDTO>> responseEntity = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    requestEntity,
+                    new ParameterizedTypeReference<ResponseWrapper<OrderDTO>>() {}
+            );
+            ResponseWrapper<OrderDTO> responseEntityBody = responseEntity.getBody();
+            assert responseEntityBody != null;
 
-                ResponseWrapper<OrderDTO> response = responseEntity.getBody();
-
-                if (response != null && response.getData() != null) {
-                    Long orderId = response.getData().getId();
-                    log.info("Order created with ID: {}", orderId);
-                    return orderId;
-                } else {
-                    log.error("Failed to create order.");
-                    return null;
-                }
-            } catch (Exception e) {
-                log.error("Error creating order: {}", e.getMessage(), e);
-                throw new RuntimeException(e);
+            if (responseEntity.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                 throw new RuntimeException(responseEntity.getBody().getMessage());
             }
+
+            Long orderId = responseEntityBody.getData().getId();
+            log.info("Order created with ID: {}", orderId);
+            return orderId;
         });
     }
 
@@ -75,21 +66,16 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
 
             log.info("Completing order with ID: {}", orderId);
 
-            try {
-                HttpHeaders headers = new HttpHeaders();
-                headers.set(HttpHeaders.CONTENT_TYPE, "application/json");
-                HttpEntity<CompleteOrderRequest> requestEntity = new HttpEntity<>(completeOrderRequest, headers);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(HttpHeaders.CONTENT_TYPE, "application/json");
+            HttpEntity<CompleteOrderRequest> requestEntity = new HttpEntity<>(completeOrderRequest, headers);
 
-                restTemplate.exchange(
-                        url,
-                        HttpMethod.PUT,
-                        requestEntity,
-                        Void.class
-                );
-            } catch (Exception e) {
-                log.error("Error completing order with ID {}: {}", orderId, e.getMessage(), e);
-                throw new RuntimeException(e);
-            }
+            restTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    requestEntity,
+                    Void.class
+            );
         });
     }
 
@@ -101,18 +87,13 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
 
             log.info("Adding payment ID {} to order ID {}", paymentId, orderId);
 
-            try {
-                restTemplate.exchange(
-                        url,
-                        HttpMethod.PUT,
-                        null,
-                        Void.class
-                );
-                log.info("Successfully added payment ID {} to order ID {}", paymentId, orderId);
-            } catch (Exception e) {
-                log.error("Error adding payment ID {} to order ID {}: {}", paymentId, orderId, e.getMessage(), e);
-                throw new RuntimeException(e);
-            }
+            restTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    null,
+                    Void.class
+            );
+            log.info("Successfully added payment ID {} to order ID {}", paymentId, orderId);
         });
     }
 
@@ -124,27 +105,20 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
 
             log.info("Fetching order with ID: {}", orderId);
 
-            try {
-                ResponseEntity<ResponseWrapper<OrderDTO>> responseEntity = restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        null,
-                        new ParameterizedTypeReference<ResponseWrapper<OrderDTO>>() {}
-                );
+            ResponseEntity<ResponseWrapper<OrderDTO>> responseEntity = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<ResponseWrapper<OrderDTO>>() {}
+            );
+            ResponseWrapper<OrderDTO> responseEntityBody = responseEntity.getBody();
+            assert responseEntityBody != null;
 
-                ResponseWrapper<OrderDTO> response = responseEntity.getBody();
-
-                if (response != null && response.getData() != null) {
-                    log.info("Order with ID {} fetched successfully.", orderId);
-                    return response.getData();
-                } else {
-                    log.error("Failed to fetch order with ID {}.", orderId);
-                    return null;
-                }
-            } catch (Exception e) {
-                log.error("Error fetching order with ID {}: {}", orderId, e.getMessage(), e);
-                throw new RuntimeException(e);
+            if (responseEntityBody.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                return null;
             }
+
+            return responseEntityBody.getData();
         });
     }
 }

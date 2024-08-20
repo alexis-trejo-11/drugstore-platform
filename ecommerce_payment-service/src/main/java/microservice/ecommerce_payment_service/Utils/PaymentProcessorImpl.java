@@ -8,7 +8,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Sale.DigitalSaleIte
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.ESale.ESaleFacadeService;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Order.OrderFacadeService;
 import lombok.extern.slf4j.Slf4j;
-import microservice.ecommerce_payment_service.Automappers.PaymentMapper;
+import microservice.ecommerce_payment_service.Mappers.PaymentMapper;
 import microservice.ecommerce_payment_service.Model.Card;
 import microservice.ecommerce_payment_service.Model.Payment;
 import microservice.ecommerce_payment_service.Repository.PaymentRepository;
