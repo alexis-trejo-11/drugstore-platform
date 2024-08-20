@@ -1,4 +1,4 @@
-package microservice.client_service.Utils;
+package microservice.client_service.Mappers;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressInsertDTO;
 import microservice.client_service.Model.Address;

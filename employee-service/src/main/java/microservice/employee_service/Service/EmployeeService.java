@@ -2,7 +2,6 @@ package microservice.employee_service.Service;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeInsertDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDTO;
-import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeInsertDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeUpdateDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
 

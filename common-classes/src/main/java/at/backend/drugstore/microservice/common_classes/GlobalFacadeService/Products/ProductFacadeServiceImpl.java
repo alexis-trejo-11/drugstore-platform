@@ -40,25 +40,19 @@ public class ProductFacadeServiceImpl implements ProductFacadeService {
         request.put("productIds", productIds);
 
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                ResponseEntity<ResponseWrapper<List<ProductDTO>>> response = restTemplate.exchange(
-                        url,
-                        HttpMethod.POST,
-                        new HttpEntity<>(request, createJsonHeaders()),
-                        new ParameterizedTypeReference<ResponseWrapper<List<ProductDTO>>>() {}
-                );
+            ResponseEntity<ResponseWrapper<List<ProductDTO>>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    new HttpEntity<>(request, createJsonHeaders()),
+                    new ParameterizedTypeReference<ResponseWrapper<List<ProductDTO>>>() {}
+            );
 
-                if (response.getStatusCode() == HttpStatus.OK) {
-                    log.info("Received response from Product Service");
-                    return Objects.requireNonNull(response.getBody()).getData();
-                } else {
-                    log.error("Error response from Product Service: {}", response.getStatusCode());
-                    throw new CompletionException(new RuntimeException("Error response from Product Service"));
-                }
-            } catch (Exception e) {
-                log.error("An error occurred while fetching products: {}", e.getMessage());
-                throw new CompletionException(e);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                log.info("Received response from Product Service");
+                return Objects.requireNonNull(response.getBody()).getData();
             }
+            log.error("Error response from Product Service: {}", response.getStatusCode());
+            throw new CompletionException(new RuntimeException("Error response from Product Service"));
         });
     }
 

@@ -9,6 +9,5 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public interface ESaleFacadeService {
 
-    CompletableFuture<Result<Void>> initSale(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO);
     CompletableFuture<Long> makeDigitalSaleAndGetID(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO);
 }

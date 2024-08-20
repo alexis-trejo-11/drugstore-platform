@@ -4,11 +4,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +19,12 @@ import java.util.List;
 public class AuthSecurity {
 
     // Secret key for signing and verifying JWT tokens
-    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final SecretKey secretKey;
+
+    // Constructor to inject the secret key
+    public AuthSecurity(@Value("${jwt.secret.key}") String secretKey) {
+        this.secretKey = new SecretKeySpec(secretKey.getBytes(), SignatureAlgorithm.HS256.getJcaName());
+    }
 
     public String generateToken(Long id, List<String> roles, Long clientId) {
         Claims claims = Jwts.claims().setSubject(String.valueOf(id));
@@ -60,7 +67,15 @@ public class AuthSecurity {
     }
 
     public Long getClientId(Claims claims) {
-        return (Long) claims.get("clientId");
+        Object clientId = claims.get("clientId");
+
+        if (clientId instanceof Integer) {
+            return ((Integer) clientId).longValue(); // Convierte Integer a Long
+        } else if (clientId instanceof Long) {
+            return (Long) clientId; // Ya es Long, simplemente lo devolvemos
+        } else {
+            throw new IllegalArgumentException("clientId is not of expected type Long or Integer");
+        }
     }
 
     public Claims getClaimsFromToken(HttpServletRequest request) {

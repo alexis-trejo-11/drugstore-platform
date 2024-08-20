@@ -8,7 +8,7 @@ import microservice.client_service.Model.Address;
 import microservice.client_service.Model.Client;
 import microservice.client_service.Repository.AddressRepository;
 import microservice.client_service.Repository.ClientRepository;
-import microservice.client_service.Utils.dtoMapper;
+import microservice.client_service.Mappers.dtoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -53,14 +53,10 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Async("taskExecutor")
-    public CompletableFuture<Result<AddressDTO>> getAddressById(Long addressId) {
+    public CompletableFuture<Optional<AddressDTO>> getAddressById(Long addressId) {
         return CompletableFuture.supplyAsync(() -> {
-            Optional<Address> address = addressRepository.findById(addressId);
-            if (address.isEmpty()) {
-                return Result.error("Address with Id: " + addressId + " Not Found");
-            }
-            AddressDTO addressDTO = addressMapper.entityToDTO(address.get());
-            return Result.success(addressDTO);
+            Optional<Address> optionalAddress = addressRepository.findById(addressId);
+            return optionalAddress.map(addressMapper::entityToDTO);
         });
     }
 

@@ -16,7 +16,7 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 		"at.backend.drugstore.microservice.common_classes.GlobalExceptions"})
 
 public class EcommerceSaleServiceApplication {
-	
+
 	public static void main(String[] args) {
 		SpringApplication.run(EcommerceSaleServiceApplication.class, args);
 	}

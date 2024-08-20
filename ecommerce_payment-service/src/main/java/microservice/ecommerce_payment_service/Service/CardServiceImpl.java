@@ -4,7 +4,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardInsertDTO;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.ClientFacadeService;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
-import microservice.ecommerce_payment_service.Automappers.CardMapper;
+import microservice.ecommerce_payment_service.Mappers.CardMapper;
 import microservice.ecommerce_payment_service.Model.Card;
 import microservice.ecommerce_payment_service.Repository.CardRepository;
 
