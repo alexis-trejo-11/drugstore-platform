@@ -31,7 +31,7 @@ dependencies {
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
 	// Swagger
-	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'
 
 	// Rate Limiter
 	implementation 'io.github.resilience4j:resilience4j-spring-boot2:1.7.1'

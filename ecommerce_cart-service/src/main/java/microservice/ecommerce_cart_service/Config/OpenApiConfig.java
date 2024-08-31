@@ -3,7 +3,6 @@ package microservice.ecommerce_cart_service.Config;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
-import org.springdoc.core.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,13 +25,5 @@ public class OpenApiConfig {
                                 .name("MIT")
                                 .url("http://opensource.org/licenses/MIT"))
                 );
-    }
-
-    @Bean
-    public GroupedOpenApi publicApi() {
-        return GroupedOpenApi.builder()
-                .group("public")
-                .pathsToMatch("/**")
-                .build();
     }
 }
