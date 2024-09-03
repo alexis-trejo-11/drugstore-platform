@@ -11,8 +11,8 @@ import java.util.List;
 @Entity
 @Data
 @NoArgsConstructor
+@Table(name = "main_categories")
 public class MainCategory {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,4 +35,13 @@ public class MainCategory {
     @OneToMany(mappedBy = "mainCategory")
     private List<Product> products;
 
+    public MainCategory(String name, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.name = name;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public MainCategory(Long id) {
+        this.id = id;
+    }
 }

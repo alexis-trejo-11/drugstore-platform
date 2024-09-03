@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "category_specification")
+@Table(name = "category_specifications")
 @Data
 @NoArgsConstructor
 public class CategorySpecification {

@@ -1,15 +1,16 @@
 package microservice.product_service.Service;
 
+import at.backend.drugstore.microservice.common_classes.DTOs.Supplier.SupplierDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Supplier.SupplierInsertDTO;
-import at.backend.drugstore.microservice.common_classes.DTOs.Supplier.SupplierReturnDTO;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface SupplierService {
     void insertSupplier(SupplierInsertDTO supplierInsertDTO);
-    SupplierReturnDTO getSupplierById(Long supplierId);
-    SupplierReturnDTO getSupplierByName(String supplierMame);
-    List<SupplierReturnDTO> getAllSuppliers();
-    boolean updateSupplier(SupplierReturnDTO supplierDTO);
-    boolean deleteSupplier(Long id);
+    SupplierDTO getSupplierById(Long supplierId);
+    SupplierDTO getSupplierByName(String supplierMame);
+    Page<SupplierDTO> getAllSuppliersSortedByName(Boolean sortedAsc, Pageable pageable);
+    void updateSupplier(SupplierDTO supplierDTO);
+    void deleteSupplier(Long supplierId);
+    boolean validateExistingSupplier(Long supplierId);
 }
