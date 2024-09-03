@@ -1,7 +1,7 @@
 package microservice.product_service.Mappers;
 
+import at.backend.drugstore.microservice.common_classes.DTOs.Supplier.SupplierDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Supplier.SupplierInsertDTO;
-import at.backend.drugstore.microservice.common_classes.DTOs.Supplier.SupplierReturnDTO;
 import microservice.product_service.Model.Supplier;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,5 +14,5 @@ public interface SupplierMapper {
     @Mapping(target = "products", ignore = true)
     Supplier insertDtoToSupplier(SupplierInsertDTO supplierInsertDTO);
 
-    SupplierReturnDTO supplierToReturnDTO(Supplier supplier);
+    SupplierDTO entityToDTO(Supplier supplier);
 }

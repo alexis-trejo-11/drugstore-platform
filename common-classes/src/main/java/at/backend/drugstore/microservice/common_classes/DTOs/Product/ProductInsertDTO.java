@@ -70,4 +70,9 @@ public class ProductInsertDTO {
     @NotNull(message = "brand_id it's obligatory")
     private Long brandId;
 
+
+    public ProductRelationsIDs getRelationIDs() {
+        return new ProductRelationsIDs(this.mainCategoryId, this.categoryId, this.subcategoryId, this.brandId, this.supplierId);
+    }
+
 }

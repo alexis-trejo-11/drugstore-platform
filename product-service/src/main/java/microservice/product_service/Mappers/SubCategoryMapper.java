@@ -10,6 +10,6 @@ import org.mapstruct.Mapping;
 public interface SubCategoryMapper {
 
     @Mapping(target = "categoryId", ignore = true)
-    @Mapping(target = "productInsertDTOS", ignore = true)
+    @Mapping(target = "productDTOS", ignore = true)
     SubcategoryDTO subcategoryToDTO(Subcategory subcategory);
 }

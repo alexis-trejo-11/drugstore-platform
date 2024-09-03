@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "product")
+@Table(name = "products")
 @Data @NoArgsConstructor
 public class Product {
     @Id
@@ -55,7 +55,6 @@ public class Product {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Relationships
     @ManyToOne
     @JoinColumn(name = "main_category_id")
     private MainCategory mainCategory;

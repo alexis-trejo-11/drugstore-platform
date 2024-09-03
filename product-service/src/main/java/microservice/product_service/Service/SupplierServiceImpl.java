@@ -1,18 +1,21 @@
 package microservice.product_service.Service;
 
+import at.backend.drugstore.microservice.common_classes.DTOs.Supplier.SupplierDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Supplier.SupplierInsertDTO;
-import at.backend.drugstore.microservice.common_classes.DTOs.Supplier.SupplierReturnDTO;
 import microservice.product_service.Mappers.SupplierMapper;
 import microservice.product_service.Model.Supplier;
 import microservice.product_service.Repository.SupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
-import java.util.List;
+
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class SupplierServiceImpl implements SupplierService {
@@ -26,64 +29,48 @@ public class SupplierServiceImpl implements SupplierService {
         this.supplierMapper = supplierMapper;
     }
 
-    @Async
+    @Override
+    @Cacheable(value = "supplierById", key = "#supplierId")
+    public SupplierDTO getSupplierById(Long supplierId) {
+        Optional<Supplier> optionalSupplier = supplierRepository.findById(supplierId);
+        return optionalSupplier.map(supplierMapper::entityToDTO).orElse(null);
+    }
+
+    @Override
+    @Cacheable(value = "supplierByName", key = "#supplierName")
+    public SupplierDTO getSupplierByName(String supplierMame) {
+            Optional<Supplier> optionalSupplier = supplierRepository.findByName(supplierMame);
+            return optionalSupplier.map(supplierMapper::entityToDTO).orElse(null);
+    }
+
+    @Override
+    @Cacheable(value = "allSuppliersSortedByName", key = "#sortedAsc + '-' + #pageable.pageNumber + '-' + #pageable.pageSize")
+    public Page<SupplierDTO> getAllSuppliersSortedByName(Boolean sortedAsc, Pageable pageable) {
+        // Determine sort direction
+        Sort sort = Sort.by("name");
+        sort = sortedAsc ? sort.ascending() : sort.descending();
+
+        // Apply sort to pageable
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        // Fetch suppliers with dynamic sorting
+        Page<Supplier> supplierPage = supplierRepository.findAll(sortedPageable);
+        return supplierPage.map(supplierMapper::entityToDTO);
+    }
+
     @Transactional
     public void insertSupplier(SupplierInsertDTO supplierInsertDTO) {
-        try {
-            Supplier supplier = supplierMapper.insertDtoToSupplier(supplierInsertDTO);
-
-            supplierRepository.saveAndFlush(supplier);
-        } catch (Exception e) {
-            throw new RuntimeException("An error occurred while inserting the supplier", e);
-        }
+        Supplier supplier = supplierMapper.insertDtoToSupplier(supplierInsertDTO);
+        supplierRepository.saveAndFlush(supplier);
     }
 
-    @Async
     @Transactional
-    public SupplierReturnDTO getSupplierById(Long supplierId) {
-        try {
-            Optional<Supplier> optionalSupplier = supplierRepository.findById(supplierId);
-
-            return optionalSupplier.map(supplierMapper::supplierToReturnDTO).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    @Async
-    @Transactional
-    public SupplierReturnDTO getSupplierByName(String supplierMame) {
-        try {
-            Optional<Supplier> optionalSupplier = supplierRepository.findByName(supplierMame);
-
-            return optionalSupplier.map(supplierMapper::supplierToReturnDTO).orElse(null);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    @Async
-    @Transactional
-    public List<SupplierReturnDTO> getAllSuppliers() {
-        try {
-            List<Supplier> suppliers = supplierRepository.findAll();
-
-            return suppliers.stream()
-                    .map(supplierMapper::supplierToReturnDTO)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    @Async
-    @Transactional
-    public boolean updateSupplier(SupplierReturnDTO supplierDTO) {
-        try {
+    public void updateSupplier(SupplierDTO supplierDTO) {
             Optional<Supplier> optionalSupplier = supplierRepository.findById(supplierDTO.getId());
             if (optionalSupplier.isEmpty()) {
-                return false;
+                throw new RuntimeException();
             }
+
             Supplier supplier = optionalSupplier.get();
             supplier.setName(supplierDTO.getName());
             supplier.setContactInfo(supplierDTO.getContactInfo());
@@ -91,29 +78,24 @@ public class SupplierServiceImpl implements SupplierService {
             supplier.setPhone(supplierDTO.getPhone());
             supplier.setEmail(supplierDTO.getEmail());
 
-            supplierRepository.save(supplier);
-
-            return true;
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+            supplierRepository.saveAndFlush(supplier);
     }
 
-    @Async
     @Transactional
-    public boolean deleteSupplier(Long id) {
-        try {
-            Optional<Supplier> optionalSupplier = supplierRepository.findById(id);
+    public void deleteSupplier(Long supplierId) {
+            Optional<Supplier> optionalSupplier = supplierRepository.findById(supplierId);
             if (optionalSupplier.isEmpty()) {
-                return false;
+                throw new RuntimeException();
             }
             Supplier supplier = optionalSupplier.get();
 
             supplierRepository.delete(supplier);
-            return true;
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+    }
+
+    @Override
+    public boolean validateExistingSupplier(Long supplierId) {
+        Optional<Supplier> optionalSupplier = supplierRepository.findById(supplierId);
+        return optionalSupplier.isPresent();
     }
 }
 
