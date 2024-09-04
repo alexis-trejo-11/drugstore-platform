@@ -47,6 +47,7 @@ public class Employee implements Serializable {
 
     private String address;
 
+    @Column(name = "is_employee_active")
     private boolean isEmployeeActive;
 
     @Column(name = "created_at")
@@ -62,14 +63,14 @@ public class Employee implements Serializable {
     @OneToOne(mappedBy = "employee")
     private PhoneNumber phoneNumber;
 
-    public Employee(EmployeeInsertDTO employeInsertDTO) {
-        this.firstName = employeInsertDTO.getFirstName();
-        this.lastName = employeInsertDTO.getLastName();
-        this.birthDate = employeInsertDTO.getBirthDate();
-        this.hiredAt = employeInsertDTO.getHiredAt();
-        this.address = employeInsertDTO.getAddress();
+    public Employee(EmployeeInsertDTO employeeInsertDTO) {
+        this.firstName = employeeInsertDTO.getFirstName();
+        this.lastName = employeeInsertDTO.getLastName();
+        this.birthDate = employeeInsertDTO.getBirthDate();
+        this.hiredAt = employeeInsertDTO.getHiredAt();
+        this.address = employeeInsertDTO.getAddress();
         this.isEmployeeActive = true;
-        this.genre = Genre.valueOf(employeInsertDTO.getGenre());
+        this.genre = Genre.valueOf(employeeInsertDTO.getGenre());
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }

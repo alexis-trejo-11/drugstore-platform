@@ -13,18 +13,20 @@ import java.time.LocalDateTime;
 @Data
 public class Sale {
 
+    @Column(name = "sale_date")
     private LocalDateTime saleDate;
 
+    @Column(name = "sale_total")
     private BigDecimal subtotal;
 
     private BigDecimal discount;
 
     private BigDecimal total;
 
+    @Column(name = "client_id")
     private Long clientId;
 
+    @Column(name = "sale_status")
     @Enumerated(EnumType.STRING)
     private SaleStatus saleStatus;
-
-
 }

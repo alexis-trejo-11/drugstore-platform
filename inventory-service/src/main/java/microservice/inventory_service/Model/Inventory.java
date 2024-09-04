@@ -39,7 +39,7 @@ public class  Inventory {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column
+    @Column(name = "product_id")
     private Long productId;
 
     @OneToMany(mappedBy = "inventory", cascade = CascadeType.ALL)
