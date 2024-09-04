@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Entity
+@Table(name = "transaction_date")
 public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,8 +19,9 @@ public class Transaction {
     @JoinColumn(name = "payment_id", nullable = false)
     private Payment payment;
 
-    private String transactionId;
     private String status;
+
+    @Column(name = "transaction_date")
     private LocalDateTime transactionDate;
 
 

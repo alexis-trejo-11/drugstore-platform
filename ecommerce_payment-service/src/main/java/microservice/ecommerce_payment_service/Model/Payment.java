@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Table(name = "payments")
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,8 +35,10 @@ public class Payment {
     @JoinColumn(name = "card_id")
     private Card card;
 
+    @Column(name = "sale_id")
     private Long saleId;
 
+    @Column(name = "order_id")
     private Long orderId;
 
     @Enumerated(EnumType.STRING)
