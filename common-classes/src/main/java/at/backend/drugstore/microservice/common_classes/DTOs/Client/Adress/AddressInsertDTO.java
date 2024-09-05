@@ -55,3 +55,4 @@ public class AddressInsertDTO {
     private String addressType;
 
 }
+

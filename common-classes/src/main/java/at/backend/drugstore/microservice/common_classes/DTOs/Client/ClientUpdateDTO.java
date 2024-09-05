@@ -5,22 +5,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
-public class ClientInsertDTO {
-
+public class ClientUpdateDTO {
+    @JsonProperty("id")
+    private Long id;
+    
     @JsonProperty("first_name")
-    @NotNull(message = "first_name is obligatory")
-    @NotBlank(message = "first_name can't be blank")
     private String firstName;
 
     @JsonProperty("last_name")
-    @NotNull(message = "last_name is obligatory")
-    @NotBlank(message = "last_name can't be blank")
     private String lastName;
 
     @JsonProperty("birthdate")
@@ -30,4 +26,3 @@ public class ClientInsertDTO {
     @JsonProperty("phone")
     private String phone;
 }
-
