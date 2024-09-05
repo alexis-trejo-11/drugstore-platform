@@ -19,7 +19,7 @@ public class CartServiceConfig {
     @Bean
     public Supplier<String> cartServiceUrlProvider() {
         return () -> {
-            List<ServiceInstance> instances = discoveryClient.getInstances("CART-SERVICE");
+            List<ServiceInstance> instances = discoveryClient.getInstances("ECOMMERCE_CART-SERVICE");
             if (instances.isEmpty()) {
                 throw new IllegalStateException("Cart is not available");
             }

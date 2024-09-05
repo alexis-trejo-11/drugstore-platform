@@ -33,7 +33,7 @@ public class ESaleFacadeServiceImpl implements ESaleFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Long> makeDigitalSaleAndGetID(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = eSaleServiceUrlProvider.get() + "/v1/api/digital-sales";
+            String url = eSaleServiceUrlProvider.get() + "/v1/drugstore/digital-sales";
             log.info("Making digital sale with URL: {}", url);
             log.info("Request Payload: {}", digitalSaleItemInsertDTO);
 

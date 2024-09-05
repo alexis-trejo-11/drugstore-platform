@@ -90,7 +90,7 @@ public class ClientController {
         return clientService.createClient(clientInsertDTO)
                 .thenApply(clientDTO -> {
                     log.info("createClient -> Client successfully created with ID: {}", clientDTO.getId());
-                    return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created("Client"));
+                    return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.ok("Client", "Create", clientDTO));
                 });
     }
 

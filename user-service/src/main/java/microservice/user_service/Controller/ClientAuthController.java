@@ -5,6 +5,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.User.ClientSignUpDT
 import at.backend.drugstore.microservice.common_classes.DTOs.User.UserLoginDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import lombok.extern.slf4j.Slf4j;
 import microservice.user_service.Service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
-@RequestMapping("/v1/api")
+@RequestMapping("/v1/drugstore")
 public class ClientAuthController {
 
     private final AuthService authService;
@@ -39,21 +40,18 @@ public class ClientAuthController {
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
-    public CompletableFuture<ResponseEntity<ResponseWrapper<String>>> signUp(
-             @RequestBody ClientSignUpDTO clientSignUpDTO) {
+    public ResponseEntity<ResponseWrapper<String>> signUp(@RequestBody ClientSignUpDTO clientSignUpDTO) {
         log.info("Received signup request for client: {}", clientSignUpDTO);
 
-        return authService.validateUniqueFields(clientSignUpDTO).thenCompose(uniqueFieldsResult -> {
-            if (!uniqueFieldsResult.isSuccess()) {
-                log.warn("Signup unique field validation failed: {}", uniqueFieldsResult.getErrorMessage());
-                return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(false, null, uniqueFieldsResult.getErrorMessage(), 400)));
-            }
+        Result<Void> validationResult = authService.validateUniqueFields(clientSignUpDTO);
+        if (!validationResult.isSuccess()) {
+            log.warn("Signup unique field validation failed: {}", validationResult.getErrorMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(false, null, validationResult.getErrorMessage(), 400));
+        }
 
-            return authService.processSignup(clientSignUpDTO).thenApply(jwtToken -> {
-                log.info("Client signup successful for: {}", clientSignUpDTO.getEmail());
-                return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper<>(true, jwtToken, "User Created Successfully.", 201));
-            });
-        });
+        String jwtToken = authService.processSignup(clientSignUpDTO);
+        log.info("Client signup successful for: {}", clientSignUpDTO.getEmail());
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created("User"));
     }
 
 
@@ -65,37 +63,26 @@ public class ClientAuthController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
-    public CompletableFuture<ResponseEntity<ResponseWrapper<String>>> login(@Valid @RequestBody ClientLoginDTO clientLoginDTO) {
+    public ResponseEntity<ResponseWrapper<String>> login(@Valid @RequestBody ClientLoginDTO clientLoginDTO) {
         log.info("Received login request for client: {}", clientLoginDTO.getEmail());
-        return authService.findUser(clientLoginDTO)
-                .thenCompose(userLoginDTOResult -> {
-                    if (!userLoginDTOResult.isSuccess()) {
-                        log.warn("Login failed: user not found for email: {}", clientLoginDTO.getEmail());
-                        return CompletableFuture.completedFuture(
-                                ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                        .body(new ResponseWrapper<>(false, null, userLoginDTOResult.getErrorMessage(), 404))
-                        );
-                    }
 
-                    UserLoginDTO userDTO = userLoginDTOResult.getData();
+        Result<UserLoginDTO> findingResult = authService.findUser(clientLoginDTO);
+        if (!findingResult.isSuccess()) {
+            log.warn("Login failed: user not found for email: {}", clientLoginDTO.getEmail());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.error(findingResult.getErrorMessage(), 404));
+        }
 
-                    return authService.validateLogin(clientLoginDTO.getPassword(), userDTO.getPassword())
-                            .thenCompose(isUserValidated -> {
-                                if (!isUserValidated.isSuccess()) {
-                                    log.warn("Login failed: incorrect validation for email: {}", clientLoginDTO.getEmail());
-                                    return CompletableFuture.completedFuture(
-                                            ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                                    .body(new ResponseWrapper<>(false, null, isUserValidated.getErrorMessage(), 401))
-                                    );
-                                }
+        UserLoginDTO userDTO = findingResult.getData();
 
-                                return authService.processLogin(userDTO)
-                                        .thenApply(jwtToken -> {
-                                            log.info("Client login successful for: {}", clientLoginDTO.getEmail());
-                                            return ResponseEntity.status(HttpStatus.OK)
-                                                    .body(new ResponseWrapper<>(true, jwtToken, "Successfully Logged In.", 200));
-                                        });
-                            });
-                });
+        Result<Void> validationResult = authService.validateLogin(clientLoginDTO.getPassword(), userDTO.getPassword());
+        if (validationResult.isSuccess()) {
+            log.warn("Login failed: incorrect validation for email: {}", clientLoginDTO.getEmail());
+            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ResponseWrapper.unauthorized(findingResult.getErrorMessage()));
+        }
+
+
+        CompletableFuture<String> processLoginFuture = authService.processLogin(userDTO);
+        String JWT_TOKEN = processLoginFuture.join();
+        return ResponseEntity.ok(ResponseWrapper.ok("User" ,"Authorize", JWT_TOKEN));
     }
 }

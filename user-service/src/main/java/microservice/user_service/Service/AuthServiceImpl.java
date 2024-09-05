@@ -14,6 +14,8 @@ import microservice.user_service.Model.User;
 import microservice.user_service.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -43,43 +45,40 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Async("taskExecutor")
-    public CompletableFuture<Result<Void>> validateUniqueFields(ClientSignUpDTO clientSignUpDTO) {
+    @Cacheable(value = "userCache", key = "#clientSignUpDTO.email", unless = "#result.success == false")
+    public Result<Void> validateUniqueFields(ClientSignUpDTO clientSignUpDTO) {
         if (clientSignUpDTO.getEmail() != null) {
             Optional<User> userEmailOptional = userRepository.findByEmail(clientSignUpDTO.getEmail());
             if (userEmailOptional.isPresent()) {
-                return CompletableFuture.completedFuture(Result.error("Email Already Taken"));
+                return Result.error("Email Already Taken");
             }
         }
 
         if (clientSignUpDTO.getPhoneNumber() != null) {
             Optional<User> userPhoneOptional = userRepository.findByPhoneNumber(clientSignUpDTO.getPhoneNumber());
             if (userPhoneOptional.isPresent()) {
-                return CompletableFuture.completedFuture(Result.error("Phone Number Already Taken"));
+                return Result.error("Phone Number Already Taken");
             }
         }
-        return CompletableFuture.completedFuture(Result.success());
+        return Result.success();
     }
 
     @Override
-    @Async("taskExecutor")
-    public CompletableFuture<String> processSignup(ClientSignUpDTO clientSignUpDTO) {
+    @CacheEvict(value = "userCache", allEntries = true)
+    public String processSignup(ClientSignUpDTO clientSignUpDTO) {
         ClientInsertDTO clientInsertDTO = userMapper.clientSignupDtoToClientInsertDTO(clientSignUpDTO);
 
-        CompletableFuture<ClientDTO> clientFuture = clientFacadeService.createClient(clientInsertDTO);
+        // Create the client synchronously (wait for the result)
+        ClientDTO clientDTO = clientFacadeService.createClient(clientInsertDTO).join();
+        // Create the client's cart synchronously (wait for the result)
+        cartFacadeService.createClientCart(clientDTO.getId()).join();
 
-        CompletableFuture<Void> clientCartFuture = clientFuture.thenCompose(clientDTO ->
-                cartFacadeService.createClientCart(clientDTO.getId())
-        );
-
-        return clientFuture
-                .thenCombine(clientCartFuture, (clientDTO, voidResult) -> clientDTO)
-                .thenCompose(clientDTO -> authDomainService.processUserCreation(clientSignUpDTO, clientDTO));
+        return authDomainService.processUserCreation(clientSignUpDTO, clientDTO);
     }
 
     @Override
-    @Async("taskExecutor")
-    public CompletableFuture<Result<UserLoginDTO>> findUser(ClientLoginDTO clientLoginDTO) {
+    @Cacheable(value = "findUserCache", key = "#clientLoginDTO.email != null ? #clientLoginDTO.email : #clientLoginDTO.phoneNumber")
+    public Result<UserLoginDTO> findUser(ClientLoginDTO clientLoginDTO) {
         Optional<User> userOptional = Optional.empty();
 
         if (clientLoginDTO.getEmail() != null) {
@@ -88,22 +87,25 @@ public class AuthServiceImpl implements AuthService {
             userOptional = userRepository.findByPhoneNumber(clientLoginDTO.getPhoneNumber());
         }
 
-        if (userOptional.isPresent()) {
-            UserLoginDTO userToLoginDTO = userMapper.entityToLoginDTO(userOptional.get());
-
-            return CompletableFuture.completedFuture(Result.success(userToLoginDTO));
+        if (userOptional.isEmpty()) {
+            return Result.error("User not found with given credentials");
         }
-        return CompletableFuture.completedFuture(Result.error("User not found with given credentials"));
+
+        UserLoginDTO userToLoginDTO = userMapper.entityToLoginDTO(userOptional.get());
+        return Result.success(userToLoginDTO);
     }
 
-    @Async("taskExecutor")
-    public CompletableFuture<Result<Void>> validateLogin(String plainPassword, String hashPassword) {
-    return authDomainService.checkPassword(plainPassword, hashPassword)
-            .thenApply(isPasswordCorrect -> isPasswordCorrect ? Result.success() : Result.error("Incorrect Password"));
+    @Override
+    @Cacheable(value = "validateLoginCache", key = "#plainPassword.concat('-').concat(#hashPassword)")
+    public Result<Void> validateLogin(String plainPassword, String hashPassword) {
+      boolean isPasswordCorrect =  authDomainService.checkPassword(plainPassword, hashPassword);
+         return isPasswordCorrect ? Result.success() : Result.error("Incorrect Password");
+
     }
 
     @Override
     @Async("taskExecutor")
+    @CacheEvict(value = "userLoginCache", key = "#userDTO.email ?: #userDTO.phoneNumber")
     public CompletableFuture<String> processLogin(UserLoginDTO userDTO) {
         Optional<User> optionalUser = userRepository.findById(userDTO.getId());
         if (optionalUser.isEmpty()) {

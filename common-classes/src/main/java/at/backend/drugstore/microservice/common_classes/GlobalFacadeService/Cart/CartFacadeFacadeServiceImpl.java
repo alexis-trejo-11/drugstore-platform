@@ -30,7 +30,8 @@ public class CartFacadeFacadeServiceImpl implements CartFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Void> createClientCart(Long clientId) {
         return CompletableFuture.runAsync(() -> {
-                String url = cartServiceUrlProvider.get() + "/v1/api/ecommerce/carts/create/{clientId}";
+            log.info("Starting to create client cart for client ID: {}", clientId);
+            String url = cartServiceUrlProvider.get() + "/v1/api/ecommerce/carts/create/{clientId}";
                 ResponseEntity<ResponseWrapper<Void>> responseEntity = restTemplate.exchange(
                         url,
                         HttpMethod.POST,
