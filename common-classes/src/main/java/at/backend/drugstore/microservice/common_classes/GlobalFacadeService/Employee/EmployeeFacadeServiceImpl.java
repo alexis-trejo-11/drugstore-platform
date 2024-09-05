@@ -33,7 +33,7 @@ public class EmployeeFacadeServiceImpl implements EmployeeFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Result<EmployeeDTO>> getEmployeeBySaleProductsDTO(SaleProductsDTO saleProductsDTO) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = employeeServiceUrlProvider.get() + "/v1/api/employees/" + saleProductsDTO.getCashierId();
+            String url = employeeServiceUrlProvider.get() + "/v1/drugstore/employees/" + saleProductsDTO.getCashierId();
             log.info("Fetching employee with URL: {}", url);
 
             ResponseEntity<ResponseWrapper<EmployeeDTO>> responseEntity = restTemplate.exchange(
@@ -62,7 +62,7 @@ public class EmployeeFacadeServiceImpl implements EmployeeFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Result<EmployeeDTO>> findEmployeeById(Long employeeId) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = employeeServiceUrlProvider.get() + "/v1/api/employees/" + employeeId;
+            String url = employeeServiceUrlProvider.get() + "/v1/drugstore/employees/" + employeeId;
             log.info("Fetching employee with URL: {}", url);
 
             ResponseEntity<ResponseWrapper<EmployeeDTO>> responseEntity = restTemplate.exchange(

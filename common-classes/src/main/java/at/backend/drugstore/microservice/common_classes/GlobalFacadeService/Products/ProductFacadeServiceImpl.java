@@ -34,7 +34,7 @@ public class ProductFacadeServiceImpl implements ProductFacadeService {
     @Override
     @Async("taskExecutor")
     public CompletableFuture<List<ProductDTO>> getProductsByIds(List<Long> productIds) {
-        String url = productServiceUrlProvider.get() + "/v1/api/products/by-ids";
+        String url = productServiceUrlProvider.get() + "/v1/drugstore/products/by-ids";
 
         Map<String, List<Long>> request = new HashMap<>();
         request.put("productIds", productIds);
@@ -59,7 +59,7 @@ public class ProductFacadeServiceImpl implements ProductFacadeService {
     @Override
     @Async("taskExecutor")
     public CompletableFuture<Result<ProductDTO>> getProductById(Long productId) {
-        String url = productServiceUrlProvider.get() + "/v1/api/products/" + productId;
+        String url = productServiceUrlProvider.get() + "/v1/drugstore/products/" + productId;
 
         return CompletableFuture.supplyAsync(() -> {
                 ResponseWrapper<ProductDTO> response = restTemplate.exchange(

@@ -38,7 +38,7 @@ public class EPaymentFacadeServiceImpl implements EPaymentFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<PaymentDTO> initPayment(PaymentInsertDTO paymentInsertDTO) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = paymentServiceUrlProvider.get() + "/v1/api/payments/init";
+            String url = paymentServiceUrlProvider.get() + "/v1/drugstore/payments/init";
             log.info("Initializing payment with URL: {}", url);
             log.debug("PaymentInsertDTO: {}", paymentInsertDTO);
 
@@ -68,7 +68,7 @@ public class EPaymentFacadeServiceImpl implements EPaymentFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Result<List<CardDTO>>> getCardByClientId(Long clientId) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = paymentServiceUrlProvider.get() + "/v1/api/client-cards/client/" + clientId;
+            String url = paymentServiceUrlProvider.get() + "/v1/drugstore/client-cards/client/" + clientId;
             log.info("Fetching client cards with URL: {}", url);
 
             ResponseEntity<ResponseWrapper<List<CardDTO>>> responseEntity = restTemplate.exchange(

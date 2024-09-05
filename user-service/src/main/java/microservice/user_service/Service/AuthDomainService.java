@@ -41,10 +41,8 @@ public class AuthDomainService {
         this.authSecurity = authSecurity;
     }
 
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<String> processUserCreation(ClientSignUpDTO clientSignUpDTO, ClientDTO clientDTO) {
-        return CompletableFuture.supplyAsync(() -> {
+    public String processUserCreation(ClientSignUpDTO clientSignUpDTO, ClientDTO clientDTO) {
             User user = userMapper.signupDtoToEntity(clientSignUpDTO);
             user.setClientId(clientDTO.getId());
 
@@ -75,12 +73,11 @@ public class AuthDomainService {
             userRepository.saveAndFlush(user);
 
             return jwtToken;
-        });
     }
 
-    public CompletableFuture<Boolean> checkPassword(String plainPassword, String hashPassword ) {
-        boolean isPasswordCorrect = PasswordUtil.validatePassword(plainPassword, hashPassword);
-        return CompletableFuture.completedFuture(isPasswordCorrect);
+    public Boolean checkPassword(String plainPassword, String hashPassword ) {
+         return PasswordUtil.validatePassword(plainPassword, hashPassword);
+
     }
 
     @Async("taskExecutor")

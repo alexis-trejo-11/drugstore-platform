@@ -39,6 +39,16 @@ public class ResponseWrapper<T> {
         return new ResponseWrapper<>(true, data, foundMsg, 200);
     }
 
+    public static <T> ResponseWrapper<T> ok(String entity, String action, T data) {
+        String notFoundMsg = entity  + " Successfully " + action + "d";
+        return new ResponseWrapper<>(true, data, notFoundMsg, 200);
+    }
+
+    public static <T> ResponseWrapper<T> ok(String entity, String action) {
+        String notFoundMsg = entity  + " Successfully " + action + "d";
+        return new ResponseWrapper<>(true, null, notFoundMsg, 200);
+    }
+
     public static <T> ResponseWrapper<T> notFound(String entity, String filter) {
         String notFoundMsg = entity  + " With " + filter + " Not Found";
         return new ResponseWrapper<>(false, null, notFoundMsg, 404);
@@ -48,10 +58,12 @@ public class ResponseWrapper<T> {
         return new ResponseWrapper<>(false, null, msg, 404);
     }
 
-    public static <T> ResponseWrapper<T> ok(String entity, String action) {
-        String notFoundMsg = entity  + " Successfully " + action + "d";
-        return new ResponseWrapper<>(false, null, notFoundMsg, 200);
+    public static <T> ResponseWrapper<T> unauthorized(String msg) {
+        return new ResponseWrapper<>(false, null, msg, 401);
     }
 
+    public static <T> ResponseWrapper<T> error(String msg, int statusCode) {
+        return new ResponseWrapper<>(false, null, msg, statusCode);
+    }
 }
 

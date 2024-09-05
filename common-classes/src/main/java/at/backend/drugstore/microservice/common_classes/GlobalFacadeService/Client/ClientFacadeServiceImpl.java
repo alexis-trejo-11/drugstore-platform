@@ -35,7 +35,7 @@ public class ClientFacadeServiceImpl implements ClientFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<ClientDTO> createClient(ClientInsertDTO clientInsertDTO) {
          return CompletableFuture.supplyAsync(() -> {
-            String url = clientServiceUrlProvider.get() + "/v1/api/clients/add";
+            String url = clientServiceUrlProvider.get() + "/v1/drugstore/clients/create";
             log.info("Sending client data to URL: {}", url);
 
                 ResponseEntity<ResponseWrapper<ClientDTO>> responseEntity = restTemplate.exchange(
@@ -69,7 +69,7 @@ public class ClientFacadeServiceImpl implements ClientFacadeService {
     public CompletableFuture<Result<ClientDTO>> findClientById(Long clientId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                String url = clientServiceUrlProvider.get() + "/v1/api/clients/" + clientId;
+                String url = clientServiceUrlProvider.get() + "/v1/drugstore/clients/" + clientId;
                 ResponseEntity<ResponseWrapper> responseEntity = restTemplate.exchange(
                         url,
                         HttpMethod.GET,

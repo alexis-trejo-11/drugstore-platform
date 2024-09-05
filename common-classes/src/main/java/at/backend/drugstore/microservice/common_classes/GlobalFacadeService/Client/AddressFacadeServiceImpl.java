@@ -34,7 +34,7 @@ public class AddressFacadeServiceImpl implements AddressFacadeService {
     @Override
     @Async("taskExecutor")
     public CompletableFuture<Result<AddressDTO>> getAddressById(Long addressId) {
-        String addressUrl = clientServiceUrlProvider.get() + "/v1/api/clients/address/" + addressId;
+        String addressUrl = clientServiceUrlProvider.get() + "/v1/drugstore/clients/address/" + addressId;
         return CompletableFuture.supplyAsync(() -> {
                 ResponseEntity<ResponseWrapper<AddressDTO>> responseEntity = restTemplate.exchange(
                         addressUrl,
@@ -56,7 +56,7 @@ public class AddressFacadeServiceImpl implements AddressFacadeService {
     @Override
     @Async("taskExecutor")
     public CompletableFuture<Result<List<AddressDTO>>> getAddressesByClientId(Long clientId) {
-        String addressUrl = clientServiceUrlProvider.get() + "/v1/api/clients/address/client/" + clientId;
+        String addressUrl = clientServiceUrlProvider.get() + "/v1/drugstore/clients/address/client/" + clientId;
         return CompletableFuture.supplyAsync(() -> {
                 ResponseEntity<ResponseWrapper<List<AddressDTO>>> responseEntity = restTemplate.exchange(
                         addressUrl,

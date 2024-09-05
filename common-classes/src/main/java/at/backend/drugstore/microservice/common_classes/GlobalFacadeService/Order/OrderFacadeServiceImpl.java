@@ -30,7 +30,7 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Long> createOrderAndGetId(OrderInsertDTO orderInsertDTO) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = orderServiceUrlProvider.get() + "/v1/api/orders/create";
+            String url = orderServiceUrlProvider.get() + "/v1/drugstore/orders/create";
             log.info("Creating order with URL: {}", url);
             log.info("Request Payload: {}", orderInsertDTO);
 
@@ -61,7 +61,7 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Void> completeOrder(boolean isOrderPaid, Long orderId, Long addressId, Long clientId) {
         return CompletableFuture.runAsync(() -> {
-            String url = orderServiceUrlProvider.get() + "/v1/api/orders/complete-order";
+            String url = orderServiceUrlProvider.get() + "/v1/drugstore/orders/complete-order";
             CompleteOrderRequest completeOrderRequest = new CompleteOrderRequest(isOrderPaid, orderId, addressId, clientId);
 
             log.info("Completing order with ID: {}", orderId);
@@ -83,7 +83,7 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Void> addPaymentIdByOrderId(Long paymentId, Long orderId) {
         return CompletableFuture.runAsync(() -> {
-            String url = orderServiceUrlProvider.get() + "/v1/api/orders/" + orderId + "/payment/" + paymentId;
+            String url = orderServiceUrlProvider.get() + "/v1/drugstore/orders/" + orderId + "/payment/" + paymentId;
 
             log.info("Adding payment ID {} to order ID {}", paymentId, orderId);
 
@@ -101,7 +101,7 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<OrderDTO> getOrderById(Long orderId) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = orderServiceUrlProvider.get() + "/v1/api/orders/" + orderId;
+            String url = orderServiceUrlProvider.get() + "/v1/drugstore/orders/" + orderId;
 
             log.info("Fetching order with ID: {}", orderId);
 
