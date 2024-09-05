@@ -2,12 +2,16 @@ package microservice.client_service.Mappers;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientUpdateDTO;
 import microservice.client_service.Model.Client;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ClientMapper {
+
+    void updateClientFromDto(ClientInsertDTO clientInsertDTO, @MappingTarget Client client);
 
     @Mapping(target = "joinedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "lastAction", expression = "java(java.time.LocalDateTime.now())")
@@ -20,4 +24,14 @@ public interface ClientMapper {
 
 
     ClientDTO entityToDTO(Client client);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "joinedAt", ignore = true)
+    @Mapping(target = "lastAction", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "clientPremium", ignore = true)
+    @Mapping(target = "loyaltyPoints", ignore = true)
+    @Mapping(target = "addresses", ignore = true)
+    void updateClientFromDto(ClientUpdateDTO clientUpdateDTO, @MappingTarget Client client);
+
 }

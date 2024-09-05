@@ -1,0 +1,101 @@
+package microservice.client_service.Controller;
+
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressUpdateDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_classes.Middleware.AuthSecurity;
+import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import microservice.client_service.Service.AddressService;
+import microservice.client_service.Service.ClientService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+@Slf4j
+@RestController
+@RequestMapping("v1/drugstore/client-address")
+public class AddressClientController {
+
+    private final AddressService addressService;
+    private final ClientService clientService;
+    private final AuthSecurity authSecurity;
+
+    @Autowired
+    public AddressClientController(AddressService addressService,
+                                   ClientService clientService,
+                                   AuthSecurity authSecurity) {
+        this.addressService = addressService;
+        this.clientService = clientService;
+        this.authSecurity = authSecurity;
+    }
+
+    @GetMapping("/addresses")
+    public ResponseEntity<ResponseWrapper<List<AddressDTO>>> getMyAddresses(HttpServletRequest request) {
+        Long clientId = authSecurity.getClientIdFromToken(request);
+        log.info("Fetching addresses for client ID: {}", clientId);
+
+        CompletableFuture<List<AddressDTO>> addressDTOsAsync = addressService.getAddressesByClientId(clientId);
+        List<AddressDTO> addressDTOs = addressDTOsAsync.join();
+
+        log.info("Addresses successfully fetched for client ID: {}", clientId);
+        return ResponseEntity.ok(ResponseWrapper.found(addressDTOs, "Addresses"));
+    }
+
+    @GetMapping("/client-data")
+    public ResponseEntity<ResponseWrapper<ClientDTO>> getMyClientData(HttpServletRequest request) {
+        Long clientId = authSecurity.getClientIdFromToken(request);
+        log.info("Fetching client data for client ID: {}", clientId);
+
+        CompletableFuture<ClientDTO> clientDTOAsync = clientService.getClientById(clientId);
+        ClientDTO clientDTO = clientDTOAsync.join();
+
+        log.info("Client data successfully fetched for client ID: {}", clientId);
+        return ResponseEntity.ok(ResponseWrapper.found(clientDTO, "Client"));
+    }
+
+    @PostMapping("/add-address")
+    public ResponseEntity<ResponseWrapper<Void>> insertAddress(@Valid @RequestBody AddressInsertDTO addressInsertDTO,
+                                                               HttpServletRequest request) {
+        Long clientId = authSecurity.getClientIdFromToken(request);
+        log.info("Request to add address for clientId: {}", clientId);
+
+        Result<Void> addResult = addressService.addAddress(addressInsertDTO, clientId);
+        if (!addResult.isSuccess()) {
+            log.error("Failed to add address for clientId: {}. Error: {}", clientId, addResult.getErrorMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Address", "ID"));
+        }
+
+        log.info("Address successfully created for clientId: {}", clientId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created("Address"));
+    }
+
+    @PutMapping("/update-address")
+    public ResponseEntity<ResponseWrapper<Void>> updateMyAddressOnMyList(@RequestBody AddressUpdateDTO addressUpdateDTO,
+                                                                         HttpServletRequest request) {
+        Long clientId = authSecurity.getClientIdFromToken(request);
+
+        addressService.updateAddressFromClientList(addressUpdateDTO, clientId);
+
+        return ResponseEntity.ok(ResponseWrapper.ok("Address", "Update"));
+    }
+
+    @DeleteMapping("client/address/remove/{addressIndex}")
+    public ResponseEntity<ResponseWrapper<Void>> deleteMyAddressOnMyList(@PathVariable int addressIndex,
+                                                                         HttpServletRequest request) {
+        Long clientId = authSecurity.getClientIdFromToken(request);
+
+        addressService.deleteAddressFromClientList(addressIndex, clientId);
+
+        return ResponseEntity.ok(ResponseWrapper.ok("Address", "Delete"));
+    }
+
+}

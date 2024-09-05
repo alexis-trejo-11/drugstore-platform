@@ -10,7 +10,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @SpringBootApplication
 @EnableEurekaServer
 @ComponentScan(basePackages = {"at.backend.drugstore.microservice.common_classes.GlobalExceptions",
-		"microservice.client_service"})
+		"microservice.client_service",
+		"at.backend.drugstore.microservice.common_classes.Middleware"})
 public class ClientServiceApplication implements WebMvcConfigurer {
 
 	public static void main(String[] args) {

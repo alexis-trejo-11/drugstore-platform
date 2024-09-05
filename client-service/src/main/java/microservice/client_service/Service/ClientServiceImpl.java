@@ -2,10 +2,15 @@ package microservice.client_service.Service;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientInsertDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientUpdateDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.EntityMapper;
 import microservice.client_service.Mappers.ClientMapper;
 import microservice.client_service.Model.Client;
 import microservice.client_service.Repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +34,23 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     @Async("taskExecutor")
+    @Cacheable(value = "clientCache", key = "#clientId")
+    public CompletableFuture<ClientDTO> getClientById(Long clientId) {
+        return CompletableFuture.supplyAsync(() -> {
+            Optional<Client> client = clientRepository.findById(clientId);
+            return client.map(clientMapper::entityToDTO).orElse(null);
+        });
+    }
+
+    @Override
+    @Cacheable(value = "clientsCache")
+    public Page<ClientDTO> getClientsSortedByName(Pageable pageable) {
+        Page<Client> clients = clientRepository.findAllByOrderByLastNameAscFirstNameAsc(pageable);
+        return clients.map(clientMapper::entityToDTO);
+    }
+
+    @Override
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<ClientDTO> createClient(ClientInsertDTO clientInsertDTO) {
         return CompletableFuture.supplyAsync(() -> {
@@ -39,36 +61,23 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    @Async("taskExecutor")
-    public CompletableFuture<ClientDTO> getClientById(Long clientId) {
-        return CompletableFuture.supplyAsync(() -> {
-            Optional<Client> client = clientRepository.findById(clientId);
-            return client.map(clientMapper::entityToDTO).orElse(null);
-        });
-    }
-
-    @Override
-    @Async("taskExecutor")
-    public CompletableFuture<List<ClientDTO>> getAllClients() {
-        return CompletableFuture.supplyAsync(() -> {
-            List<Client> clients = clientRepository.findAll();
-            return clients.stream()
-                    .map(clientMapper::entityToDTO)
-                    .collect(Collectors.toList());
-        });
-    }
-
-    @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Boolean> deleteClient(Long clientId) {
-        return CompletableFuture.supplyAsync(() -> {
-            Optional<Client> client = clientRepository.findById(clientId);
-            if (client.isEmpty()) {
-                return false;
-            }
-            clientRepository.deleteById(clientId);
-            return true;
-        });
+    public void updateClient(ClientUpdateDTO clientUpdateDTO) {
+        Client client = clientRepository.findById(clientUpdateDTO.getId()).orElse(null);
+        if (client == null) { return; }
+
+        clientMapper.updateClientFromDto(clientUpdateDTO , client);
+        clientRepository.saveAndFlush(client);
+    }
+
+    @Override
+    @Transactional
+    public void deleteClientByID(Long clientId) {
+        clientRepository.deleteById(clientId);
+    }
+
+    @Override
+    public boolean validateExistingClient(Long clientID) {
+        return clientRepository.findById(clientID).isPresent();
     }
 }
