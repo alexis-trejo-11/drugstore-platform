@@ -14,14 +14,18 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class PositionInsertDTO {
 
-    @NotBlank @NotNull @Length(min = 2, message = "position_name is required")
+    @NotBlank(message = "position_name can't be empty")
+    @NotNull(message = "position_name is obligatory")
     @JsonProperty("position_name")
     private String positionName;
 
     @Positive(message = "salary must has a positive number")
     private BigDecimal salary;
 
+    // Valid Enums -> PART_TIME, FULL_TIME, INTERN, TEMPORAL
     @JsonProperty("classification_workday")
+    @NotBlank(message = "classification_workday can't be empty")
+    @NotNull(message = "classification_workday is obligatory")
     private String classificationWorkday;
 
 

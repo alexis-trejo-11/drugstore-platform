@@ -31,8 +31,4 @@ public class EmployeeInsertDTO {
     @PastOrPresent
     @JsonProperty("hired_at")
     private LocalDateTime hiredAt;
-
-    @JsonProperty("address")
-    private String address;
-
 }

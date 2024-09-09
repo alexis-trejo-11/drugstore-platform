@@ -3,6 +3,7 @@ package microservice.employee_service.Service;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeInsertDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeUpdateDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.User.RequestEmployeeUser;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.employee_service.Mappers.EmployeeMapper;
 import microservice.employee_service.Model.Employee;
@@ -11,6 +12,7 @@ import microservice.employee_service.Repository.EmployeeRepository;
 import microservice.employee_service.Repository.PositionRepository;
 import microservice.employee_service.Utils.CompanyHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 
 import org.springframework.data.domain.Pageable;
@@ -42,10 +44,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void addEmployee(EmployeeInsertDTO employeeDTO) {
         Employee employee = new Employee(employeeDTO);
 
-        String employeeEmail = companyHelper.companyEmailGenerator(employee.getFirstName(), employee.getLastName());
-        employee.setCompanyEmail(employeeEmail);
-
         employeeRepository.saveAndFlush(employee);
+
+        String employeeEmail = companyHelper.companyEmailGenerator(employee.getFirstName(), employee.getLastName(), employee.getId());
+        employee.setCompanyEmail(employeeEmail);
 
         String phoneNumber = companyHelper.getAndAssignCompanyPhone(employee);
         if (phoneNumber != null) {
@@ -57,6 +59,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
+    @Cacheable(value = "employeesByPage", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort.toString()")
     public Page<EmployeeDTO> getEmployeesByPagesSortedByName(Pageable pageable) {
             Page<Employee> employeePage = employeeRepository.findAllByOrderByLastName(pageable);
             return employeePage.map(employeeMapper::employeeToDTO);
@@ -64,9 +67,30 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
+    @Cacheable(value = "employeeById", key = "#id")
     public EmployeeDTO getEmployeeById(Long id) {
             Employee employee = employeeRepository.findById(id).orElse(null);
             return employeeMapper.employeeToDTO(employee);
+    }
+
+    @Override
+    public Result<EmployeeDTO> getEmployeeByEmailOrPhoneOrID(RequestEmployeeUser requestEmployeeUser) {
+        Optional<Employee> optionalEmployee = Optional.empty();
+
+        if (requestEmployeeUser.getId() != null) {
+            optionalEmployee = employeeRepository.findById(requestEmployeeUser.getId());
+        } else if (requestEmployeeUser.getCompanyEmail() != null) {
+            optionalEmployee = employeeRepository.findByCompanyEmail(requestEmployeeUser.getCompanyEmail());
+        } else if (requestEmployeeUser.getCompanyPhone() != null) {
+            optionalEmployee = employeeRepository.findByCompanyPhone(requestEmployeeUser.getCompanyPhone());
+        }
+
+        if (optionalEmployee.isEmpty()) {
+            return Result.error("Employee not found with provided information");
+        }
+
+        EmployeeDTO employeeDTO = optionalEmployee.map(employeeMapper::employeeToDTO).get();
+        return Result.success(employeeDTO);
     }
 
     @Override

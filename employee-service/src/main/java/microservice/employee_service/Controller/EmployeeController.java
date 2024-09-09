@@ -1,9 +1,11 @@
 package microservice.employee_service.Controller;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.User.RequestEmployeeUser;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeUpdateDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.employee_service.Service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -40,17 +43,19 @@ public class EmployeeController {
             @ApiResponse(responseCode = "201", description = "Employee successfully created"),
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
-    @PostMapping
-    public ResponseEntity<ResponseWrapper<Void>> addEmployee(@RequestBody @Valid EmployeeInsertDTO employeeDTO) {
-        employeeService.addEmployee(employeeDTO);
+    @PostMapping("/create")
+    public ResponseEntity<ResponseWrapper<Void>> createEmployee(@RequestBody @Valid EmployeeInsertDTO employeeInsertDTO) {
+        log.info("Request to create employee with values: {}", employeeInsertDTO);
+
+        employeeService.addEmployee(employeeInsertDTO);
         return ResponseEntity.ok(ResponseWrapper.created("Employee"));
     }
 
-    @Operation(summary = "Get all employees")
+    @Operation(summary = "Get Employees Order By Name")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Employees successfully fetched")
     })
-    @GetMapping
+    @GetMapping("/by-name")
     public ResponseEntity<ResponseWrapper<Page<EmployeeDTO>>> getEmployeesByPagesSortedByName(@RequestParam(defaultValue = "0") int page,
                                                                                               @RequestParam(defaultValue = "10") int size) {
 
@@ -75,17 +80,40 @@ public class EmployeeController {
         }
 
         EmployeeDTO employeeDTO = employeeService.getEmployeeById(employeeId);
-        log.info("Employee successfully fetched with ID: {}", employeeId);
+        log.info("getEmployeeById -> Employee successfully fetched with ID: {}", employeeId);
 
         return ResponseEntity.ok(ResponseWrapper.found(employeeDTO, "Employee"));
     }
+
+    @Operation(summary = "Get employee by Company Data or Id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Employee successfully fetched"),
+            @ApiResponse(responseCode = "404", description = "Employee not found")
+    })
+    @PostMapping("/search")
+    public ResponseEntity<ResponseWrapper<EmployeeDTO>> getEmployeeForUserCreation(@RequestBody RequestEmployeeUser requestEmployeeUser) {
+        log.info("Request to fetch employee with values: {}", requestEmployeeUser);
+
+        Result<EmployeeDTO> employeeDTOResult = employeeService.getEmployeeByEmailOrPhoneOrID(requestEmployeeUser);
+
+        if (!employeeDTOResult.isSuccess()) {
+            log.warn("getEmployeeForUserCreation -> Failed to fetch employee: {}", employeeDTOResult.getErrorMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.error(employeeDTOResult.getErrorMessage(), 404));
+        }
+
+        EmployeeDTO employeeDTO = employeeDTOResult.getData();
+        log.info("getEmployeeForUserCreation -> Employee successfully fetched with ID: {}", employeeDTO.getId());
+
+        return ResponseEntity.ok(ResponseWrapper.found(employeeDTO, "Employee"));
+    }
+
 
     @Operation(summary = "Update an existing employee")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Employee successfully updated"),
             @ApiResponse(responseCode = "404", description = "Employee not found")
     })
-    @PutMapping
+    @PutMapping("/update")
     public ResponseEntity<ResponseWrapper<Void>> updateEmployee(@RequestBody @Valid EmployeeUpdateDTO employeeUpdateDTO) {
         log.info("updateEmployee -> Request to update employee with ID: {}", employeeUpdateDTO.getId());
 
@@ -106,7 +134,7 @@ public class EmployeeController {
             @ApiResponse(responseCode = "200", description = "Employee successfully deleted"),
             @ApiResponse(responseCode = "404", description = "Employee not found")
     })
-    @DeleteMapping("/{employeeId}")
+    @DeleteMapping("delete/{employeeId}")
     public ResponseEntity<ResponseWrapper<Void>> deleteEmployee(@PathVariable Long employeeId) {
         log.info("deleteEmployee -> Request to delete employee with ID: {}", employeeId);
 

@@ -14,6 +14,7 @@ import java.util.Date;
 @Entity
 @Data
 @NoArgsConstructor
+@Table(name = "employees")
 public class Employee implements Serializable {
 
     @Id

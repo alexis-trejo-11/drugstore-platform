@@ -21,10 +21,10 @@ public class CompanyHelper {
         this.phoneRepository = phoneRepository;
     }
 
-    public String companyEmailGenerator(String firstName, String lastName) {
+    public String companyEmailGenerator(String firstName, String lastName, Long employeeId) {
         String name = firstName.split(" ")[0].toLowerCase();
         String lastname = lastName.split(" ")[0].toLowerCase();
-        return name + "." + lastname + COMPANY_DOMINION;
+        return name + "." + lastname + employeeId.toString() + COMPANY_DOMINION;
     }
 
     public String getAndAssignCompanyPhone(Employee employee) {
