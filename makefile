@@ -18,7 +18,7 @@ create tables:
     docker cp ./flyway/queries/V1__create_inventory_tables.sql drugstore_databases:/tmp/V1__create_inventory_tables.sql
     docker exec -i drugstore_databases psql -U postgres -d drugstore_inventories_db -f /tmp/V1__create_inventory_tables.sql
 
-    # inventories
+    # sale
     docker cp ./flyway/queries/V1__create_sale_tables.sql drugstore_databases:/tmp/V1__create_sale_tables.sql
     docker exec -i drugstore_databases psql -U postgres -d drugstore_sales_db -f /tmp/V1__create_sale_tables.sql
 

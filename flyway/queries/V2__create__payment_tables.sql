@@ -1,3 +1,4 @@
+-- Cards Table
 CREATE TABLE cards (
     id SERIAL PRIMARY KEY,
     client_id BIGINT NOT NULL,
@@ -7,11 +8,11 @@ CREATE TABLE cards (
     cvv TEXT NOT NULL,
     is_card_valid BOOLEAN NOT NULL,
     card_type VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
+-- Payments Table
 CREATE TABLE payments (
     id SERIAL PRIMARY KEY,
     client_id BIGINT NOT NULL,
@@ -20,21 +21,20 @@ CREATE TABLE payments (
     discount DECIMAL(10, 2) NOT NULL,
     total DECIMAL(10, 2) NOT NULL,
     payment_date TIMESTAMP NOT NULL,
-    card_id BIGINT REFERENCES Card(id),
+    card_id BIGINT REFERENCES cards(id) ON DELETE SET NULL,
     sale_id BIGINT,
     order_id BIGINT,
     status VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE transaction_date (
+CREATE TABLE payment_transactions (
     id SERIAL PRIMARY KEY,
-    payment_id BIGINT NOT NULL REFERENCES payments(id),
+    payment_id BIGINT NOT NULL REFERENCES payments(id) ON DELETE CASCADE,
     status VARCHAR(255) NOT NULL,
     transaction_date TIMESTAMP NOT NULL
 );
 
-
-INSERT INTO Card (client_id, card_number, cardholder_name, expiration_date, cvv, is_card_valid, card_type)
+INSERT INTO cards (client_id, card_number, cardholder_name, expiration_date, cvv, is_card_valid, card_type)
 VALUES
 (1, '1234567812345678', 'John Doe', '2025-12-31', '123', TRUE, 'VISA'),
 (2, '8765432187654321', 'Jane Smith', '2024-10-31', '321', TRUE, 'MASTERCARD'),
@@ -53,7 +53,7 @@ VALUES
 (5, 'CASH', 120.00, 10.00, 110.00, CURRENT_TIMESTAMP, NULL, 5, 5, 'PENDING'),
 (6, 'CARD', 95.00, 15.00, 80.00, CURRENT_TIMESTAMP, 6, 6, 6, 'SUCCESS');
 
-INSERT INTO transaction_date (payment_id, status, transaction_date)
+INSERT INTO payment_transactions (payment_id, status, transaction_date)
 VALUES
 (1, 'COMPLETED', CURRENT_TIMESTAMP),
 (2, 'PENDING', CURRENT_TIMESTAMP),

@@ -23,7 +23,7 @@ public class OrderFacadeServiceConfig {
     @Qualifier("orderServiceUrlProvider")
     public Supplier<String> orderServiceUrlProvider() {
         return () -> {
-            List<ServiceInstance> instances = discoveryClient.getInstances("ORDER-SERVICE");
+            List<ServiceInstance> instances = discoveryClient.getInstances("EORDER-SERVICE");
             if (instances.isEmpty()) {
                 throw new IllegalStateException("Order service is not available");
             }

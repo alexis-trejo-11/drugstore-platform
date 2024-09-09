@@ -1,87 +1,3 @@
--- Tables
-CREATE TABLE main_categories (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
-CREATE TABLE categories (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP,
-    main_category_id BIGINT
-);
-
-CREATE TABLE subcategories (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP,
-    main_category_id BIGINT,
-    category_id BIGINT
-);
-CREATE TABLE brands (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
-CREATE TABLE suppliers (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    contact_info VARCHAR(255),
-    address VARCHAR(255),
-    phone VARCHAR(20),
-    email VARCHAR(255),
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
-CREATE TABLE category_specifications (
-    id BIGSERIAL PRIMARY KEY,
-    category_id BIGINT,
-    name VARCHAR(255) NOT NULL,
-    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
-);
-
-CREATE TABLE product_attributes (
-    id BIGSERIAL PRIMARY KEY,
-    product_id BIGINT,
-    name VARCHAR(255) NOT NULL,
-    value VARCHAR(255) NOT NULL,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-);
-
-CREATE TABLE products (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    image VARCHAR(255),
-    price DECIMAL(10, 2),
-    upc VARCHAR(50),
-    content TEXT,
-    package_dimension VARCHAR(255),
-    route_of_administration VARCHAR(50),
-    product_type VARCHAR(50),
-    product_presentation VARCHAR(50),
-    prescription_required BOOLEAN,
-    age_usage VARCHAR(255),
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP,
-    main_category_id BIGINT,
-    category_id BIGINT,
-    subcategory_id BIGINT,
-    supplier_id BIGINT,
-    brand_id BIGINT,
-    FOREIGN KEY (main_category_id) REFERENCES main_categories(id) ON DELETE SET NULL,
-    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
-    FOREIGN KEY (subcategory_id) REFERENCES subcategories(id) ON DELETE SET NULL,
-    FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL,
-    FOREIGN KEY (brand_id) REFERENCES brands(id) ON DELETE SET NULL
-);
-
 -- Enums
 CREATE TYPE route_of_administration AS ENUM (
     'ORAL', 'SPREAD', 'TOPICAL', 'TRANSDERMAL', 'INTRAMUSCULAR',
@@ -106,40 +22,94 @@ CREATE TYPE product_type AS ENUM (
     'CONDOM', 'PROPHYLACTIC', 'PREGNANCY_TEST', 'PREGNANCY_TEST_KIT'
 );
 
--- Add Enums
-ALTER TABLE products
-    ALTER COLUMN route_of_administration TYPE route_of_administration USING route_of_administration::route_of_administration,
-    ALTER COLUMN product_presentation TYPE product_presentation USING product_presentation::product_presentation,
-    ALTER COLUMN product_type TYPE product_type USING product_type::product_type;
+-- Create Tables
+CREATE TABLE main_categories (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
--- FK Config with CASCADE
-ALTER TABLE products
-    ADD CONSTRAINT fk_brand
-    FOREIGN KEY (brand_id) REFERENCES brands(id) ON DELETE SET NULL,
-    ADD CONSTRAINT fk_main_category
+CREATE TABLE categories (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    main_category_id BIGINT,
+    FOREIGN KEY (main_category_id) REFERENCES main_categories(id) ON DELETE SET NULL
+);
+
+CREATE TABLE subcategories (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    main_category_id BIGINT,
+    category_id BIGINT,
     FOREIGN KEY (main_category_id) REFERENCES main_categories(id) ON DELETE SET NULL,
-    ADD CONSTRAINT fk_category
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+);
+
+CREATE TABLE brands (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE suppliers (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    contact_info VARCHAR(255),
+    address VARCHAR(255),
+    phone VARCHAR(20),
+    email VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE category_specifications (
+    id BIGSERIAL PRIMARY KEY,
+    category_id BIGINT,
+    name VARCHAR(255) NOT NULL,
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+);
+
+CREATE TABLE products (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    image VARCHAR(255),
+    price DECIMAL(10, 2),
+    upc VARCHAR(50),
+    content TEXT,
+    package_dimension VARCHAR(255),
+    route_of_administration route_of_administration, -- Enum type
+    product_type product_type, -- Enum type
+    product_presentation product_presentation, -- Enum type
+    prescription_required BOOLEAN,
+    age_usage VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    main_category_id BIGINT,
+    category_id BIGINT,
+    subcategory_id BIGINT,
+    supplier_id BIGINT,
+    brand_id BIGINT,
+    FOREIGN KEY (main_category_id) REFERENCES main_categories(id) ON DELETE SET NULL,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
-    ADD CONSTRAINT fk_subcategory
     FOREIGN KEY (subcategory_id) REFERENCES subcategories(id) ON DELETE SET NULL,
-    ADD CONSTRAINT fk_supplier
-    FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL;
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL,
+    FOREIGN KEY (brand_id) REFERENCES brands(id) ON DELETE SET NULL
+);
 
-ALTER TABLE category_specifications
-    ADD CONSTRAINT fk_category_specification
-    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE;
+CREATE TABLE product_attributes (
+    id BIGSERIAL PRIMARY KEY,
+    product_id BIGINT,
+    name VARCHAR(255) NOT NULL,
+    value VARCHAR(255) NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
 
-ALTER TABLE subcategories
-    ADD CONSTRAINT fk_subcategory_category
-    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
-    ADD CONSTRAINT fk_subcategory_main_category
-    FOREIGN KEY (main_category_id) REFERENCES main_categories(id) ON DELETE CASCADE;
-
-ALTER TABLE product_attributes
-    ADD CONSTRAINT fk_product
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE;
-
--- Add Values
 -- Insert data into main_category
 INSERT INTO main_categories (name, created_at, updated_at) VALUES
 ('Medicines', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
