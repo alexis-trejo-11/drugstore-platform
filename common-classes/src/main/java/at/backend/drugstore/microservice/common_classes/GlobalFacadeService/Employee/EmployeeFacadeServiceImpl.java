@@ -1,15 +1,14 @@
 package at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Employee;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderInsertDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Sale.SaleInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.User.RequestEmployeeUser;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -34,7 +33,7 @@ public class EmployeeFacadeServiceImpl implements EmployeeFacadeService {
     public CompletableFuture<Result<EmployeeDTO>> getEmployeeById(Long employeeId) {
         return CompletableFuture.supplyAsync(() -> {
             String url = employeeServiceUrlProvider.get() + "/v1/drugstore/employees/" + employeeId;
-            log.info("Fetching employee with URL: {}", url);
+            log.info("getEmployeeById -> Fetching employee with URL: {}", url);
 
             ResponseEntity<ResponseWrapper<EmployeeDTO>> responseEntity = restTemplate.exchange(
                     url,
@@ -44,16 +43,46 @@ public class EmployeeFacadeServiceImpl implements EmployeeFacadeService {
             );
 
             ResponseWrapper<EmployeeDTO> responseEntityBody = responseEntity.getBody();
-            log.debug("Response received: {}", responseEntityBody);
-
-            assert responseEntityBody != null;
+            log.debug("getEmployeeById -> Response received: {}", responseEntityBody);
 
             if (responseEntityBody.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
-                log.warn("Employee not found with ID: {}", employeeId);
+                log.warn("getEmployeeById -> Employee not found with ID: {}", employeeId);
                 return Result.error(responseEntityBody.getMessage());
             }
 
-            log.info("Employee found with ID: {}", employeeId);
+            log.info("getEmployeeById -> Employee found with ID: {}", employeeId);
+            return Result.success(responseEntityBody.getData());
+        });
+    }
+
+    @Override
+    @Async("taskExecutor")
+    public CompletableFuture<Result<EmployeeDTO>> getEmployeeForUserCreation(RequestEmployeeUser requestEmployeeUser) {
+        return CompletableFuture.supplyAsync(() -> {
+            String url = employeeServiceUrlProvider.get() + "/v1/drugstore/employees/search" ;
+            log.info("getEmployeeForUserCreation -> Fetching employee with URL: {}", url);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(HttpHeaders.CONTENT_TYPE, "application/json");
+            HttpEntity<RequestEmployeeUser> requestEntity = new HttpEntity<>(requestEmployeeUser, headers);
+
+            ResponseEntity<ResponseWrapper<EmployeeDTO>> responseEntity = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    new ParameterizedTypeReference<ResponseWrapper<EmployeeDTO>>() {}
+            );
+
+            ResponseWrapper<EmployeeDTO> responseEntityBody = responseEntity.getBody();
+            log.debug("getEmployeeForUserCreation -> Response received: {}", responseEntityBody);
+
+
+            if (responseEntityBody.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                log.warn("Employee not found with values: {}", requestEmployeeUser);
+                return Result.error(responseEntityBody.getMessage());
+            }
+
+            log.info("Employee found with value: {}", requestEmployeeUser);
             return Result.success(responseEntityBody.getData());
         });
     }

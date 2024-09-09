@@ -16,7 +16,6 @@ public interface PositionMapper {
     @Mapping(target = "employees", ignore = true)
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "classificationWorkday", expression = "java(stringToClassificationWorkday(positionInsertDTO.getClassificationWorkday()))")
     Position insertDtoToEntity(PositionInsertDTO positionInsertDTO);
 
     @Mapping(target = "classificationWorkday", expression = "java(classificationWorkdayToString(position.getClassificationWorkday()))")

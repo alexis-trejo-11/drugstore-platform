@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> findByLastName(String lastName);
@@ -18,7 +19,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     List<Employee> findByBirthDateBetween(Date startDate, Date endDate);
 
-    List<Employee> findByCompanyEmail(String companyEmail);
+    Optional<Employee> findByCompanyEmail(String companyEmail);
+
+    Optional<Employee> findByCompanyPhone(String companyEmail);
 
     List<Employee> findByPosition(Position position);
 

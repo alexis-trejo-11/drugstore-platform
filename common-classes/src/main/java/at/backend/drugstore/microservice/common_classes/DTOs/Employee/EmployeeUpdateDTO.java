@@ -37,7 +37,6 @@ public class EmployeeUpdateDTO {
     private Date birthDate;
 
     @JsonProperty("hired_at")
-    @NotNull(message = "company_phone is obligatory")
     private LocalDateTime hiredAt;
 
     @JsonProperty("fired_at")
