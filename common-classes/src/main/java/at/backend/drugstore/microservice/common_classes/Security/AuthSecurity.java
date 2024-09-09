@@ -1,4 +1,4 @@
-package at.backend.drugstore.microservice.common_classes.Middleware;
+package at.backend.drugstore.microservice.common_classes.Security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

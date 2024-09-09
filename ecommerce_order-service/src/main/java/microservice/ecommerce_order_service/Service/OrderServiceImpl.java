@@ -62,15 +62,12 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Order> createOrderAsync(OrderInsertDTO orderInsertDTO) {
-        return CompletableFuture.supplyAsync(() -> {
+    public Order createOrder(OrderInsertDTO orderInsertDTO) {
             Order order = orderDomainService.createOrder(orderInsertDTO, orderMapper, orderItemMapper);
             order = orderRepository.save(order);
             orderItemRepository.saveAll(order.getItems());
             return order;
-        });
     }
 
     @Override
@@ -81,23 +78,9 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.entityToDTO(order);
     }
 
+    @Override
     @Transactional
-    @Async("taskExecutor")
-    private CompletableFuture<Void> processOrderPaid(ClientDTO clientDTO, Order order, AddressDTO addressDTO) {
-        return CompletableFuture.runAsync(() ->  {
-            ShippingData shippingData = shippingService.generateShippingData(addressDTO, clientDTO);
-
-            order.setStatus(OrderStatus.TO_BE_DELIVERED);
-            order.setLastOrderUpdate(LocalDateTime.now());
-            order.setShippingData(shippingData);
-            orderRepository.saveAndFlush(order);
-        });
-    }
-
-    @Transactional
-    @Async("taskExecutor")
-    public CompletableFuture<Void> processOrderNotPaid(Long orderId) {
-        return CompletableFuture.runAsync(() ->  {
+    public void processOrderNotPaid(Long orderId) {
             Optional<Order> optionalOrder = orderRepository.findById(orderId);
             if(optionalOrder.isEmpty()) {
                 throw new RuntimeException();
@@ -106,58 +89,47 @@ public class OrderServiceImpl implements OrderService {
             order.setStatus(OrderStatus.PAID_FAILED);
             order.setLastOrderUpdate(LocalDateTime.now());
             orderRepository.saveAndFlush(order);
-        });
     }
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Result<Void>> processOrderPayment(CompleteOrderRequest completeOrderRequest, AddressDTO addressDTO, ClientDTO clientDTO, OrderDTO orderDTO) {
-        return CompletableFuture.supplyAsync(() -> {
-            Optional<Order> optionalOrder = orderRepository.findById(completeOrderRequest.getOrderId());
-            if (optionalOrder.isEmpty()) {
-                return Result.error("Order not found");
-            }
+    public Result<Void> processOrderPayment(CompleteOrderRequest completeOrderRequest, AddressDTO addressDTO, ClientDTO clientDTO, OrderDTO orderDTO) {
+        Optional<Order> optionalOrder = orderRepository.findById(completeOrderRequest.getOrderId());
+        if (optionalOrder.isEmpty()) {
+            return Result.error("Order not found");
+        }
 
-            Order order = optionalOrder.get();
-            if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
-                return Result.error("Order already processed");
-            }
+        Order order = optionalOrder.get();
+        if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
+            return Result.error("Order already processed");
+        }
 
-            // Create shipping data asynchronously and handle the completion
-            return processOrderPaid(clientDTO, order, addressDTO)
-                    .thenApply(v -> Result.success())
-                    .join();
-        });
+        // Create shipping data asynchronously and handle the completion
+        processOrderPaid(clientDTO, order, addressDTO);
+
+        return Result.success();
     }
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Optional<OrderDTO>> getOrderById(Long orderId) {
-        return CompletableFuture.supplyAsync(() -> {
+    public Optional<OrderDTO> getOrderById(Long orderId) {
             Optional<Order> optionalOrder = orderRepository.findById(orderId);
             return optionalOrder.map(orderDomainService::makeOrderDTO).map(CompletableFuture::join);
-        });
     }
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<String> deliveryOrder(Long orderId, boolean isOrderDelivered) {
-        return CompletableFuture.supplyAsync(() -> {
-            Order order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-            String result = orderDomainService.handleDelivery(order, isOrderDelivered);
-            orderRepository.save(order);
-            return result;
-        });
+    public String deliveryOrder(Long orderId, boolean isOrderDelivered) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        String result = orderDomainService.handleDelivery(order, isOrderDelivered);
+        orderRepository.save(order);
+        return result;
     }
 
     @Override
-    public CompletableFuture<Result<Void>> validateOrderForDelivery(OrderDTO orderDTO) {
-        return CompletableFuture.supplyAsync(() ->
-                orderDTO.getStatus() != OrderStatus.PENDING_PAYMENT ? Result.success() : Result.error("Invalid Order"));
+    public Result<Void> validateOrderForDelivery(OrderDTO orderDTO) {
+        return orderDTO.getStatus() != OrderStatus.PENDING_PAYMENT ? Result.success() : Result.error("Invalid Order");
     }
 
     @Override
@@ -173,7 +145,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Async("taskExecutor")
     @Transactional
     public void addPaymentIdByOrderId(Long orderId, Long paymentId) {
         orderRepository.findById(orderId)
@@ -184,4 +155,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
+    @Transactional
+    private void processOrderPaid(ClientDTO clientDTO, Order order, AddressDTO addressDTO) {
+        ShippingData shippingData = shippingService.generateShippingData(addressDTO, clientDTO);
+
+        order.setStatus(OrderStatus.TO_BE_DELIVERED);
+        order.setLastOrderUpdate(LocalDateTime.now());
+        order.setShippingData(shippingData);
+        orderRepository.saveAndFlush(order);
+    }
 }

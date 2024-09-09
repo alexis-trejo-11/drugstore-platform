@@ -19,7 +19,6 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
-@RequestMapping("v1/api/inventory/stock")
 @Tag(name = "Drugstore Microservice API (Inventory Service)", description = "Service for managing inventory stock")
 public class StockController {
 

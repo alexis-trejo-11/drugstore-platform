@@ -33,13 +33,10 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    @Async("taskExecutor")
     @Cacheable(value = "clientCache", key = "#clientId")
-    public CompletableFuture<ClientDTO> getClientById(Long clientId) {
-        return CompletableFuture.supplyAsync(() -> {
+    public ClientDTO getClientById(Long clientId) {
             Optional<Client> client = clientRepository.findById(clientId);
             return client.map(clientMapper::entityToDTO).orElse(null);
-        });
     }
 
     @Override
@@ -50,14 +47,11 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<ClientDTO> createClient(ClientInsertDTO clientInsertDTO) {
-        return CompletableFuture.supplyAsync(() -> {
-            Client client = clientMapper.insertDtoToEntity(clientInsertDTO);
-            client = clientRepository.saveAndFlush(client);
-            return clientMapper.entityToDTO(client);
-        });
+    public ClientDTO createClient(ClientInsertDTO clientInsertDTO) {
+        Client client = clientMapper.insertDtoToEntity(clientInsertDTO);
+        client = clientRepository.saveAndFlush(client);
+        return clientMapper.entityToDTO(client);
     }
 
     @Override

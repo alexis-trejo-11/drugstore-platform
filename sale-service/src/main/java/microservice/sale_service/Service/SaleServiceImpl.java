@@ -5,6 +5,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Sale.*;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Employee.EmployeeFacadeService;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Products.ProductFacadeService;
+import at.backend.drugstore.microservice.common_classes.Models.Sales.Sale;
 import at.backend.drugstore.microservice.common_classes.Models.Sales.SaleStatus;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.sale_service.Mappers.SaleMapper;
@@ -53,117 +54,102 @@ public class SaleServiceImpl implements SaleService {
     @Override
     @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Result<CreateSaleDTO>> createSale(SaleProductsDTO saleProductsDTO) {
+    public CreateSaleDTO createSale(SaleInsertDTO saleInsertDTO, Long employeeId) {
+        // Bring Data From Other Services Asynchronously
+        CompletableFuture<List<ProductDTO>> completableFutureProducts = productFacadeService.getProductsByIds(saleInsertDTO.getProductsId());
+        CompletableFuture<Result<EmployeeDTO>> completableFutureEmployee = externalEmployeeService.getEmployeeById(employeeId);
 
-        CompletableFuture<List<ProductDTO>> completableFutureProducts = productFacadeService.getProductsByIds(saleProductsDTO.getProductsId());
-        CompletableFuture<Result<EmployeeDTO>> completableFutureEmployee = externalEmployeeService.getEmployeeBySaleProductsDTO(saleProductsDTO);
+        // Map Sale
+        PhysicalSale sale = saleMapper.SaleInsertDTOtoEntity(saleInsertDTO);
+        sale.setSaleStatus(SaleStatus.PAID);
+        sale.setPayType(PhysicalSale.PayType.valueOf(saleInsertDTO.getPayType()));
 
-        return CompletableFuture.allOf(completableFutureProducts, completableFutureEmployee)
-                .thenApplyAsync(voidResult -> {
-                    Result<CreateSaleDTO> result;
-                    try {
-                        List<ProductDTO> productResult = completableFutureProducts.get();
-                        Result<EmployeeDTO> employeeResult = completableFutureEmployee.get();
+        saleRepository.saveAndFlush(sale);
 
-                        if (productResult == null) {
-                            return Result.error("Failed to retrieve products");
-                        }
+        Result<EmployeeDTO> employeeDTOResult = completableFutureEmployee.join();
+        List<ProductDTO> productDTOS = completableFutureProducts.join();
 
-                        if (!employeeResult.isSuccess()) {
-                            return Result.error(employeeResult.getErrorMessage());
-                        }
+        // Create Sale Items With External DATA
+        if (!employeeDTOResult.isSuccess() || productDTOS == null ) { return null; }
+        EmployeeDTO employeeDTO = employeeDTOResult.getData();
 
-                        PhysicalSale sale = saleMapper.employeeDTOtoEntity(employeeResult.getData());
-                        saleRepository.saveAndFlush(sale);
+        sale.setEmployeeId(employeeDTO.getId());
+        sale.setEmployeeName(employeeDTO.getFirstName() + " " + employeeDTO.getLastName());
 
-                        List<PhysicalSaleItem> saleItems = SaleDomainService.createSaleItems(saleProductsDTO.getItems(), productResult, sale);
-                        sale.setSaleItems(saleItems);
+        List<PhysicalSaleItem> physicalSaleItems = SaleDomainService.createSaleItems(saleInsertDTO.getItems(), productDTOS, sale);
+        sale.setSaleItems(physicalSaleItems);
 
-                        PhysicalSale saleCalculated = SaleDomainService.calculateTotal(sale);
-                        saleRepository.saveAndFlush(saleCalculated);
+        saleRepository.saveAndFlush(sale);
 
-                        CreateSaleDTO createSaleDTO = saleMapper.saleToCreateSaleDTO(sale);
-                        result = Result.success(createSaleDTO);
-                    } catch (Exception e) {
-                        result = Result.error("Error during sale creation: " + e.getMessage());
-                    }
-                    return result;
-                });
+        // Update Stock
+        Result<String> stockResult = inventoryService.updateInventory(sale);
+        if (!stockResult.isSuccess()) {
+            throw new RuntimeException("Stock Conflict: " + stockResult.getErrorMessage());
+        }
+
+        // Map Return DTO
+        return saleMapper.saleToCreateSaleDTO(sale);
     }
 
 
-    @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Result<ProcessSaleDTO>> paySale(PaySaleDTO paySaleDTO) {
-        return CompletableFuture.supplyAsync(() -> {
-            Optional<PhysicalSale> saleOptional = saleRepository.findById(paySaleDTO.getSaleId());
-            if (saleOptional.isEmpty()) {
-                return Result.error("Sale With Id:" + paySaleDTO.getSaleId() + " Not Found");
-            }
+    public Result<ProcessSaleDTO> paySale(PaySaleDTO paySaleDTO) {
+        Optional<PhysicalSale> saleOptional = saleRepository.findById(paySaleDTO.getSaleId());
+        if (saleOptional.isEmpty()) {
+            return Result.error("Sale With Id:" + paySaleDTO.getSaleId() + " Not Found");
+        }
 
-            PhysicalSale sale = saleOptional.get();
-            BigDecimal moneyProvided = paySaleDTO.getMoneyProvided();
-            BigDecimal totalToPay = sale.getTotal();
+        PhysicalSale sale = saleOptional.get();
+        BigDecimal moneyProvided = paySaleDTO.getMoneyProvided();
+        BigDecimal totalToPay = sale.getTotal();
 
-            if (totalToPay.compareTo(moneyProvided) > 0) {
-                BigDecimal moneyLeft = totalToPay.subtract(moneyProvided);
-                return Result.error("Not Enough Money: " + moneyLeft + "$ Left");
-            }
+        if (totalToPay.compareTo(moneyProvided) > 0) {
+            BigDecimal moneyLeft = totalToPay.subtract(moneyProvided);
+            return Result.error("Not Enough Money: " + moneyLeft + "$ Left");
+        }
 
-            sale.setSaleStatus(SaleStatus.PAID);
-            sale.setPayType(PhysicalSale.PayType.valueOf(paySaleDTO.getPayType()));
-            saleRepository.saveAndFlush(sale);
+        sale.setSaleStatus(SaleStatus.PAID);
+        sale.setPayType(PhysicalSale.PayType.valueOf(paySaleDTO.getPayType()));
 
-            Result<String> stockResult = inventoryService.updateInventory(sale);
-            if (!stockResult.isSuccess()) {
-                return Result.error(stockResult.getErrorMessage());
-            }
 
-            ProcessSaleDTO processSaleDTO = DtoMapper.paidSaleToReturnDTO(sale, paySaleDTO);
-            return Result.success(processSaleDTO);
-        });
+        Result<String> stockResult = inventoryService.updateInventory(sale);
+        if (!stockResult.isSuccess()) {
+            return Result.error(stockResult.getErrorMessage());
+        }
+
+        ProcessSaleDTO processSaleDTO = DtoMapper.paidSaleToReturnDTO(sale, paySaleDTO);
+        return Result.success(processSaleDTO);
     }
 
     @Override
-    @Async("taskExecutor")
-    public CompletableFuture<Result<SaleDTO>> getSaleById(Long saleId) {
-        return CompletableFuture.supplyAsync(() -> {
-            Optional<PhysicalSale> saleOptional = saleRepository.findById(saleId);
-            if (saleOptional.isEmpty()) {
-                return Result.error("Sale With Id:" + saleId + " Not Found");
-            }
+    public Result<SaleDTO> getSaleById(Long saleId) {
+        Optional<PhysicalSale> saleOptional = saleRepository.findById(saleId);
+        if (saleOptional.isEmpty()) {
+            return Result.error("Sale With Id:" + saleId + " Not Found");
+        }
 
-            SaleDTO saleDTO = DtoMapper.entityToDTO(saleOptional.get());
-            return Result.success(saleDTO);
-        });
+        SaleDTO saleDTO = DtoMapper.entityToDTO(saleOptional.get());
+        return Result.success(saleDTO);
     }
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<List<SaleDTO>> getTodaySales() {
-        return CompletableFuture.supplyAsync(() -> {
-            LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-            LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+    public List<SaleDTO> getTodaySales() {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
 
-            List<PhysicalSale> sales = saleRepository.findPhysicalSalesByDateAndStatus(startOfDay, endOfDay, SaleStatus.PAID);
-            return sales.stream()
-                    .map(DtoMapper::entityToDTO)
-                    .toList();
-        });
+        List<PhysicalSale> sales = saleRepository.findPhysicalSalesByDateAndStatus(startOfDay, endOfDay, SaleStatus.PAID);
+        return sales.stream()
+                .map(DtoMapper::entityToDTO)
+                .toList();
     }
 
     @Override
-    @Async("taskExecutor")
-    @Transactional
-    public CompletableFuture<SalesSummaryDTO> getTodaySummarySales() {
-        return CompletableFuture.supplyAsync(() -> {
-            LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-            LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+    public SalesSummaryDTO getTodaySummarySales() {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
 
-            List<PhysicalSale> sales = saleRepository.findPhysicalSalesByDateAndStatus(startOfDay, endOfDay, SaleStatus.PAID);
-            return SaleDomainService.createSaleSummary(sales, startOfDay, endOfDay);
-        });
+        List<PhysicalSale> sales = saleRepository.findPhysicalSalesByDateAndStatus(startOfDay, endOfDay, SaleStatus.PAID);
+        return SaleDomainService.createSaleSummary(sales, startOfDay, endOfDay);
     }
 }

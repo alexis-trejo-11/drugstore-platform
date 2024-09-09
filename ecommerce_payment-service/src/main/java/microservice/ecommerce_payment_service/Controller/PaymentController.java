@@ -1,5 +1,6 @@
 package microservice.ecommerce_payment_service.Controller;
 
+import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentInsertDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
@@ -42,46 +43,27 @@ public class PaymentController {
             @ApiResponse(responseCode = "400", description = "Invalid payment request")
     })
     @PostMapping("/init")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<PaymentDTO>>> initPayment(@Valid @RequestBody PaymentInsertDTO paymentInsertDTO) {
+    public ResponseEntity<ResponseWrapper<PaymentDTO>> initPayment(@Valid @RequestBody PaymentInsertDTO paymentInsertDTO) {
         log.info("Initializing payment for client ID: {}", paymentInsertDTO.getClientId());
 
-        return cardService.validateClient(paymentInsertDTO.getClientId())
-                .thenCompose(isClientValidated -> {
-                    if (!isClientValidated) {
-                        log.warn("Client with ID {} not found.", paymentInsertDTO.getClientId());
-                        return CompletableFuture.completedFuture(
-                                ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                        .body(new ResponseWrapper<>(false, null, "User with ID " + paymentInsertDTO.getClientId() + " Not Found.", 404))
-                        );
-                    }
+        if (paymentInsertDTO.getCardId() != null && "CARD".equals(paymentInsertDTO.getPaymentMethod())) {
+            boolean isCardValidated = cardService.validateExistingCard(paymentInsertDTO.getCardId());
+            if (!isCardValidated) {
+                log.warn("Card with ID {} not found.", paymentInsertDTO.getCardId());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "Card with Id " + paymentInsertDTO.getCardId() + " not found", 404));
+            }
+            CardDTO cardDTO = cardService.getCardById(paymentInsertDTO.getCardId());
 
-                    if (paymentInsertDTO.getCardId() != null && "CARD".equals(paymentInsertDTO.getPaymentMethod())) {
-                        return cardService.getCardById(paymentInsertDTO.getCardId())
-                                .thenCompose(cardDTO -> {
-                                    if (cardDTO.isEmpty()) {
-                                        log.warn("Card with ID {} not found.", paymentInsertDTO.getCardId());
-                                        return CompletableFuture.completedFuture(
-                                                ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                                        .body(new ResponseWrapper<>(false, null, "Card with Id " + paymentInsertDTO.getCardId() + " not found", 404))
-                                        );
-                                    }
+            PaymentDTO paymentDTO = paymentService.initPaymentFromCart(paymentInsertDTO);
+            log.info("initPayment -> Payment successfully initiated for client ID: {}", paymentInsertDTO.getClientId());
 
-                                    return paymentService.initPaymentFromCart(paymentInsertDTO)
-                                            .thenApply(paymentDTO -> {
-                                                log.info("Payment successfully initiated for client ID: {}", paymentInsertDTO.getClientId());
-                                                return ResponseEntity.status(HttpStatus.CREATED)
-                                                        .body(new ResponseWrapper<>(true, paymentDTO, "Payment successfully initiated.", 201));
-                                            });
-                                });
-                    } else {
-                        return paymentService.initPaymentFromCart(paymentInsertDTO)
-                                .thenApply(paymentDTO -> {
-                                    log.info("Payment successfully initiated for client ID: {}", paymentInsertDTO.getClientId());
-                                    return ResponseEntity.status(HttpStatus.CREATED)
-                                            .body(new ResponseWrapper<>(true, paymentDTO, "Payment successfully initiated.", 201));
-                                });
-                    }
-                });
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper<>(true, paymentDTO, "Payment successfully initiated.", 201));
+        } else {
+            PaymentDTO paymentDTO = paymentService.initPaymentFromCart(paymentInsertDTO);
+            log.info("initPayment -> Payment successfully initiated for client ID: {}", paymentInsertDTO.getClientId());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper<>(true, paymentDTO, "Payment successfully initiated.", 201));
+        }
     }
 
     @Operation(summary = "Validate a payment",
@@ -92,29 +74,23 @@ public class PaymentController {
             @ApiResponse(responseCode = "409", description = "Payment already processed")
     })
     @PutMapping("/{paymentId}/validate")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> completePayment(@PathVariable Long paymentId, @RequestParam boolean isPaid) {
+    public ResponseEntity<ResponseWrapper<Void>> completePayment(@PathVariable Long paymentId, @RequestParam boolean isPaid) {
         log.info("Validating payment with ID: {}", paymentId);
 
-        return paymentService.getPaymentById(paymentId)
-                .thenCompose(optionalPaymentDTO -> {
-                    if (optionalPaymentDTO.isEmpty()) {
-                        log.warn("Payment with ID {} not found.", paymentId);
-                        return CompletableFuture.completedFuture(
-                                ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                        .body(new ResponseWrapper<>(false, null, "Payment with ID " + paymentId + " not found.", 404))
-                        );
+        boolean isPaymentValidated = paymentService.validExistingPayment(paymentId);
+        if (!isPaymentValidated) {
+            log.warn("Payment with ID {} not found.", paymentId);
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Payment", "Id"));
+        }
 
-                    } else if (!optionalPaymentDTO.get().getPaymentStatus().equals("PENDING")) {
-                        log.warn("Payment with ID {} already processed.", paymentId);
-                        return CompletableFuture.completedFuture(
-                                ResponseEntity.status(HttpStatus.CONFLICT)
-                                        .body(new ResponseWrapper<>(false, null, "Payment with ID " + paymentId + " already processed.", 409))
-                        );
-                    }
+        PaymentDTO paymentDTO = paymentService.getPaymentById(paymentId);
+        if (paymentDTO.getPaymentStatus().equals("PENDING")) {
+            log.warn("Payment with ID {} already processed.", paymentId);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ResponseWrapper.error("Payment with ID " + paymentId + " already processed.", 409));
+        }
 
-                    return paymentService.processPayment(paymentId, isPaid)
-                            .thenApply(v -> ResponseEntity.ok(new ResponseWrapper<>(true, null, "Payment validation completed", 200)));
-                });
+        paymentService.processPayment(paymentId, isPaid);
+        return ResponseEntity.ok(ResponseWrapper.ok("Payment Validation", "Complete"));
     }
 
     @Operation(summary = "Fetch payment by ID",
@@ -124,21 +100,17 @@ public class PaymentController {
             @ApiResponse(responseCode = "404", description = "Payment not found")
     })
     @GetMapping("/{paymentId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<PaymentDTO>>> getPaymentById(@PathVariable Long paymentId) {
+    public ResponseEntity<ResponseWrapper<PaymentDTO>> getPaymentById(@PathVariable Long paymentId) {
         log.info("Fetching payment with ID: {}", paymentId);
+        boolean isPaymentValidated = paymentService.validExistingPayment(paymentId);
+        if (!isPaymentValidated) {
+            log.warn("getPaymentById -> Payment with ID {} not found.", paymentId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Payment", "Id"));
+        }
 
-        return paymentService.getPaymentById(paymentId)
-                .thenApply(optionalPaymentDTO -> {
-                    if (optionalPaymentDTO.isEmpty()) {
-                        log.warn("Payment with ID {} not found.", paymentId);
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body(new ResponseWrapper<>(false, null, "Payment with ID " + paymentId + " not found.", 404));
-                    }
+        PaymentDTO paymentDTO = paymentService.getPaymentById(paymentId);
+        log.info("Payment with ID {} successfully fetched.", paymentId);
 
-                    PaymentDTO paymentDTO = optionalPaymentDTO.get();
-                    log.info("Payment with ID {} successfully fetched.", paymentId);
-                    return ResponseEntity.status(HttpStatus.OK)
-                            .body(new ResponseWrapper<>(true, paymentDTO, "Payment correctly fetched.", 200));
-                });
+        return ResponseEntity.ok(ResponseWrapper.found(paymentDTO, "Payment"));
     }
 }

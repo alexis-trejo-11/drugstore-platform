@@ -34,6 +34,11 @@ public class ResponseWrapper<T> {
         return new ResponseWrapper<>(true, null, createMsg, 201);
     }
 
+    public static <T> ResponseWrapper<T> created(T data, String entity) {
+        String createMsg = entity  + " Successfully Created";
+        return new ResponseWrapper<>(true, data, createMsg, 201);
+    }
+
     public static <T> ResponseWrapper<T> found(T data, String entity) {
         String foundMsg = entity  + " Data Successfully Fetched";
         return new ResponseWrapper<>(true, data, foundMsg, 200);
@@ -47,6 +52,10 @@ public class ResponseWrapper<T> {
     public static <T> ResponseWrapper<T> ok(String entity, String action) {
         String notFoundMsg = entity  + " Successfully " + action + "d";
         return new ResponseWrapper<>(true, null, notFoundMsg, 200);
+    }
+
+    public static <T> ResponseWrapper<T> success(String msg) {
+        return new ResponseWrapper<>(true, null, msg, 200);
     }
 
     public static <T> ResponseWrapper<T> notFound(String entity, String filter) {

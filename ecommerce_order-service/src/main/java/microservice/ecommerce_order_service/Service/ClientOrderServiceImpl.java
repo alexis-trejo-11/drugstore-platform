@@ -36,74 +36,60 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Page<OrderDTO>> getCancelledOrdersByClientId(Long clientId, Pageable pageable) {
-        return CompletableFuture.supplyAsync(() -> {
+    public Page<OrderDTO> getCancelledOrdersByClientId(Long clientId, Pageable pageable) {
             Page<Order> orderPage = orderRepository.findByClientIdAndStatusIn(clientId, Arrays.asList(OrderStatus.CANCELLED, OrderStatus.PAID_FAILED) ,pageable);
             List<OrderDTO> orderDTOs = orderPage.getContent().stream()
                     .map(orderDomainService::makeOrderDTO)
                     .map(CompletableFuture::join)
                     .collect(Collectors.toList());
             return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
-        });
-    }
-
-    @Override
-    @Async("taskExecutor")
-    @Transactional
-    public CompletableFuture<Page<OrderDTO>> getOrdersToBeValidatedByClientId(Long clientId, Pageable pageable) {
-        return CompletableFuture.supplyAsync(() -> {
-            Page<Order> orderPage = orderRepository.findByClientIdAndStatus(clientId, OrderStatus.PENDING_PAYMENT ,pageable);
-            List<OrderDTO> orderDTOs = orderPage.getContent().stream()
-                    .map(orderDomainService::makeOrderDTO)
-                    .map(CompletableFuture::join)
-                    .collect(Collectors.toList());
-            return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
-        });
-    }
-
-
-    @Override
-    @Async("taskExecutor")
-    @Transactional
-    public CompletableFuture<Page<OrderDTO>> getCurrentOrdersByClientId(Long clientId, Pageable pageable) {
-        return CompletableFuture.supplyAsync(() -> {
-            Page<Order> orderPage = orderRepository.findByClientIdAndStatus(clientId, OrderStatus.TO_BE_DELIVERED ,pageable);
-            List<OrderDTO> orderDTOs = orderPage.getContent().stream()
-                    .map(orderDomainService::makeOrderDTO)
-                    .map(CompletableFuture::join)
-                    .collect(Collectors.toList());
-            return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
-        });
-    }
-
-
-    @Override
-    @Async("taskExecutor")
-    @Transactional
-    public CompletableFuture<Page<OrderDTO>> getCompletedOrdersByClientId(Long clientId, Pageable pageable) {
-        return CompletableFuture.supplyAsync(() -> {
-            Page<Order> orderPage = orderRepository.findByClientIdAndStatus(clientId, OrderStatus.DELIVERED, pageable);
-
-            List<OrderDTO> orderDTOs = orderPage.getContent().stream()
-                    .map(orderDomainService::makeOrderDTO)
-                    .map(CompletableFuture::join)
-                    .collect(Collectors.toList());
-
-            return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
-        });
     }
 
     @Override
     @Transactional
-    public CompletableFuture<Result<Void>> cancelOrder(Long orderId) {
-        return CompletableFuture.supplyAsync(() -> {
+    public Page<OrderDTO> getOrdersToBeValidatedByClientId(Long clientId, Pageable pageable) {
+        Page<Order> orderPage = orderRepository.findByClientIdAndStatus(clientId, OrderStatus.PENDING_PAYMENT ,pageable);
+        List<OrderDTO> orderDTOs = orderPage.getContent().stream()
+                .map(orderDomainService::makeOrderDTO)
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
+        return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
+    }
+
+
+    @Override
+    @Transactional
+    public Page<OrderDTO> getCurrentOrdersByClientId(Long clientId, Pageable pageable) {
+        Page<Order> orderPage = orderRepository.findByClientIdAndStatus(clientId, OrderStatus.TO_BE_DELIVERED ,pageable);
+        List<OrderDTO> orderDTOs = orderPage.getContent().stream()
+                .map(orderDomainService::makeOrderDTO)
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
+        return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
+    }
+
+
+    @Override
+    @Transactional
+    public Page<OrderDTO> getCompletedOrdersByClientId(Long clientId, Pageable pageable) {
+        Page<Order> orderPage = orderRepository.findByClientIdAndStatus(clientId, OrderStatus.DELIVERED, pageable);
+
+        List<OrderDTO> orderDTOs = orderPage.getContent().stream()
+                .map(orderDomainService::makeOrderDTO)
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional
+    public Result<Void> cancelOrder(Long orderId) {
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException("Order not found"));
 
-            return orderDomainService.cancelOrder(order);
-        });
+        return orderDomainService.cancelOrder(order);
     }
 
     @Override

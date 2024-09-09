@@ -12,9 +12,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface ProductService {
-    CompletableFuture<List<ProductDTO>> getProductsById(List<Long> productId);
-    CompletableFuture<ProductDTO> getProductById(Long productId);
-
+    List<ProductDTO> getProductsById(List<Long> productId);
+    ProductDTO getProductById(Long productId);
     Page<ProductDTO> getAllProductsSortedByCategoryHierarchy(Pageable pageable);
     Page<ProductDTO> getProductsBySupplier(Long supplierId, Pageable pageable);
     Page<ProductDTO> getProductsByCategoryId(Long categoryId, Pageable pageable);

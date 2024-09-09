@@ -12,7 +12,8 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client" ,
 		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Order" ,
 		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.ESale" ,
-		"at.backend.drugstore.microservice.common_classes.GlobalExceptions"})
+		"at.backend.drugstore.microservice.common_classes.GlobalExceptions",
+		"at.backend.drugstore.microservice.common_classes.Security"})
 
 public class EcommercePaymentServiceApplication {
 

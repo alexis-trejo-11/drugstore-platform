@@ -36,21 +36,18 @@ public class CardController {
             @ApiResponse(responseCode = "404", description = "Card not found")
     })
     @GetMapping("/{cardId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<CardDTO>>> getCardById(@PathVariable Long cardId) {
+    public ResponseEntity<ResponseWrapper<CardDTO>> getCardById(@PathVariable Long cardId) {
         log.info("Request to retrieve card with ID: {}", cardId);
+        boolean isCartExisting = cardService.validateExistingCard(cardId);
+        if (!isCartExisting) {
+            log.warn("Card with ID {} not found.", cardId);
+            ResponseWrapper<CardDTO> errorResponse = new ResponseWrapper<>(false, null, "Card with ID " + cardId + " not found", 404);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
 
-        return cardService.getCardById(cardId)
-                .thenApply(optionalCardDTO -> {
-                    if (optionalCardDTO.isEmpty()) {
-                        log.warn("Card with ID {} not found.", cardId);
-                        ResponseWrapper<CardDTO> errorResponse = new ResponseWrapper<>(false, null, "Card with ID " + cardId + " not found", 404);
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-                    }
+        CardDTO cardDTO = cardService.getCardById(cardId);
+        log.info("Card with ID {} retrieved successfully.", cardId);
 
-                    CardDTO dto = optionalCardDTO.get();
-                    log.info("Card with ID {} retrieved successfully.", cardId);
-                    ResponseWrapper<CardDTO> successResponse = new ResponseWrapper<>(true, dto, "Card Retrieved Successfully!", 200);
-                    return ResponseEntity.status(HttpStatus.OK).body(successResponse);
-                });
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.found(cardDTO, "Card"));
     }
 }

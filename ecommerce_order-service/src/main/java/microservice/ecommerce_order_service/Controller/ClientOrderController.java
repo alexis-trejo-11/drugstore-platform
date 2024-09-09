@@ -1,8 +1,10 @@
 package microservice.ecommerce_order_service.Controller;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderDTO;
+import at.backend.drugstore.microservice.common_classes.Security.AuthSecurity;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
-import io.swagger.v3.oas.annotations.Parameter;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_order_service.Service.ClientOrderService;
 import microservice.ecommerce_order_service.Service.OrderService;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,10 +30,14 @@ public class ClientOrderController {
 
     private final ClientOrderService clientOrderService;
     private final OrderService orderService;
+    private final AuthSecurity authSecurity;
 
-    public ClientOrderController(ClientOrderService clientOrderService, OrderService orderService) {
+    public ClientOrderController(ClientOrderService clientOrderService,
+                                 OrderService orderService,
+                                 AuthSecurity authSecurity) {
         this.clientOrderService = clientOrderService;
         this.orderService = orderService;
+        this.authSecurity = authSecurity;
     }
 
     @Cacheable(value = "orderCache", key = "#clientId + '-' + #page + '-' + #size")
@@ -41,21 +48,23 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
     @GetMapping("/current/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Page<OrderDTO>>>> getCancelledOrdersByClientId(@PathVariable Long clientId,
+    public ResponseEntity<ResponseWrapper<Page<OrderDTO>>> getCancelledOrdersByClientId(HttpServletRequest request,
                                                                                                            @RequestParam(defaultValue = "0") int page,
                                                                                                            @RequestParam(defaultValue = "10") int size) {
-        return clientOrderService.validateExistingClient(clientId)
-                .thenCompose(isClientValidate -> {
-                    if (!isClientValidate) {
-                        return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body(new ResponseWrapper<>(false, null, "Client with ID " + clientId + " not found", 404)));
-                    }
+        Long clientId = authSecurity.getClientIdFromToken(request);
+        log.info("getCancelledOrdersByClientId -> Fetching cancelled orders for client Id: {}", clientId);
 
-                    Pageable pageable = PageRequest.of(page, size);
-                    return clientOrderService.getCancelledOrdersByClientId(clientId, pageable)
-                            .thenApply(orderDTOS -> ResponseEntity.status(HttpStatus.OK)
-                                    .body(new ResponseWrapper<>(true, orderDTOS, "Orders successfully fetched.", 200)));
-                });
+        CompletableFuture<Boolean> validatedExistingClientFuture  = clientOrderService.validateExistingClient(clientId);
+        Boolean isClientValidated = validatedExistingClientFuture.join();
+
+        if (!isClientValidated) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Client", "Id"));
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<OrderDTO> orderDTOS = clientOrderService.getCancelledOrdersByClientId(clientId, pageable);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseWrapper<>(true, orderDTOS, "Orders successfully fetched.", 200));
     }
 
     @Cacheable(value = "orderCache", key = "#clientId + '-' + #page + '-' + #size")
@@ -66,21 +75,23 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
     @GetMapping("/delivering/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Page<OrderDTO>>>> getOrdersToBeDeliveredByClientId(@PathVariable Long clientId,
-                                                                                                               @RequestParam(defaultValue = "0") int page,
-                                                                                                               @RequestParam(defaultValue = "10") int size) {
-        return clientOrderService.validateExistingClient(clientId)
-                .thenCompose(isClientValidate -> {
-                    if (!isClientValidate) {
-                        return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body(new ResponseWrapper<>(false, null, "Client with ID " + clientId + " not found", 404)));
-                    }
+    public ResponseEntity<ResponseWrapper<Page<OrderDTO>>> getOrdersToBeDeliveredByClientId(HttpServletRequest request,
+                                                                                            @RequestParam(defaultValue = "0") int page,
+                                                                                            @RequestParam(defaultValue = "10") int size) {
+        Long clientId = authSecurity.getClientIdFromToken(request);
+        log.info("getOrdersToBeDeliveredByClientId -> Fetching cancelled orders for client Id: {}", clientId);
 
-                    Pageable pageable = PageRequest.of(page, size);
-                    return clientOrderService.getCurrentOrdersByClientId(clientId, pageable)
-                            .thenApply(orderDTOS -> ResponseEntity.status(HttpStatus.OK)
-                                    .body(new ResponseWrapper<>(true, orderDTOS, "Orders successfully fetched.", 200)));
-                });
+        CompletableFuture<Boolean> validatedExistingClientFuture  = clientOrderService.validateExistingClient(clientId);
+        Boolean isClientValidated = validatedExistingClientFuture.join();
+
+        if (!isClientValidated) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Client", "Id"));
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<OrderDTO>  orderDTOS = clientOrderService.getCurrentOrdersByClientId(clientId, pageable);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.found(orderDTOS, "Orders"));
     }
 
 
@@ -92,21 +103,23 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
     @GetMapping("/completed/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Page<OrderDTO>>>> getCompletedOrdersByClientId(@PathVariable Long clientId,
-                                                                                                           @RequestParam(defaultValue = "0") int page,
-                                                                                                           @RequestParam(defaultValue = "10") int size) {
-        return clientOrderService.validateExistingClient(clientId)
-                .thenCompose(isClientValidate -> {
-                    if (!isClientValidate) {
-                        return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body(new ResponseWrapper<>(false, null, "Client with ID " + clientId + " not found", 404)));
-                    }
+    public ResponseEntity<ResponseWrapper<Page<OrderDTO>>> getCompletedOrdersByClientId(HttpServletRequest request,
+                                                                                        @RequestParam(defaultValue = "0") int page,
+                                                                                        @RequestParam(defaultValue = "10") int size) {
+        Long clientId = authSecurity.getClientIdFromToken(request);
+        log.info("getCompletedOrdersByClientId -> Fetching cancelled orders for client Id: {}", clientId);
 
-                    Pageable pageable = PageRequest.of(page, size);
-                    return clientOrderService.getCompletedOrdersByClientId(clientId, pageable)
-                            .thenApply(orderDTOS -> ResponseEntity.status(HttpStatus.OK)
-                                    .body(new ResponseWrapper<>(true, orderDTOS, "Orders successfully fetched.", 200)));
-                });
+        CompletableFuture<Boolean> validatedExistingClientFuture  = clientOrderService.validateExistingClient(clientId);
+        Boolean isClientValidated = validatedExistingClientFuture.join();
+
+        if (!isClientValidated) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Client", "Id"));
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<OrderDTO> orderDTOS = clientOrderService.getCompletedOrdersByClientId(clientId, pageable);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.found(orderDTOS,"Orders"));
     }
 
 
@@ -118,21 +131,23 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
     @GetMapping("/pending/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Page<OrderDTO>>>> getPendingPaymentOrdersByClientId(@PathVariable Long clientId,
-                                                                                                                @RequestParam(defaultValue = "0") int page,
-                                                                                                                @RequestParam(defaultValue = "10") int size) {
-        return clientOrderService.validateExistingClient(clientId)
-                .thenCompose(isClientValidate -> {
-                    if (!isClientValidate) {
-                        return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body(new ResponseWrapper<>(false, null, "Client with ID " + clientId + " not found", 404)));
-                    }
+    public ResponseEntity<ResponseWrapper<Page<OrderDTO>>> getPendingPaymentOrdersByClientId(HttpServletRequest request,
+                                                                                             @RequestParam(defaultValue = "0") int page,
+                                                                                             @RequestParam(defaultValue = "10") int size) {
+        Long clientId = authSecurity.getClientIdFromToken(request);
+        log.info("getPendingPaymentOrdersByClientId -> Fetching cancelled orders for client Id: {}", clientId);
 
-                    Pageable pageable = PageRequest.of(page, size);
-                    return clientOrderService.getOrdersToBeValidatedByClientId(clientId, pageable)
-                            .thenApply(orderDTOS -> ResponseEntity.status(HttpStatus.OK)
-                                    .body(new ResponseWrapper<>(true, orderDTOS, "Orders successfully fetched.", 200)));
-                });
+        CompletableFuture<Boolean> validatedExistingClientFuture  = clientOrderService.validateExistingClient(clientId);
+        Boolean isClientValidated = validatedExistingClientFuture.join();
+
+        if (!isClientValidated) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Client", "Id"));
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<OrderDTO> orderDTOS = clientOrderService.getOrdersToBeValidatedByClientId(clientId, pageable);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.found(orderDTOS,"Orders"));
     }
 
     @Operation(summary = "Cancel an order by ID",
@@ -143,24 +158,18 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "409", description = "Conflict occurred while cancelling the order")
     })
     @GetMapping("/cancel/{orderId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> cancelOrder(@PathVariable Long orderId) {
-        return orderService.getOrderById(orderId)
-                .thenCompose(optionalOrderDTO -> {
-                    if (optionalOrderDTO.isEmpty()) {
-                        return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body(new ResponseWrapper<>(false, null, "Order with ID " + orderId + " not found.", 400)));
-                    }
+    public ResponseEntity<ResponseWrapper<Void>> cancelOrder(@PathVariable Long orderId) {
+        Optional<OrderDTO> optionalOrderDTO = orderService.getOrderById(orderId);
+        if (optionalOrderDTO.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Order", "Id"));
+        }
 
-                    return clientOrderService.cancelOrder(orderId)
-                            .thenApply(orderResult -> {
-                                if (!orderResult.isSuccess()) {
-                                    return ResponseEntity.status(HttpStatus.CONFLICT)
-                                            .body(new ResponseWrapper<>(false, null, orderResult.getErrorMessage(), 409));
-                                }
+        Result<Void> orderResult = clientOrderService.cancelOrder(orderId);
+        if (!orderResult.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ResponseWrapper.error(orderResult.getErrorMessage(), 409));
+        }
 
-                                return ResponseEntity.status(HttpStatus.OK)
-                                        .body(new ResponseWrapper<>(true, null, "Order successfully canceled.", 200));
-                            });
-                });
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.ok("Order", "Cancel"));
+
     }
 }

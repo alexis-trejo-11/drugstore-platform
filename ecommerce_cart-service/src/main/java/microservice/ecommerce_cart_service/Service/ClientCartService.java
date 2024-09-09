@@ -10,7 +10,7 @@ import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import java.util.concurrent.CompletableFuture;
 
 public interface ClientCartService {
-    CompletableFuture<Result<Void>> addProductsCart(Long clientId, Long productId, int quantity);
-    CompletableFuture<Result<?>> deleteProductFromCart(Long clientId, CartItemInsertDTO cartItemInsertDTO);
-    CompletableFuture<CartDTO> processCartAndGePurchaseData(ClientEcommerceDataDTO clientEcommerceDataDTO, PurchaseFromCartDTO purchaseFromCartDTO);
+    Result<Void> addProductsCart(Long clientId, Long productId, int quantity);
+    Result<?> deleteProductFromCart(Long clientId, CartItemInsertDTO cartItemInsertDTO);
+    CartDTO processCartAndGetPurchaseData(ClientEcommerceDataDTO clientEcommerceDataDTO, PurchaseFromCartDTO purchaseFromCartDTO);
 }

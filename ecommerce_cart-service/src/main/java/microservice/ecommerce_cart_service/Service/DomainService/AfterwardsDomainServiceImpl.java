@@ -39,51 +39,45 @@ public class AfterwardsDomainServiceImpl implements AfterwardsDomainService {
 
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Result<Void>> processMoveToAfterwards(Cart cart, Long productId, Long clientId) {
-        return CompletableFuture.supplyAsync(() -> {
-            Optional<CartItem> optionalItemToRemove = cart.getCartItems().stream()
-                    .filter(cartItem -> cartItem.getProductId().equals(productId))
-                    .findFirst();
+    public Result<Void> processMoveToAfterwards(Cart cart, Long productId, Long clientId) {
+        Optional<CartItem> optionalItemToRemove = cart.getCartItems().stream()
+                .filter(cartItem -> cartItem.getProductId().equals(productId))
+                .findFirst();
 
-            // Look At Unique Afterward Item
-            List<Afterward> afterwards = afterwardsRepository.findByClientId(clientId);
-            Optional<Afterward> optionalAfterward = afterwards.stream().filter(afterward -> afterward.getProductId().equals(productId)).findAny();
-            if (optionalAfterward.isPresent()) {
-                return Result.error("Product already on Afterwards");
-            }
+        // Look At Unique Afterward Item
+        List<Afterward> afterwards = afterwardsRepository.findByClientId(clientId);
+        Optional<Afterward> optionalAfterward = afterwards.stream().filter(afterward -> afterward.getProductId().equals(productId)).findAny();
+        if (optionalAfterward.isPresent()) {
+            return Result.error("Product already on Afterwards");
+        }
 
-            // Look At Existing Product on Cart
-            if (optionalItemToRemove.isPresent()) {
-                CartItem itemToRemove = optionalItemToRemove.get();
+        // Look At Existing Product on Cart
+        if (optionalItemToRemove.isPresent()) {
+            CartItem itemToRemove = optionalItemToRemove.get();
 
-                cart.getCartItems().remove(itemToRemove);
-                cartRepository.save(cart);
+            cart.getCartItems().remove(itemToRemove);
+            cartRepository.save(cart);
 
-                cartItemRepository.deleteById(itemToRemove.getId());
+            cartItemRepository.deleteById(itemToRemove.getId());
 
-                Afterward afterward = afterwardMapper.cartItemToEntity(itemToRemove, clientId);
-                afterwardsRepository.save(afterward);
+            Afterward afterward = afterwardMapper.cartItemToEntity(itemToRemove, clientId);
+            afterwardsRepository.save(afterward);
 
-                cartDomainService.calculateCartNumbers(cart);
-                return Result.success();
-            } else {
-                return Result.error("Product not found in cart");
-            }
-        });
+            cartDomainService.calculateCartNumbers(cart);
+            return Result.success();
+        } else {
+            return Result.error("Product not found in cart");
+        }
     }
 
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Void> processReturnToAfterwards(Cart cart, Afterward afterward) {
-        return CompletableFuture.runAsync(() -> {
-            CartItem cartItem = afterwardMapper.entityToCartItem(afterward);
-            cart.getCartItems().add(cartItem);
-            cartRepository.save(cart);
-            afterwardsRepository.delete(afterward);
-        });
+    public void processReturnToAfterwards(Cart cart, Afterward afterward) {
+        CartItem cartItem = afterwardMapper.entityToCartItem(afterward);
+        cart.getCartItems().add(cartItem);
+        cartRepository.save(cart);
+        afterwardsRepository.delete(afterward);
     }
 }

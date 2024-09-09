@@ -12,6 +12,7 @@ import java.util.List;
 @Entity
 @Data
 @NoArgsConstructor
+@Table(name = "positions")
 public class Position {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,6 +21,7 @@ public class Position {
     @Column(name = "position_name")
     private String positionName;
 
+    @Column(name = "salary")
     private BigDecimal salary;
 
     @Enumerated(EnumType.STRING)

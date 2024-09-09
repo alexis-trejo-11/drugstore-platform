@@ -36,62 +36,50 @@ public class AfterwardsServiceImpl implements AfterwardsService {
     }
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Result<Void>> moveProductToAfterwards(Long clientId, Long productId) {
-        return CompletableFuture.supplyAsync(() -> getCartByClientId(clientId))
-                .thenCompose(cart -> {
-                    if (cart.getCartItems() == null) {
-                        return CompletableFuture.completedFuture(Result.error("Cart Item Not Fetched"));
-                    }
-                    return afterwardsDomainService.processMoveToAfterwards(cart, productId, clientId);
-                });
+    public Result<Void> moveProductToAfterwards(Long clientId, Long productId) {
+         Cart cart = getCartByClientId(clientId);
+        if (cart.getCartItems() == null) {
+            return Result.error("Cart Item Not Fetched");
+        }
+        return afterwardsDomainService.processMoveToAfterwards(cart, productId, clientId);
     }
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Result<Void>> returnProductToCart(Long clientId, Long productId) {
-        return CompletableFuture.supplyAsync(() -> {
+    public Result<Void> returnProductToCart(Long clientId, Long productId) {
+
             List<Afterward> afterwards = afterwardsRepository.findByClientId(clientId);
             Optional<Afterward> optionalAfterward = afterwards.stream()
                     .filter(afterward -> afterward.getProductId().equals(productId))
                     .findAny();
 
-            return optionalAfterward.map(afterward -> new Result<>(true, afterward, null))
+            Result<Afterward> result =  optionalAfterward.map(afterward -> new Result<>(true, afterward, null))
                     .orElseGet(() -> Result.error("Item requested not found"));
-        }).thenCompose(result -> {
-            if (!result.isSuccess()) {
-                return CompletableFuture.completedFuture(Result.error(result.getErrorMessage()));
-            }
 
-            Cart cart = getCartByClientId(clientId);
-            return afterwardsDomainService.processReturnToAfterwards(cart, result.getData())
-                    .thenApply(voidResult -> Result.success());
-        });
+        if (!result.isSuccess()) {
+            return Result.error(result.getErrorMessage());
+        }
+
+        Cart cart = getCartByClientId(clientId);
+        afterwardsDomainService.processReturnToAfterwards(cart, result.getData());
+        return Result.success();
     }
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<List<CartItemDTO>> getAfterwardsByClientId(Long clientId) {
-        return CompletableFuture.supplyAsync(() -> {
+    public List<CartItemDTO> getAfterwardsByClientId(Long clientId) {
             List<Afterward> afterwards = afterwardsRepository.findByClientId(clientId);
-            if (afterwards.isEmpty()) {
-                return new ArrayList<>();
-            }
+
+
             return afterwards.stream().map(afterwardMapper::entityToCartItemDTO).toList();
-        });
     }
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Optional<CartItemDTO>> getAfterwardsBytId(Long afterwardsId) {
-        return CompletableFuture.supplyAsync(() -> {
+    public Optional<CartItemDTO> getAfterwardsBytId(Long afterwardsId) {
             Optional<Afterward> optionalAfterward = afterwardsRepository.findById(afterwardsId);
             return optionalAfterward.map(afterwardMapper::entityToCartItemDTO);
-        });
     }
 
     private Cart getCartByClientId(Long clientId) {

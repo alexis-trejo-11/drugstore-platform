@@ -9,6 +9,8 @@ import microservice.ecommerce_sale_service.Model.DigitalSale;
 import microservice.ecommerce_sale_service.Model.DigitalSaleItem;
 import microservice.ecommerce_sale_service.Repository.DigitalSaleRepository;
 import microservice.ecommerce_sale_service.Utils.DigitalSaleHelper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -32,34 +34,39 @@ public class DigitalSaleDomainService {
         this.digitalSaleItemMapper = digitalSaleItemMapper;
     }
 
-    public DigitalSale createSale(DigitalSaleItemInsertDTO dto) {
-        DigitalSale sale = mapAndSaveDigitalSale(dto);
-        List<DigitalSaleItem> saleItems = mapAndSaveSaleItems(dto.getOrderItemDTOS(), sale);
+    public DigitalSale createSale(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
+        DigitalSale sale = mapAndSaveDigitalSale(digitalSaleItemInsertDTO);
+
+        List<DigitalSaleItem> saleItems = mapAndSaveSaleItems(digitalSaleItemInsertDTO.getOrderItemDTOS(), sale);
         sale.setSaleItems(saleItems);
+
         return saleRepository.save(sale);
     }
 
-    public DigitalSaleDTO toDTO(DigitalSale sale) {
+    public DigitalSaleDTO entityToDTO(DigitalSale sale) {
         DigitalSaleDTO digitalSaleDTO = digitalSaleMapper.entityToDTO(sale);
+
         List<SaleItemDTO> saleItemDTOS = sale.getSaleItems().stream()
                 .map(digitalSaleItemMapper::entityToDTO)
                 .collect(Collectors.toList());
+
         digitalSaleDTO.setSaleItemDTOS(saleItemDTOS);
         return digitalSaleDTO;
     }
 
-    public List<DigitalSaleDTO> getTodaySales() {
+    public Page<DigitalSaleDTO> getTodaySales(Pageable pageable) {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
-        return saleRepository.findDigitalSalesByDate(startOfDay, endOfDay).stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+
+        return saleRepository.findDigitalSalesByDate(startOfDay, endOfDay, pageable).map(this::entityToDTO);
     }
 
-    public SalesSummaryDTO getTodaySalesSummary() {
+    public SalesSummaryDTO getTodaySalesSummary(Pageable pageable) {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
-        List<DigitalSale> sales = saleRepository.findDigitalSalesByDate(startOfDay, endOfDay);
+
+        Page<DigitalSale> sales = saleRepository.findDigitalSalesByDate(startOfDay, endOfDay, pageable);
+
         return DigitalSaleHelper.saleToSummaryDTO(sales, startOfDay, endOfDay);
     }
 

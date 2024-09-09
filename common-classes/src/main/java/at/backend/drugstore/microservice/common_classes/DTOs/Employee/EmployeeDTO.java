@@ -35,9 +35,6 @@ public class EmployeeDTO {
     @JsonProperty("hired_at")
     private LocalDateTime hiredAt;
 
-    @JsonProperty("address")
-    private String address;
-
     @JsonProperty("position")
     private String position;
 

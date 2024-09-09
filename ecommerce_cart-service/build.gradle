@@ -59,6 +59,9 @@ dependencies {
 
 	// Eureka
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+
+	// Admin Service
+	implementation 'de.codecentric:spring-boot-admin-starter-client:3.0.0'
 }
 
 dependencyManagement {

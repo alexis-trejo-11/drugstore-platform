@@ -2,12 +2,15 @@ package microservice.ecommerce_sale_service.Service;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Sale.*;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Inventory.InventoryFacadeService;
+import at.backend.drugstore.microservice.common_classes.Models.Sales.Sale;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_sale_service.Model.DigitalSale;
 import microservice.ecommerce_sale_service.Repository.DigitalSaleRepository;
 import microservice.ecommerce_sale_service.Service.DomainService.DigitalSaleDomainService;
 import microservice.ecommerce_sale_service.Utils.DigitalSaleValidator;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -16,66 +19,58 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Service
-@Slf4j
 public class DigitalSaleServiceImpl implements DigitalSaleService {
 
     private final DigitalSaleRepository saleRepository;
-    private final DigitalSaleValidator validator;
-    private final DigitalSaleDomainService domainService;
+    private final DigitalSaleValidator digitalSaleValidator;
+    private final DigitalSaleDomainService digitalSaleDomainService;
     private final InventoryFacadeService  inventoryFacadeService;
 
     public DigitalSaleServiceImpl(DigitalSaleRepository saleRepository,
-                                  DigitalSaleValidator validator,
-                                  DigitalSaleDomainService domainService,
+                                  DigitalSaleValidator digitalSaleValidator,
+                                  DigitalSaleDomainService digitalSaleDomainService,
                                   InventoryFacadeService inventoryFacadeService) {
         this.saleRepository = saleRepository;
-        this.validator = validator;
-        this.domainService = domainService;
+        this.digitalSaleValidator = digitalSaleValidator;
+        this.digitalSaleDomainService = digitalSaleDomainService;
         this.inventoryFacadeService = inventoryFacadeService;
     }
 
     @Override
-    @Async("taskExecutor")
-    public CompletableFuture<DigitalSaleDTO> createDigitalSale(DigitalSaleItemInsertDTO dto) {
-        return CompletableFuture.supplyAsync(() ->  {
-            log.info("Creating digital sale");
-            validator.validateSaleCreation(dto);
+    public DigitalSaleDTO createDigitalSale(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
+            digitalSaleValidator.validateSaleCreation(digitalSaleItemInsertDTO);
 
-            DigitalSale sale = domainService.createSale(dto);
-            DigitalSaleDTO saleDTO = domainService.toDTO(sale);
+            DigitalSale sale = digitalSaleDomainService.createSale(digitalSaleItemInsertDTO);
+            DigitalSaleDTO saleDTO = digitalSaleDomainService.entityToDTO(sale);
 
             inventoryFacadeService.updateStockBySaleItemDTO(saleDTO.getSaleItemDTOS());
             return saleDTO;
-        });
     }
 
     @Override
-    @Async("taskExecutor")
-    public CompletableFuture<Optional<DigitalSaleDTO>> getSaleById(Long saleId) {
-        return CompletableFuture.supplyAsync(() -> {
-            log.info("Fetching sale with id: {}", saleId);
-            return saleRepository.findById(saleId)
-                .map(domainService::toDTO);
-        });
+    @Cacheable(value = "saleById", key = "#saleId")
+    public DigitalSaleDTO getSaleById(Long saleId) {
+        DigitalSale sale = saleRepository.findById(saleId).orElse(null);
+        if (sale == null) { return null;}
+
+        return digitalSaleDomainService.entityToDTO(sale);
     }
 
     @Override
-    @Async("taskExecutor")
-    public CompletableFuture<List<DigitalSaleDTO>> getTodaySales() {
-        return CompletableFuture.supplyAsync(() -> {
-            log.info("Fetching today's sales");
-            return domainService.getTodaySales();
-        });
+    @Cacheable("todaySales")
+    public Page<DigitalSaleDTO> getTodaySales(Pageable pageable) {
+            return digitalSaleDomainService.getTodaySales(pageable);
     }
 
     @Override
-    @Async
     @Cacheable("todaySalesSummary")
-    public CompletableFuture<SalesSummaryDTO> getTodaySummarySales() {
-        return CompletableFuture.supplyAsync(() -> {
-            log.info("Fetching today's sales summary");
-            return domainService.getTodaySalesSummary();
-        });
+    public SalesSummaryDTO getTodaySummarySales(Pageable pageable) {
+        return digitalSaleDomainService.getTodaySalesSummary(pageable);
+    }
+
+    @Override
+    public boolean validateExistingSale(Long saleId) {
+       return saleRepository.findById(saleId).isPresent();
     }
 
 }

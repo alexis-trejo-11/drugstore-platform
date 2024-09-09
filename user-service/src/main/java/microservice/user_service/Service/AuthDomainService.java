@@ -2,7 +2,7 @@ package microservice.user_service.Service;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.User.ClientSignUpDTO;
-import at.backend.drugstore.microservice.common_classes.Middleware.AuthSecurity;
+import at.backend.drugstore.microservice.common_classes.Security.AuthSecurity;
 import microservice.user_service.Mappers.UserMapper;
 import microservice.user_service.Middleware.PasswordUtil;
 import microservice.user_service.Model.Role;

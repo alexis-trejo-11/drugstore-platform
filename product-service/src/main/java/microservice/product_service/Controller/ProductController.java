@@ -42,7 +42,6 @@ public class ProductController {
         this.productService = productService;
     }
 
-    // Completable Future Endpoints Commonly Used To Provide Data to Other Services
     @Operation(summary = "Retrieve products by IDs", description = "Fetch products by a list of IDs")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Products retrieved successfully",
@@ -51,13 +50,12 @@ public class ProductController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @PostMapping("/by-ids")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<List<ProductDTO>>>> getProductsById(@Parameter(description = "List of product IDs") @RequestBody Map<String, List<Long>> request) {
+    public ResponseEntity<ResponseWrapper<List<ProductDTO>>> getProductsById(@Parameter(description = "List of product IDs") @RequestBody Map<String, List<Long>> request) {
         List<Long> productIds = request.get("productIds");
-        return productService.getProductsById(productIds)
-                .thenApply(productDTOS -> {
-                    log.info("Products retrieved for IDs: {}", productIds);
-                    return ResponseEntity.ok(new ResponseWrapper<>(true, productDTOS, "Products retrieved successfully", HttpStatus.OK.value()));
-                });
+        List<ProductDTO> productDTOS = productService.getProductsById(productIds);
+
+        log.info("Products retrieved for IDs: {}", productIds);
+        return ResponseEntity.ok(new ResponseWrapper<>(true, productDTOS, "Products retrieved successfully", HttpStatus.OK.value()));
     }
 
     @Operation(summary = "Retrieve a product by ID", description = "Fetch a product by its ID")
@@ -68,16 +66,16 @@ public class ProductController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @GetMapping("/{productId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<ProductDTO>>> getProductById(@Parameter(description = "ID of the product") @PathVariable Long productId) {
-        return productService.getProductById(productId)
-                .thenApply(productDTO -> {
-                    if (productDTO == null) {
-                        log.warn("Product not found for ID: {}", productId);
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
-                    }
-                    log.info("Product retrieved for ID: {}", productId);
-                    return ResponseEntity.ok(new ResponseWrapper<>(true, productDTO, "Product retrieved successfully", HttpStatus.OK.value()));
-                });
+    public ResponseEntity<ResponseWrapper<ProductDTO>> getProductById(@Parameter(description = "ID of the product") @PathVariable Long productId) {
+        ProductDTO productDTO =  productService.getProductById(productId);
+
+        if (productDTO == null) {
+            log.warn("Product not found for ID: {}", productId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
+        }
+
+        log.info("Product retrieved for ID: {}", productId);
+        return ResponseEntity.ok(new ResponseWrapper<>(true, productDTO, "Product retrieved successfully", HttpStatus.OK.value()));
     }
 
     @Operation(summary = "Retrieve a all products sorting by category hierarchy", description = "Fetch a product all product data return in pages")

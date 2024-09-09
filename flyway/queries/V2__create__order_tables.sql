@@ -14,7 +14,9 @@ CREATE TABLE shipping_data (
     service_type VARCHAR(100),
     shipping_cost DECIMAL(10, 2) NOT NULL,
     shipping_status shipping_status NOT NULL,
-    tracking_number VARCHAR(50)
+    tracking_number VARCHAR(50),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
 );
 
 -- Create Orders Table

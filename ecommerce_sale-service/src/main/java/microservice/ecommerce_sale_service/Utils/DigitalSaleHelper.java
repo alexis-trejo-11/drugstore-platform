@@ -3,6 +3,7 @@ package microservice.ecommerce_sale_service.Utils;
 import at.backend.drugstore.microservice.common_classes.DTOs.Sale.*;
 import microservice.ecommerce_sale_service.Model.DigitalSale;
 import microservice.ecommerce_sale_service.Model.DigitalSaleItem;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,10 +11,10 @@ import java.util.*;
 
 public class DigitalSaleHelper {
 
-    public static SalesSummaryDTO saleToSummaryDTO(List<DigitalSale> digitalSales, LocalDateTime startTime, LocalDateTime endTime) {
+    public static SalesSummaryDTO saleToSummaryDTO(Page<DigitalSale> digitalSales, LocalDateTime startTime, LocalDateTime endTime) {
         SalesSummaryDTO salesSummaryDTO = new SalesSummaryDTO();
 
-        salesSummaryDTO.setQuantitySales(digitalSales.size());
+        salesSummaryDTO.setQuantitySales(Math.toIntExact(digitalSales.getTotalElements()));
         salesSummaryDTO.setSummaryDate(LocalDateTime.now());
         salesSummaryDTO.setStartSummary(startTime);
         salesSummaryDTO.setEndSummary(endTime);

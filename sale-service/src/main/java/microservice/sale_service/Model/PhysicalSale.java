@@ -21,13 +21,16 @@ public class PhysicalSale extends Sale {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "employee_id")
     private Long employeeId;
 
+    @Column(name = "employee_name")
     private String employeeName;
 
     @OneToMany(mappedBy = "physicalSale", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PhysicalSaleItem> saleItems;
 
+    @Column(name = "pay_type")
     private PayType payType;
 
     public enum PayType {

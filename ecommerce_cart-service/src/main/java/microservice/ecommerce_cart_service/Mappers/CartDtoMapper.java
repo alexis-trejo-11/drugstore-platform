@@ -22,9 +22,9 @@ public class CartDtoMapper {
         this.cartItemMapper = cartItemMapper;
     }
 
-    public CartDTO createCartDTO(Cart cart) {
+    public CartDTO createCartDTO(Cart cart, List<CartItem> cartItems) {
         CartDTO cartDTO = cartMapper.entityToDTO(cart);
-        List<CartItemDTO> cartItemDTOS = cart.getCartItems().stream()
+        List<CartItemDTO> cartItemDTOS = cartItems.stream()
                 .map(cartItemMapper::entityToDTO)
                 .collect(Collectors.toList());
         cartDTO.setCartItems(cartItemDTOS);

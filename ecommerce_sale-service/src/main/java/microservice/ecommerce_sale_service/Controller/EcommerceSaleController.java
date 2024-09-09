@@ -12,17 +12,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_sale_service.Service.DigitalSaleService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
-@RequestMapping("/v1/api/digital-sales")
+@RequestMapping("/v1/drugstore/digital-sales")
 @Tag(name = "Drugstore Microservice API (E-Sale Service)", description = "Service for managing electronic sales")
 public class EcommerceSaleController {
 
@@ -39,10 +40,9 @@ public class EcommerceSaleController {
                     content = @Content(schema = @Schema(implementation = ResponseWrapper.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input")
     })
-    public CompletableFuture<ResponseEntity<ResponseWrapper<DigitalSaleDTO>>> createDigitalSale(@Valid @RequestBody DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
-        return digitalSaleService.createDigitalSale(digitalSaleItemInsertDTO)
-                .thenApply(digitalSaleDTO -> ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ResponseWrapper<>(true, digitalSaleDTO, "Sale successfully created.", HttpStatus.CREATED.value())));
+    public ResponseEntity<ResponseWrapper<DigitalSaleDTO>> createDigitalSale(@Valid @RequestBody DigitalSaleItemInsertDTO digitalSaleItemInsertDTO) {
+        DigitalSaleDTO digitalSaleDTO = digitalSaleService.createDigitalSale(digitalSaleItemInsertDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created(digitalSaleDTO, "E-Sale"));
     }
 
     @GetMapping("/{saleId}")
@@ -52,12 +52,15 @@ public class EcommerceSaleController {
                     content = @Content(schema = @Schema(implementation = ResponseWrapper.class))),
             @ApiResponse(responseCode = "404", description = "Sale not found")
     })
-    public CompletableFuture<ResponseEntity<ResponseWrapper<DigitalSaleDTO>>> getSaleById(@PathVariable Long saleId) {
-        return digitalSaleService.getSaleById(saleId)
-                .thenApply(digitalSaleDTOOptional -> digitalSaleDTOOptional
-                        .map(digitalSaleDTO -> ResponseEntity.ok(new ResponseWrapper<>(true, digitalSaleDTO, "Sale successfully fetched.", HttpStatus.OK.value())))
-                        .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body(new ResponseWrapper<>(false, null, "Sale with Id " + saleId + " not found.", HttpStatus.NOT_FOUND.value()))));
+    public ResponseEntity<ResponseWrapper<DigitalSaleDTO>> getSaleById(@PathVariable Long saleId) {
+       boolean isSaleExisting = digitalSaleService.validateExistingSale(saleId);
+       if (!isSaleExisting) {
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Sale", "Id"));
+       }
+
+       DigitalSaleDTO digitalSaleDTO = digitalSaleService.getSaleById(saleId);
+       return ResponseEntity.ok(ResponseWrapper.found(digitalSaleDTO, "E-Sale"));
+
     }
 
     @GetMapping("/today")
@@ -66,10 +69,12 @@ public class EcommerceSaleController {
             @ApiResponse(responseCode = "200", description = "Sales retrieved successfully",
                     content = @Content(schema = @Schema(implementation = ResponseWrapper.class)))
     })
-    public CompletableFuture<ResponseEntity<ResponseWrapper<List<DigitalSaleDTO>>>> getSalesFromToday() {
-        return digitalSaleService.getTodaySales().thenApply(todaySales -> {
-            return ResponseEntity.ok(new ResponseWrapper<>(true, todaySales, "Sales successfully fetched", HttpStatus.OK.value()));
-        });
+    public ResponseWrapper<Page<DigitalSaleDTO>> getSalesFromToday(@RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DigitalSaleDTO> digitalSaleDTOPage = digitalSaleService.getTodaySales(pageable);
+
+        return ResponseWrapper.ok("Today E-Sale", "Retrieve", digitalSaleDTOPage);
     }
 
     @GetMapping("/today/summary")
@@ -78,9 +83,11 @@ public class EcommerceSaleController {
             @ApiResponse(responseCode = "200", description = "Sales summary retrieved successfully",
                     content = @Content(schema = @Schema(implementation = ResponseWrapper.class)))
     })
-    public CompletableFuture<ResponseEntity<ResponseWrapper<SalesSummaryDTO>>> getSaleSummaryFromToday() {
-        return digitalSaleService.getTodaySummarySales().thenApply(summaryDTO ->
-                ResponseEntity.ok(new ResponseWrapper<>(true, summaryDTO, "Sale summary successfully fetched", HttpStatus.OK.value()))
-        );
+    public ResponseWrapper<SalesSummaryDTO> getSaleSummaryFromToday(@RequestParam(defaultValue = "0") int page,
+                                                                    @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        SalesSummaryDTO salesSummaryDTO = digitalSaleService.getTodaySummarySales(pageable);
+
+        return ResponseWrapper.ok("E-Sale Summary", "Retrieve", salesSummaryDTO);
     }
 }

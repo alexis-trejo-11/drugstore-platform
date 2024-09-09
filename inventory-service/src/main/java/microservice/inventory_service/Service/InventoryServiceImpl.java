@@ -13,6 +13,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
 import microservice.inventory_service.Service.DomainService.InventoryDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +49,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     public CompletableFuture<Result<Void>> createInventory(InventoryInsertDTO inventoryInsertDTO) {
         CompletableFuture<Result<ProductDTO>> productFuture = productFacadeService.getProductById(inventoryInsertDTO.getProductId());
-        CompletableFuture<Result<EmployeeDTO>> employeeFuture = employeeFacadeService.findEmployeeById(inventoryInsertDTO.getInventoryTransactionInsertDTO().getEmployeeId());
+        CompletableFuture<Result<EmployeeDTO>> employeeFuture = employeeFacadeService.getEmployeeById(inventoryInsertDTO.getInventoryTransactionInsertDTO().getEmployeeId());
 
         return CompletableFuture.allOf(productFuture, employeeFuture)
                 .thenCompose(v -> {
@@ -73,6 +74,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Async("taskExecutor")
     @Transactional
+    @Cacheable(value = "inventoriesByProductId", key = "#productId")
     public CompletableFuture<List<InventoryDTO>> getInventoriesByProductId(Long productId) {
         return productFacadeService.getProductById(productId)
                 .thenApplyAsync(productResult -> {
@@ -91,18 +93,15 @@ public class InventoryServiceImpl implements InventoryService {
 
 
     @Override
-    @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<Boolean> deleteInventory(Long inventoryId) {
-        return CompletableFuture.supplyAsync(() -> {
-            Optional<Inventory> inventory = inventoryRepository.findById(inventoryId);
-            if (inventory.isEmpty()) {
-                return false;
-            }
+    public boolean deleteInventory(Long inventoryId) {
+        Optional<Inventory> inventory = inventoryRepository.findById(inventoryId);
+        if (inventory.isEmpty()) {
+            return false;
+        }
 
-            inventoryRepository.deleteById(inventoryId);
-            return true;
-        });
+        inventoryRepository.deleteById(inventoryId);
+        return true;
     }
 
 

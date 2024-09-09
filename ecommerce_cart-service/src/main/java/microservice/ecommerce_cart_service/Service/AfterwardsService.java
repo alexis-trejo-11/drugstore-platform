@@ -8,8 +8,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public interface AfterwardsService {
-    CompletableFuture<Result<Void>> moveProductToAfterwards(Long clientId, Long productId);
-    CompletableFuture<Result<Void>> returnProductToCart(Long clientId, Long productId);
-    CompletableFuture<List<CartItemDTO>> getAfterwardsByClientId(Long clientId);
-    CompletableFuture<Optional<CartItemDTO>> getAfterwardsBytId(Long afterwardsId);
+    Result<Void> moveProductToAfterwards(Long clientId, Long productId);
+    Result<Void> returnProductToCart(Long clientId, Long productId);
+    List<CartItemDTO> getAfterwardsByClientId(Long clientId);
+    Optional<CartItemDTO> getAfterwardsBytId(Long afterwardsId);
 }

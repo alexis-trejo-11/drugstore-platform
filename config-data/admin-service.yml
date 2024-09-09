@@ -1,2 +1,23 @@
 server:
   port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/  # Eureka server URL
+    register-with-eureka: true
+    fetch-registry: true
+
+spring:
+  application:
+    name: spring-boot-admin
+  boot:
+    admin:
+      discovery:
+        enabled: true
