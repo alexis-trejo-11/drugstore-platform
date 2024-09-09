@@ -9,8 +9,8 @@ import org.springframework.data.domain.Pageable;
 import java.util.concurrent.CompletableFuture;
 
 public interface ClientService {
-    CompletableFuture<ClientDTO> createClient(ClientInsertDTO clientInsertDTO);
-    CompletableFuture<ClientDTO> getClientById(Long clientId);
+    ClientDTO createClient(ClientInsertDTO clientInsertDTO);
+    ClientDTO getClientById(Long clientId);
     Page<ClientDTO> getClientsSortedByName(Pageable pageable);
     void deleteClientByID(Long clientId);
     void updateClient(ClientUpdateDTO clientUpdateDTO);

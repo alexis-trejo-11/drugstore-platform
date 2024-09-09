@@ -3,6 +3,8 @@ package microservice.employee_service.Repository;
 import microservice.employee_service.Model.Employee;
 import microservice.employee_service.Model.Position;
 import microservice.employee_service.Model.enums.Genre;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
@@ -25,4 +27,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> findByHiredAtAfter(LocalDateTime hiredAt);
 
     List<Employee> findByFiredAtBefore(LocalDateTime firedAt);
+
+    Page<Employee> findAllByOrderByLastName(Pageable pageable);
 }

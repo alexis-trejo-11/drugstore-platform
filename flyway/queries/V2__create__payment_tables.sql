@@ -1,4 +1,4 @@
-CREATE TABLE Card (
+CREATE TABLE cards (
     id SERIAL PRIMARY KEY,
     client_id BIGINT NOT NULL,
     card_number TEXT NOT NULL,
@@ -6,7 +6,9 @@ CREATE TABLE Card (
     expiration_date DATE NOT NULL,
     cvv TEXT NOT NULL,
     is_card_valid BOOLEAN NOT NULL,
-    card_type VARCHAR(50) NOT NULL
+    card_type VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
 );
 
 

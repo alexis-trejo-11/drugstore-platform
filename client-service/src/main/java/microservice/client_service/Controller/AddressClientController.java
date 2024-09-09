@@ -4,7 +4,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.Addre
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressInsertDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressUpdateDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
-import at.backend.drugstore.microservice.common_classes.Middleware.AuthSecurity;
+import at.backend.drugstore.microservice.common_classes.Security.AuthSecurity;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import jakarta.servlet.http.HttpServletRequest;
@@ -75,8 +75,7 @@ public class AddressClientController {
         Long clientId = authSecurity.getClientIdFromToken(request);
         log.info("Fetching client data for client ID: {}", clientId);
 
-        CompletableFuture<ClientDTO> clientDTOAsync = clientService.getClientById(clientId);
-        ClientDTO clientDTO = clientDTOAsync.join();
+        ClientDTO clientDTO = clientService.getClientById(clientId);
 
         log.info("Client data successfully fetched for client ID: {}", clientId);
         return ResponseEntity.ok(ResponseWrapper.found(clientDTO, "Client"));

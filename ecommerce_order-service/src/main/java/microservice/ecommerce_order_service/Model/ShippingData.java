@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -50,6 +51,12 @@ public class ShippingData {
 
     @Column(name = "tracking_number")
     private String trackingNumber;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @OneToOne(mappedBy = "shippingData", cascade = CascadeType.ALL)
     private Order order;

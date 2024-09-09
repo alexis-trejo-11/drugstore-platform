@@ -8,6 +8,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public interface CartService {
-    CompletableFuture<Result<Void>> createCart(Long clientId);
-    CompletableFuture<Optional<CartDTO>> getCartByClientId(Long clientId);
+    Result<Void> createCart(Long clientId);
+    CartDTO getCartByClientId(Long clientId);
 }

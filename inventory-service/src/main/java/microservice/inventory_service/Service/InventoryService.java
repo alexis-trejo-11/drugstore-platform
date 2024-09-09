@@ -10,5 +10,5 @@ import java.util.concurrent.CompletableFuture;
 public interface InventoryService {
     CompletableFuture<Result<Void>> createInventory(InventoryInsertDTO inventoryInsertDTO);
     CompletableFuture<List<InventoryDTO>> getInventoriesByProductId(Long productId);
-    CompletableFuture<Boolean> deleteInventory(Long inventoryId);
+    boolean deleteInventory(Long inventoryId);
 }

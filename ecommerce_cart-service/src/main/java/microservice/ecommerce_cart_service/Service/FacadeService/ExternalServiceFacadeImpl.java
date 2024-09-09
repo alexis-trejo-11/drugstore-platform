@@ -77,12 +77,11 @@ public class ExternalServiceFacadeImpl implements ExternalServiceFacade {
     public CompletableFuture<Result<ClientEcommerceDataDTO>> aggregateClientData(Long clientId) {
         // Start fetching data asynchronously
         CompletableFuture<Result<ClientDTO>> clientFuture = clientFacadeService.findClientById(clientId);
-
         CompletableFuture<Result<List<AddressDTO>>> addressFuture = addressFacadeService.getAddressesByClientId(clientId);
-
         CompletableFuture<Result<List<CardDTO>>> cardFuture = ePaymentFacadeService.getCardByClientId(clientId);
 
-        CompletableFuture<Optional<CartDTO>> cartFuture = cartService.getCartByClientId(clientId);
+        // Run cart fetching asynchronously
+        CompletableFuture<CartDTO> cartFuture = CompletableFuture.supplyAsync(() -> cartService.getCartByClientId(clientId));
 
         // Combine all futures
         return CompletableFuture.allOf(clientFuture, addressFuture, cardFuture, cartFuture)
@@ -91,13 +90,6 @@ public class ExternalServiceFacadeImpl implements ExternalServiceFacade {
                     Result<ClientDTO> clientResult = clientFuture.join();
                     if (!clientResult.isSuccess()) {
                         return CompletableFuture.completedFuture(Result.error("Can't retrieve Client data"));
-                    }
-
-                    Optional<CartDTO> cartResult = cartFuture.join();
-                    if (cartResult.isEmpty()) {
-                        return CompletableFuture.completedFuture(Result.error("Can't retrieve Cart data"));
-                    } else if (cartResult.get().getCartItems().isEmpty()) {
-                        return CompletableFuture.completedFuture(Result.error("Cart has no products"));
                     }
 
                     Result<List<AddressDTO>> addressResult = addressFuture.join();
@@ -110,13 +102,14 @@ public class ExternalServiceFacadeImpl implements ExternalServiceFacade {
                         return CompletableFuture.completedFuture(Result.error("Can't retrieve Payment data"));
                     }
 
+                    CartDTO cartDTO = cartFuture.join();
+
                     // Create and populate the result DTOs
                     ClientEcommerceDataDTO clientEcommerceDataDTO = new ClientEcommerceDataDTO();
                     clientEcommerceDataDTO.setClientDTO(clientResult.getData());
                     clientEcommerceDataDTO.setAddressDTOS(addressResult.getData());
                     clientEcommerceDataDTO.setCardDTOS(cardResult.getData());
-                    clientEcommerceDataDTO.setCartDTO(cartResult.get());
-
+                    clientEcommerceDataDTO.setCartDTO(cartDTO);
 
                     return CompletableFuture.completedFuture(Result.success(clientEcommerceDataDTO));
                 });

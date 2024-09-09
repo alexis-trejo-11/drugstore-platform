@@ -29,7 +29,6 @@ public class Employee implements Serializable {
     @Enumerated(EnumType.STRING)
     private Genre genre;
 
-
     @Column(name = "birth_date")
     private Date birthDate;
 
@@ -44,8 +43,6 @@ public class Employee implements Serializable {
 
     @Column(name = "fired_at")
     private LocalDateTime firedAt;
-
-    private String address;
 
     @Column(name = "is_employee_active")
     private boolean isEmployeeActive;
@@ -68,7 +65,6 @@ public class Employee implements Serializable {
         this.lastName = employeeInsertDTO.getLastName();
         this.birthDate = employeeInsertDTO.getBirthDate();
         this.hiredAt = employeeInsertDTO.getHiredAt();
-        this.address = employeeInsertDTO.getAddress();
         this.isEmployeeActive = true;
         this.genre = Genre.valueOf(employeeInsertDTO.getGenre());
         this.createdAt = LocalDateTime.now();

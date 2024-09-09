@@ -6,6 +6,7 @@ import microservice.ecommerce_payment_service.Utils.CreditCardConverter;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -39,6 +40,12 @@ public class Card {
     @Enumerated(EnumType.STRING)
     @Column(name = "card_type")
     private CardType cardType;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     public enum CardType {
         VISA, MASTERCARD, AMEX, DISCOVER

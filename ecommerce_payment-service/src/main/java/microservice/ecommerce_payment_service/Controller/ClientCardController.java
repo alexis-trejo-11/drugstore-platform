@@ -2,11 +2,13 @@ package microservice.ecommerce_payment_service.Controller;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardInsertDTO;
+import at.backend.drugstore.microservice.common_classes.Security.AuthSecurity;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_payment_service.Service.CardService;
 import org.springframework.http.HttpStatus;
@@ -15,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
@@ -24,9 +25,11 @@ import java.util.concurrent.CompletableFuture;
 public class ClientCardController {
 
     private final CardService cardService;
+    private final AuthSecurity authSecurity;
 
-    public ClientCardController(CardService cardService) {
+    public ClientCardController(CardService cardService, AuthSecurity authSecurity) {
         this.cardService = cardService;
+        this.authSecurity = authSecurity;
     }
 
     @Operation(summary = "Add a card to a client",
@@ -36,25 +39,16 @@ public class ClientCardController {
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
     @PostMapping("/add")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> addCard(@Valid @RequestBody CardInsertDTO cardInsertDTO) {
-        log.info("Request to add card for client ID: {}", cardInsertDTO.getClientId());
+    public ResponseEntity<ResponseWrapper<Void>> addCard(@Valid @RequestBody CardInsertDTO cardInsertDTO, HttpServletRequest request) {
+        Long clientId = authSecurity.getClientIdFromToken(request);
+        log.info("Fetching card for client ID: {}", clientId);
 
-        return cardService.validateClient(cardInsertDTO.getClientId())
-                .thenCompose(isClientValidated -> {
-                    if (!isClientValidated) {
-                        log.warn("Client with ID {} not found.", cardInsertDTO.getClientId());
-                        return CompletableFuture.completedFuture(
-                                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "User with ID " + cardInsertDTO.getClientId() + " Not Found.", 404))
-                        );
-                    }
+        cardService.addCardToClient(cardInsertDTO);
+        log.info("Card successfully added for client ID: {}", clientId);
 
-                    return cardService.addCardToClient(cardInsertDTO)
-                            .thenApply(v -> {
-                                log.info("Card successfully added for client ID: {}", cardInsertDTO.getClientId());
-                                return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper<>(true, null, "Card Successfully Added!", 201));
-                            });
-                });
+        return ResponseEntity.ok(ResponseWrapper.ok("Card", "Added"));
     }
+
 
     @Operation(summary = "Retrieve cards by client ID",
             description = "Fetches all cards associated with a specific client.")
@@ -63,24 +57,14 @@ public class ClientCardController {
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
     @GetMapping("/client/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<List<CardDTO>>>> getCardsByClientId(@PathVariable Long clientId) {
-        log.info("Request to retrieve cards for client ID: {}", clientId);
+    public ResponseEntity<ResponseWrapper<List<CardDTO>>> getCardsByClientId(HttpServletRequest request) {
+        Long clientId = authSecurity.getClientIdFromToken(request);
+        log.info("getCardsByClientId -> Fetching cards for client ID: {}", clientId);
 
-        return cardService.validateClient(clientId)
-                .thenCompose(isClientValidated -> {
-                    if (!isClientValidated) {
-                        log.warn("Client with ID {} not found.", clientId);
-                        return CompletableFuture.completedFuture(
-                                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "User with ID " + clientId + " Not Found.", 404))
-                        );
-                    }
+        List<CardDTO> cardDTOS = cardService.getCardByClientId(clientId);
+        log.info("Cards retrieved successfully for client ID: {}", clientId);
 
-                    return cardService.getCardByClientId(clientId)
-                            .thenApply(cardDTOS -> {
-                                log.info("Cards retrieved successfully for client ID: {}", clientId);
-                                return ResponseEntity.status(HttpStatus.OK).body(new ResponseWrapper<>(true, cardDTOS, "Cards Retrieved Successfully!", 200));
-                            });
-                });
+        return ResponseEntity.ok(ResponseWrapper.found(cardDTOS, "Card"));
     }
 
     @Operation(summary = "Delete a card by ID",
@@ -91,27 +75,24 @@ public class ClientCardController {
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
     @DeleteMapping("/{cardId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> deleteCardById(@PathVariable Long cardId, @RequestParam Long clientId) {
+    public ResponseEntity<ResponseWrapper<Void>> deleteCardById(@PathVariable Long cardId, @RequestParam Long clientId) {
         log.info("Request to delete card ID: {} for client ID: {}", cardId, clientId);
 
-        return cardService.validateClient(clientId)
-                .thenCompose(isClientValidated -> {
-                    if (!isClientValidated) {
-                        log.warn("Client with ID {} not found.", clientId);
-                        return CompletableFuture.completedFuture(
-                                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "User with ID " + clientId + " Not Found.", 404))
-                        );
-                    }
+        boolean isClientValidated = cardService.validateClient(clientId);
+        if (!isClientValidated) {
+            log.warn("deleteCardById -> Client with ID {} not found.", clientId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Client", "Id"));
+        }
 
-                    return cardService.deleteCardById(cardId)
-                            .thenApply(isCardDeleted -> {
-                                if (!isCardDeleted) {
-                                    log.warn("Card with ID {} not found.", cardId);
-                                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "Card with ID " + cardId + " not found", 400));
-                                }
-                                log.info("Card with ID {} successfully deleted for client ID: {}", cardId, clientId);
-                                return ResponseEntity.ok(new ResponseWrapper<>(true, null, "Card Deleted Successfully!", 200));
-                            });
-                });
+        boolean isClientExisting = cardService.validateExistingCard(cardId);
+        if (!isClientExisting) {
+            log.warn("Card with ID {} not found.", cardId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Card", "Id"));
+        }
+
+        cardService.deleteCardById(cardId);
+        log.info("Card with ID {} successfully deleted for client ID: {}", cardId, clientId);
+
+        return ResponseEntity.ok(ResponseWrapper.ok("Card", "Delete"));
     }
 }

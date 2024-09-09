@@ -14,13 +14,13 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public interface OrderService {
-    CompletableFuture<Order> createOrderAsync(OrderInsertDTO orderInsertDTO);
+    Order createOrder(OrderInsertDTO orderInsertDTO);
     OrderDTO processOrderCreation(Order order, Long clientId, CartDTO cartDTO);
-    CompletableFuture<Result<Void>> processOrderPayment(CompleteOrderRequest completeOrderRequest, AddressDTO addressDTO, ClientDTO clientDTO, OrderDTO orderDTO);
-    CompletableFuture<Optional<OrderDTO>> getOrderById(Long orderId);
-    CompletableFuture<String> deliveryOrder(Long orderId, boolean isOrderDelivered);
-    CompletableFuture<Result<Void>> validateOrderForDelivery(OrderDTO orderDTO);
+    Result<Void> processOrderPayment(CompleteOrderRequest completeOrderRequest, AddressDTO addressDTO, ClientDTO clientDTO, OrderDTO orderDTO);
+    Optional<OrderDTO> getOrderById(Long orderId);
+    String deliveryOrder(Long orderId, boolean isOrderDelivered);
+    Result<Void> validateOrderForDelivery(OrderDTO orderDTO);
     CompletableFuture<CompleteOrderData> bringClientDataToCompleteOrder(CompleteOrderRequest completeOrderRequest);
     void addPaymentIdByOrderId(Long orderId, Long paymentId);
-    CompletableFuture<Void> processOrderNotPaid(Long orderId);
+    void processOrderNotPaid(Long orderId);
 }

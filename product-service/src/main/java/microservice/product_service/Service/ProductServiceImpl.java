@@ -52,22 +52,18 @@ public class ProductServiceImpl implements ProductService {
 
     @Async("taskExecutor")
     @Cacheable(value = "productsByIds", key = "#productIds")
-    public CompletableFuture<List<ProductDTO>> getProductsById(List<Long> productIds) {
-        return CompletableFuture.supplyAsync(() -> {
+    public List<ProductDTO> getProductsById(List<Long> productIds) {
             List<Product> products = productRepository.findByIdIn(productIds);
             return products.stream()
                     .map(productMapper::productToDTO)
                     .collect(Collectors.toList());
-        });
     }
 
     @Async("taskExecutor")
     @Cacheable(value = "productById", key = "#productId")
-    public CompletableFuture<ProductDTO> getProductById(Long productId) {
-        return CompletableFuture.supplyAsync(() -> {
+    public ProductDTO getProductById(Long productId) {
             Optional<Product> productOptional = productRepository.findById(productId);
             return productOptional.map(productMapper::productToDTO).orElse(null);
-        });
     }
 
     @Transactional

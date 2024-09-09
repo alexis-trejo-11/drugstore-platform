@@ -30,6 +30,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	// Cache
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.6'
+
 	// Config Server
 	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
@@ -60,6 +64,9 @@ dependencies {
 
 	// Eureka
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+
+	// Admin Service
+	implementation 'de.codecentric:spring-boot-admin-starter-client:3.0.0'
 }
 
 

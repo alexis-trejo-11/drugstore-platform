@@ -1,21 +1,20 @@
 package microservice.ecommerce_payment_service.Controller;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentDTO;
+import at.backend.drugstore.microservice.common_classes.Security.AuthSecurity;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_payment_service.Service.PaymentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -24,9 +23,11 @@ import java.util.concurrent.CompletableFuture;
 public class ClientPaymentController {
 
     private final PaymentService paymentService;
+    private final AuthSecurity authSecurity;
 
-    public ClientPaymentController(PaymentService paymentService) {
+    public ClientPaymentController(PaymentService paymentService, AuthSecurity authSecurity) {
         this.paymentService = paymentService;
+        this.authSecurity = authSecurity;
     }
 
     @Operation(summary = "Retrieve completed payments by client ID",
@@ -36,18 +37,16 @@ public class ClientPaymentController {
             @ApiResponse(responseCode = "404", description = "Client not found or no completed payments found")
     })
     @GetMapping("/client/{clientId}/completed")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<List<PaymentDTO>>>> getCompletedPaymentsByClientId(@PathVariable Long clientId) {
-        log.info("Request to retrieve completed payments for client ID: {}", clientId);
+    public ResponseEntity<ResponseWrapper<Page<PaymentDTO>>> getCompletedPaymentsByClientId(HttpServletRequest request,
+                                                                                            @RequestParam(defaultValue = "0") int page,
+                                                                                            @RequestParam(defaultValue = "10") int size) {
+        Long clientId = authSecurity.getClientIdFromToken(request);
+        log.info("Fetching card for client ID: {}", clientId);
 
-        return paymentService.getCompletedPaymentsByClientId(clientId)
-                .thenApply(payments -> {
-                    if (payments.isEmpty()) {
-                        log.warn("No completed payments found for client ID: {}", clientId);
-                        return ResponseEntity.ok(new ResponseWrapper<>(false, null, "No completed payments found for client ID: " + clientId, 404));
-                    }
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PaymentDTO> paymentDTOS = paymentService.getCompletedPaymentsByClientId(clientId, pageable);
+        log.info("Completed payments successfully fetched for client ID: {}", clientId);
 
-                    log.info("Completed payments successfully fetched for client ID: {}", clientId);
-                    return ResponseEntity.ok(new ResponseWrapper<>(true, payments, "Completed payments correctly fetched.", 200));
-                });
+        return ResponseEntity.ok(ResponseWrapper.found(paymentDTOS, "Payments"));
     }
 }

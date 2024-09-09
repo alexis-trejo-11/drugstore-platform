@@ -9,6 +9,7 @@ import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import microservice.inventory_service.Model.Inventory;
 import microservice.inventory_service.Repository.InventoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,7 @@ public class StockServiceImpl implements StockService {
 
     @Override
     @Async("taskExecutor")
-    @Transactional
+    @Cacheable(value = "productCache", key = "#productId")
     public CompletableFuture<Result<ProductDTO>> validateExistingProduct(Long productId) {
         return productFacadeService.getProductById(productId)
                 .thenApplyAsync(productResult -> {
@@ -84,7 +85,7 @@ public class StockServiceImpl implements StockService {
 
     @Override
     @Async("taskExecutor")
-    @Transactional
+    @Cacheable(value = "productStockCache", key = "#productId")
     public CompletableFuture<ProductStockDTO> getCurrentStockByProduct(Long productId, ProductDTO productDTO) {
         List<Inventory> inventories = inventoryRepository.findByProductId(productId);
         if (inventories.isEmpty()) {

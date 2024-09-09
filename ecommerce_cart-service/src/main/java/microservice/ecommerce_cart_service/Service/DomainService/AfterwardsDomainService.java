@@ -7,6 +7,6 @@ import microservice.ecommerce_cart_service.Model.Cart;
 import java.util.concurrent.CompletableFuture;
 
 public interface AfterwardsDomainService {
-    CompletableFuture<Void> processReturnToAfterwards(Cart cart, Afterward afterward);
-    CompletableFuture<Result<Void>> processMoveToAfterwards(Cart cart, Long productId, Long clientId);
+    void processReturnToAfterwards(Cart cart, Afterward afterward);
+    Result<Void> processMoveToAfterwards(Cart cart, Long productId, Long clientId);
 }

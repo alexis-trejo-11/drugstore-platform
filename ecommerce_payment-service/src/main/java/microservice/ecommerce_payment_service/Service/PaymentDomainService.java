@@ -41,14 +41,12 @@ public class PaymentDomainService {
         this.eSaleFacadeService = eSaleFacadeService;
     }
 
-    public CompletableFuture<Void> processPaymentFailed(Long paymentId) {
-        return CompletableFuture.runAsync(() -> {
+    public void processPaymentFailed(Long paymentId) {
             Optional<Payment> optionalPayment = paymentRepository.findById(paymentId);
 
             completeNotPaidPayment(paymentId);
             var orderFuture = orderFacadeService.completeOrder(false, optionalPayment.get().getOrderId(), null, null);
             orderFuture.join();
-        });
     }
 
     public void completeSuccessfullPayment(Long paymentId, Long orderId, Long saleId) {
@@ -69,23 +67,15 @@ public class PaymentDomainService {
         });
     }
 
-    public CompletableFuture<Void> processPaymentCompleted(Long paymentId) {
-        return CompletableFuture.supplyAsync(() -> paymentRepository.findById(paymentId))
-                .thenApply(paymentOpt -> paymentOpt.map(paymentMapper::toDto)
-                        .orElseThrow(() -> new EntityNotFoundException("Payment not found with id: " + paymentId)))
+    public void processPaymentCompleted(Long paymentId) {
+        Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
+        PaymentDTO paymentDTO = paymentOpt.map(paymentMapper::entityToDto)
+                .orElseThrow(() -> new EntityNotFoundException("Payment not found with id: " + paymentId));
 
-                .thenCompose(paymentDTO ->
-                        orderFacadeService.getOrderById(paymentDTO.getOrderId())
-                                .thenApply(orderDTO -> {
-                                    if (orderDTO == null) {
-                                        throw new EntityNotFoundException("Order not found for payment id: " + paymentId);
-                                    }
+        CompletableFuture<OrderDTO> orderDTOFuture = orderFacadeService.getOrderById(paymentDTO.getOrderId());
+        OrderDTO orderDTO = orderDTOFuture.join();
 
-                                    CompletableFuture<Void> future = processPaymentAndOrder(paymentDTO, orderDTO);
-                                    future.join();
-                                    return null;
-                                })
-                );
+        processPaymentAndOrder(paymentDTO, orderDTO);
     }
 
     public void handleCartData(Payment payment, PaymentInsertDTO paymentInsertDTO) {

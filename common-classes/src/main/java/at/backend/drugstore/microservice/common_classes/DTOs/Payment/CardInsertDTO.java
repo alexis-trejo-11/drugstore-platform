@@ -12,11 +12,6 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 public class CardInsertDTO {
-
-    @JsonProperty("client_id")
-    @NotNull(message = "client_id is obligatory")
-    private Long clientId;
-
     @JsonProperty("card_number")
     @NotNull(message = "card_number is obligatory")
     @NotBlank(message = "card_number is empty")

@@ -8,11 +8,11 @@ import org.springframework.data.domain.Pageable;
 import java.util.concurrent.CompletableFuture;
 
 public interface ClientOrderService {
-    CompletableFuture<Page<OrderDTO>> getCurrentOrdersByClientId(Long clientId, Pageable pageable);
-    CompletableFuture<Page<OrderDTO>> getCompletedOrdersByClientId(Long clientId, Pageable pageable);
-    CompletableFuture<Page<OrderDTO>> getCancelledOrdersByClientId(Long clientId, Pageable pageable);
-    CompletableFuture<Page<OrderDTO>> getOrdersToBeValidatedByClientId(Long clientId, Pageable pageable);
-    CompletableFuture<Result<Void>> cancelOrder(Long orderId);
+    Page<OrderDTO> getCurrentOrdersByClientId(Long clientId, Pageable pageable);
+    Page<OrderDTO> getCompletedOrdersByClientId(Long clientId, Pageable pageable);
+    Page<OrderDTO> getCancelledOrdersByClientId(Long clientId, Pageable pageable);
+    Page<OrderDTO> getOrdersToBeValidatedByClientId(Long clientId, Pageable pageable);
+    Result<Void> cancelOrder(Long orderId);
     CompletableFuture<Boolean> validateExistingClient(Long clientId);
 
 }

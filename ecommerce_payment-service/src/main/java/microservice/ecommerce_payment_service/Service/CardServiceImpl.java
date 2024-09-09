@@ -1,5 +1,6 @@
 package microservice.ecommerce_payment_service.Service;
 
+import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardInsertDTO;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.ClientFacadeService;
@@ -37,71 +38,62 @@ public class CardServiceImpl implements CardService {
         this.cardDomainService = cardDomainService;
     }
 
-    @Async("taskExecutor")
     @Override
     @Transactional
-    public CompletableFuture<Boolean> validateClient(Long clientId) {
-        return clientFacadeService.findClientById(clientId)
-                .thenApply(Result::isSuccess);
+    public boolean validateClient(Long clientId) {
+        CompletableFuture<Result<ClientDTO>> clientResultAsync = clientFacadeService.findClientById(clientId);
+        Result<ClientDTO> clientDTOResult = clientResultAsync.join();
+        return clientDTOResult.isSuccess();
     }
+
     @Override
     @Transactional
-    public CompletableFuture<Boolean> validateCardData(Long cardId, Long clientId) {
-        return CompletableFuture.supplyAsync(() -> {
+    public boolean validateCardData(Long cardId, Long clientId) {
+        List<Card> cards = cardRepository.findByClientId(clientId);
+        return cards.stream().anyMatch(card -> card.getId().equals(cardId));
+    }
+
+    @Override
+    @Transactional
+    public void addCardToClient(CardInsertDTO cardInsertDTO) {
+        Card card = cardMapper.toEntity(cardInsertDTO);
+        cardDomainService.encryptSensitiveData(card);
+        cardRepository.saveAndFlush(card);
+    }
+
+    @Override
+    public CardDTO getCardById(Long cardId) {
+        Card card = cardRepository.findById(cardId).orElse(null);
+
+        CardDTO cardDTO = cardMapper.toDto(card);
+        cardDomainService.decryptAndCensureSensitiveData(cardDTO);
+
+        return cardDTO;
+    }
+
+    @Override
+    public List<CardDTO> getCardByClientId(Long clientId) {
             List<Card> cards = cardRepository.findByClientId(clientId);
-            return cards.stream().anyMatch(card -> card.getId().equals(cardId));
-        });
-    }
 
-    @Override
-    @Transactional
-    public CompletableFuture<Void> addCardToClient(CardInsertDTO cardInsertDTO) {
-        return CompletableFuture.runAsync(() -> {
-            Card card = cardMapper.toEntity(cardInsertDTO);
-            cardDomainService.encryptSensitiveData(card);
-            cardRepository.saveAndFlush(card);
-        });
-    }
-
-    @Override
-    public CompletableFuture<Optional<CardDTO>> getCardById(Long cardId) {
-        return CompletableFuture.supplyAsync(() -> {
-            Optional<Card> optionalCard = cardRepository.findById(cardId);
-            return optionalCard.map(card -> {
-                CardDTO cardDTO = cardMapper.toDto(card);
-                cardDomainService.decryptAndCensureSensitiveData(cardDTO);
-                return cardDTO;
-            });
-        });
-    }
-
-    @Override
-    public CompletableFuture<List<CardDTO>> getCardByClientId(Long clientId) {
-        return CompletableFuture.supplyAsync(() -> {
-            List<Card> cards = cardRepository.findByClientId(clientId);
             List<CardDTO> cardDTOS = new ArrayList<>();
             for (Card card : cards) {
                 CardDTO cardDTO = cardMapper.toDto(card);
                 cardDomainService.decryptAndCensureSensitiveData(cardDTO);
                 cardDTOS.add(cardDTO);
             }
+
             return cardDTOS;
-        });
     }
 
     @Override
     @Transactional
-    public CompletableFuture<Boolean> deleteCardById(Long cardId) {
-        return CompletableFuture.supplyAsync(() -> {
-            Optional<Card> optionalCard = cardRepository.findById(cardId);
-            if (optionalCard.isEmpty()) {
-                return false;
-            }
-
+    public void deleteCardById(Long cardId) {
             cardRepository.deleteById(cardId);
-            return true;
-        });
     }
 
+    @Override
+    public boolean validateExistingCard(Long cardId) {
+        return cardRepository.findById(cardId).isPresent();
+    }
 
 }

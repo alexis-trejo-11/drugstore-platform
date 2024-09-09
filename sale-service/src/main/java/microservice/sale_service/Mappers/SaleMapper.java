@@ -4,6 +4,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDT
 import at.backend.drugstore.microservice.common_classes.DTOs.Sale.CreateSaleDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Sale.ProcessSaleDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Sale.SaleDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Sale.SaleInsertDTO;
 import microservice.sale_service.Model.PhysicalSale;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -33,6 +34,13 @@ public interface SaleMapper {
     @Mapping(expression = "java(sale.getEmployeeName())", target = "cashierName")
     @Mapping(source = "clientId", target = "clientId")
     CreateSaleDTO saleToCreateSaleDTO(PhysicalSale sale);
+
+    @Mapping(target = "employeeId", ignore = true)
+    @Mapping(target = "clientId", ignore = true)
+    @Mapping(target = "employeeName", ignore = true)
+    @Mapping(target = "saleItems", ignore = true)
+    @Mapping(target = "saleDate", expression = "java(java.time.LocalDateTime.now())")
+    PhysicalSale SaleInsertDTOtoEntity(SaleInsertDTO saleInsertDTO);
 
 
     @Mapping(source = "discount", target = "discount")

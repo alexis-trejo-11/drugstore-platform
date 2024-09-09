@@ -1,7 +1,10 @@
 package microservice.ecommerce_cart_service.Controller;
 
+import at.backend.drugstore.microservice.common_classes.Security.AuthSecurity;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_cart_service.Service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,9 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Logger;
-
 @Slf4j
 @RestController
 @RequestMapping("v1/api/ecommerce/carts")
@@ -23,10 +23,12 @@ import java.util.logging.Logger;
 public class CartController {
 
     private final CartService cartService;
+    private final AuthSecurity authSecurity;
 
     @Autowired
-    public CartController(CartService cartService) {
+    public CartController(CartService cartService, AuthSecurity authSecurity) {
         this.cartService = cartService;
+        this.authSecurity = authSecurity;
     }
 
     @Operation(summary = "Create a new cart", description = "Create a new cart for a specific client.")
@@ -35,16 +37,17 @@ public class CartController {
             @ApiResponse(responseCode = "409", description = "Failed to create cart due to a conflict")
     })
     @PostMapping("/create/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> createCart(@PathVariable final Long clientId) {
-        log.info("Creating cart for client ID: {}", clientId);
-        return cartService.createCart(clientId).thenApply(cartResult -> {
-            if (!cartResult.isSuccess()) {
-                log.warn("Failed to create cart for client ID: {}. Error: {}", clientId, cartResult.getErrorMessage());
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseWrapper<>(false, null, cartResult.getErrorMessage(), 409));
-            }
+    public ResponseEntity<ResponseWrapper<Void>> createCart(HttpServletRequest request) {
+        Long clientId = authSecurity.getClientIdFromToken(request);
+        log.info("Fetching card for client ID: {}", clientId);
 
-            log.info("Successfully created cart for client ID: {}", clientId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper<>(true, null, "Cart Successfully Created.", 201));
-        });
+        Result<Void> cartResult = cartService.createCart(clientId);
+        if (!cartResult.isSuccess()) {
+            log.warn("Failed to create cart for client ID: {}. Error: {}", clientId, cartResult.getErrorMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ResponseWrapper.error(cartResult.getErrorMessage(), 409));
+        }
+
+        log.info("Successfully created cart for client ID: {}", clientId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created("Cart"));
     }
 }

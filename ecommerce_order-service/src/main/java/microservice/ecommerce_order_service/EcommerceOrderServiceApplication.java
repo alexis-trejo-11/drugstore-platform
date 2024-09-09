@@ -13,7 +13,8 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 @ComponentScan(basePackages = {"microservice.ecommerce_order_service",
 		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Inventory",
 		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client",
-		"at.backend.drugstore.microservice.common_classes.GlobalExceptions"})
+		"at.backend.drugstore.microservice.common_classes.GlobalExceptions",
+		"at.backend.drugstore.microservice.common_classes.Security"})
 public class EcommerceOrderServiceApplication {
 
 	public static void main(String[] args) {

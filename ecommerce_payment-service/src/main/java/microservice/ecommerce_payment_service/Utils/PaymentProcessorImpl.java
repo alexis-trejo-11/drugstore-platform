@@ -41,7 +41,7 @@ public class PaymentProcessorImpl implements PaymentProcessor {
     @Override
     public void processPayment(Long paymentId, boolean isSuccess) {
         CompletableFuture.runAsync(() -> {
-            Optional<PaymentDTO> optionalPaymentDTO = paymentRepository.findById(paymentId).map(paymentMapper::toDto);
+            Optional<PaymentDTO> optionalPaymentDTO = paymentRepository.findById(paymentId).map(paymentMapper::entityToDto);
             if (optionalPaymentDTO.isEmpty()) {
                 throw new RuntimeException("Payment not found");
             }

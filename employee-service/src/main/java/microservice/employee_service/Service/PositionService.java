@@ -10,6 +10,7 @@ public interface PositionService {
     void createPosition(PositionInsertDTO positionInsertDTO);
     List<PositionDTO> getAllPositions();
     PositionDTO getPositionById(Long positionId);
-    boolean updatePosition(PositionUpdateDTO positionUpdateDTO);
+    void updatePosition(PositionUpdateDTO positionUpdateDTO);
     void deletePosition(Long positionId);
+    boolean validateExisitingPosition(Long positionId);
     }

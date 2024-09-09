@@ -3,10 +3,12 @@ package microservice.employee_service.Mappers;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeUpdateDTO;
 import microservice.employee_service.Model.Employee;
 import microservice.employee_service.Model.enums.Genre;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
 
 
@@ -32,6 +34,14 @@ public interface EmployeeMapper {
             @Mapping(source = "employeeInsertDTO.genre", target = "genre")
     })
     Employee insertDtoToEmployee(EmployeeInsertDTO employeeInsertDTO);
+
+    @Mapping(target = "firedAt", ignore = true)
+    @Mapping(target = "position", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "companyPhone", ignore = true)
+    @Mapping(target = "companyEmail", ignore = true)
+    @Mapping(source = "employeeUpdateDTO.genre", target = "genre")
+    void updateEntity(@MappingTarget Employee employee, EmployeeUpdateDTO employeeUpdateDTO);
 
     default String genreToString(Genre genre) {
         return genre.toString();

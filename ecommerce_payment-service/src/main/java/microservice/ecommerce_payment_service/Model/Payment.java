@@ -45,6 +45,12 @@ public class Payment {
     @Column(name = "status")
     private PaymentStatus status;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     public enum PaymentStatus {
         SUCCESS, FAILURE, PENDING
     }

@@ -8,10 +8,12 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public interface CardService {
-    CompletableFuture<Void> addCardToClient(CardInsertDTO cardInsertDTO);
-    CompletableFuture<List<CardDTO> >getCardByClientId(Long clientId);
-    CompletableFuture<Optional<CardDTO>> getCardById(Long cardId);
-    CompletableFuture<Boolean> deleteCardById(Long cardId);
-    CompletableFuture<Boolean> validateClient(Long clientId);
-    CompletableFuture<Boolean> validateCardData(Long cardId, Long clientId);
-    }
+    void addCardToClient(CardInsertDTO cardInsertDTO);
+    List<CardDTO> getCardByClientId(Long clientId);
+    CardDTO getCardById(Long cardId);
+    void deleteCardById(Long cardId);
+    boolean validateClient(Long clientId);
+    boolean validateCardData(Long cardId, Long clientId);
+    boolean validateExistingCard(Long cardId);
+
+}

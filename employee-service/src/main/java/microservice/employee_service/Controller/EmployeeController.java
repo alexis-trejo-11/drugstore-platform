@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
-@RequestMapping("v1/api/employees")
+@RequestMapping("v1/drugstore/employees")
 @Tag(name = "Drugstore Microservice API (Employee Service)", description = "Service for managing employees")
 public class EmployeeController {
 
@@ -38,12 +41,9 @@ public class EmployeeController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> addEmployee(@RequestBody @Valid EmployeeInsertDTO employeeDTO) {
-        log.info("Request to add a new employee");
-        return employeeService.addEmployee(employeeDTO).thenApply(voidResult -> {
-            log.info("Employee successfully created");
-            return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper<>(true, null, "Employee Successfully Created.", 201));
-        });
+    public ResponseEntity<ResponseWrapper<Void>> addEmployee(@RequestBody @Valid EmployeeInsertDTO employeeDTO) {
+        employeeService.addEmployee(employeeDTO);
+        return ResponseEntity.ok(ResponseWrapper.created("Employee"));
     }
 
     @Operation(summary = "Get all employees")
@@ -51,12 +51,12 @@ public class EmployeeController {
             @ApiResponse(responseCode = "200", description = "Employees successfully fetched")
     })
     @GetMapping
-    public CompletableFuture<ResponseEntity<ResponseWrapper<List<EmployeeDTO>>>> getAllEmployees() {
-        log.info("Request to fetch all employees");
-        return employeeService.getAllEmployees().thenApply(employeeDTOS -> {
-            log.info("Employees successfully fetched");
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseWrapper<>(true, employeeDTOS, "Employees Successfully Fetched.", 200));
-        });
+    public ResponseEntity<ResponseWrapper<Page<EmployeeDTO>>> getEmployeesByPagesSortedByName(@RequestParam(defaultValue = "0") int page,
+                                                                                              @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<EmployeeDTO> employeeDTOS = employeeService.getEmployeesByPagesSortedByName(pageable);
+        return ResponseEntity.ok(ResponseWrapper.found(employeeDTOS, "Employees"));
     }
 
     @Operation(summary = "Get employee by ID")
@@ -65,19 +65,19 @@ public class EmployeeController {
             @ApiResponse(responseCode = "404", description = "Employee not found")
     })
     @GetMapping("/{employeeId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<EmployeeDTO>>> getEmployeeById(@PathVariable Long employeeId) {
+    public ResponseEntity<ResponseWrapper<EmployeeDTO>> getEmployeeById(@PathVariable Long employeeId) {
         log.info("Request to fetch employee with ID: {}", employeeId);
-        return employeeService.getEmployeeById(employeeId).thenApply(employeeDTO -> {
-            return employeeDTO.map(dto -> {
-                log.info("Employee successfully fetched with ID: {}", employeeId);
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(new ResponseWrapper<>(true, dto, "Employee Successfully Fetched.", 200));
-            }).orElseGet(() -> {
-                log.warn("Employee with ID: {} not found", employeeId);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ResponseWrapper<>(false, null, "Employee With " + employeeId + " Not Found", 404));
-            });
-        });
+
+        boolean isEmployeeExisting = employeeService.validateExisitingEmployee(employeeId);
+        if (!isEmployeeExisting) {
+            log.warn("getEmployeeById -> Employee with Id: {} not found", employeeId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Employee", "Id"));
+        }
+
+        EmployeeDTO employeeDTO = employeeService.getEmployeeById(employeeId);
+        log.info("Employee successfully fetched with ID: {}", employeeId);
+
+        return ResponseEntity.ok(ResponseWrapper.found(employeeDTO, "Employee"));
     }
 
     @Operation(summary = "Update an existing employee")
@@ -86,18 +86,19 @@ public class EmployeeController {
             @ApiResponse(responseCode = "404", description = "Employee not found")
     })
     @PutMapping
-    public CompletableFuture<ResponseEntity<ResponseWrapper<?>>> updateEmployee(@RequestBody @Valid EmployeeUpdateDTO employeeUpdateDTO) {
-        log.info("Request to update employee with ID: {}", employeeUpdateDTO.getId());
-        return employeeService.updateEmployee(employeeUpdateDTO).thenApply(updateEmployeeResult -> {
-            if (!updateEmployeeResult.isSuccess()) {
-                log.warn("Employee update failed for ID: {}", employeeUpdateDTO.getId());
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ResponseWrapper<>(false, null, updateEmployeeResult.getErrorMessage(), 404));
-            }
-            log.info("Employee successfully updated with ID: {}", employeeUpdateDTO.getId());
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ResponseWrapper<>(true, null, "Employee Successfully Updated.", 200));
-        });
+    public ResponseEntity<ResponseWrapper<Void>> updateEmployee(@RequestBody @Valid EmployeeUpdateDTO employeeUpdateDTO) {
+        log.info("updateEmployee -> Request to update employee with ID: {}", employeeUpdateDTO.getId());
+
+        boolean isEmployeeExisting = employeeService.validateExisitingEmployee(employeeUpdateDTO.getId());
+        if (!isEmployeeExisting) {
+            log.warn("updateEmployee -> Employee with Id: {} not found", employeeUpdateDTO.getId());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Employee", "Id"));
+        }
+
+        employeeService.updateEmployee(employeeUpdateDTO);
+        log.info("updateEmployee -> Employee successfully updated with ID: {}", employeeUpdateDTO.getId());
+
+        return ResponseEntity.ok(ResponseWrapper.ok("Employee", "Update"));
     }
 
     @Operation(summary = "Delete employee by ID")
@@ -106,19 +107,18 @@ public class EmployeeController {
             @ApiResponse(responseCode = "404", description = "Employee not found")
     })
     @DeleteMapping("/{employeeId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<Void>>> deleteEmployee(@PathVariable Long employeeId) {
-        log.info("Request to delete employee with ID: {}", employeeId);
-        return employeeService.getEmployeeById(employeeId).thenCompose(employeeDTO -> {
-            if (employeeDTO.isEmpty()) {
-                log.warn("Employee with ID: {} not found", employeeId);
-                return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ResponseWrapper<>(false, null, "Employee With " + employeeId + " Not Found", 404)));
-            }
-            return employeeService.deleteEmployee(employeeId).thenApply(voidResult -> {
-                log.info("Employee successfully deleted with ID: {}", employeeId);
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(new ResponseWrapper<>(true, null, "Employee Successfully Deleted.", 200));
-            });
-        });
+    public ResponseEntity<ResponseWrapper<Void>> deleteEmployee(@PathVariable Long employeeId) {
+        log.info("deleteEmployee -> Request to delete employee with ID: {}", employeeId);
+
+        boolean isEmployeeExisting = employeeService.validateExisitingEmployee(employeeId);
+        if (!isEmployeeExisting) {
+            log.warn("deleteEmployee -> Employee with Id: {} not found", employeeId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Employee", "Id"));
+        }
+
+        employeeService.deleteEmployee(employeeId);
+        log.info("deleteEmployee -> Employee successfully deleted with ID: {}", employeeId);
+
+        return ResponseEntity.ok(ResponseWrapper.ok("Employee", "Delete"));
     }
 }

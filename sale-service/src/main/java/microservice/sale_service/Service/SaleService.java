@@ -7,10 +7,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface SaleService {
-    CompletableFuture<Result<CreateSaleDTO>> createSale(SaleProductsDTO saleProductsDTO);
-    CompletableFuture<Result<ProcessSaleDTO>> paySale(PaySaleDTO paySaleDTO);
-    CompletableFuture<Result<SaleDTO>> getSaleById(Long saleId);
-    CompletableFuture<List<SaleDTO>> getTodaySales();
-    CompletableFuture<SalesSummaryDTO> getTodaySummarySales();
+    CreateSaleDTO createSale(SaleInsertDTO saleInsertDTO, Long employeeId);
+    Result<SaleDTO> getSaleById(Long saleId);
+    List<SaleDTO> getTodaySales();
+    SalesSummaryDTO getTodaySummarySales();
 
     }

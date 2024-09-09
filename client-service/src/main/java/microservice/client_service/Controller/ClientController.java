@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,8 +36,6 @@ public class ClientController {
         this.clientService = clientService;
     }
 
-    // Completable Future Commonly User To Connect Services Each Other
-
     @Operation(summary = "Get client by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Client successfully fetched"),
@@ -45,22 +44,19 @@ public class ClientController {
 
     })
     @GetMapping("/{clientId}")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<ClientDTO>>> getClientById(@PathVariable Long clientId) {
+    public ResponseEntity<ResponseWrapper<ClientDTO>> getClientById(@PathVariable Long clientId) {
         log.info("Request to get client with ID: {}", clientId);
 
         boolean isClientExisting = clientService.validateExistingClient(clientId);
         if (!isClientExisting) {
             log.warn("getClientById -> Client not found with ID: {}", clientId);
-            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ResponseWrapper.notFound("Client", "ID")));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Client", "ID"));
         }
 
-        return clientService.getClientById(clientId)
-                .thenApply(clientDTO -> {
-                    log.info("Client successfully fetched with ID: {}", clientId);
-                    return ResponseEntity.status(HttpStatus.OK)
-                            .body(new ResponseWrapper<>(true, clientDTO, "Client Successfully Fetched", 200));
-                });
+        ClientDTO clientDTO = clientService.getClientById(clientId);
+        log.info("Client successfully fetched with ID: {}", clientId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.found(clientDTO, "Client"));
+
     }
 
     @Operation(summary = "Get all clients")
@@ -85,13 +81,13 @@ public class ClientController {
 
     })
     @PostMapping("/create")
-    public CompletableFuture<ResponseEntity<ResponseWrapper<ClientDTO>>> createClient(@Valid @RequestBody ClientInsertDTO clientInsertDTO) {
+    public ResponseEntity<ResponseWrapper<ClientDTO>> createClient(@Valid @RequestBody ClientInsertDTO clientInsertDTO) {
         log.info("Request to create a new client");
-        return clientService.createClient(clientInsertDTO)
-                .thenApply(clientDTO -> {
-                    log.info("createClient -> Client successfully created with ID: {}", clientDTO.getId());
-                    return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.ok("Client", "Create", clientDTO));
-                });
+
+        ClientDTO clientDTO = clientService.createClient(clientInsertDTO);
+        log.info("createClient -> Client successfully created with ID: {}", clientDTO.getId());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.ok("Client", "Create", clientDTO));
     }
 
     @Operation(summary = "Update a client")

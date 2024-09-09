@@ -7,14 +7,10 @@ import microservice.ecommerce_payment_service.Mappers.PaymentMapper;
 import microservice.ecommerce_payment_service.Model.Payment;
 import microservice.ecommerce_payment_service.Repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -33,40 +29,32 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Async("taskExecutor")
-    @Transactional(readOnly = true)
-    public CompletableFuture<Optional<PaymentDTO>> getPaymentById(Long paymentId) {
-        return CompletableFuture.supplyAsync(() ->
-                paymentRepository.findById(paymentId).map(paymentMapper::toDto)
-        );
+    public PaymentDTO getPaymentById(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId).orElse(null);
+        if (payment == null) { return null;}
+
+        return paymentMapper.entityToDto(payment);
     }
 
     @Override
-    @Async("taskExecutor")
-    @Transactional(readOnly = true)
-    public CompletableFuture<List<PaymentDTO>> getCompletedPaymentsByClientId(Long clientId) {
-        return CompletableFuture.supplyAsync(() ->
-                paymentRepository.findCompletedPaymentsByClientId(clientId).stream()
-                        .map(paymentMapper::toDto)
-                        .collect(Collectors.toList())
-        );
+    public Page<PaymentDTO> getCompletedPaymentsByClientId(Long clientId, Pageable pageable) {
+        Page<Payment> payments =  paymentRepository.findCompletedPaymentsByClientId(clientId, pageable);
+        return payments.map(paymentMapper::entityToDto);
+
     }
 
     @Override
-    @Async("taskExecutor")
-    public CompletableFuture<Void> processPayment(Long paymentId, boolean isPaid) {
-          if (!isPaid) {
-              return paymentDomainService.processPaymentFailed(paymentId);
-          }
-
-          return paymentDomainService.processPaymentCompleted(paymentId);
+    public void processPayment(Long paymentId, boolean isPaid) {
+        if (!isPaid) {
+              paymentDomainService.processPaymentFailed(paymentId);
+        } else {
+            paymentDomainService.processPaymentCompleted(paymentId);
+        }
     }
-
 
     @Override
     @Transactional
-    public CompletableFuture<PaymentDTO> initPaymentFromCart(PaymentInsertDTO paymentInsertDTO) {
-        return CompletableFuture.supplyAsync(() -> {
+    public PaymentDTO initPaymentFromCart(PaymentInsertDTO paymentInsertDTO) {
             Payment payment = paymentMapper.toEntity(paymentInsertDTO);
 
             if (paymentInsertDTO.getCardId() != null) {
@@ -75,8 +63,12 @@ public class PaymentServiceImpl implements PaymentService {
 
             payment = paymentRepository.saveAndFlush(payment);
 
-            return paymentMapper.toDto(payment);
-        });
+            return paymentMapper.entityToDto(payment);
+    }
+
+    @Override
+    public boolean validExistingPayment(Long paymentId) {
+        return paymentRepository.findById(paymentId).isPresent();
     }
 
 }
