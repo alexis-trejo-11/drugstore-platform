@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "transaction_date")
-public class Transaction {
+@Table(name = "payments_transactions")
+public class PaymentTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -19,7 +19,7 @@ CREATE TABLE physical_sale_items (
     product_name VARCHAR(255),
     product_unit_price NUMERIC,
     product_quantity INT,
-    created_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     physical_sale_id BIGINT,
     FOREIGN KEY (physical_sale_id) REFERENCES physical_sales(id) ON DELETE CASCADE
 );

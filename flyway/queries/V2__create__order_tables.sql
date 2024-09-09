@@ -15,8 +15,8 @@ CREATE TABLE shipping_data (
     shipping_cost DECIMAL(10, 2) NOT NULL,
     shipping_status shipping_status NOT NULL,
     tracking_number VARCHAR(50),
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create Orders Table

@@ -83,16 +83,18 @@ public class AuthServiceImpl implements AuthService {
 
         if (clientLoginDTO.getEmail() != null) {
             userOptional = userRepository.findByEmail(clientLoginDTO.getEmail());
+
+            UserLoginDTO userToLoginDTO = userMapper.entityToLoginDTO(userOptional.get());
+            return Result.success(userToLoginDTO);
+
         } else if (clientLoginDTO.getPhoneNumber() != null) {
             userOptional = userRepository.findByPhoneNumber(clientLoginDTO.getPhoneNumber());
-        }
 
-        if (userOptional.isEmpty()) {
+            UserLoginDTO userToLoginDTO = userMapper.entityToLoginDTO(userOptional.get());
+            return Result.success(userToLoginDTO);
+        } else  {
             return Result.error("User not found with given credentials");
         }
-
-        UserLoginDTO userToLoginDTO = userMapper.entityToLoginDTO(userOptional.get());
-        return Result.success(userToLoginDTO);
     }
 
     @Override

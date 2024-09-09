@@ -33,7 +33,7 @@ public class ClientAuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/signup/clients")
+    @PostMapping("/client-signup")
     @Operation(summary = "Sign up a new client", description = "Register a new client with the provided details")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "User Created Successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class))),
@@ -55,7 +55,7 @@ public class ClientAuthController {
     }
 
 
-    @PostMapping("/login")
+    @PostMapping("/client-login")
     @Operation(summary = "Login a client", description = "Authenticate a client with the provided login details")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully Logged In", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class))),
