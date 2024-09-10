@@ -15,6 +15,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Cart",
 		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client",
 		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Cart",
+		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Employee",
 		"at.backend.drugstore.microservice.common_classes.GlobalExceptions",
 		"at.backend.drugstore.microservice.common_classes.Security"})
 public class UserServiceApplication {

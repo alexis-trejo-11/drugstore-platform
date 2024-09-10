@@ -1,6 +1,7 @@
 package microservice.user_service.Mappers;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.User.ClientSignUpDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.User.UserDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.User.UserLoginDTO;
@@ -21,6 +22,19 @@ public interface UserMapper {
     @Mapping(target = "clientId", ignore = true)
     @Mapping(target = "roles", ignore = true)
     User signupDtoToEntity(ClientSignUpDTO clientSignUpDTO);
+
+    @Mapping(target = "joinedAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "lastLogin", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "email", source = "companyEmail")
+    @Mapping(target = "phoneNumber", source = "companyPhone")
+    @Mapping(target = "recoveryEmail", ignore = true)
+    @Mapping(target = "lastOldPassword", ignore = true)
+    @Mapping(target = "employeeId", source = "id")
+    @Mapping(target = "clientId", ignore = true)
+    @Mapping(target = "roles", ignore = true)
+    User employeeDtoToEntity(EmployeeDTO employeeDTO);
 
 
     @Mapping(target = "phone", source = "phoneNumber")

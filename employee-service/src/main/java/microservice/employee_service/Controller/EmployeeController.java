@@ -91,20 +91,20 @@ public class EmployeeController {
             @ApiResponse(responseCode = "404", description = "Employee not found")
     })
     @PostMapping("/search")
-    public ResponseEntity<ResponseWrapper<EmployeeDTO>> getEmployeeForUserCreation(@RequestBody RequestEmployeeUser requestEmployeeUser) {
+    public ResponseWrapper<EmployeeDTO> getEmployeeForUserCreation(@RequestBody RequestEmployeeUser requestEmployeeUser) {
         log.info("Request to fetch employee with values: {}", requestEmployeeUser);
 
         Result<EmployeeDTO> employeeDTOResult = employeeService.getEmployeeByEmailOrPhoneOrID(requestEmployeeUser);
 
         if (!employeeDTOResult.isSuccess()) {
             log.warn("getEmployeeForUserCreation -> Failed to fetch employee: {}", employeeDTOResult.getErrorMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.error(employeeDTOResult.getErrorMessage(), 404));
+            return ResponseWrapper.error(employeeDTOResult.getErrorMessage(), 404);
         }
 
         EmployeeDTO employeeDTO = employeeDTOResult.getData();
         log.info("getEmployeeForUserCreation -> Employee successfully fetched with ID: {}", employeeDTO.getId());
 
-        return ResponseEntity.ok(ResponseWrapper.found(employeeDTO, "Employee"));
+        return ResponseWrapper.found(employeeDTO, "Employee");
     }
 
 

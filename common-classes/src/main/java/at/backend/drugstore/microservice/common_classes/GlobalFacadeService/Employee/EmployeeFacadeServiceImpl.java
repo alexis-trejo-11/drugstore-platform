@@ -61,6 +61,7 @@ public class EmployeeFacadeServiceImpl implements EmployeeFacadeService {
         return CompletableFuture.supplyAsync(() -> {
             String url = employeeServiceUrlProvider.get() + "/v1/drugstore/employees/search" ;
             log.info("getEmployeeForUserCreation -> Fetching employee with URL: {}", url);
+            log.info("getEmployeeForUserCreation -> Fetching employee with DATA: {}", requestEmployeeUser);
 
             HttpHeaders headers = new HttpHeaders();
             headers.set(HttpHeaders.CONTENT_TYPE, "application/json");
@@ -68,7 +69,7 @@ public class EmployeeFacadeServiceImpl implements EmployeeFacadeService {
 
             ResponseEntity<ResponseWrapper<EmployeeDTO>> responseEntity = restTemplate.exchange(
                     url,
-                    HttpMethod.GET,
+                    HttpMethod.POST,
                     requestEntity,
                     new ParameterizedTypeReference<ResponseWrapper<EmployeeDTO>>() {}
             );

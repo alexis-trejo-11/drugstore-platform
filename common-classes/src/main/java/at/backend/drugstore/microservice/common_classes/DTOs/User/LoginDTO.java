@@ -9,19 +9,19 @@ import jakarta.validation.constraints.NotBlank;
 
 @Data
 @NoArgsConstructor
-public class ClientLoginDTO {
+public class LoginDTO {
 
-    @Schema(description = "Email address of the client", example = "client@example.com")
+    @Schema(description = "Email address of the user", example = "user@example.com")
     @JsonProperty("email")
     private String email;
 
-    @Schema(description = "Phone number of the client", example = "+123456789")
+    @Schema(description = "Phone number of the user", example = "+123456789")
     @JsonProperty("phone_number")
     private String phoneNumber;
 
 
     @NotBlank(message = "password is empty")
-    @Schema(description = "Password of the client", required = true, example = "strongPassword123")
+    @Schema(description = "Password of the user", required = true, example = "strongPassword123")
     @JsonProperty("password")
     private String password;
 }
