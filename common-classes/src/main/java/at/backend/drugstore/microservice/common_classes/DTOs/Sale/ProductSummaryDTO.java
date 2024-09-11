@@ -16,7 +16,7 @@ public class ProductSummaryDTO {
     @JsonProperty("product_name")
     public String productName;
 
-    @JsonProperty("quantity")
+    @JsonProperty("productQuantity")
     public int quantity;
 
     @JsonProperty("unit_price")

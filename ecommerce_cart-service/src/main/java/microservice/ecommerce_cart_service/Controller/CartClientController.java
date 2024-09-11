@@ -77,7 +77,7 @@ public class CartClientController {
 
         var productId = cartItemInsertDTO.getProductId();
         var quantity = cartItemInsertDTO.getQuantity();
-        log.info("Adding product ID: {} with quantity: {} to cart for client ID: {}", productId, quantity, clientId);
+        log.info("Adding product ID: {} with productQuantity: {} to cart for client ID: {}", productId, quantity, clientId);
 
          Result<Void> cartResult = clientCartService.addProductsCart(clientId, productId, quantity);
         if (!cartResult.isSuccess()) {

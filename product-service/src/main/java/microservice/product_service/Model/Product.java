@@ -1,28 +1,31 @@
 package microservice.product_service.Model;
 
-
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.Enums.ProductPresentation;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.Enums.ProductType;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.Enums.RouteOfAdministration;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Type;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "products")
-@Data @NoArgsConstructor
+@Data
+@NoArgsConstructor
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
-
     private String image;
-
     private BigDecimal price;
-
     private String upc;
 
     @Column(name = "content")
@@ -55,120 +58,23 @@ public class Product {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "main_category_id")
     private MainCategory mainCategory;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subcategory_id")
     private Subcategory subcategory;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id")
     private Brand brand;
-
-
-
-    public enum ProductPresentation {
-        BOX,
-        BOTTLE,
-        TUBE,
-        BLISTER,
-        SACHET,
-        VIAL,
-        JAR,
-        AMPOULE,
-        SPRAY,
-        DROPPER,
-        CARTON,
-        BAG,
-        POUCH,
-        CANISTER,
-        SYRINGE,
-        PATCH,
-        INHALER,
-        DOSE_PACK,
-        KIT,
-        STICK
-    }
-
-    public enum RouteOfAdministration {
-        ORAL,
-        SPREAD,
-        TOPICAL,
-        TRANSDERMAL,
-        INTRAMUSCULAR,
-        INTRAVENOUS,
-        SUBCUTANEOUS,
-        RECTAL,
-        VAGINAL,
-        OPHTHALMIC,
-        OTIC,
-        NASAL,
-        INHALATION,
-        BUCCAL,
-        SUBLINGUAL
-    }
-
-    public enum ProductType {
-        CREAM,
-        PILL,
-        TABLET,
-        CAPSULE,
-        SYRUP,
-        OINTMENT,
-        GEL,
-        DROPS,
-        INJECTION,
-        INHALER,
-        PATCH,
-        SUPPOSITORY,
-        LOZENGE,
-        POWDER,
-        LIQUID,
-        SUSPENSION,
-        EMULSION,
-        SOLUTION,
-        GRANULES,
-        SPRAY,
-        FOAM,
-        SHAMPOO,
-        SOAP,
-        TINCTURE,
-        PASTE,
-        BANDAGE,
-        BALM,
-        SUPPLEMENT,
-        VITAMIN,
-        HERBAL,
-        TOPICAL,
-        ORAL,
-        RECTAL,
-        VAGINAL,
-        NASAL,
-        AEROSOL,
-        CHEWABLE,
-        EFFERVESCENT,
-        TRANSDERMAL,
-        GELCAP,
-        MOUTHWASH,
-        GROCERIES,
-        DIAPER,
-        DISPOSABLE_DIAPER,
-        CONDOM,
-        PROPHYLACTIC,
-        PREGNANCY_TEST,
-        PREGNANCY_TEST_KIT
-    }
-
-
-
 }

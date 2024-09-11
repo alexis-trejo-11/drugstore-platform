@@ -6,8 +6,10 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductRela
 import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductUpdateDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.EntityMapper;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
+import lombok.extern.slf4j.Slf4j;
 import microservice.product_service.Mappers.ProductMapper;
 import microservice.product_service.Model.*;
+import microservice.product_service.Service.DomainServices.ProductDomainService;
 import org.springframework.cache.annotation.Cacheable;
 import microservice.product_service.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,44 +24,32 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    private final BrandRepository brandRepository;
-    private final CategoryRepository categoryRepository;
-    private final MainCategoryRepository mainCategoryRepository;
     private final ProductMapper productMapper;
+    private final ProductDomainService productDomainService;
     private final ProductRepository productRepository;
-    private final SubcategoryRepository subcategoryRepository;
-    private final SupplierRepository supplierRepository;
 
     @Autowired
-    public ProductServiceImpl(BrandRepository brandRepository,
-                              CategoryRepository categoryRepository,
-                              MainCategoryRepository mainCategoryRepository,
-                              ProductMapper productMapper,
-                              ProductRepository productRepository,
-                              SubcategoryRepository subcategoryRepository,
-                              SupplierRepository supplierRepository) {
-        this.brandRepository = brandRepository;
-        this.categoryRepository = categoryRepository;
-        this.mainCategoryRepository = mainCategoryRepository;
+    public ProductServiceImpl(ProductMapper productMapper, ProductDomainService productDomainService,
+                              ProductRepository productRepository) {
+
         this.productMapper = productMapper;
+        this.productDomainService = productDomainService;
         this.productRepository = productRepository;
-        this.subcategoryRepository = subcategoryRepository;
-        this.supplierRepository = supplierRepository;
     }
 
-    @Async("taskExecutor")
-    @Cacheable(value = "productsByIds", key = "#productIds")
+    @Cacheable(value = "productsById", key = "#productIds")
     public List<ProductDTO> getProductsById(List<Long> productIds) {
-            List<Product> products = productRepository.findByIdIn(productIds);
-            return products.stream()
-                    .map(productMapper::productToDTO)
-                    .collect(Collectors.toList());
+
+        List<Product> products = productRepository.findByIdIn(productIds);
+        return products.stream()
+                .map(productMapper::productToDTO)
+                .collect(Collectors.toList());
     }
 
-    @Async("taskExecutor")
     @Cacheable(value = "productById", key = "#productId")
     public ProductDTO getProductById(Long productId) {
             Optional<Product> productOptional = productRepository.findById(productId);
@@ -96,16 +86,16 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     public Result<Void> createProduct(ProductInsertDTO productInsertDTO) {
-            Product product = productMapper.insertDtoToProduct(productInsertDTO);
+        Product product = productMapper.insertDtoToProduct(productInsertDTO);
 
-            // Validate And Set Relationship Values In Model Created
-            Result<Void> relationshipResult = handleRelationShips(productInsertDTO.getRelationIDs(), product);
-            if (!relationshipResult.isSuccess()) {
-                return Result.error(relationshipResult.getErrorMessage());
-            }
+        // Validate And Set Relationship Values In Model Created
+        Result<Void> relationshipResult = productDomainService.handleRelationShips(productInsertDTO.getRelationIDs(), product);
+        if (!relationshipResult.isSuccess()) {
+         return Result.error(relationshipResult.getErrorMessage());
+        }
 
-            addProduct(productInsertDTO);
-            return Result.success();
+        productRepository.saveAndFlush(product);
+        return Result.success();
     }
 
     @Transactional
@@ -116,7 +106,7 @@ public class ProductServiceImpl implements ProductService {
         // Map DTO and assign not null values to product
         EntityMapper.mapNonNullProperties(productUpdateDTO, product);
 
-        Result<Void> relationshipResult = handleRelationShips(productUpdateDTO.getRelationIDs(), product);
+        Result<Void> relationshipResult = productDomainService.handleRelationShips(productUpdateDTO.getRelationIDs(), product);
             if (!relationshipResult.isSuccess()) {
                 return Result.error(relationshipResult.getErrorMessage());
             }
@@ -131,52 +121,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(value = "validateExisitingProduct", key = "#productId")
     public boolean validateExisitingProduct(Long productId) {
-        Optional<Product> optionalProduct = productRepository.findById(productId);
-        return optionalProduct.isEmpty();
-    }
-
-
-    private Result<Void> handleRelationShips(ProductRelationsIDs productRelationsIDs, Product product) {
-        Optional<MainCategory> optionalMainCategory = mainCategoryRepository.findById(productRelationsIDs.getMainCategoryId());
-        if (optionalMainCategory.isEmpty()) {
-            return Result.error("Invalid Main Category");
-        }
-
-        Optional<Category> optionalCategory = categoryRepository.findById(productRelationsIDs.getCategoryId());
-        if (optionalCategory.isEmpty()) {
-            return Result.error("Invalid Category");
-        }
-
-        Optional<Subcategory> optionalSubcategory = subcategoryRepository.findById(productRelationsIDs.getSubcategoryId());
-        if (optionalSubcategory.isEmpty()) {
-            return Result.error("Invalid SubCategory");
-        }
-
-        Optional<Brand> optionalBrand = brandRepository.findById(productRelationsIDs.getBrandId());
-        if (optionalBrand.isEmpty()) {
-            return Result.error("Invalid Brand");
-        }
-
-        Optional<Supplier> optionalSupplier = supplierRepository.findById(productRelationsIDs.getSupplierId());
-        if (optionalSupplier.isEmpty()) {
-            return Result.error("Invalid Supplier");
-        }
-
-        addRelationship(product, optionalMainCategory.get(), optionalCategory.get(), optionalSubcategory.get(), optionalSupplier.get(), optionalBrand.get());
-        return Result.success();
-    }
-
-    private void addProduct(ProductInsertDTO productInsertDTO) {
-        Product product = productMapper.insertDtoToProduct(productInsertDTO);
-        productRepository.saveAndFlush(product);
-    }
-
-    private void addRelationship(Product product, MainCategory mainCategory, Category category, Subcategory subcategory, Supplier supplier, Brand brand) {
-        product.setMainCategory(mainCategory);
-        product.setCategory(category);
-        product.setSubcategory(subcategory);
-        product.setSupplier(supplier);
-        product.setBrand(brand);
+         return productRepository.findById(productId).isPresent();
     }
 }

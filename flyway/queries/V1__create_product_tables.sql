@@ -83,9 +83,9 @@ CREATE TABLE products (
     upc VARCHAR(50),
     content TEXT,
     package_dimension VARCHAR(255),
-    route_of_administration route_of_administration, -- Enum type
-    product_type product_type, -- Enum type
-    product_presentation product_presentation, -- Enum type
+    route_of_administration VARCHAR(20) CHECK (route_of_administration IN ('ORAL', 'SPREAD', 'TOPICAL', 'TRANSDERMAL', 'INTRAMUSCULAR', 'INTRAVENOUS', 'SUBCUTANEOUS', 'RECTAL', 'VAGINAL', 'OPHTHALMIC', 'OTIC', 'NASAL', 'INHALATION', 'BUCCAL', 'SUBLINGUAL')),
+    product_presentation VARCHAR(20) CHECK (product_presentation IN ('BOX', 'BOTTLE', 'TUBE', 'BLISTER', 'SACHET', 'VIAL', 'JAR', 'AMPOULE', 'SPRAY', 'DROPPER', 'CARTON', 'BAG', 'POUCH', 'CANISTER', 'SYRINGE', 'PATCH', 'INHALER', 'DOSE_PACK', 'KIT', 'STICK')),
+    product_type VARCHAR(20) CHECK (product_type IN ('CREAM', 'PILL', 'TABLET', 'CAPSULE', 'SYRUP', 'OINTMENT', 'GEL', 'DROPS', 'INJECTION', 'INHALER', 'PATCH', 'SUPPOSITORY', 'LOZENGE', 'POWDER', 'LIQUID', 'SUSPENSION', 'EMULSION', 'SOLUTION', 'GRANULES', 'SPRAY', 'FOAM', 'SHAMPOO', 'SOAP', 'TINCTURE', 'PASTE', 'BANDAGE', 'BALM', 'SUPPLEMENT', 'VITAMIN', 'HERBAL', 'TOPICAL', 'ORAL', 'RECTAL', 'VAGINAL', 'NASAL', 'AEROSOL', 'CHEWABLE', 'EFFERVESCENT', 'TRANSDERMAL', 'GELCAP', 'MOUTHWASH', 'GROCERIES', 'DIAPER', 'DISPOSABLE_DIAPER', 'CONDOM', 'PROPHYLACTIC', 'PREGNANCY_TEST', 'PREGNANCY_TEST_KIT')),
     prescription_required BOOLEAN,
     age_usage VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -101,6 +101,7 @@ CREATE TABLE products (
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL,
     FOREIGN KEY (brand_id) REFERENCES brands(id) ON DELETE SET NULL
 );
+
 
 CREATE TABLE product_attributes (
     id BIGSERIAL PRIMARY KEY,

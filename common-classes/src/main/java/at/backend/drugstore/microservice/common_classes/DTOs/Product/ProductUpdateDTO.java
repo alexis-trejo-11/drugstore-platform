@@ -1,6 +1,11 @@
 package at.backend.drugstore.microservice.common_classes.DTOs.Product;
 
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.Enums.ProductPresentation;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.Enums.ProductType;
+import at.backend.drugstore.microservice.common_classes.DTOs.Product.Enums.RouteOfAdministration;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,14 +44,16 @@ public class ProductUpdateDTO {
     private String packageDimension;
 
     @JsonProperty("route_of_administration")
-    private String routeOfAdministration;
+    @Enumerated(EnumType.STRING)
+    private RouteOfAdministration routeOfAdministration;
 
     @JsonProperty("product_presentation")
-    private String productPresentation;
+    @Enumerated(EnumType.STRING)
+    private ProductPresentation productPresentation;
 
     @JsonProperty("product_type")
-    @NotNull(message = "Product Type Can Not Be Null") @NotBlank(message = "Product Type Can Not Be Blank")
-    private String productType;
+    @Enumerated(EnumType.STRING)
+    private ProductType productType;
 
     @JsonProperty("prescription_required")
     private boolean prescriptionRequired;

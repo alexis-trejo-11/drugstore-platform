@@ -1,15 +1,18 @@
 package microservice.product_service.Model;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Table(name = "main_categories")
 public class MainCategory {
@@ -26,13 +29,13 @@ public class MainCategory {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "mainCategory")
+    @OneToMany(mappedBy = "mainCategory", fetch = FetchType.LAZY)
     private List<Category> categories;
 
-    @OneToMany(mappedBy = "mainCategory")
+    @OneToMany(mappedBy = "mainCategory", fetch = FetchType.LAZY)
     private List<Subcategory> subcategories;
 
-    @OneToMany(mappedBy = "mainCategory")
+    @OneToMany(mappedBy = "mainCategory", fetch = FetchType.LAZY)
     private List<Product> products;
 
     public MainCategory(String name, LocalDateTime createdAt, LocalDateTime updatedAt) {
@@ -41,7 +44,16 @@ public class MainCategory {
         this.updatedAt = updatedAt;
     }
 
-    public MainCategory(Long id) {
-        this.id = id;
+    @Override
+    public String toString() {
+        return "MainCategory{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", categories=" + categories +
+                ", subcategories=" + subcategories +
+                ", products=" + products +
+                '}';
     }
 }

@@ -23,7 +23,7 @@ public class CacheConfig {
                 "mainCategoryWithProducts",
                 "productsBySupplier",
                 "productsByCategory",
-                "productsBySubCategory",
+                "productsBySubcategory",
                 "productsById",
                 "productsByCategory",
                 "productById",
@@ -32,12 +32,15 @@ public class CacheConfig {
                 "subcategoryWithProducts",
                 "supplierById",
                 "supplierByName",
-                "allSuppliersSortedByName"
+                "allSuppliersSortedByName",
+                "validateExisitingProduct"
         );        cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(100)
                 .expireAfterAccess(8, TimeUnit.HOURS));
         cacheManager.setAllowNullValues(false);
         cacheManager.setAsyncCacheMode(true);
+
+
         return cacheManager;
     }
 }
