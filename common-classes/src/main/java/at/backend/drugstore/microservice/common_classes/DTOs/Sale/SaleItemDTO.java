@@ -21,14 +21,14 @@ public class SaleItemDTO {
     private String productName;
 
     @Schema(description = "Quantity of the product in this sale item")
-    @JsonProperty("quantity")
+    @JsonProperty("productQuantity")
     private int productQuantity;
 
     @Schema(description = "Unit price of the product")
     @JsonProperty("product_unit_price")
     private BigDecimal productUnitPrice;
 
-    @Schema(description = "Total price for this sale item (quantity * unit price)")
+    @Schema(description = "Total price for this sale item (productQuantity * unit price)")
     @JsonProperty("item_total")
     private BigDecimal itemTotal;
 }

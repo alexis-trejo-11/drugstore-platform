@@ -1,29 +1,46 @@
 package at.backend.drugstore.microservice.common_classes.DTOs.Inventory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import java.util.Date;
 
-@Data
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
+@Data
 public class InventoryTransactionInsertDTO {
+    @JsonProperty("inventory_item_id")
+    @NotNull(message = "inventory_item_id is obligatory")
+    @Positive(message = "inventory_item_id must be positive")
+    private Long inventoryItemId;
 
-    @NotBlank
+    // Accepted Enums -> RECEIVED, SOLD, ADJUSTED, RETURNED, DAMAGED, EXPIRED
+    @Enumerated(EnumType.ORDINAL)
     @JsonProperty("transaction_type")
-    private String transactionType;
+    @NotNull(message = "transaction_type is obligatory")
+    private TransactionType transactionType;
 
-    @Min(value = 1, message = "Quantity must be greater than or equal to 1.")
-    private int quantity;
+    @JsonProperty("quantity")
+    @NotNull(message = "quantity is obligatory")
+    private Integer quantity;
 
-    @NotNull(message = "Date It's Obligatory")
-    private Date date;
+    @JsonProperty("transaction_date")
+    @NotNull(message = "transaction_date is obligatory")
+    private LocalDateTime transactionDate;
 
-    @JsonProperty("employee_id")
-    private Long employeeId;
+    @JsonProperty("notes")
+    private String notes;
 
+    @JsonProperty("supplier_id")
+    @NotNull(message = "supplier_id is obligatory")
+    @Positive(message = "supplier_id must be positive")
+    private Long supplierId;
 }
+

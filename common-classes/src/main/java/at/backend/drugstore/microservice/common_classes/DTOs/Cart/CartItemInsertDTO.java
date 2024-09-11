@@ -16,8 +16,8 @@ public class CartItemInsertDTO {
     @JsonProperty("product_id")
     private Long productId;
 
-    @JsonProperty("quantity")
-    @NotNull(message = "quantity is obligatory")
-    @Positive(message = "quantity must be positive")
+    @JsonProperty("productQuantity")
+    @NotNull(message = "productQuantity is obligatory")
+    @Positive(message = "productQuantity must be positive")
     private int quantity;
 }

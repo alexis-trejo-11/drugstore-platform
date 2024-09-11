@@ -30,7 +30,7 @@ public class Afterward {
     @Column(name = "product_price")
     private BigDecimal productPrice;
 
-    @Column(name = "quantity")
+    @Column(name = "productQuantity")
     private int quantity;
 
     @Column(name = "item_total")

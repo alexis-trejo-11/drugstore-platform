@@ -81,6 +81,18 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+tasks.named('bootRun') {
+	jvmArgs = [
+			'-Xms2g',
+			'-Xmx4g',
+			'-XX:MaxMetaspaceSize=256m',
+			'-XX:+UseG1GC',
+			'-XX:MaxGCPauseMillis=200',
+			'-XX:+TieredCompilation',
+			'-XX:CompileThreshold=10000'
+	]
+}
+
 bootJar {
 	archiveFileName = 'product-service.jar'
 }

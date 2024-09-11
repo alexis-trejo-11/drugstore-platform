@@ -25,5 +25,8 @@ public interface ProductMapper {
     @Mapping(target = "subcategory", ignore = true)
     @Mapping(target = "brand", ignore = true)
     @Mapping(target = "supplier", ignore = true)
+    @Mapping(target = "routeOfAdministration", source = "routeOfAdministration")
+    @Mapping(target = "productPresentation", source = "productPresentation")
+    @Mapping(target = "productType", source = "productType")
     Product insertDtoToProduct(ProductInsertDTO productInsertDTO);
 }

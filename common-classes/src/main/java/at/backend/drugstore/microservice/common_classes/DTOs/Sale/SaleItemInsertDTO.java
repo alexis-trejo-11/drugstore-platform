@@ -10,6 +10,6 @@ public class SaleItemInsertDTO {
     @JsonProperty("product_id")
     private Long productId;
 
-    @JsonProperty("quantity")
+    @JsonProperty("productQuantity")
     private Integer quantity;
 }

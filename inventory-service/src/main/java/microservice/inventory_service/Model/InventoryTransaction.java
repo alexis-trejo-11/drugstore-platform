@@ -1,49 +1,45 @@
 package microservice.inventory_service.Model;
 
-
-import at.backend.drugstore.microservice.common_classes.DTOs.Inventory.InventoryTransactionInsertDTO;
+import at.backend.drugstore.microservice.common_classes.DTOs.Inventory.TransactionType;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
-import java.util.Date;
 
-
-@Entity
-@Table(name = "inventory_transaction")
 @Data
 @NoArgsConstructor
+@Entity
+@Table(name = "inventory_transactions")
 public class InventoryTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "transaction_type")
-    private String transactionType;
+    @ManyToOne
+    @JoinColumn(name = "inventory_item_id", nullable = false)
+    private InventoryItem inventoryItem;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "transaction_type", nullable = false)
+    private TransactionType transactionType;
+
+    @Column(nullable = false)
     private int quantity;
 
-    private Date date;
+    @Column(name = "transaction_date")
+    private LocalDateTime transactionDate;
 
+    @Column(length = 200)
+    private String notes;
+
+    @Column(name = "supplier_id")
+    private Long supplierId;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    // Relationships
-    @ManyToOne
-    @JoinColumn(name = "inventory_id")
-    private Inventory inventory;
-
-    @Column(name = "employee_id")
-    private Long employeeId;
-
-    public InventoryTransaction(InventoryTransactionInsertDTO inventoryTransactionInsertDTO, Long employeeId) {
-        this.transactionType = inventoryTransactionInsertDTO.getTransactionType();
-        this.quantity = inventoryTransactionInsertDTO.getQuantity();
-        this.date = inventoryTransactionInsertDTO.getDate();
-        this.employeeId = inventoryTransactionInsertDTO.getEmployeeId();
-        this.createdAt = LocalDateTime.now();
-        this.employeeId = employeeId;
-
-    }
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }
+

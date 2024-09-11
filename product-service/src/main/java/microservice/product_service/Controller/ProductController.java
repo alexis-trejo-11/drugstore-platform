@@ -207,4 +207,10 @@ public class ProductController {
         log.info("Product deleted successfully for ID: {}", productId);
         return ResponseEntity.ok(new ResponseWrapper<>(true, null, "Product deleted successfully", HttpStatus.OK.value()));
     }
+
+    // To Validate an Entry of Product in Another Services
+    @GetMapping("/validate/{productId}")
+    public boolean validateExisitingProduct(@PathVariable Long productId) {
+        return productService.validateExisitingProduct(productId);
+    }
 }

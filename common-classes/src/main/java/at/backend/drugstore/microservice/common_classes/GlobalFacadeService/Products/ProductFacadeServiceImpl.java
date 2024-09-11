@@ -80,6 +80,22 @@ public class ProductFacadeServiceImpl implements ProductFacadeService {
         });
     }
 
+    @Override
+    public CompletableFuture<Boolean> validateExistingProduct(Long productId) {
+        String url = productServiceUrlProvider.get() + "/v1/drugstore/products/validate/" + productId;
+        return CompletableFuture.supplyAsync(() -> {
+            ResponseEntity<Boolean> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    Boolean.class
+            );
+
+            return response.getBody();
+        });
+    }
+
+
     private HttpHeaders createJsonHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

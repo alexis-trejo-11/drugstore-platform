@@ -13,13 +13,13 @@ public class ModelTransformer {
         productDTO.setName(product.getName());
         productDTO.setImage(product.getImage());
         productDTO.setPrice(product.getPrice());
-        productDTO.setProductType(valueOf(product.getProductType()));
+        productDTO.setProductType(product.getProductType());
         productDTO.setUpc(product.getUpc());
-        productDTO.setProductPresentation(valueOf(product.getProductPresentation()));
+        productDTO.setProductPresentation(product.getProductPresentation());
         productDTO.setContent(product.getContent());
         productDTO.setPackageDimension(product.getPackageDimension());
         productDTO.setPackageDimension(product.getPackageDimension());
-        productDTO.setRouteOfAdministration(valueOf(product.getRouteOfAdministration()));
+        productDTO.setRouteOfAdministration(product.getRouteOfAdministration());
         productDTO.setAgeUsage(product.getAgeUsage());
         productDTO.setPrescriptionRequired(product.isPrescriptionRequired());
         productDTO.setCategory(product.getCategory().getName());
