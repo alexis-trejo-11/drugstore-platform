@@ -149,4 +149,9 @@ public class EmployeeController {
 
         return ResponseEntity.ok(ResponseWrapper.ok("Employee", "Delete"));
     }
+
+    @GetMapping("/validate/{employeeId}")
+    public boolean validateExistingEmployee(@PathVariable Long employeeId) {
+        return employeeService.validateExisitingEmployee(employeeId);
+    }
 }

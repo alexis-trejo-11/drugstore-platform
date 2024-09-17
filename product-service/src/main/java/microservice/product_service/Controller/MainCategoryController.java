@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import microservice.product_service.Service.ValidateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +25,13 @@ import jakarta.validation.Valid;
 @RequestMapping("/v1/drugstore/products/main-categories")
 public class MainCategoryController {
 
+    private final ValidateService validateService;
     private final MainCategoryService mainCategoryService;
 
     @Autowired
-    public MainCategoryController(MainCategoryService mainCategoryService) {
+    public MainCategoryController(ValidateService validateService,
+                                  MainCategoryService mainCategoryService) {
+        this.validateService = validateService;
         this.mainCategoryService = mainCategoryService;
     }
 
@@ -36,21 +40,21 @@ public class MainCategoryController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved main category"),
             @ApiResponse(responseCode = "404", description = "Main category not found")
     })
-    @GetMapping("/{mainCategoryID}")
-    public ResponseEntity<ResponseWrapper<MainCategoryDTO>> getMainCategoryById(@Parameter(description = "ID of the main category to be fetched") @PathVariable Long mainCategoryID,
+    @GetMapping("/{mainCategoryId}")
+    public ResponseEntity<ResponseWrapper<MainCategoryDTO>> getMainCategoryById(@PathVariable Long mainCategoryId,
                                                                                 @RequestParam(defaultValue = "0") int page,
                                                                                 @RequestParam(defaultValue = "10") int size) {
-        boolean isMainCategoryExisting = mainCategoryService.validateExistingMainCategory(mainCategoryID);
+        boolean isMainCategoryExisting = validateService.validateExistingMainCategory(mainCategoryId);
         if (!isMainCategoryExisting) {
-            log.warn("Main category not found for ID: {}", mainCategoryID);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(false, null, "Main Category With ID " + mainCategoryID.toString() + " Not Found.", 404));
+            log.warn("getMainCategoryById -> main category not found for ID: {}", mainCategoryId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Main Category", "Id"));
         }
 
         Pageable pageable = PageRequest.of(page, size);
-        MainCategoryDTO mainCategoryDTO = mainCategoryService.getMainCategoryByIdWithCategoryAndSubCategory(mainCategoryID, pageable);
-        log.info("Main category found for ID: {}", mainCategoryID);
-        return ResponseEntity.ok(new ResponseWrapper<>(true, mainCategoryDTO, "Main Category Successfully Fetched.", 200));
+        MainCategoryDTO mainCategoryDTO = mainCategoryService.getMainCategoryByIdWithCategoryAndSubCategory(mainCategoryId, pageable);
+
+        log.info("Main category found for ID: {}", mainCategoryId);
+        return ResponseEntity.ok(ResponseWrapper.found(mainCategoryDTO, "Main Category"));
     }
 
     @Operation(summary = "Get Main Category with Products by ID", description = "Fetches a main category along with its products by its ID")
@@ -58,32 +62,31 @@ public class MainCategoryController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved main category with products"),
             @ApiResponse(responseCode = "404", description = "Main category not found")
     })
-    @GetMapping("/{mainCategoryID}/products")
-    public ResponseEntity<ResponseWrapper<MainCategoryDTO>> getMainCategoryByIdWithProducts(@Parameter(description = "ID of the main category to be fetched along with its products") @PathVariable Long mainCategoryID,
+    @GetMapping("/{mainCategoryId}/products")
+    public ResponseEntity<ResponseWrapper<MainCategoryDTO>> getMainCategoryByIdWithProducts(@PathVariable Long mainCategoryId,
                                                                                             @RequestParam(defaultValue = "0") int page,
                                                                                             @RequestParam(defaultValue = "10") int size) {
-        boolean isMainCategoryExisting = mainCategoryService.validateExistingMainCategory(mainCategoryID);
+        boolean isMainCategoryExisting = validateService.validateExistingMainCategory(mainCategoryId);
         if (!isMainCategoryExisting) {
-            log.warn("Main category not found for ID: {}", mainCategoryID);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(false, null, "Main Category With ID " + mainCategoryID.toString() + " Not Found.", 404));
+            log.warn("getMainCategoryByIdWithProducts -> main category not found for ID: {}", mainCategoryId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Main Category", "Id"));
         }
 
         Pageable pageable = PageRequest.of(page, size);
-        MainCategoryDTO mainCategoryDTO = mainCategoryService.getMainCategoryByIdWithProducts(mainCategoryID, pageable);
-        log.info("Main category with products found for ID: {}", mainCategoryID);
+        MainCategoryDTO mainCategoryDTO = mainCategoryService.getMainCategoryByIdWithProducts(mainCategoryId, pageable);
 
-        return ResponseEntity.ok(new ResponseWrapper<>(true, mainCategoryDTO, "Main Category Successfully Fetched.", 200));
+        log.info("getMainCategoryByIdWithProducts -> main category with products found for ID: {}", mainCategoryId);
+        return ResponseEntity.ok(ResponseWrapper.found(mainCategoryDTO, "Main Category"));
     }
 
     @Operation(summary = "Insert a new Main Category", description = "Inserts a new main category into the system")
     @ApiResponse(responseCode = "200", description = "Successfully inserted main category")
     @PostMapping
-    public ResponseEntity<String> insertCategory(@Parameter(description = "Details of the main category to be inserted") @Valid @RequestBody MainCategoryInsertDTO mainCategoryInsertDTO) {
+    public ResponseEntity<ResponseWrapper<Void>> insertCategory(@Valid @RequestBody MainCategoryInsertDTO mainCategoryInsertDTO) {
         mainCategoryService.insertCategory(mainCategoryInsertDTO);
-        log.info("Main category inserted successfully: {}", mainCategoryInsertDTO.getName());
 
-        return ResponseEntity.ok("Category inserted successfully");
+        log.info("insertCategory -> Main category inserted successfully: {}", mainCategoryInsertDTO.getName());
+        return ResponseEntity.ok(ResponseWrapper.created("Category"));
     }
 
     @Operation(summary = "Update an existing Main Category", description = "Updates an existing main category")
@@ -92,18 +95,17 @@ public class MainCategoryController {
             @ApiResponse(responseCode = "404", description = "Main category not found")
     })
     @PutMapping
-    public ResponseEntity<ResponseWrapper<Void>> updateMainCategory(@Parameter(description = "Updated details of the main category") @Valid @RequestBody MainCategoryUpdateDTO mainCategoryUpdateDTO) {
-        boolean isMainCategoryExisting = mainCategoryService.validateExistingMainCategory(mainCategoryUpdateDTO.getId());
+    public ResponseEntity<ResponseWrapper<Void>> updateMainCategory(@Valid @RequestBody MainCategoryUpdateDTO mainCategoryUpdateDTO) {
+        boolean isMainCategoryExisting = validateService.validateExistingMainCategory(mainCategoryUpdateDTO.getId());
         if (!isMainCategoryExisting) {
-            log.warn("Main category not found for ID: {}", mainCategoryUpdateDTO.getId());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(false, null, "Main Category With ID " + mainCategoryUpdateDTO.getId().toString() + " Not Found.", 404));
+            log.warn("updateMainCategory -> main category not found for ID: {}", mainCategoryUpdateDTO.getId());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.ok("Main Category", "Update"));
         }
 
         mainCategoryService.updateMainCategory(mainCategoryUpdateDTO);
         log.info("Main category updated successfully: {}", mainCategoryUpdateDTO.getId());
 
-        return ResponseEntity.ok(new ResponseWrapper<>(true, null, "Main Category Successfully Updated.", 200));
+        return ResponseEntity.ok(ResponseWrapper.ok("Main Category", "Update"));
     }
 
     @Operation(summary = "Delete a Main Category", description = "Deletes a main category by its ID")
@@ -111,18 +113,18 @@ public class MainCategoryController {
             @ApiResponse(responseCode = "200", description = "Successfully deleted main category"),
             @ApiResponse(responseCode = "404", description = "Main category not found")
     })
-    @DeleteMapping("/{mainCategoryID}")
-    public ResponseEntity<ResponseWrapper<Void>> deleteCategory(@Parameter(description = "ID of the main category to be deleted") @PathVariable Long mainCategoryID) {
-        boolean isMainCategoryExisting = mainCategoryService.validateExistingMainCategory(mainCategoryID);
+    @DeleteMapping("/{mainCategoryId}")
+    public ResponseEntity<ResponseWrapper<Void>> deleteCategory(@PathVariable Long mainCategoryId) {
+        boolean isMainCategoryExisting = validateService.validateExistingMainCategory(mainCategoryId);
         if (!isMainCategoryExisting) {
-            log.warn("Main category not found for ID: {}", mainCategoryID);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(false, null, "Main Category With ID " + mainCategoryID.toString() + " Not Found.", 404));
+            log.warn("deleteCategory -> main category not found for ID: {}", mainCategoryId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Main Category", "Id"));
         }
 
-        mainCategoryService.deleteMainCategoryById(mainCategoryID);
-        log.info("Main category deleted successfully, ID: {}", mainCategoryID);
+        mainCategoryService.deleteMainCategoryById(mainCategoryId);
+        log.info("deleteCategory -> main category deleted successfully, ID: {}", mainCategoryId);
 
-        return ResponseEntity.ok(new ResponseWrapper<>(true, null, "Main Category Successfully Deleted.", 200));
+        return ResponseEntity.ok(ResponseWrapper.ok("Main Category", "Delete"));
+
     }
 }

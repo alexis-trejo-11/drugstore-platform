@@ -1,6 +1,8 @@
-package microservice.inventory_service.Model;
+package microservice.inventory_service.Utils;
 
 import jakarta.persistence.*;
+import microservice.inventory_service.Model.InventoryItem;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,5 +28,6 @@ public class StockAlert {
 
     public enum AlertType {
         LOW_STOCK, EXPIRED, NEAR_EXPIRY
-    }}
+    }
+}
 

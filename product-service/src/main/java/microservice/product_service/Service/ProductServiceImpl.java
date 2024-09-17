@@ -119,10 +119,4 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(Long productId) {
             productRepository.deleteById(productId);
     }
-
-    @Override
-    @Cacheable(value = "validateExisitingProduct", key = "#productId")
-    public boolean validateExisitingProduct(Long productId) {
-         return productRepository.findById(productId).isPresent();
-    }
 }

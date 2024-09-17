@@ -13,8 +13,6 @@ public interface SubcategoryService {
     SubcategoryDTO getSubCategoryByIdWithProducts(Long subcategoryId, Pageable pageable);
     void insertCategory(SubCategoryInsertDTO subCategoryInsertDTO);
     void updateCategory(SubCategoryUpdateDTO subCategoryUpdateDTO);
-    void deleteCategory(Long subcategoryId);
-    boolean validateExistingSubCategory(Long subcategoryID);
-}
+    void deleteCategory(Long subcategoryId);}
 
 

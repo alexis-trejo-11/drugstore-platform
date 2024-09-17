@@ -151,10 +151,4 @@ public class MainCategoryServiceImpl implements MainCategoryService {
             mainCategoryRepository.deleteById(mainCategoryID);
     }
 
-    @Override
-    public boolean validateExistingMainCategory(Long mainCategoryID) {
-        Optional<MainCategory> optionalMainCategory = mainCategoryRepository.findById(mainCategoryID);
-        return optionalMainCategory.isPresent();
-
-    }
 }

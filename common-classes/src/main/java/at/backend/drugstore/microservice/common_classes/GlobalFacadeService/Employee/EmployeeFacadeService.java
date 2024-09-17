@@ -10,4 +10,6 @@ import java.util.concurrent.CompletableFuture;
 public interface EmployeeFacadeService {
     CompletableFuture<Result<EmployeeDTO>> getEmployeeById(Long employeeId);
     CompletableFuture<Result<EmployeeDTO>> getEmployeeForUserCreation(RequestEmployeeUser requestEmployeeUser);
+    CompletableFuture<Boolean> validateExistingEmployee(Long employeeId);
+
 }

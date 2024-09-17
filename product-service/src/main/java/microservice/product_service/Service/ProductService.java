@@ -22,5 +22,4 @@ public interface ProductService {
     Result<Void> createProduct(ProductInsertDTO productInsertDTO);
     Result<Void> updateProduct(ProductUpdateDTO productUpdateDTO);
     void deleteProduct(Long productId);
-    boolean validateExisitingProduct(Long productId);
     }

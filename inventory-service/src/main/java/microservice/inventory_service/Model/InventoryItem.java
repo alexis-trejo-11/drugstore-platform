@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -24,9 +25,6 @@ public class InventoryItem {
     @Column(name = "batch_number", length = 50)
     private String batchNumber;
 
-    @Column(name = "expiration_date")
-    private LocalDateTime expirationDate;
-
     @Column(length = 50)
     private String location;
 
@@ -35,6 +33,9 @@ public class InventoryItem {
 
     @Column(name = "optimal_stock_level")
     private Integer optimalStockLevel;
+
+    @OneToMany(mappedBy = "inventoryItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<InventoryTransaction> inventoryTransactions;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

@@ -11,6 +11,8 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 public class InventoryTransactionDTO {
+    @JsonProperty("inventory_transaction_id")
+    private Long id;
 
     @JsonProperty("inventory_item_id")
     private Long inventoryItemId;
@@ -30,4 +32,5 @@ public class InventoryTransactionDTO {
 
     @JsonProperty("supplier_id")
     private Long supplierId;
+
 }

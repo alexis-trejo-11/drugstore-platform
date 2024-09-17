@@ -25,17 +25,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final CompanyHelper companyHelper;
-    private final PositionRepository positionRepository;
     private final EmployeeMapper employeeMapper;
 
     @Autowired
     public EmployeeServiceImpl(EmployeeRepository employeeRepository,
                                CompanyHelper companyHelper,
-                               PositionRepository positionRepository,
                                EmployeeMapper employeeMapper) {
         this.employeeRepository = employeeRepository;
         this.companyHelper = companyHelper;
-        this.positionRepository = positionRepository;
         this.employeeMapper = employeeMapper;
     }
 
@@ -67,9 +64,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
-    @Cacheable(value = "employeeById", key = "#id")
-    public EmployeeDTO getEmployeeById(Long id) {
-            Employee employee = employeeRepository.findById(id).orElse(null);
+    @Cacheable(value = "employeeById", key = "#employeeId")
+    public EmployeeDTO getEmployeeById(Long employeeId) {
+            Employee employee = employeeRepository.findById(employeeId).orElse(null);
             return employeeMapper.employeeToDTO(employee);
     }
 
@@ -111,6 +108,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Cacheable(value = "validateExisitingEmployee", key = "#employeeId")
     public boolean validateExisitingEmployee(Long employeeId) {
         return employeeRepository.findById(employeeId).isPresent();
     }

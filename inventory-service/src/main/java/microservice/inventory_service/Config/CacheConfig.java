@@ -16,13 +16,23 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
-                "inventoriesByProductId",
-                "productCache",
-                "productStockCache"
+                "transactionSummary",
+                "inventoryItemsByProduct",
+                "inventoryItems",
+                "inventoryItemsByProduct",
+                "inventorySummary",
+                "transactionsBySupplier",
+                "transactionsByStatus",
+                "nearToExpireTransactions",
+                "transactionById",
+                "validateInventoryItems",
+                "validateInventoryTransactions",
+                "validateProduct",
+                "validateSupplier"
         );
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(100)
-                .expireAfterAccess(8, TimeUnit.HOURS));
+                .expireAfterAccess(60, TimeUnit.MINUTES));
         cacheManager.setAllowNullValues(false);
         cacheManager.setAsyncCacheMode(true);
         return cacheManager;
