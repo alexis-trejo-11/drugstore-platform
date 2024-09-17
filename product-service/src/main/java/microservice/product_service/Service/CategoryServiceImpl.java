@@ -144,11 +144,4 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Long categoryId) {
             categoryRepository.deleteById(categoryId);
     }
-
-    @Override
-    public boolean validateExistingCategory(Long categoryID) {
-        Optional<Category> optionalCategory = categoryRepository.findById(categoryID);
-        return optionalCategory.isPresent();
-    }
-
 }

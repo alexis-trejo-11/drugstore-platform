@@ -16,7 +16,7 @@ public class InventoryTransaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "inventory_item_id", nullable = false)
     private InventoryItem inventoryItem;
 
@@ -30,11 +30,17 @@ public class InventoryTransaction {
     @Column(name = "transaction_date")
     private LocalDateTime transactionDate;
 
+    @Column(name = "expiration_date")
+    private LocalDateTime expirationDate;
+
     @Column(length = 200)
     private String notes;
 
     @Column(name = "supplier_id")
     private Long supplierId;
+
+    @Column(name = "employee_id")
+    private Long employeeId;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

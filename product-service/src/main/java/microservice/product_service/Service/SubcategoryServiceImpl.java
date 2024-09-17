@@ -99,11 +99,5 @@ public class SubcategoryServiceImpl implements SubcategoryService {
 
         subcategoryRepository.deleteById(subcategoryID);
     }
-
-    @Override
-    public boolean validateExistingSubCategory(Long subcategoryID) {
-        Optional<Subcategory> optionalSubcategory = subcategoryRepository.findById(subcategoryID);
-        return optionalSubcategory.isPresent();
-    }
 }
 

@@ -12,5 +12,4 @@ public interface SupplierService {
     Page<SupplierDTO> getAllSuppliersSortedByName(Boolean sortedAsc, Pageable pageable);
     void updateSupplier(SupplierDTO supplierDTO);
     void deleteSupplier(Long supplierId);
-    boolean validateExistingSupplier(Long supplierId);
 }

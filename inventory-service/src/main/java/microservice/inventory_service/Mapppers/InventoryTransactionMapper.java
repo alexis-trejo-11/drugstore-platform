@@ -16,6 +16,11 @@ public interface InventoryTransactionMapper {
     @Mapping(target = "inventoryItem", ignore = true)
     InventoryTransaction insertDtoToEntity(InventoryTransactionInsertDTO transactionInsertDTO);
 
+    @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "inventoryItem", ignore = true)
+    @Mapping(target = "id",  source = "inventoryTransactionId")
+    InventoryTransaction updateDtoToEntity(InventoryTransactionInsertDTO transactionInsertDTO, Long inventoryTransactionId);
+
     @Mapping(target = "inventoryItemId", source = "inventoryTransaction.inventoryItem.id")
     @Mapping(target = "transactionType", source = "transactionType")
     InventoryTransactionDTO entityToDTO(InventoryTransaction inventoryTransaction);

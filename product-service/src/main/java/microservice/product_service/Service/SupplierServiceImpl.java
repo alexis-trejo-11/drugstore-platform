@@ -92,10 +92,6 @@ public class SupplierServiceImpl implements SupplierService {
             supplierRepository.delete(supplier);
     }
 
-    @Override
-    public boolean validateExistingSupplier(Long supplierId) {
-        Optional<Supplier> optionalSupplier = supplierRepository.findById(supplierId);
-        return optionalSupplier.isPresent();
-    }
+
 }
 

@@ -33,7 +33,8 @@ public class CacheConfig {
                 "supplierById",
                 "supplierByName",
                 "allSuppliersSortedByName",
-                "validateExisitingProduct"
+                "validateExisitingProduct",
+                "validateExistingSupplier"
         );        cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(100)
                 .expireAfterAccess(8, TimeUnit.HOURS));

@@ -40,6 +40,7 @@ public class CacheInitializer {
         Cache supplierByNameCache = cacheManager.getCache("supplierByName");
         Cache allSuppliersSortedByNameCache = cacheManager.getCache("allSuppliersSortedByName");
         Cache validateExisitingProductCache = cacheManager.getCache("validateExisitingProduct");
+        Cache validateExisitingSupplierCache = cacheManager.getCache("validateExisitingSupplier");
 
         if (categoryWithProductsCache != null) {
             List<Category> categories = productRepository.findAllCategories();
@@ -125,6 +126,11 @@ public class CacheInitializer {
             List<Product> products = productRepository.findAll();
             products.forEach(product -> validateExisitingProductCache.put(product.getId(), Boolean.TRUE));
         }
+
+        if (validateExisitingSupplierCache != null) {
+            List<Supplier> suppliers = productRepository.findAllSuppliers();
+            suppliers.forEach(supplier -> validateExisitingSupplierCache.put(supplier.getId(), Boolean.TRUE));
+        }
     }
 
     private Object fetchCategoryWithProducts(Category category) {
@@ -132,12 +138,10 @@ public class CacheInitializer {
     }
 
     private Object fetchCategoryWithSubcategories(Category category) {
-        // Implement method to fetch categories with subcategories
         return new Object();
     }
 
     private Object fetchCategoryWithSubcategoriesAndProducts(Category category) {
-        // Implement method to fetch categories with subcategories and products
         return new Object();
     }
 

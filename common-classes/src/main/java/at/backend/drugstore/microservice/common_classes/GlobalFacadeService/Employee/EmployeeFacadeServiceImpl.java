@@ -88,4 +88,18 @@ public class EmployeeFacadeServiceImpl implements EmployeeFacadeService {
         });
     }
 
+    @Override
+    public CompletableFuture<Boolean> validateExistingEmployee(Long employeeId) {
+        return CompletableFuture.supplyAsync(() -> {
+            String url = employeeServiceUrlProvider.get() + "/v1/drugstore/employees/validate/" + employeeId;
+            ResponseEntity<Boolean> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    Boolean.class
+            );
+            return response.getBody();
+        });
+    }
+
 }

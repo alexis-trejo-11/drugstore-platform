@@ -15,7 +15,6 @@ public interface CategoryService {
     Page<CategoryDTO> findCategoryByIdWithSubCategoriesAndProducts(Long categoryID, Pageable pageable);
 
     Result<Void> insertCategory(CategoryInsertDTO categoryInsertDTO);
-    boolean validateExistingCategory(Long categoryID);
     Result<Void> updateCategory(CategoryUpdateDTO categoryUpdateDTO);
     void deleteCategory(Long categoryId);
     }

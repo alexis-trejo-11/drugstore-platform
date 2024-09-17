@@ -10,4 +10,5 @@ public interface ProductFacadeService {
     CompletableFuture<List<ProductDTO>> getProductsByIds(List<Long> productIds);
     CompletableFuture<Result<ProductDTO>> getProductById(Long productId);
     CompletableFuture<Boolean> validateExistingProduct(Long productId);
+    CompletableFuture<Boolean> validateExistingSupplier(Long supplierId);
 }

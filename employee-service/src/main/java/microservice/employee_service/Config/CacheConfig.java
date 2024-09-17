@@ -19,7 +19,8 @@ public class CacheConfig {
                 "positionById",
                 "positionsByPage",
                 "employeesByPage",
-                "employeeById"
+                "employeeById",
+                "validateExisitingEmployee"
         );        cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(100)
                 .expireAfterAccess(8, TimeUnit.HOURS));

@@ -6,6 +6,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Product.Category.Su
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
 import microservice.product_service.Service.SubcategoryService;
+import microservice.product_service.Service.ValidateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,21 +31,24 @@ import java.util.List;
 public class SubcategoryController {
 
     private final SubcategoryService subcategoryService;
+    private final ValidateService validateService;
 
     @Autowired
-    public SubcategoryController(SubcategoryService subcategoryService) {
+    public SubcategoryController(SubcategoryService subcategoryService, ValidateService validateService) {
         this.subcategoryService = subcategoryService;
+        this.validateService = validateService;
     }
 
     @Operation(summary = "Get All Subcategories", description = "Retrieves all subcategories")
     @ApiResponse(responseCode = "200", description = "All subcategories retrieved successfully",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = SubcategoryDTO.class)))
     @GetMapping
-    public ResponseEntity<Page<SubcategoryDTO>> getAllSubCategories(@RequestParam(defaultValue = "0") int page,
-                                                                    @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<ResponseWrapper<Page<SubcategoryDTO>>> getAllSubCategories(@RequestParam(defaultValue = "0") int page,
+                                                                                     @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<SubcategoryDTO> subcategoryReturnDTOS = subcategoryService.getAllSubCategories(pageable);
-        return ResponseEntity.ok(subcategoryReturnDTOS);
+
+        return ResponseEntity.ok(ResponseWrapper.found(subcategoryReturnDTOS, "Subcategory"));
     }
 
     @Operation(summary = "Get Subcategory by ID", description = "Fetches a subcategory by its ID")
@@ -55,26 +59,27 @@ public class SubcategoryController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @GetMapping("/{subcategoryID}")
-    public ResponseEntity<ResponseWrapper<SubcategoryDTO>> getSubCategoryById(@Parameter(description = "ID of the subcategory to be fetched") @PathVariable Long subcategoryID,
+    public ResponseEntity<ResponseWrapper<SubcategoryDTO>> getSubCategoryById(@PathVariable Long subcategoryID,
                                                                               @RequestParam(defaultValue = "0") int page,
                                                                               @RequestParam(defaultValue = "10") int size) {
-        boolean isSubcategoryExisting = subcategoryService.validateExistingSubCategory(subcategoryID);
+        boolean isSubcategoryExisting = validateService.validateExistingSubCategory(subcategoryID);
         if (!isSubcategoryExisting) {
             log.warn("Subcategory not found for ID: {}", subcategoryID);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "Subcategory with ID " + subcategoryID.toString() + " Not Found.", 404));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Subcategory", "Id"));
         }
 
         Pageable pageable = PageRequest.of(page, size);
         SubcategoryDTO subcategoryReturnDTO = subcategoryService.getSubCategoryByIdWithProducts(subcategoryID, pageable);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseWrapper<>(true, subcategoryReturnDTO, "Subcategory successfully fetched", 200));
+
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.found(subcategoryReturnDTO, "Subcategory"));
     }
 
     @Operation(summary = "Insert a new Subcategory", description = "Inserts a new subcategory into the system")
     @ApiResponse(responseCode = "200", description = "Subcategory inserted successfully")
     @PostMapping
-    public ResponseEntity<String> insertCategory(@Parameter(description = "Details of the subcategory to be inserted") @Valid @RequestBody SubCategoryInsertDTO subCategoryInsertDTO) {
+    public ResponseEntity<ResponseWrapper<Void>> insertCategory(@Valid @RequestBody SubCategoryInsertDTO subCategoryInsertDTO) {
         subcategoryService.insertCategory(subCategoryInsertDTO);
-        return ResponseEntity.ok("Subcategory inserted successfully");
+        return ResponseEntity.ok(ResponseWrapper.created("Subcategory"));
     }
 
     @Operation(summary = "Update Subcategory", description = "Updates an existing subcategory by its ID")
@@ -85,16 +90,16 @@ public class SubcategoryController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @PutMapping("/{subcategoryID}")
-    public ResponseEntity<ResponseWrapper<Void>> updateCategory(@Parameter(description = "ID of the subcategory to be updated") @PathVariable Long subcategoryID,
-                                                                @Parameter(description = "Updated details of the subcategory") @Valid @RequestBody SubCategoryUpdateDTO subCategoryUpdateDTO) {
-        boolean isSubcategoryExisting = subcategoryService.validateExistingSubCategory(subCategoryUpdateDTO.getId());
+    public ResponseEntity<ResponseWrapper<Void>> updateCategory(@PathVariable Long subcategoryID,
+                                                                @Valid @RequestBody SubCategoryUpdateDTO subCategoryUpdateDTO) {
+        boolean isSubcategoryExisting = validateService.validateExistingSubCategory(subCategoryUpdateDTO.getId());
         if (!isSubcategoryExisting) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "Subcategory with ID " + subcategoryID.toString() + " Not Found.", 404));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Subcategory", "Id"));
         }
 
         subcategoryService.updateCategory(subCategoryUpdateDTO);
 
-        return ResponseEntity.ok(new ResponseWrapper<>(true, null, "Subcategory Successfully Updated", 200));
+        return ResponseEntity.ok(ResponseWrapper.ok("Subcategory", "Update"));
     }
 
     @Operation(summary = "Delete Subcategory", description = "Deletes a subcategory by its ID")
@@ -105,14 +110,14 @@ public class SubcategoryController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @DeleteMapping("/{subcategoryID}")
-    public ResponseEntity<ResponseWrapper<Void>> deleteCategory(@Parameter(description = "ID of the subcategory to be deleted") @PathVariable Long subcategoryID) {
-        boolean isSubcategoryExisting = subcategoryService.validateExistingSubCategory(subcategoryID);
+    public ResponseEntity<ResponseWrapper<Void>> deleteCategory(@PathVariable Long subcategoryID) {
+        boolean isSubcategoryExisting = validateService.validateExistingSubCategory(subcategoryID);
         if (!isSubcategoryExisting) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "Subcategory with ID " + subcategoryID.toString() + " Not Found.", 404));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Subcategory", "Id"));
         }
 
         subcategoryService.deleteCategory(subcategoryID);
 
-        return ResponseEntity.ok(new ResponseWrapper<>(true, null, "Subcategory Successfully Deleted", 200));
+        return ResponseEntity.ok(ResponseWrapper.ok("Subcategory", "Delete"));
     }
 }

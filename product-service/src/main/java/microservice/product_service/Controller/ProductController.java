@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import lombok.extern.slf4j.Slf4j;
 import microservice.product_service.Service.ProductService;
+import microservice.product_service.Service.ValidateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
@@ -36,10 +36,12 @@ import java.util.concurrent.CompletableFuture;
 public class ProductController {
 
     private final ProductService productService;
+    private final ValidateService validateService;
 
     @Autowired
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ValidateService validateService) {
         this.productService = productService;
+        this.validateService = validateService;
     }
 
     @Operation(summary = "Retrieve products by IDs", description = "Fetch products by a list of IDs")
@@ -50,7 +52,7 @@ public class ProductController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @PostMapping("/by-ids")
-    public ResponseEntity<ResponseWrapper<List<ProductDTO>>> getProductsById(@Parameter(description = "List of product IDs") @RequestBody Map<String, List<Long>> request) {
+    public ResponseEntity<ResponseWrapper<List<ProductDTO>>> getProductsById(@RequestBody Map<String, List<Long>> request) {
         List<Long> productIds = request.get("productIds");
         List<ProductDTO> productDTOS = productService.getProductsById(productIds);
 
@@ -66,7 +68,7 @@ public class ProductController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @GetMapping("/{productId}")
-    public ResponseEntity<ResponseWrapper<ProductDTO>> getProductById(@Parameter(description = "ID of the product") @PathVariable Long productId) {
+    public ResponseEntity<ResponseWrapper<ProductDTO>> getProductById(@PathVariable Long productId) {
         ProductDTO productDTO =  productService.getProductById(productId);
 
         if (productDTO == null) {
@@ -99,7 +101,7 @@ public class ProductController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @GetMapping("/by-supplier/{supplierId}")
-    public ResponseEntity<ResponseWrapper<Page<ProductDTO>>> getProductsBySupplier(@Parameter(description = "ID of the supplier") @PathVariable Long supplierId,
+    public ResponseEntity<ResponseWrapper<Page<ProductDTO>>> getProductsBySupplier(@PathVariable Long supplierId,
                                                                                     @RequestParam(defaultValue = "0") int page,
                                                                                     @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -115,9 +117,9 @@ public class ProductController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @GetMapping("/by-category/{categoryId}")
-    public ResponseEntity<ResponseWrapper<Page<ProductDTO>>> getProductsByCategoryId(@Parameter(description = "ID of the category") @PathVariable Long categoryId,
-                                                                                      @RequestParam(defaultValue = "0") int page,
-                                                                                      @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<ResponseWrapper<Page<ProductDTO>>> getProductsByCategoryId(@PathVariable Long categoryId,
+                                                                                     @RequestParam(defaultValue = "0") int page,
+                                                                                     @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<ProductDTO> productDTOS = productService.getProductsByCategoryId(categoryId,pageable);
 
@@ -131,7 +133,7 @@ public class ProductController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @GetMapping("/by-subcategory/{subcategoryId}")
-    public ResponseEntity<ResponseWrapper<Page<ProductDTO>>> findProductsBySubCategory(@Parameter(description = "ID of the subcategory") @PathVariable Long subcategoryId,
+    public ResponseEntity<ResponseWrapper<Page<ProductDTO>>> findProductsBySubCategory(@PathVariable Long subcategoryId,
                                                                                        @RequestParam(defaultValue = "0") int page,
                                                                                        @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -171,10 +173,10 @@ public class ProductController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @PutMapping("/{productId}")
-    public ResponseEntity<ResponseWrapper<Void>> updateProduct(@Parameter(description = "Product data to be updated") @Valid @RequestBody ProductUpdateDTO productUpdateDTO) {
-        boolean isProductExisitng = productService.validateExisitingProduct(productUpdateDTO.getId());
-        if (!isProductExisitng) {
-            log.warn("Failed to delete product for ID: {}", productUpdateDTO.getId());
+    public ResponseEntity<ResponseWrapper<Void>> updateProduct(@Valid @RequestBody ProductUpdateDTO productUpdateDTO) {
+        boolean isProductValidated = validateService.validateExisitingProduct(productUpdateDTO.getId());
+        if (!isProductValidated) {
+            log.warn("updateProduct -> failed to found product for ID: {}", productUpdateDTO.getId());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
         }
 
@@ -196,21 +198,15 @@ public class ProductController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class)))
     })
     @DeleteMapping("/{productId}")
-    public ResponseEntity<ResponseWrapper<Void>> deleteProduct(@Parameter(description = "ID of the product to be deleted") @PathVariable Long productId) {
-        boolean isProductExisitng = productService.validateExisitingProduct(productId);
-        if (!isProductExisitng) {
-            log.warn("Failed to delete product for ID: {}", productId);
+    public ResponseEntity<ResponseWrapper<Void>> deleteProduct(@PathVariable Long productId) {
+        boolean isProductValidated = validateService.validateExisitingProduct(productId);
+        if (!isProductValidated) {
+            log.warn("Failed to found product for ID: {}", productId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "Product not found", HttpStatus.NOT_FOUND.value()));
         }
 
         productService.deleteProduct(productId);
         log.info("Product deleted successfully for ID: {}", productId);
         return ResponseEntity.ok(new ResponseWrapper<>(true, null, "Product deleted successfully", HttpStatus.OK.value()));
-    }
-
-    // To Validate an Entry of Product in Another Services
-    @GetMapping("/validate/{productId}")
-    public boolean validateExisitingProduct(@PathVariable Long productId) {
-        return productService.validateExisitingProduct(productId);
     }
 }

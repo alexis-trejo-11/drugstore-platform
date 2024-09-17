@@ -44,7 +44,7 @@ public class ResponseWrapper<T> {
         return new ResponseWrapper<>(true, data, foundMsg, 200);
     }
 
-    public static <T> ResponseWrapper<T> ok(String entity, String action, T data) {
+    public static <T> ResponseWrapper<T> ok(T data, String entity, String action) {
         String notFoundMsg = entity  + " Successfully " + action + "d";
         return new ResponseWrapper<>(true, data, notFoundMsg, 200);
     }
