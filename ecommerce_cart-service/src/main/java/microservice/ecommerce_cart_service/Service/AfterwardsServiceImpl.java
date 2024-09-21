@@ -8,6 +8,7 @@ import microservice.ecommerce_cart_service.Model.Cart;
 import microservice.ecommerce_cart_service.Repository.AfterwardsRepository;
 import microservice.ecommerce_cart_service.Repository.CartRepository;
 import microservice.ecommerce_cart_service.Service.DomainService.AfterwardsDomainService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -48,14 +49,13 @@ public class AfterwardsServiceImpl implements AfterwardsService {
     @Override
     @Transactional
     public Result<Void> returnProductToCart(Long clientId, Long productId) {
+        List<Afterward> afterwards = afterwardsRepository.findByClientId(clientId);
+        Optional<Afterward> optionalAfterward = afterwards.stream()
+                .filter(afterward -> afterward.getProductId().equals(productId))
+                .findAny();
 
-            List<Afterward> afterwards = afterwardsRepository.findByClientId(clientId);
-            Optional<Afterward> optionalAfterward = afterwards.stream()
-                    .filter(afterward -> afterward.getProductId().equals(productId))
-                    .findAny();
-
-            Result<Afterward> result =  optionalAfterward.map(afterward -> new Result<>(true, afterward, null))
-                    .orElseGet(() -> Result.error("Item requested not found"));
+        Result<Afterward> result =  optionalAfterward.map(afterward -> new Result<>(true, afterward, null))
+                .orElseGet(() -> Result.error("Item requested not found"));
 
         if (!result.isSuccess()) {
             return Result.error(result.getErrorMessage());
@@ -69,17 +69,15 @@ public class AfterwardsServiceImpl implements AfterwardsService {
     @Override
     @Transactional
     public List<CartItemDTO> getAfterwardsByClientId(Long clientId) {
-            List<Afterward> afterwards = afterwardsRepository.findByClientId(clientId);
-
-
-            return afterwards.stream().map(afterwardMapper::entityToCartItemDTO).toList();
+        List<Afterward> afterwards = afterwardsRepository.findByClientId(clientId);
+        return afterwards.stream().map(afterwardMapper::entityToCartItemDTO).toList();
     }
 
     @Override
     @Transactional
-    public Optional<CartItemDTO> getAfterwardsBytId(Long afterwardsId) {
-            Optional<Afterward> optionalAfterward = afterwardsRepository.findById(afterwardsId);
-            return optionalAfterward.map(afterwardMapper::entityToCartItemDTO);
+    public Optional<CartItemDTO> getAfterwardsById(Long afterwardsId) {
+        Optional<Afterward> optionalAfterward = afterwardsRepository.findById(afterwardsId);
+        return optionalAfterward.map(afterwardMapper::entityToCartItemDTO);
     }
 
     private Cart getCartByClientId(Long clientId) {

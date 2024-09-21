@@ -1,4 +1,4 @@
-package microservice.ecommerce_cart_service.Service.FacadeService;
+package microservice.ecommerce_cart_service.Service;
 
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartDTO;
@@ -8,7 +8,7 @@ import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import java.util.concurrent.CompletableFuture;
 
 
-public interface PurchaseServiceFacade {
+public interface PurchaseService {
     CompletableFuture<Result<ClientEcommerceDataDTO>> prepareClientData(Long clientId);
-    CompletableFuture<Void>  processPurchase(ClientEcommerceDataDTO clientEcommerceDataDTO, Long cardId, CartDTO cartDTO, Long addressId);
+    void processPurchase(ClientEcommerceDataDTO clientEcommerceDataDTO, Long cardId, Long addressId);
 }

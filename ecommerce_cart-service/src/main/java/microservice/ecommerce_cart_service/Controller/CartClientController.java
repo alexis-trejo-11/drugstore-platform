@@ -6,46 +6,39 @@ import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import microservice.ecommerce_cart_service.Service.AfterwardsService;
-import microservice.ecommerce_cart_service.Service.AfterwardsServiceImpl;
 import microservice.ecommerce_cart_service.Service.ClientCartService;
 import microservice.ecommerce_cart_service.Service.CartService;
-import microservice.ecommerce_cart_service.Service.FacadeService.PurchaseServiceFacade;
+import microservice.ecommerce_cart_service.Service.PurchaseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
-@RequestMapping("v1/api/ecommerce/client-carts")
+@RequestMapping("v1/drugstore/ecommerce-carts/clients")
 @Tag(name = "Drugstore Microservice API (Cart Service)", description = "Service for managing carts")
 
 public class CartClientController {
 
     private final CartService cartService;
     private final ClientCartService clientCartService;
-    private final PurchaseServiceFacade purchaseServiceFacade;
-    private final AfterwardsService afterwardsService;
+    private final PurchaseService purchaseService;
     private final AuthSecurity authSecurity;
 
     public CartClientController(CartService cartService,
                                 ClientCartService clientCartService,
-                                PurchaseServiceFacade purchaseServiceFacade,
-                                AfterwardsServiceImpl afterwardsService,
+                                PurchaseService purchaseService,
                                 AuthSecurity authSecurity) {
         this.cartService = cartService;
         this.clientCartService = clientCartService;
-        this.purchaseServiceFacade = purchaseServiceFacade;
-        this.afterwardsService = afterwardsService;
+        this.purchaseService = purchaseService;
         this.authSecurity = authSecurity;
     }
 
@@ -54,7 +47,7 @@ public class CartClientController {
             @ApiResponse(responseCode = "200", description = "Cart successfully fetched"),
             @ApiResponse(responseCode = "409", description = "No cart found for the client ID")
     })
-    @GetMapping(value = "/client")
+    @GetMapping
     public ResponseEntity<ResponseWrapper<CartDTO>> getCartByClientId(HttpServletRequest request) {
         Long clientId = authSecurity.getClientIdFromToken(request);
         log.info("Fetching cart for client ID: {}", clientId);
@@ -70,7 +63,7 @@ public class CartClientController {
             @ApiResponse(responseCode = "200", description = "Product successfully added to cart"),
             @ApiResponse(responseCode = "404", description = "Product or cart not found")
     })
-    @PostMapping(value = "/product/{clientId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/product")
     public ResponseEntity<ResponseWrapper<Void>> addProductToCart(@Valid @RequestBody CartItemInsertDTO cartItemInsertDTO, HttpServletRequest request) {
         Long clientId = authSecurity.getClientIdFromToken(request);
         log.info("addProductToCart -> Fetching cart for client ID: {}", clientId);
@@ -94,13 +87,14 @@ public class CartClientController {
             @ApiResponse(responseCode = "200", description = "Product successfully deleted from cart"),
             @ApiResponse(responseCode = "400", description = "Failed to delete product from cart")
     })
-    @DeleteMapping("/product/{clientId}")
-    public ResponseEntity<ResponseWrapper<Void>> deleteProductFromCart(@Valid @PathVariable final Long clientId, @RequestBody final CartItemInsertDTO cartItemInsertDTO) {
-        log.info("Deleting product from cart for client ID: {}", clientId);
+    @DeleteMapping("/product")
+    public ResponseEntity<ResponseWrapper<Void>> deleteProductFromCart(@Valid HttpServletRequest request, @RequestBody final CartItemInsertDTO cartItemInsertDTO) {
+        Long clientId = authSecurity.getClientIdFromToken(request);
+        log.info("deleteProductFromCart -> Deleting product from cart for client ID: {}", clientId);
 
-        Result<?> deleteResult = clientCartService.deleteProductFromCart(clientId, cartItemInsertDTO);
+        Result<Void> deleteResult = clientCartService.deleteProductFromCart(clientId, cartItemInsertDTO);
         if (!deleteResult.isSuccess()) {
-            log.warn("Failed to delete product from cart for client ID: {}. Error: {}", clientId, deleteResult.getErrorMessage());
+            log.warn("deleteProductFromCart -> Failed to delete product from cart for client ID: {}. Error: {}", clientId, deleteResult.getErrorMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(false, null, deleteResult.getErrorMessage(), 400));
         }
 
@@ -118,69 +112,23 @@ public class CartClientController {
         Long clientId = authSecurity.getClientIdFromToken(request);
         log.info("purchaseProductsFromCart -> Fetching cart for client ID: {}", clientId);
 
-        // Bring Data From Another Services
-        var ecommerceDataFuture = purchaseServiceFacade.prepareClientData(clientId);
+        // Bring Client Data
+        var ecommerceDataFuture = purchaseService.prepareClientData(clientId);
         Result<ClientEcommerceDataDTO> ecommerceDataDTOResult  = ecommerceDataFuture.join();
 
         if (!ecommerceDataDTOResult.isSuccess()) {
             log.warn("purchaseProductsFromCart -> Failed to prepare client data for purchase for client ID: {}. Error: {}", clientId, ecommerceDataDTOResult.getErrorMessage());
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, ecommerceDataDTOResult.getErrorMessage(), 404));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(false, null, ecommerceDataDTOResult.getErrorMessage(), 400));
         }
 
-        var purchaseData = clientCartService.processCartAndGetPurchaseData(ecommerceDataDTOResult.getData(), purchaseFromCartDTO);
         Long cardId = purchaseFromCartDTO.getCardId();
         Long addressId = purchaseFromCartDTO.getAddressId();
 
-        // Asynchronously process the purchase
-        CompletableFuture<Void> processPurchaseFuture = purchaseServiceFacade.processPurchase(ecommerceDataDTOResult.getData(), cardId, purchaseData, addressId);
-        processPurchaseFuture.join();
+        // Procces Purchase running in bakcgorund
+        purchaseService.processPurchase(ecommerceDataDTOResult.getData(), cardId, addressId);
+        log.info("purchaseProductsFromCart -> processing purchase for client ID: {}", clientId);
 
-        log.info("purchaseProductsFromCart -> Successfully processed purchase for client ID: {}", clientId);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseWrapper<>(true, null, "Order Created. Payment Will Be Validated Soon.", 200));
-    }
-
-    @Operation(summary = "Get afterward products by client ID", description = "Retrieve the list of products marked for afterwards for a specific client.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Afterward items successfully fetched")
-    })
-    @GetMapping("/client-afterwards/{clientId}")
-    public ResponseWrapper<List<CartItemDTO>> getAfterwardProductsByClientId(HttpServletRequest request) {
-        Long clientId = authSecurity.getClientIdFromToken(request);
-        log.info("getAfterwardProductsByClientId -> Fetching cart for client ID: {}", clientId);
-
-        List<CartItemDTO> cartItemDTOS = afterwardsService.getAfterwardsByClientId(clientId);
-        return ResponseWrapper.ok("Afterward Products", "Retrieve", cartItemDTOS);
-    }
-
-    @Operation(summary = "Move product to afterwards", description = "Move a specific product from cart to afterwards list for a client.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Product successfully moved to afterwards"),
-            @ApiResponse(responseCode = "400", description = "Failed to move product to afterwards")
-    })
-    @PostMapping("/move-to-afterwards/{clientId}/{productId}")
-    public ResponseEntity<ResponseWrapper<Void>> moveProductToAfterwards(@Valid @PathVariable final Long clientId, @PathVariable final Long productId) {
-        Result<Void> afterwardsResult = afterwardsService.moveProductToAfterwards(clientId, productId);
-        if (!afterwardsResult.isSuccess()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseWrapper.badRequest(afterwardsResult.getErrorMessage()));
-        }
-
-        log.info("Successfully moved product ID: {} to afterwards for client ID: {}", productId, clientId);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseWrapper<>(true, null, "Product successfully moved to Afterwards", 200));
-    }
-
-    @Operation(summary = "Return product to cart", description = "Return a specific product from afterwards list to the cart for a client.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Product successfully returned to cart"),
-            @ApiResponse(responseCode = "400", description = "Failed to return product to cart")
-    })
-    @DeleteMapping("/return-to-afterwards/{clientId}/{productId}")
-    public ResponseEntity<ResponseWrapper<Void>> returnProductToCart(@Valid @PathVariable final Long clientId, @PathVariable final Long productId) {
-        Result<Void> returnResult = afterwardsService.returnProductToCart(clientId, productId);
-            if (!returnResult.isSuccess()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseWrapper.badRequest(returnResult.getErrorMessage()));
-            }
-
-            log.info("returnProductToCart -> Successfully moved product ID: {} to afterwards for client ID: {}", productId, clientId);
-            return ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.ok("Product", "Restore"));
+        // Dont Wait To Proccess Purchase and Return Response
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.success("Purchase Requested. Payment Will Be Validated Soon."));
     }
 }

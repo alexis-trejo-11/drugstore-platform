@@ -24,7 +24,4 @@ public class PurchaseFromCartDTO {
 
     @JsonProperty("card_id")
     private Long cardId;
-
-    @JsonProperty("products_to_omit")
-    private List<Long> productsToOmit;
     }

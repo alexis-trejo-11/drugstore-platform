@@ -8,6 +8,7 @@ import microservice.ecommerce_cart_service.Model.CartItem;
 import microservice.ecommerce_cart_service.Repository.CartRepository;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
 
@@ -45,7 +46,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartDTO getCartByClientId(Long clientId) {
-            Cart cart = cartRepository.findByClientId(clientId). orElse(null);
+            Cart cart = cartRepository.findByClientId(clientId).orElse(null);
             if (cart == null) { return null; }
 
             List<CartItem> cartItems = cart.getCartItems();

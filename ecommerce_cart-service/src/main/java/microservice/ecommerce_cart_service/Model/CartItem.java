@@ -11,10 +11,9 @@ import java.util.Objects;
 
 @Data
 @NoArgsConstructor
-@Table(name = "cart_items")
 @Entity
+@Table(name = "cart_items")
 public class CartItem {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -33,7 +32,7 @@ public class CartItem {
     @Column(name = "product_price")
     private BigDecimal productPrice;
 
-    @Column(name = "productQuantity")
+    @Column(name = "quantity")
     private int quantity;
 
     @Column(name = "item_total")

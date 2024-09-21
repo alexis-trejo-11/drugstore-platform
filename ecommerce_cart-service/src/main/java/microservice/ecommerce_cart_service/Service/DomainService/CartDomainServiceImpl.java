@@ -3,6 +3,7 @@ package microservice.ecommerce_cart_service.Service.DomainService;
 import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartItemDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
+import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_cart_service.Mappers.CartDtoMapper;
 import microservice.ecommerce_cart_service.Mappers.CartItemMapper;
 import microservice.ecommerce_cart_service.Mappers.CartMapper;
@@ -12,73 +13,56 @@ import microservice.ecommerce_cart_service.Repository.CartItemRepository;
 import microservice.ecommerce_cart_service.Repository.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class CartDomainServiceImpl implements CartDomainService {
 
-    private final CartMapper cartMapper;
-    private final CartItemMapper cartItemMapper;
     private final CartItemRepository cartItemRepository;
     private final CartRepository cartRepository;
     private final CartDtoMapper cartDtoMapper;
 
     @Autowired
-    public CartDomainServiceImpl(CartMapper cartMapper,
-                                 CartItemMapper cartItemMapper,
-                                 CartItemRepository cartItemRepository,
+    public CartDomainServiceImpl(CartItemRepository cartItemRepository,
                                  CartRepository cartRepository,
                                  CartDtoMapper cartDtoMapper) {
-        this.cartMapper = cartMapper;
-        this.cartItemMapper = cartItemMapper;
         this.cartItemRepository = cartItemRepository;
         this.cartRepository = cartRepository;
         this.cartDtoMapper = cartDtoMapper;
     }
 
-    public Cart calculateCartNumbers(Cart cart) {
+    public void calculateCartNumbers(Cart cart) {
         if (cart == null) {
             throw new IllegalArgumentException("Cart cannot be null");
         }
 
         calculateSubTotal(cart);
         calculateItemsSubtotal(cart);
-
-        return cart;
     }
 
-    public CartDTO purchaseAllItems(Cart cart) {
-        // Calculate cart numbers before creating DTOs
-        Cart CartProcessed = calculateCartNumbers(cart);
-
-        // Create CartDTO with updated cart information
-        var purchaseData = cartMapper.entityToDTO(CartProcessed);
-
-        // Map cart items to DTOs
-        List<CartItemDTO> productsToPurchase = CartProcessed.getCartItems().stream()
-                .map(cartItemMapper::entityToDTO)
-                .collect(Collectors.toList());
-
-        purchaseData.setCartItems(productsToPurchase);
-
-        // Clear cart items after processing
-        List<CartItem> itemsToRemove = new ArrayList<>(cart.getCartItems());
-        cart.getCartItems().clear();
-        cartRepository.save(cart);
+    @Override
+    @Transactional
+    public void removeItems(Cart cart) {
+        log.info("Clearing Cart With ID: {} ", cart.getId());
 
         // Delete cart items from the database
-        cartItemRepository.deleteAll(itemsToRemove);
+         List<CartItem> cartItems = cart.getCartItems();
+         log.info("Items to be removed: {}", cartItems.size());
+         cartItemRepository.deleteAll(cartItems);
+         cart.setCartItems(new ArrayList<>());
 
         // Update numbers
         calculateCartNumbers(cart);
-
-        return purchaseData;
+        cartRepository.save(cart);
     }
 
     private void calculateSubTotal(Cart cart) {
@@ -110,6 +94,7 @@ public class CartDomainServiceImpl implements CartDomainService {
             CartItem cartItem = existingCartItem.get();
             cartItem.setQuantity(cartItem.getQuantity() + quantity);
             cartItem.setItemTotal(cartItem.getProductPrice().multiply(new BigDecimal(cartItem.getQuantity())));
+            cartItem.setUpdatedAt(LocalDateTime.now());
             cartItemRepository.save(cartItem);
             return cart;
         } else {

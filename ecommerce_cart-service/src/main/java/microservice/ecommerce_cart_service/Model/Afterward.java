@@ -1,6 +1,7 @@
 package microservice.ecommerce_cart_service.Model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
@@ -17,6 +18,9 @@ public class Afterward {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "client_id")
+    private Long clientId;
+
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;
@@ -30,7 +34,7 @@ public class Afterward {
     @Column(name = "product_price")
     private BigDecimal productPrice;
 
-    @Column(name = "productQuantity")
+    @Column(name = "quantity")
     private int quantity;
 
     @Column(name = "item_total")
@@ -42,6 +46,5 @@ public class Afterward {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "client_id")
-    private Long clientId;
+
 }
