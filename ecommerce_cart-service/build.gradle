@@ -71,3 +71,7 @@ dependencyManagement {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+bootRun {
+	jvmArgs = ["-XX:+TieredCompilation", "-XX:TieredStopAtLevel=1"]
+}

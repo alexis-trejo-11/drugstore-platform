@@ -14,7 +14,7 @@ import org.mapstruct.Mappings;
 public interface CartItemMapper {
 
     @Mappings({
-            @Mapping(target = "productQuantity", source = "cartItem.productQuantity"),
+            @Mapping(target = "productQuantity", source = "cartItem.quantity"),
             @Mapping(target = "productUnitPrice", source = "cartItem.productPrice"),
     })
     CartItemDTO entityToDTO(CartItem cartItem);
@@ -23,7 +23,7 @@ public interface CartItemMapper {
             @Mapping(target = "productId", source = "productDTO.id"),
             @Mapping(target = "productName", source = "productDTO.name"),
             @Mapping(target = "productPrice", source = "productDTO.price"),
-            @Mapping(target = "productQuantity", source = "productQuantity"),
+            @Mapping(target = "quantity", source = "quantity"),
             @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())"),
             @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())"),
             @Mapping(target = "itemTotal", ignore = true),

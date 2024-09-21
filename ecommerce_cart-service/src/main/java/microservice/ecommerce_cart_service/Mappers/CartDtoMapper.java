@@ -8,6 +8,7 @@ import microservice.ecommerce_cart_service.Model.CartItem;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,9 @@ public class CartDtoMapper {
         cartItem.setQuantity(quantity);
         cartItem.setItemTotal(productDTO.getPrice().multiply(new BigDecimal(quantity)));
         cartItem.setCart(cart);
+        cartItem.setCreatedAt(LocalDateTime.now());
+        cartItem.setUpdatedAt(LocalDateTime.now());
+
         return cartItem;
     }
 }

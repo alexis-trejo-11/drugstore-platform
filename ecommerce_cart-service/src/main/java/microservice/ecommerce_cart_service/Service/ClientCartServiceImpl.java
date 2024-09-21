@@ -1,9 +1,6 @@
 package microservice.ecommerce_cart_service.Service;
 
-import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Cart.CartItemInsertDTO;
-import at.backend.drugstore.microservice.common_classes.DTOs.Cart.ClientEcommerceDataDTO;
-import at.backend.drugstore.microservice.common_classes.DTOs.Cart.PurchaseFromCartDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Product.ProductDTO;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Products.ProductFacadeService;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
@@ -12,6 +9,7 @@ import microservice.ecommerce_cart_service.Repository.CartRepository;
 import microservice.ecommerce_cart_service.Service.DomainService.CartDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +24,6 @@ public class ClientCartServiceImpl implements ClientCartService {
     private final ProductFacadeService productFacadeService;
     private final CartDomainService cartDomainService;
 
-
     @Autowired
     public ClientCartServiceImpl(CartRepository cartRepository,
                                  CartDomainService cartDomainService,
@@ -38,6 +35,7 @@ public class ClientCartServiceImpl implements ClientCartService {
 
     @Override
     @Transactional
+    @Cacheable(value = "carts", key = "#clientId", unless = "#result == null")
     public Result<Void> addProductsCart(Long clientId, Long productId, int quantity) {
         // Fetch cart by client ID asynchronously
         CompletableFuture<Optional<Cart>> cartFuture = CompletableFuture.supplyAsync(() -> cartRepository.findByClientId(clientId));
@@ -69,7 +67,7 @@ public class ClientCartServiceImpl implements ClientCartService {
 
     @Override
     @Transactional
-    public Result<?> deleteProductFromCart(Long clientId, CartItemInsertDTO cartItemInsertDTO) {
+    public Result<Void> deleteProductFromCart(Long clientId, CartItemInsertDTO cartItemInsertDTO) {
         // Fetch the cart asynchronously
         CompletableFuture<Optional<Cart>> cartFuture = CompletableFuture.supplyAsync(() -> cartRepository.findByClientId(clientId));
         Optional<Cart> optionalCart = cartFuture.join();
@@ -89,16 +87,11 @@ public class ClientCartServiceImpl implements ClientCartService {
 
     @Override
     @Transactional
-    public CartDTO processCartAndGetPurchaseData(ClientEcommerceDataDTO clientEcommerceDataDTO, PurchaseFromCartDTO purchaseFromCartDTO) {
-        Cart cart = getCartByClientId(clientEcommerceDataDTO.getCartDTO().getClientId());
-        return cartDomainService.purchaseAllItems(cart);
+    @Async("taskExecutor")
+    public CompletableFuture<Void> clearOutCart(Long cartId) {
+        return CompletableFuture.runAsync(() -> {
+            Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new RuntimeException("An Error Clearing Out Cart"));
+            cartDomainService.removeItems(cart);
+        });
     }
-
-    private Cart getCartByClientId(Long clientId) {
-        Optional<Cart> cartOptional = cartRepository.findByClientId(clientId);
-        return cartOptional.get();
-    }
-
-
-
 }

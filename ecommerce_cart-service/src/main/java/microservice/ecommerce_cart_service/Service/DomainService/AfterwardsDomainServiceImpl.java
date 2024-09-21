@@ -49,7 +49,7 @@ public class AfterwardsDomainServiceImpl implements AfterwardsDomainService {
         List<Afterward> afterwards = afterwardsRepository.findByClientId(clientId);
         Optional<Afterward> optionalAfterward = afterwards.stream().filter(afterward -> afterward.getProductId().equals(productId)).findAny();
         if (optionalAfterward.isPresent()) {
-            return Result.error("Product already on Afterwards");
+            return Result.error("Product already on afterwards");
         }
 
         // Look At Existing Product on Cart
@@ -76,7 +76,10 @@ public class AfterwardsDomainServiceImpl implements AfterwardsDomainService {
     @Transactional
     public void processReturnToAfterwards(Cart cart, Afterward afterward) {
         CartItem cartItem = afterwardMapper.entityToCartItem(afterward);
+        // Return Item
         cart.getCartItems().add(cartItem);
+        // Sum Item Total To Cart Subtotal
+        cart.setSubtotal(cart.getSubtotal().add(cartItem.getItemTotal()));
         cartRepository.save(cart);
         afterwardsRepository.delete(afterward);
     }

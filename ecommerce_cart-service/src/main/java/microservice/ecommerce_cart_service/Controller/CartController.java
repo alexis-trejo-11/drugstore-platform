@@ -17,18 +17,15 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("v1/api/ecommerce/carts")
+@RequestMapping("v1/drugstore/ecommerce-carts")
 @Tag(name = "Drugstore Microservice API (Cart Service)", description = "Service for managing cart payments")
-
 public class CartController {
 
     private final CartService cartService;
-    private final AuthSecurity authSecurity;
 
     @Autowired
-    public CartController(CartService cartService, AuthSecurity authSecurity) {
+    public CartController(CartService cartService) {
         this.cartService = cartService;
-        this.authSecurity = authSecurity;
     }
 
     @Operation(summary = "Create a new cart", description = "Create a new cart for a specific client.")
@@ -37,9 +34,8 @@ public class CartController {
             @ApiResponse(responseCode = "409", description = "Failed to create cart due to a conflict")
     })
     @PostMapping("/create/{clientId}")
-    public ResponseEntity<ResponseWrapper<Void>> createCart(HttpServletRequest request) {
-        Long clientId = authSecurity.getClientIdFromToken(request);
-        log.info("Fetching card for client ID: {}", clientId);
+    public ResponseEntity<ResponseWrapper<Void>> createCart(@PathVariable Long clientId) {
+
 
         Result<Void> cartResult = cartService.createCart(clientId);
         if (!cartResult.isSuccess()) {
