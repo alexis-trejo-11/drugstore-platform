@@ -1,4 +1,5 @@
 CREATE DATABASE drugstore_clients_db;
+CREATE DATABASE drugstore_addresses_db;
 CREATE DATABASE drugstore_employees_db;
 CREATE DATABASE drugstore_inventories_db;
 CREATE DATABASE drugstore_products_db;

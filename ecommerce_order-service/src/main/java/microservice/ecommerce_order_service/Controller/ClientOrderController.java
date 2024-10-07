@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @Slf4j
 @RestController
-@RequestMapping("v1/api/client-orders")
+@RequestMapping("/v1/drugstore/client-orders")
 public class ClientOrderController {
 
     private final ClientOrderService clientOrderService;
@@ -47,10 +47,10 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved cancelled orders"),
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
-    @GetMapping("/current/{clientId}")
+    @GetMapping("/cancelled")
     public ResponseEntity<ResponseWrapper<Page<OrderDTO>>> getCancelledOrdersByClientId(HttpServletRequest request,
-                                                                                                           @RequestParam(defaultValue = "0") int page,
-                                                                                                           @RequestParam(defaultValue = "10") int size) {
+                                                                                        @RequestParam(defaultValue = "0") int page,
+                                                                                        @RequestParam(defaultValue = "10") int size) {
         Long clientId = authSecurity.getClientIdFromToken(request);
         log.info("getCancelledOrdersByClientId -> Fetching cancelled orders for client Id: {}", clientId);
 
@@ -74,7 +74,7 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved orders to be delivered"),
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
-    @GetMapping("/delivering/{clientId}")
+    @GetMapping("/delivering")
     public ResponseEntity<ResponseWrapper<Page<OrderDTO>>> getOrdersToBeDeliveredByClientId(HttpServletRequest request,
                                                                                             @RequestParam(defaultValue = "0") int page,
                                                                                             @RequestParam(defaultValue = "10") int size) {
@@ -102,7 +102,7 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved completed orders"),
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
-    @GetMapping("/completed/{clientId}")
+    @GetMapping("/completed")
     public ResponseEntity<ResponseWrapper<Page<OrderDTO>>> getCompletedOrdersByClientId(HttpServletRequest request,
                                                                                         @RequestParam(defaultValue = "0") int page,
                                                                                         @RequestParam(defaultValue = "10") int size) {
@@ -130,7 +130,7 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved pending payment orders"),
             @ApiResponse(responseCode = "404", description = "Client not found")
     })
-    @GetMapping("/pending/{clientId}")
+    @GetMapping("/pending")
     public ResponseEntity<ResponseWrapper<Page<OrderDTO>>> getPendingPaymentOrdersByClientId(HttpServletRequest request,
                                                                                              @RequestParam(defaultValue = "0") int page,
                                                                                              @RequestParam(defaultValue = "10") int size) {
@@ -157,7 +157,7 @@ public class ClientOrderController {
             @ApiResponse(responseCode = "400", description = "Order not found"),
             @ApiResponse(responseCode = "409", description = "Conflict occurred while cancelling the order")
     })
-    @GetMapping("/cancel/{orderId}")
+    @PutMapping("/cancel/{orderId}")
     public ResponseEntity<ResponseWrapper<Void>> cancelOrder(@PathVariable Long orderId) {
         Optional<OrderDTO> optionalOrderDTO = orderService.getOrderById(orderId);
         if (optionalOrderDTO.isEmpty()) {

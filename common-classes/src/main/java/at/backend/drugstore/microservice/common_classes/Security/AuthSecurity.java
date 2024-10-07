@@ -72,7 +72,7 @@ public class AuthSecurity {
         if (clientId instanceof Integer) {
             return ((Integer) clientId).longValue(); // Convierte Integer a Long
         } else if (clientId instanceof Long) {
-            return (Long) clientId; // Ya es Long, simplemente lo devolvemos
+            return (Long) clientId;
         } else {
             throw new IllegalArgumentException("clientId is not of expected type Long or Integer");
         }

@@ -8,15 +8,12 @@ import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -38,7 +35,7 @@ public class EPaymentFacadeServiceImpl implements EPaymentFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<PaymentDTO> initPayment(PaymentInsertDTO paymentInsertDTO) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = paymentServiceUrlProvider.get() + "/v1/drugstore/payments/init";
+            String url = paymentServiceUrlProvider.get() + "/v1/drugstore/ecommerce-payments/init";
             log.info("Initializing payment with URL: {}", url);
             log.debug("PaymentInsertDTO: {}", paymentInsertDTO);
 
@@ -53,28 +50,31 @@ public class EPaymentFacadeServiceImpl implements EPaymentFacadeService {
                     new ParameterizedTypeReference<ResponseWrapper<PaymentDTO>>() {}
             );
             ResponseWrapper<PaymentDTO> responseEntityBody = responseEntity.getBody();
-            assert responseEntityBody != null;
 
-            if (responseEntityBody.getStatusCode() == HttpStatus.CREATED.value()) {
-                log.info("Payment initialization successful with status code: {}", HttpStatus.CREATED);
-                return responseEntityBody.getData();
-            }
-            log.warn("Payment initialization failed with status code: {}", HttpStatus.BAD_REQUEST);
-            return null;
+            assert responseEntityBody != null;
+            log.info("Payment initialization successful with status code: {}",responseEntityBody.getStatusCode());
+            log.info("Payment initialization successful with Id: {}", responseEntityBody.getData().getId());
+
+            return responseEntityBody.getData();
         });
+
     }
 
     @Override
     @Async("taskExecutor")
     public CompletableFuture<Result<List<CardDTO>>> getCardByClientId(Long clientId) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = paymentServiceUrlProvider.get() + "/v1/drugstore/client-cards/client/" + clientId;
+            HttpHeaders headers = new HttpHeaders();
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            String url = paymentServiceUrlProvider.get() + "/v1/drugstore/ecommerce-payments/cards/by-client/" + clientId;
             log.info("Fetching client cards with URL: {}", url);
 
             ResponseEntity<ResponseWrapper<List<CardDTO>>> responseEntity = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
-                    null,
+                    entity,
                     new ParameterizedTypeReference<ResponseWrapper<List<CardDTO>>>() {}
             );
             ResponseWrapper<List<CardDTO>> responseEntityBody = responseEntity.getBody();

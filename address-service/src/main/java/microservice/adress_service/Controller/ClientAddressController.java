@@ -1,4 +1,4 @@
-package microservice.client_service.Controller;
+package microservice.adress_service.Controller;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressInsertDTO;
@@ -10,13 +10,13 @@ import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import microservice.client_service.Service.AddressService;
-import microservice.client_service.Service.ClientService;
+import microservice.adress_service.Service.ClientAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,18 +27,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @Slf4j
 @RestController
 @RequestMapping("v1/drugstore/client-address")
-public class AddressClientController {
+public class ClientAddressController {
 
-    private final AddressService addressService;
-    private final ClientService clientService;
+    private final ClientAddressService clientAddressService;
     private final AuthSecurity authSecurity;
 
     @Autowired
-    public AddressClientController(AddressService addressService,
-                                   ClientService clientService,
+    public ClientAddressController(ClientAddressService clientAddressService,
                                    AuthSecurity authSecurity) {
-        this.addressService = addressService;
-        this.clientService = clientService;
+        this.clientAddressService = clientAddressService;
         this.authSecurity = authSecurity;
     }
 
@@ -50,35 +47,14 @@ public class AddressClientController {
             @ApiResponse(responseCode = "404", description = "Addresses not found",
                     content = @Content)
     })
-    @GetMapping("/addresses")
+    @GetMapping("/my-addresses")
     public ResponseEntity<ResponseWrapper<List<AddressDTO>>> getMyAddresses(HttpServletRequest request) {
         Long clientId = authSecurity.getClientIdFromToken(request);
-        log.info("Fetching addresses for client ID: {}", clientId);
 
-        CompletableFuture<List<AddressDTO>> addressDTOsAsync = addressService.getAddressesByClientId(clientId);
+        CompletableFuture<List<AddressDTO>> addressDTOsAsync = clientAddressService.getAddressesByClientId(clientId);
         List<AddressDTO> addressDTOs = addressDTOsAsync.join();
 
-        log.info("Addresses successfully fetched for client ID: {}", clientId);
         return ResponseEntity.ok(ResponseWrapper.found(addressDTOs, "Addresses"));
-    }
-
-    @Operation(summary = "Fetch current client data")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found client data",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ClientDTO.class)) }),
-            @ApiResponse(responseCode = "404", description = "Client not found",
-                    content = @Content)
-    })
-    @GetMapping("/client-data")
-    public ResponseEntity<ResponseWrapper<ClientDTO>> getMyClientData(HttpServletRequest request) {
-        Long clientId = authSecurity.getClientIdFromToken(request);
-        log.info("Fetching client data for client ID: {}", clientId);
-
-        ClientDTO clientDTO = clientService.getClientById(clientId);
-
-        log.info("Client data successfully fetched for client ID: {}", clientId);
-        return ResponseEntity.ok(ResponseWrapper.found(clientDTO, "Client"));
     }
 
     @Operation(summary = "Insert a new address for the current client")
@@ -88,19 +64,16 @@ public class AddressClientController {
             @ApiResponse(responseCode = "404", description = "Failed to create address",
                     content = @Content)
     })
-    @PostMapping("/add-address")
+    @PostMapping("/")
     public ResponseEntity<ResponseWrapper<Void>> insertAddress(@Valid @RequestBody AddressInsertDTO addressInsertDTO,
                                                                HttpServletRequest request) {
         Long clientId = authSecurity.getClientIdFromToken(request);
-        log.info("Request to add address for clientId: {}", clientId);
 
-        Result<Void> addResult = addressService.addAddress(addressInsertDTO, clientId);
+        Result<Void> addResult = clientAddressService.addAddress(addressInsertDTO, clientId);
         if (!addResult.isSuccess()) {
-            log.error("Failed to add address for clientId: {}. Error: {}", clientId, addResult.getErrorMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Address", "ID"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Address"));
         }
 
-        log.info("Address successfully created for clientId: {}", clientId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created("Address"));
     }
 
@@ -111,13 +84,12 @@ public class AddressClientController {
             @ApiResponse(responseCode = "404", description = "Address not found",
                     content = @Content)
     })
-    @PutMapping("/update-address")
+    @PutMapping("/")
     public ResponseEntity<ResponseWrapper<Void>> updateMyAddressOnMyList(@RequestBody AddressUpdateDTO addressUpdateDTO,
                                                                          HttpServletRequest request) {
         Long clientId = authSecurity.getClientIdFromToken(request);
 
-        addressService.updateAddressFromClientList(addressUpdateDTO, clientId);
-
+        clientAddressService.updateAddressFromClient(addressUpdateDTO, clientId);
         return ResponseEntity.ok(ResponseWrapper.ok("Address", "Update"));
     }
 
@@ -128,13 +100,12 @@ public class AddressClientController {
             @ApiResponse(responseCode = "404", description = "Address not found",
                     content = @Content)
     })
-    @DeleteMapping("client/address/remove/{addressIndex}")
-    public ResponseEntity<ResponseWrapper<Void>> deleteMyAddressOnMyList(@PathVariable int addressIndex,
+    @DeleteMapping("/{addresId}")
+    public ResponseEntity<ResponseWrapper<Void>> deleteMyAddressOnMyList(@PathVariable Long addresId,
                                                                          HttpServletRequest request) {
         Long clientId = authSecurity.getClientIdFromToken(request);
 
-        addressService.deleteAddressFromClientList(addressIndex, clientId);
-
+        clientAddressService.deleteAddressFromClient(addresId, clientId);
         return ResponseEntity.ok(ResponseWrapper.ok("Address", "Delete"));
     }
 

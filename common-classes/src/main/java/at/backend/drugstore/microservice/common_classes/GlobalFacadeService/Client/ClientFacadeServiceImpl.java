@@ -3,7 +3,7 @@ package at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Cli
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientInsertDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
-import at.backend.drugstore.microservice.common_classes.Utils.Result;
+
 import java.util.function.Supplier;
 
 import lombok.extern.slf4j.Slf4j;
@@ -66,35 +66,43 @@ public class ClientFacadeServiceImpl implements ClientFacadeService {
 
     @Override
     @Async("taskExecutor")
-    public CompletableFuture<Result<ClientDTO>> findClientById(Long clientId) {
+    public CompletableFuture<ClientDTO> getClientById(Long clientId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 String url = clientServiceUrlProvider.get() + "/v1/drugstore/clients/" + clientId;
-                ResponseEntity<ResponseWrapper> responseEntity = restTemplate.exchange(
+                ResponseEntity<ResponseWrapper<ClientDTO>> responseEntity = restTemplate.exchange(
                         url,
                         HttpMethod.GET,
                         HttpEntity.EMPTY,
-                        ResponseWrapper.class
+                        new ParameterizedTypeReference<ResponseWrapper<ClientDTO>>() {}
                 );
 
                 if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                    ResponseWrapper<ClientDTO> responseBody = (ResponseWrapper<ClientDTO>) responseEntity.getBody();
-                    if (responseBody != null) {
-                        log.info("Client found successfully: {}", clientId);
-                        return new Result<>(true, responseBody.getData(), responseBody.getMessage());
-                    } else {
-                        log.warn("Client not found: {}, status code: {}", clientId, responseEntity.getStatusCode());
-                        return new Result<>(false, null, "Client not found");
-                    }
+                    ResponseWrapper<ClientDTO> responseBody = responseEntity.getBody();
+                        log.info("getClientById -> Client found successfully: {}", responseBody);
+                        return responseBody.getData();
                 } else {
-                    String message = responseEntity.getBody() != null ? ((ResponseWrapper<ClientDTO>) responseEntity.getBody()).getMessage() : "Client not found";
-                    log.warn("Client not found: {}, status code: {}", clientId, responseEntity.getStatusCode());
-                    return new Result<>(false, null, message);
+                    log.warn("getClientById -> Client not found: {}, status code: {}", clientId, responseEntity.getStatusCode());
+                    return null;
                 }
             } catch (Exception e) {
                 log.error("Error occurred while finding client", e);
-                return new Result<>(false, null, "An error occurred");
+                throw new RuntimeException(e);
             }
         });
     }
-}
+
+    @Override
+    @Async("taskExecutor")
+    public boolean validateExistingClient(Long clientId) {
+            String url = clientServiceUrlProvider.get() + "/v1/drugstore/clients/validate/" + clientId;
+
+            ResponseEntity<Boolean> responseEntity = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    HttpEntity.EMPTY,
+                    Boolean.class
+            );
+            return Boolean.TRUE.equals(responseEntity.getBody());
+        }
+    }

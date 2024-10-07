@@ -1,6 +1,6 @@
 package at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Order;
 
-import at.backend.drugstore.microservice.common_classes.DTOs.Order.CompleteOrderRequest;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderPaymentStatus;
 import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderInsertDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
@@ -30,7 +30,7 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Long> createOrderAndGetId(OrderInsertDTO orderInsertDTO) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = orderServiceUrlProvider.get() + "/v1/drugstore/orders/create";
+            String url = orderServiceUrlProvider.get() + "/v1/drugstore/ecommerce-orders/create";
             log.info("Creating order with URL: {}", url);
             log.info("Request Payload: {}", orderInsertDTO);
 
@@ -61,14 +61,14 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Void> completeOrder(boolean isOrderPaid, Long orderId, Long addressId, Long clientId) {
         return CompletableFuture.runAsync(() -> {
-            String url = orderServiceUrlProvider.get() + "/v1/drugstore/orders/complete-order";
-            CompleteOrderRequest completeOrderRequest = new CompleteOrderRequest(isOrderPaid, orderId, addressId, clientId);
+            String url = orderServiceUrlProvider.get() + "/v1/drugstore/ecommerce-orders/complete-order";
+            OrderPaymentStatus orderPaymentStatus = new OrderPaymentStatus(isOrderPaid, orderId);
 
             log.info("Completing order with ID: {}", orderId);
 
             HttpHeaders headers = new HttpHeaders();
             headers.set(HttpHeaders.CONTENT_TYPE, "application/json");
-            HttpEntity<CompleteOrderRequest> requestEntity = new HttpEntity<>(completeOrderRequest, headers);
+            HttpEntity<OrderPaymentStatus> requestEntity = new HttpEntity<>(orderPaymentStatus, headers);
 
             restTemplate.exchange(
                     url,
@@ -83,7 +83,7 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<Void> addPaymentIdByOrderId(Long paymentId, Long orderId) {
         return CompletableFuture.runAsync(() -> {
-            String url = orderServiceUrlProvider.get() + "/v1/drugstore/orders/" + orderId + "/payment/" + paymentId;
+            String url = orderServiceUrlProvider.get() + "/v1/drugstore/ecommerce-orders/" + orderId + "/payment/" + paymentId;
 
             log.info("Adding payment ID {} to order ID {}", paymentId, orderId);
 
@@ -101,7 +101,7 @@ public class OrderFacadeServiceImpl implements OrderFacadeService {
     @Async("taskExecutor")
     public CompletableFuture<OrderDTO> getOrderById(Long orderId) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = orderServiceUrlProvider.get() + "/v1/drugstore/orders/" + orderId;
+            String url = orderServiceUrlProvider.get() + "/v1/drugstore/ecommerce-orders/" + orderId;
 
             log.info("Fetching order with ID: {}", orderId);
 

@@ -40,9 +40,13 @@ public class PaymentInsertDTO {
     private BigDecimal total;
 
     @JsonProperty("card_id")
+    @NotNull(message = "card_id is obligatory.")
+    @Positive(message = "card_id must be positive.")
     private Long cardId;
 
     @JsonProperty("order_id")
+    @NotNull(message = "order_id is obligatory.")
+    @Positive(message = "order_id must be positive.")
     private Long orderId;
 
 }

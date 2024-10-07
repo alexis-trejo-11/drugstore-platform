@@ -50,10 +50,11 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     @Cacheable(value = "productById", key = "#productId")
     public ProductDTO getProductById(Long productId) {
-            Optional<Product> productOptional = productRepository.findById(productId);
-            return productOptional.map(productMapper::productToDTO).orElse(null);
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        return optionalProduct.map(productMapper::productToDTO).orElse(null);
     }
 
     @Transactional

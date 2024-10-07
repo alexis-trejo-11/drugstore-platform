@@ -1,6 +1,5 @@
 package microservice.ecommerce_payment_service.Service;
 
-import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardInsertDTO;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.ClientFacadeService;
@@ -10,62 +9,54 @@ import microservice.ecommerce_payment_service.Model.Card;
 import microservice.ecommerce_payment_service.Repository.CardRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 public class CardServiceImpl implements CardService {
 
     private final CardRepository cardRepository;
-    private final ClientFacadeService clientFacadeService;
+    private final CardValidatorService cardValidatorService;
     private final CardMapper cardMapper;
     private final CardDomainService cardDomainService;
 
     @Autowired
     public CardServiceImpl(CardRepository cardRepository,
                            ClientFacadeService clientFacadeService,
+                           CardValidatorService cardValidatorService,
                            CardMapper cardMapper,
                            CardDomainService cardDomainService) {
         this.cardRepository = cardRepository;
-        this.clientFacadeService = clientFacadeService;
+        this.cardValidatorService = cardValidatorService;
         this.cardMapper = cardMapper;
         this.cardDomainService = cardDomainService;
     }
 
-    @Override
-    @Transactional
-    public boolean validateClient(Long clientId) {
-        CompletableFuture<Result<ClientDTO>> clientResultAsync = clientFacadeService.findClientById(clientId);
-        Result<ClientDTO> clientDTOResult = clientResultAsync.join();
-        return clientDTOResult.isSuccess();
-    }
 
     @Override
     @Transactional
-    public boolean validateCardData(Long cardId, Long clientId) {
-        List<Card> cards = cardRepository.findByClientId(clientId);
-        return cards.stream().anyMatch(card -> card.getId().equals(cardId));
-    }
+    public Result<Void> addCardToClient(CardInsertDTO cardInsertDTO, Long clientId) {
+        Card card = cardMapper.insertDtoToEntity(cardInsertDTO, clientId);
 
-    @Override
-    @Transactional
-    public void addCardToClient(CardInsertDTO cardInsertDTO) {
-        Card card = cardMapper.toEntity(cardInsertDTO);
+        Result<Void> validationReuslt = cardValidatorService.validateNewCard(card.getCardNumber(), clientId);
+        if (!validationReuslt.isSuccess()) {
+            return Result.error(validationReuslt.getErrorMessage());
+        }
+
         cardDomainService.encryptSensitiveData(card);
         cardRepository.saveAndFlush(card);
+
+        return Result.success();
     }
 
     @Override
     public CardDTO getCardById(Long cardId) {
-        Card card = cardRepository.findById(cardId).orElse(null);
+        Card card = cardRepository.findById(cardId).orElseThrow(() -> new RuntimeException("Card Not Found"));
 
-        CardDTO cardDTO = cardMapper.toDto(card);
+        CardDTO cardDTO = cardMapper.entityToDto(card);
         cardDomainService.decryptAndCensureSensitiveData(cardDTO);
 
         return cardDTO;
@@ -77,7 +68,7 @@ public class CardServiceImpl implements CardService {
 
             List<CardDTO> cardDTOS = new ArrayList<>();
             for (Card card : cards) {
-                CardDTO cardDTO = cardMapper.toDto(card);
+                CardDTO cardDTO = cardMapper.entityToDto(card);
                 cardDomainService.decryptAndCensureSensitiveData(cardDTO);
                 cardDTOS.add(cardDTO);
             }
@@ -92,8 +83,18 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public boolean validateExistingCard(Long cardId) {
-        return cardRepository.findById(cardId).isPresent();
+    public Result<Void> updateCard(CardInsertDTO cardInsertDTO, Long clientId, Long cardId) {
+        Card cardUpdated = cardMapper.updateDtoToEntity(cardInsertDTO, clientId, cardId);
+
+        Result<Void> validationReuslt = cardValidatorService.validateNewCard(cardUpdated.getCardNumber(), clientId);
+        if (!validationReuslt.isSuccess()) {
+            return Result.error(validationReuslt.getErrorMessage());
+        }
+
+        cardDomainService.encryptSensitiveData(cardUpdated);
+        cardRepository.saveAndFlush(cardUpdated);
+
+        return Result.success();
     }
 
 }

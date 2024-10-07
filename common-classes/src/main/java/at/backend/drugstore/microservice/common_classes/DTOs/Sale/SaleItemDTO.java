@@ -21,7 +21,7 @@ public class SaleItemDTO {
     private String productName;
 
     @Schema(description = "Quantity of the product in this sale item")
-    @JsonProperty("productQuantity")
+    @JsonProperty("product_quantity")
     private int productQuantity;
 
     @Schema(description = "Unit price of the product")
@@ -31,4 +31,8 @@ public class SaleItemDTO {
     @Schema(description = "Total price for this sale item (productQuantity * unit price)")
     @JsonProperty("item_total")
     private BigDecimal itemTotal;
+
+    public void setCalculateItemTotal() {
+        this.itemTotal = this.productUnitPrice.multiply(BigDecimal.valueOf(this.productQuantity));
+    }
 }

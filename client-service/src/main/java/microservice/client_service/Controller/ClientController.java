@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -45,19 +46,28 @@ public class ClientController {
     })
     @GetMapping("/{clientId}")
     public ResponseEntity<ResponseWrapper<ClientDTO>> getClientById(@PathVariable Long clientId) {
-        log.info("Request to get client with ID: {}", clientId);
+        Optional<ClientDTO> optionalClientDTO = clientService.getClientById(clientId);
 
-        boolean isClientExisting = clientService.validateExistingClient(clientId);
-        if (!isClientExisting) {
-            log.warn("getClientById -> Client not found with ID: {}", clientId);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Client", "ID"));
-        }
-
-        ClientDTO clientDTO = clientService.getClientById(clientId);
-        log.info("Client successfully fetched with ID: {}", clientId);
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.found(clientDTO, "Client"));
-
+        return optionalClientDTO.map(clientDTO -> ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.found(clientDTO, "Client")))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Client")));
     }
+
+    @Operation(summary = "Add loyalty points to client")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Loyalty points succesfully added to user"),
+            @ApiResponse(responseCode = "404", description = "Client not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+
+    })
+    @PutMapping("loyalty-points/{clientId}/{points}")
+    public ResponseEntity<ResponseWrapper<ClientDTO>> adjustLoyaltyPoints(@Valid @PathVariable Long clientId, @PathVariable int points) {
+        log.info("adjustLoyaltyPoints -> Request add {} to client with id {} ", points, clientId);
+
+        clientService.adjustLoyaltyPoints(clientId, points);
+
+        return ResponseEntity.ok(ResponseWrapper.ok("User Loyalty Points", "Update"));
+    }
+
 
     @Operation(summary = "Get all clients")
     @ApiResponses(value = {
@@ -65,13 +75,12 @@ public class ClientController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/all")
-    public ResponseEntity<ResponseWrapper<Page<ClientDTO>>> getAllClientsSortedByName(@RequestParam(defaultValue = "0") int page,
-                                                                                      @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<ResponseWrapper<Page<ClientDTO>>> getClientsSortedByName(@RequestParam(defaultValue = "0") int page,
+                                                                                   @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<ClientDTO> clientDTOs = clientService.getClientsSortedByName(pageable);
 
-        log.info("getAllClientsSortedByName -> Clients successfully fetched");
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseWrapper<>(true, clientDTOs, "Clients Successfully Fetched", 200));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.ok(clientDTOs, "Clients", "Retrieved by name"));
     }
 
     @Operation(summary = "Create a new client")
@@ -82,12 +91,9 @@ public class ClientController {
     })
     @PostMapping("/create")
     public ResponseEntity<ResponseWrapper<ClientDTO>> createClient(@Valid @RequestBody ClientInsertDTO clientInsertDTO) {
-        log.info("Request to create a new client");
-
         ClientDTO clientDTO = clientService.createClient(clientInsertDTO);
-        log.info("createClient -> Client successfully created with ID: {}", clientDTO.getId());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.ok("Client", "Create", clientDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.ok(clientDTO, "Client", "Create"));
     }
 
     @Operation(summary = "Update a client")
@@ -98,15 +104,7 @@ public class ClientController {
     })
     @PutMapping("/update")
     public ResponseEntity<ResponseWrapper<Void>> updateClient(@Valid @RequestBody ClientUpdateDTO clientUpdateDTO) {
-        boolean isClientExisting = clientService.validateExistingClient(clientUpdateDTO.getId());
-        if (!isClientExisting) {
-            log.warn("updateClient -> Client not found with ID: {}", clientUpdateDTO.getId());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "Client Not Found", 404));
-        }
-
         clientService.updateClient(clientUpdateDTO);
-        log.info("updateClient ->  Client successfully updated with ID: {}", clientUpdateDTO.getId());
-
         return ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.ok("Client", "Update"));
     }
 
@@ -117,17 +115,21 @@ public class ClientController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
 
     })
-    @DeleteMapping("/delete/{clientID}")
-    public ResponseEntity<ResponseWrapper<Void>> deleteClient(@PathVariable Long clientID) {
-         boolean isClientExisting = clientService.validateExistingClient(clientID);
-            if (!isClientExisting) {
-                log.warn("deleteClient -> Client not found with ID: {}", clientID);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "Client Not Found", 404));
-            }
+    @DeleteMapping("/delete/{clientId}")
+    public ResponseEntity<ResponseWrapper<Void>> deleteClient(@PathVariable Long clientId) {
+        boolean isClientExisting = clientService.validateExistingClient(clientId);
+        if (!isClientExisting) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseWrapper<>(false, null, "Client Not Found", 404));
+        }
 
-            clientService.deleteClientByID(clientID);
-            log.info("deleteClient -> Client successfully deleted with ID: {}", clientID);
+        clientService.deleteClientByID(clientId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseWrapper<>(true, null, "Client Successfully Deleted", 200));
+    }
 
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseWrapper<>(true, null, "Client Successfully Deleted", 200));
+    @GetMapping("/validate/{clientId}")
+    public boolean validateExisitngClient(@PathVariable Long clientId) {
+        return clientService.validateExistingClient(clientId);
     }
 }

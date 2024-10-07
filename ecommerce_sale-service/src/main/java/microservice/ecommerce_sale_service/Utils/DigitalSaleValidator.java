@@ -7,10 +7,8 @@ import org.springframework.stereotype.Component;
 public class DigitalSaleValidator {
 
     public void validateSaleCreation(DigitalSaleItemInsertDTO dto) {
-        // Implement validation logic here
         if (dto == null || dto.getOrderItemDTOS() == null || dto.getOrderItemDTOS().isEmpty()) {
             throw new IllegalArgumentException("Sale must contain at least one item");
         }
-        // Add more validation as needed
     }
 }

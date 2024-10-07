@@ -1,17 +1,15 @@
 package microservice.ecommerce_order_service.Controller;
 
-import at.backend.drugstore.microservice.common_classes.DTOs.Order.CompleteOrderRequest;
+import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderPaymentStatus;
 import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderInsertDTO;
-import at.backend.drugstore.microservice.common_classes.Models.Sales.Sale;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import microservice.ecommerce_order_service.Model.Order;
+import microservice.ecommerce_order_service.Model.CompleteOrderData;
 import microservice.ecommerce_order_service.Service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +17,12 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
-@RequestMapping("v1/api/orders")
+@RequestMapping("/v1/drugstore/ecommerce-orders")
 public class OrderController {
 
     private final OrderService orderService;
@@ -41,12 +38,9 @@ public class OrderController {
     })
     @PostMapping("/create")
     public ResponseEntity<ResponseWrapper<OrderDTO>> createOrder(@Valid @RequestBody OrderInsertDTO orderInsertDTO) {
-        log.info("Received create order request: {}", orderInsertDTO);
-        var order = orderService.createOrder(orderInsertDTO);
+        OrderDTO orderDTO = orderService.createOrder(orderInsertDTO);
 
-        log.info("Order created successfully with ID: {}", order.getId());
-        OrderDTO orderDTO = orderService.processOrderCreation(order, orderInsertDTO.getClientId(), orderInsertDTO.getCartDTO());
-
+        log.info("Order created successfully with ID: {}", orderDTO.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created(orderDTO, "Order"));
     }
 
@@ -56,35 +50,27 @@ public class OrderController {
             @ApiResponse(responseCode = "400", description = "Failed to process payment or invalid order details.")
     })
     @PutMapping("/complete-order")
-    public ResponseEntity<ResponseWrapper<Void>> completeOrder(@Valid @RequestBody CompleteOrderRequest completeOrderRequest) {
-        log.info("Received request to complete order: {}", completeOrderRequest);
+    public ResponseEntity<ResponseWrapper<Void>> updateOrderAfterPaymentResult(@Valid @RequestBody OrderPaymentStatus orderPaymentStatus) {
+        log.info("Received request to complete order: {}", orderPaymentStatus);
 
-        if (!completeOrderRequest.isOrderPaid()) {
-            orderService.processOrderNotPaid(completeOrderRequest.getOrderId());
-            log.info("Order payment processed as failed for order: {}", completeOrderRequest.getOrderId());
+        if (!orderPaymentStatus.isOrderPaid()) {
+            orderService.processOrderNotPaid(orderPaymentStatus.getOrderId());
+            log.info("Order payment processed as failed for order: {}", orderPaymentStatus.getOrderId());
             return ResponseEntity.ok(ResponseWrapper.success("Order marked as not paid"));
         }
 
-        // Fetch client data needed to complete the order
-        var clientDataFuture = orderService.bringClientDataToCompleteOrder(completeOrderRequest);
-        var clientData = clientDataFuture.join();
-
+        // Fetch client data connecting with another services
+        CompletableFuture<CompleteOrderData> clientDataFuture = orderService.bringClientDataToCompleteOrder(orderPaymentStatus);
+        CompleteOrderData clientData = clientDataFuture.join();
         log.debug("Client data fetched successfully: {}", clientData);
 
-        // Process order payment with the fetched client data
-        Result<Void> processResult = orderService.processOrderPayment(completeOrderRequest,
-                clientData.getAddressDTO(),
-                clientData.getClientDTO(),
-                clientData.getOrderDTO());
-
-        // Check if the payment process was successful
+        Result<Void> processResult = orderService.processOrderPaid(clientData);
         if (!processResult.isSuccess()) {
             log.warn("Order payment processing failed: {}", processResult.getErrorMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseWrapper.badRequest(processResult.getErrorMessage()));
         }
 
-        log.info("Order payment processed successfully for order: {}", completeOrderRequest.getOrderId());
-
+        log.info("Order payment processed successfully for order: {}", orderPaymentStatus.getOrderId());
         return ResponseEntity.ok(ResponseWrapper.success("Order completed"));
     }
 
@@ -94,10 +80,9 @@ public class OrderController {
             @ApiResponse(responseCode = "404", description = "Order not found.")
     })
     @PutMapping("/{orderId}/payment/{paymentId}")
-    public ResponseEntity<ResponseWrapper<Void>> addPaymentIdByOrderId(@PathVariable Long orderId,
-                                                                                          @PathVariable Long paymentId) {
+    public ResponseEntity<ResponseWrapper<Void>> addPaymentIdByOrderId(@PathVariable Long orderId, @PathVariable Long paymentId) {
        orderService.addPaymentIdByOrderId(orderId, paymentId);
-       return ResponseEntity.ok(new ResponseWrapper<>(true, null, "Order Updated", 200));
+       return ResponseEntity.ok(ResponseWrapper.ok("Order", "Update"));
     }
 
     @Operation(summary = "Get an order by ID", description = "Retrieves the details of an order by its ID.")

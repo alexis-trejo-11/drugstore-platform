@@ -45,7 +45,6 @@ public class ClientAuthServiceImpl implements ClientAuthService {
     }
 
     @Override
-    @Cacheable(value = "userCache", key = "#clientSignUpDTO.email", unless = "#result.success == false")
     public Result<Void> validateUniqueFields(ClientSignUpDTO clientSignUpDTO) {
         if (clientSignUpDTO.getEmail() != null) {
             Optional<User> userEmailOptional = userRepository.findByEmail(clientSignUpDTO.getEmail());
@@ -64,7 +63,6 @@ public class ClientAuthServiceImpl implements ClientAuthService {
     }
 
     @Override
-    @CacheEvict(value = "userCache", allEntries = true)
     public String processClientSignup(ClientSignUpDTO clientSignUpDTO) {
         ClientInsertDTO clientInsertDTO = userMapper.clientSignupDtoToClientInsertDTO(clientSignUpDTO);
 

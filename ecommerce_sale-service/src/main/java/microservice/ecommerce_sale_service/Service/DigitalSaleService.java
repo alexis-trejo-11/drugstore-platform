@@ -14,10 +14,7 @@ public interface DigitalSaleService {
     DigitalSaleDTO createDigitalSale(DigitalSaleItemInsertDTO digitalSaleItemInsertDTO);
 
     DigitalSaleDTO getSaleById(Long saleId);
-
     Page<DigitalSaleDTO> getTodaySales(Pageable pageable);
-
     SalesSummaryDTO getTodaySummarySales(Pageable pageable);
-
     boolean validateExistingSale(Long saleId);
 }

@@ -25,14 +25,6 @@ public class OrderDTO {
     @JsonProperty("address_id")
     private Long addressId;
 
-    @Schema(description = "Name of the client who placed the order.", example = "John Doe")
-    @JsonProperty("client_name")
-    private String clientName;
-
-    @Schema(description = "Phone number of the client who placed the order.", example = "+1234567890")
-    @JsonProperty("client_phone")
-    private String clientPhone;
-
     @Schema(description = "Date and time when the order was placed.", example = "2024-08-05T15:30:00")
     @JsonProperty("order_date")
     private LocalDateTime orderDate;

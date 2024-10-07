@@ -13,25 +13,25 @@ public interface ClientMapper {
 
     void updateClientFromDto(ClientInsertDTO clientInsertDTO, @MappingTarget Client client);
 
-    @Mapping(target = "joinedAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "lastAction", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "active", constant = "true")
     @Mapping(target = "clientPremium", constant = "true")
     @Mapping(target = "loyaltyPoints", constant = "0")
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "addresses", ignore = true)
     Client insertDtoToEntity(ClientInsertDTO clientInsertDTO);
 
 
     ClientDTO entityToDTO(Client client);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "joinedAt", ignore = true)
-    @Mapping(target = "lastAction", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "lastAction", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "clientPremium", ignore = true)
     @Mapping(target = "loyaltyPoints", ignore = true)
-    @Mapping(target = "addresses", ignore = true)
     void updateClientFromDto(ClientUpdateDTO clientUpdateDTO, @MappingTarget Client client);
 
 }

@@ -1,4 +1,4 @@
-package at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client;
+package at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Address;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;

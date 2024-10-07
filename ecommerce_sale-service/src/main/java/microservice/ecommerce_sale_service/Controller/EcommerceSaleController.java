@@ -23,7 +23,7 @@ import jakarta.validation.Valid;
 
 @Slf4j
 @RestController
-@RequestMapping("/v1/drugstore/digital-sales")
+@RequestMapping("/v1/drugstore/ecommerce-sales")
 @Tag(name = "Drugstore Microservice API (E-Sale Service)", description = "Service for managing electronic sales")
 public class EcommerceSaleController {
 
@@ -74,7 +74,7 @@ public class EcommerceSaleController {
         Pageable pageable = PageRequest.of(page, size);
         Page<DigitalSaleDTO> digitalSaleDTOPage = digitalSaleService.getTodaySales(pageable);
 
-        return ResponseWrapper.ok("Today E-Sale", "Retrieve", digitalSaleDTOPage);
+        return ResponseWrapper.ok(digitalSaleDTOPage,"Today E-Sale", "Retrieve");
     }
 
     @GetMapping("/today/summary")
@@ -88,6 +88,6 @@ public class EcommerceSaleController {
         Pageable pageable = PageRequest.of(page, size);
         SalesSummaryDTO salesSummaryDTO = digitalSaleService.getTodaySummarySales(pageable);
 
-        return ResponseWrapper.ok("E-Sale Summary", "Retrieve", salesSummaryDTO);
+        return ResponseWrapper.ok(salesSummaryDTO,"E-Sale Summary", "Retrieve");
     }
 }

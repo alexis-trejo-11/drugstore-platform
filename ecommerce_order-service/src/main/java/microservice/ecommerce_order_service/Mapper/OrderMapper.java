@@ -26,6 +26,7 @@
 
 
         @Mapping(target = "items", ignore = true)
+        @Mapping(target = "status", source = "status")
         OrderDTO entityToDTO(Order order);
 
 

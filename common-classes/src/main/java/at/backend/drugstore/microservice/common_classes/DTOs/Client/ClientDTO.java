@@ -24,8 +24,11 @@ public class ClientDTO {
     @JsonProperty("birthdate")
     private LocalDate birthdate;
 
-    @JsonProperty("phone")
-    private String phone;
+    @JsonProperty("phone_number")
+    private String phone_number;
+
+    @JsonProperty("email")
+    private String email;
 
     @JsonProperty("is_client_premium")
     private boolean isClientPremium;

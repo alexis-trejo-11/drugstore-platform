@@ -1,64 +1,48 @@
 package microservice.client_service.Model;
 
+import at.backend.drugstore.microservice.common_classes.Models.Persons.Person;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @Entity
 @Table(name = "clients")
-public class Client {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @JsonProperty("first_name")
-    @Column(name = "first_name")
-    private String firstName;
-
-    @JsonProperty("last_name")
-    @Column(name = "last_name")
-    private String lastName;
-
-    @JsonProperty("birth_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    @Column(name = "birth_date")
-    private LocalDate birthdate;
-
-    @JsonProperty("phone")
-    @Column(name = "phone")
-    private String phone;
-
-    @JsonProperty("is_active")
-    @Column(name = "is_active")
-    private boolean isActive;
-
+public class Client extends Person {
     @JsonProperty("is_client_premium")
-    @Column(name = "is_client_premium")
+    @Column(name = "is_client_premium", nullable = false)
     private boolean isClientPremium;
 
     @JsonProperty("loyalty_points")
-    @Column(name = "loyalty_points")
+    @Column(name = "loyalty_points" , nullable = false)
     private int loyaltyPoints;
-
-    @JsonProperty("joined_at")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Column(name = "joined_at")
-    private LocalDateTime joinedAt;
 
     @JsonProperty("last_action")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Column(name = "last_action")
+    @Column(name = "last_action", nullable = false)
     private LocalDateTime lastAction;
 
-    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
-    private List<Address> addresses;
+    public void addLoyaltyPoints(int points) {
+        this.loyaltyPoints += points;
+    }
+
+    public void deductLoyaltyPoints(int points) {
+        if (points < 0) {
+            throw new IllegalArgumentException("Points to deduct must be positive");
+        }
+
+        if (this.loyaltyPoints < points) {
+            this.loyaltyPoints = 0;
+        } else {
+            this.loyaltyPoints -= points;
+        }
+    }
 }
