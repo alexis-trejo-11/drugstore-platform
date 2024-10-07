@@ -1,8 +1,10 @@
-package microservice.client_service.Mappers;
+package microservice.adress_service.Mappers;
+
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressInsertDTO;
-import microservice.client_service.Model.Address;
+import at.backend.drugstore.microservice.common_classes.Models.Address.AddressType;
+import microservice.adress_service.Model.ClientAddress;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -18,32 +20,23 @@ public interface AddressMapper {
             @Mapping(target = "addressType", source = "addressInsertDTO", qualifiedByName = "mapAddressType"),
             @Mapping(target = "innerNumber", source = "addressInsertDTO.innerNumber"),
             @Mapping(target = "id", ignore = true),
-            @Mapping(target = "client", ignore = true)
+            @Mapping(target = "clientId", ignore = true)
     })
-    Address insertDtoToEntity(AddressInsertDTO addressInsertDTO);
+    ClientAddress insertDtoToEntity(AddressInsertDTO addressInsertDTO);
 
     @Mappings({
-            @Mapping(target = "addressType", expression = "java(address.getAddressType().toString())"),
-            @Mapping(target = "clientId", source = "address", qualifiedByName = "extractClientId")
+            @Mapping(target = "addressType", expression = "java(clientAddress.getAddressType().toString())"),
     })
-    AddressDTO entityToDTO(Address address);
+    AddressDTO entityToDTO(ClientAddress clientAddress);
 
 
     @Named("mapAddressType")
-    default Address.AddressType mapAddressType(AddressInsertDTO addressInsertDTO) {
+    default AddressType mapAddressType(AddressInsertDTO addressInsertDTO) {
         if (addressInsertDTO.getAddressType() != null) {
-            return Address.AddressType.valueOf(addressInsertDTO.getAddressType());
+            return AddressType.valueOf(addressInsertDTO.getAddressType());
         } else {
-            return Address.AddressType.HOUSE;
+            return AddressType.HOUSE;
         }
     }
 
-    @Named("extractClientId")
-    default Long extractClientId(Address address) {
-        if (address.getClient() != null) {
-            return address.getClient().getId();
-        } else {
-            return null;
-        }
-    }
 }

@@ -28,10 +28,6 @@ public class AddressInsertDTO {
 
     @NotNull(message = "city is obligatory")
     @NotBlank(message = "city can't be empty")
-    private String city;
-
-    @NotNull(message = "city is obligatory")
-    @NotBlank(message = "city can't be empty")
     @JsonProperty("state")
     private String state;
 

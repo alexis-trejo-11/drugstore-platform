@@ -8,16 +8,25 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring",
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface CardMapper {
 
     @Mapping(target = "cardType", source = "cardInsertDTO.cardType", qualifiedByName = "stringToCardType")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "cardValid", ignore = true)
-    Card toEntity(CardInsertDTO cardInsertDTO);
+    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "clientId", source = "clientId")
+    Card insertDtoToEntity(CardInsertDTO cardInsertDTO, Long clientId);
 
-    CardDTO toDto(Card card);
+    @Mapping(target = "cardType", source = "cardInsertDTO.cardType", qualifiedByName = "stringToCardType")
+    @Mapping(target = "id", source = "cardId")
+    @Mapping(target = "cardValid", ignore = true)
+    @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "clientId", source = "clientId")
+    Card updateDtoToEntity(CardInsertDTO cardInsertDTO, Long clientId, Long cardId);
+
+    CardDTO entityToDto(Card card);
 
     @Named("stringToCardType")
     static Card.CardType stringToCardType(String cardType) {

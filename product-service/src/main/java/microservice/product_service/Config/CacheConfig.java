@@ -37,7 +37,7 @@ public class CacheConfig {
                 "validateExistingSupplier"
         );        cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(100)
-                .expireAfterAccess(8, TimeUnit.HOURS));
+                .expireAfterAccess(1, TimeUnit.HOURS));
         cacheManager.setAllowNullValues(false);
         cacheManager.setAsyncCacheMode(true);
 

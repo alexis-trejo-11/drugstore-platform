@@ -36,10 +36,9 @@ public interface UserMapper {
     @Mapping(target = "roles", ignore = true)
     User employeeDtoToEntity(EmployeeDTO employeeDTO);
 
-
-    @Mapping(target = "phone", source = "phoneNumber")
+    @Mapping(target = "email", source = "email")
+    @Mapping(target = "phoneNumber", source = "phoneNumber")
     ClientInsertDTO clientSignupDtoToClientInsertDTO(ClientSignUpDTO clientSignUpDTO);
-
 
     UserDTO userToDTO(User user);
 

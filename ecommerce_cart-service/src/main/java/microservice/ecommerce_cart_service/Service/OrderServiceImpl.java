@@ -8,7 +8,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Order.OrderInsertDT
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.CardDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Payment.PaymentInsertDTO;
-import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.AddressFacadeService;
+import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Address.AddressFacadeService;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client.ClientFacadeService;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Order.OrderFacadeService;
 import at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Payment.EPaymentFacadeService;
@@ -69,7 +69,7 @@ public class OrderServiceImpl implements OrderService {
     @Async("taskExecutor")
     public CompletableFuture<Result<ClientEcommerceDataDTO>> aggregateClientData(Long clientId) {
         // Start fetching data asynchronously
-        CompletableFuture<Result<ClientDTO>> clientFuture = clientFacadeService.findClientById(clientId);
+        CompletableFuture<ClientDTO> clientFuture = clientFacadeService.getClientById(clientId);
         CompletableFuture<Result<List<AddressDTO>>> addressFuture = addressFacadeService.getAddressesByClientId(clientId);
         CompletableFuture<Result<List<CardDTO>>> cardFuture = ePaymentFacadeService.getCardByClientId(clientId);
         CompletableFuture<CartDTO> cartFuture = CompletableFuture.supplyAsync(() -> cartService.getCartByClientId(clientId));
@@ -77,8 +77,8 @@ public class OrderServiceImpl implements OrderService {
         return CompletableFuture.allOf(clientFuture, addressFuture, cardFuture, cartFuture)
                 .thenCompose(v -> {
                     // Check all results and map them
-                    Result<ClientDTO> clientResult = clientFuture.join();
-                    if (!clientResult.isSuccess()) {
+                    ClientDTO clientDTO = clientFuture.join();
+                    if (clientDTO == null) {
                         return CompletableFuture.completedFuture(Result.error("Can't retrieve Client data"));
                     }
 
@@ -99,7 +99,7 @@ public class OrderServiceImpl implements OrderService {
 
                     // Create and populate the result DTOs
                     ClientEcommerceDataDTO clientEcommerceDataDTO = new ClientEcommerceDataDTO();
-                    clientEcommerceDataDTO.setClientDTO(clientResult.getData());
+                    clientEcommerceDataDTO.setClientDTO(clientDTO);
                     clientEcommerceDataDTO.setAddressDTOS(addressResult.getData());
                     clientEcommerceDataDTO.setCardDTOS(cardResult.getData());
                     clientEcommerceDataDTO.setCartDTO(cartDTO);

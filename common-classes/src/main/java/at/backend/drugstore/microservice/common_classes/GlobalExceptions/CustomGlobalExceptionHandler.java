@@ -2,6 +2,7 @@ package at.backend.drugstore.microservice.common_classes.GlobalExceptions;
 
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -53,6 +54,18 @@ public class CustomGlobalExceptionHandler {
     public ResponseEntity<String> handleRequestNotPermitted(RequestNotPermitted exception) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                 .body("Rate limit exceeded. Please try again later.");
+    }
+
+    /* Entity Not Found Exception */
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ResponseWrapper<Void>> handleEntityNotFoundException(EntityNotFoundException ex) {
+        ResponseWrapper<Void> responseWrapper = new ResponseWrapper<>(
+                false,
+                null,
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND.value()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseWrapper);
     }
 
     /* Generic Exception */

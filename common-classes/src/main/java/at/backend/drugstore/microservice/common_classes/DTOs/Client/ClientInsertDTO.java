@@ -27,7 +27,12 @@ public class ClientInsertDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthdate;
 
-    @JsonProperty("phone")
-    private String phone;
+    @JsonProperty("email")
+    @NotNull(message = "email is obligatory")
+    @NotBlank(message = "email can't be blank")
+    private String email;
+
+    @JsonProperty("phone_number")
+    private String phoneNumber;
 }
 

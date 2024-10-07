@@ -4,6 +4,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientInsert
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientUpdateDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.EntityMapper;
+import jakarta.persistence.EntityNotFoundException;
 import microservice.client_service.Mappers.ClientMapper;
 import microservice.client_service.Model.Client;
 import microservice.client_service.Repository.ClientRepository;
@@ -33,10 +34,9 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    @Cacheable(value = "clientCache", key = "#clientId")
-    public ClientDTO getClientById(Long clientId) {
+    public Optional<ClientDTO> getClientById(Long clientId) {
             Optional<Client> client = clientRepository.findById(clientId);
-            return client.map(clientMapper::entityToDTO).orElse(null);
+            return client.map(clientMapper::entityToDTO);
     }
 
     @Override
@@ -57,21 +57,39 @@ public class ClientServiceImpl implements ClientService {
     @Override
     @Transactional
     public void updateClient(ClientUpdateDTO clientUpdateDTO) {
-        Client client = clientRepository.findById(clientUpdateDTO.getId()).orElse(null);
-        if (client == null) { return; }
+        Client client = clientRepository.findById(clientUpdateDTO.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Client with id " + clientUpdateDTO.getId() + " not found"));
 
-        clientMapper.updateClientFromDto(clientUpdateDTO , client);
+        clientMapper.updateClientFromDto(clientUpdateDTO, client);
         clientRepository.saveAndFlush(client);
     }
 
     @Override
     @Transactional
     public void deleteClientByID(Long clientId) {
+        if (!clientRepository.existsById(clientId)) {
+            throw new EntityNotFoundException("Client with id " + clientId + " not found");
+        }
+
         clientRepository.deleteById(clientId);
     }
 
     @Override
     public boolean validateExistingClient(Long clientID) {
         return clientRepository.findById(clientID).isPresent();
+    }
+
+    @Override
+    public void adjustLoyaltyPoints(Long clientId, int points) {
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new EntityNotFoundException("Client with id " + clientId + " not found"));
+
+        if (points > 0) {
+            client.addLoyaltyPoints(points);
+        } else {
+          client.deductLoyaltyPoints(-points);
+        }
+
+        clientRepository.saveAndFlush(client);
     }
 }

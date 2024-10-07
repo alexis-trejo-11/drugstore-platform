@@ -12,7 +12,6 @@ import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

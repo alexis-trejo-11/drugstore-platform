@@ -14,6 +14,7 @@ import org.springframework.context.annotation.ComponentScan;
 		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Products",
 		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.ESale",
 		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Payment",
+		"at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Address",
 		"at.backend.drugstore.microservice.common_classes.GlobalExceptions",
 		"at.backend.drugstore.microservice.common_classes.Security"})
 public class EcommerceCartServiceApplication {

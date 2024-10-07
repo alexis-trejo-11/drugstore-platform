@@ -23,6 +23,5 @@ public interface OrderItemMapper {
 
 
     @Mapping(target = "orderId", source = "order.id")
-    @Mapping(target = "itemTotal", ignore = true)
     OrderItemDTO entityToDTO(OrderItem orderItem);
 }

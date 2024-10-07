@@ -33,9 +33,8 @@ public class OrderFacadeServiceConfig {
 
     @Bean
     @Qualifier("orderFacadeService")
-    public OrderFacadeService orderFacadeService(
-            RestTemplate restTemplate,
-            @Qualifier("orderServiceUrlProvider") Supplier<String> orderServiceUrlProvider) {
+    public OrderFacadeService orderFacadeService(RestTemplate restTemplate,
+                                                 @Qualifier("orderServiceUrlProvider") Supplier<String> orderServiceUrlProvider) {
         return new OrderFacadeServiceImpl(restTemplate, orderServiceUrlProvider);
     }
 }

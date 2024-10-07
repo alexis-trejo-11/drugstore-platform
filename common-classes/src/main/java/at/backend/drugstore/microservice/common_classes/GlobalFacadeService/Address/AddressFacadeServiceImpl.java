@@ -1,4 +1,4 @@
-package at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Client;
+package at.backend.drugstore.microservice.common_classes.GlobalFacadeService.Address;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
@@ -6,13 +6,12 @@ import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -23,18 +22,18 @@ import java.util.function.Supplier;
 public class AddressFacadeServiceImpl implements AddressFacadeService {
 
     private final RestTemplate restTemplate;
-    private final Supplier<String> clientServiceUrlProvider;
+    private final Supplier<String> addressServiceUrlProvider;
 
     @Autowired
-    public AddressFacadeServiceImpl(RestTemplate restTemplate, Supplier<String> clientServiceUrlProvider) {
+    public AddressFacadeServiceImpl(RestTemplate restTemplate, Supplier<String> addressServiceUrlProvider) {
         this.restTemplate = restTemplate;
-        this.clientServiceUrlProvider = clientServiceUrlProvider;
+        this.addressServiceUrlProvider = addressServiceUrlProvider;
     }
 
     @Override
     @Async("taskExecutor")
     public CompletableFuture<Result<AddressDTO>> getAddressById(Long addressId) {
-        String addressUrl = clientServiceUrlProvider.get() + "/v1/drugstore/clients/address/" + addressId;
+        String addressUrl = addressServiceUrlProvider.get() + "/v1/drugstore/addresses/" + addressId;
         return CompletableFuture.supplyAsync(() -> {
                 ResponseEntity<ResponseWrapper<AddressDTO>> responseEntity = restTemplate.exchange(
                         addressUrl,
@@ -56,23 +55,27 @@ public class AddressFacadeServiceImpl implements AddressFacadeService {
     @Override
     @Async("taskExecutor")
     public CompletableFuture<Result<List<AddressDTO>>> getAddressesByClientId(Long clientId) {
-        String addressUrl = clientServiceUrlProvider.get() + "/v1/drugstore/clients/address/client/" + clientId;
+        String addressUrl = addressServiceUrlProvider.get() + "/v1/drugstore/addresses/client/" + clientId;
         return CompletableFuture.supplyAsync(() -> {
-                ResponseEntity<ResponseWrapper<List<AddressDTO>>> responseEntity = restTemplate.exchange(
+            HttpHeaders headers = new HttpHeaders();
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<ResponseWrapper<List<AddressDTO>>> responseEntity = restTemplate.exchange(
                         addressUrl,
                         HttpMethod.GET,
-                        null,
+                        entity,
                         new ParameterizedTypeReference<ResponseWrapper<List<AddressDTO>>>() {});
 
                 if (responseEntity.getStatusCode() == HttpStatus.NOT_FOUND && responseEntity.getBody() != null) {
-                    log.warn("Client ID {} not found", clientId);
+                    log.warn("getAddressesByClientId -> Client ID {} not found", clientId);
                     return new Result<>(false, null, "client with ID " + clientId + " not found.");
                 }
 
             assert responseEntity.getBody() != null;
             List<AddressDTO> addressDTOs = responseEntity.getBody().getData();
 
-            log.info("Addresses for client ID: {} successfully fetched", clientId);
+            log.info("getAddressesByClientId -> Addresses for client ID: {} successfully fetched", clientId);
             return Result.success(addressDTOs);
         });
     }

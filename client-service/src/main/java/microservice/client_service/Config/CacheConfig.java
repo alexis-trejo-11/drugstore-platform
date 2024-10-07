@@ -16,13 +16,12 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
-                "clientCache",
                 "clientsCache",
                 "clientAddresses",
                 "addresses"
         );        cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(100)
-                .expireAfterAccess(8, TimeUnit.HOURS));
+                .expireAfterAccess(1, TimeUnit.HOURS));
         cacheManager.setAllowNullValues(false);
         cacheManager.setAsyncCacheMode(true);
         return cacheManager;

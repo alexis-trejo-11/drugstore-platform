@@ -58,8 +58,8 @@ public class ResponseWrapper<T> {
         return new ResponseWrapper<>(true, null, msg, 200);
     }
 
-    public static <T> ResponseWrapper<T> notFound(String entity, String filter) {
-        String notFoundMsg = entity  + " With " + filter + " Not Found";
+    public static <T> ResponseWrapper<T> notFound(String entity) {
+        String notFoundMsg = entity  + " " + "Not Found";
         return new ResponseWrapper<>(false, null, notFoundMsg, 404);
     }
 

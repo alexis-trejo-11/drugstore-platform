@@ -47,7 +47,6 @@ public class ClientAuthController {
 
         String jwtToken = clientAuthService.processClientSignup(clientSignUpDTO);
         log.info("Client signup successful for: {}", clientSignUpDTO.getEmail());
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created("User"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created(jwtToken,"User"));
     }
-
 }

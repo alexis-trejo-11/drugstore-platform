@@ -41,12 +41,12 @@ public class ClientPaymentController {
                                                                                             @RequestParam(defaultValue = "0") int page,
                                                                                             @RequestParam(defaultValue = "10") int size) {
         Long clientId = authSecurity.getClientIdFromToken(request);
-        log.info("Fetching card for client ID: {}", clientId);
+        log.info("getCompletedPaymentsByClientId -> Fetching card for client ID: {}", clientId);
 
         Pageable pageable = PageRequest.of(page, size);
         Page<PaymentDTO> paymentDTOS = paymentService.getCompletedPaymentsByClientId(clientId, pageable);
-        log.info("Completed payments successfully fetched for client ID: {}", clientId);
 
+        log.info("getCompletedPaymentsByClientId -> Completed payments successfully fetched for client ID: {}", clientId);
         return ResponseEntity.ok(ResponseWrapper.found(paymentDTOS, "Payments"));
     }
 }

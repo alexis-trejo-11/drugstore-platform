@@ -8,7 +8,6 @@ import microservice.ecommerce_order_service.Model.Order;
 import microservice.ecommerce_order_service.Repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -16,9 +15,8 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Service
 public class ClientOrderServiceImpl implements ClientOrderService {
@@ -38,23 +36,15 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     @Override
     @Transactional
     public Page<OrderDTO> getCancelledOrdersByClientId(Long clientId, Pageable pageable) {
-            Page<Order> orderPage = orderRepository.findByClientIdAndStatusIn(clientId, Arrays.asList(OrderStatus.CANCELLED, OrderStatus.PAID_FAILED) ,pageable);
-            List<OrderDTO> orderDTOs = orderPage.getContent().stream()
-                    .map(orderDomainService::makeOrderDTO)
-                    .map(CompletableFuture::join)
-                    .collect(Collectors.toList());
-            return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
+        Page<Order> orderPage = orderRepository.findByClientIdAndStatusIn(clientId, Arrays.asList(OrderStatus.CANCELLED, OrderStatus.PAID_FAILED) ,pageable);
+        return orderPage.map(orderDomainService::createOrderDTO);
     }
 
     @Override
     @Transactional
     public Page<OrderDTO> getOrdersToBeValidatedByClientId(Long clientId, Pageable pageable) {
         Page<Order> orderPage = orderRepository.findByClientIdAndStatus(clientId, OrderStatus.PENDING_PAYMENT ,pageable);
-        List<OrderDTO> orderDTOs = orderPage.getContent().stream()
-                .map(orderDomainService::makeOrderDTO)
-                .map(CompletableFuture::join)
-                .collect(Collectors.toList());
-        return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
+        return orderPage.map(orderDomainService::createOrderDTO);
     }
 
 
@@ -62,25 +52,14 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     @Transactional
     public Page<OrderDTO> getCurrentOrdersByClientId(Long clientId, Pageable pageable) {
         Page<Order> orderPage = orderRepository.findByClientIdAndStatus(clientId, OrderStatus.TO_BE_DELIVERED ,pageable);
-        List<OrderDTO> orderDTOs = orderPage.getContent().stream()
-                .map(orderDomainService::makeOrderDTO)
-                .map(CompletableFuture::join)
-                .collect(Collectors.toList());
-        return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
+         return orderPage.map(orderDomainService::createOrderDTO);
     }
-
 
     @Override
     @Transactional
     public Page<OrderDTO> getCompletedOrdersByClientId(Long clientId, Pageable pageable) {
         Page<Order> orderPage = orderRepository.findByClientIdAndStatus(clientId, OrderStatus.DELIVERED, pageable);
-
-        List<OrderDTO> orderDTOs = orderPage.getContent().stream()
-                .map(orderDomainService::makeOrderDTO)
-                .map(CompletableFuture::join)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(orderDTOs, pageable, orderPage.getTotalElements());
+        return orderPage.map(orderDomainService::createOrderDTO);
     }
 
     @Override
@@ -96,8 +75,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     @Async("taskExecutor")
     @Transactional
     public CompletableFuture<Boolean> validateExistingClient(Long clientId) {
-        return clientFacadeServiceFacade.findClientById(clientId)
-                .thenApply(Result::isSuccess);
+        return clientFacadeServiceFacade.getClientById(clientId)
+                .thenApply(Objects::nonNull);
     }
-
 }

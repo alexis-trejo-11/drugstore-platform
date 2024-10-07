@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_payment_service.Service.CardService;
+import microservice.ecommerce_payment_service.Service.CardValidatorService;
 import microservice.ecommerce_payment_service.Service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,17 +23,15 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
-@RequestMapping("/v1/api/payments")
+@RequestMapping("/v1/drugstore/ecommerce-payments")
 @Tag(name = "Drugstore Microservice API (E-Payment Service)", description = "Service for managing payments")
 public class PaymentController {
 
     private final PaymentService paymentService;
-    private final CardService cardService;
 
     @Autowired
-    public PaymentController(PaymentService paymentService, CardService cardService) {
+    public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
-        this.cardService = cardService;
     }
 
     @Operation(summary = "Initialize a payment",
@@ -44,26 +43,10 @@ public class PaymentController {
     })
     @PostMapping("/init")
     public ResponseEntity<ResponseWrapper<PaymentDTO>> initPayment(@Valid @RequestBody PaymentInsertDTO paymentInsertDTO) {
-        log.info("Initializing payment for client ID: {}", paymentInsertDTO.getClientId());
-
-        if (paymentInsertDTO.getCardId() != null && "CARD".equals(paymentInsertDTO.getPaymentMethod())) {
-            boolean isCardValidated = cardService.validateExistingCard(paymentInsertDTO.getCardId());
-            if (!isCardValidated) {
-                log.warn("Card with ID {} not found.", paymentInsertDTO.getCardId());
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(false, null, "Card with Id " + paymentInsertDTO.getCardId() + " not found", 404));
-            }
-            CardDTO cardDTO = cardService.getCardById(paymentInsertDTO.getCardId());
-
             PaymentDTO paymentDTO = paymentService.initPaymentFromCart(paymentInsertDTO);
             log.info("initPayment -> Payment successfully initiated for client ID: {}", paymentInsertDTO.getClientId());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper<>(true, paymentDTO, "Payment successfully initiated.", 201));
-        } else {
-            PaymentDTO paymentDTO = paymentService.initPaymentFromCart(paymentInsertDTO);
-            log.info("initPayment -> Payment successfully initiated for client ID: {}", paymentInsertDTO.getClientId());
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper<>(true, paymentDTO, "Payment successfully initiated.", 201));
-        }
     }
 
     @Operation(summary = "Validate a payment",

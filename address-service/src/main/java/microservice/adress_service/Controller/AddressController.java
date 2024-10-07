@@ -1,17 +1,15 @@
-package microservice.client_service.Controller;
+package microservice.adress_service.Controller;
 
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressInsertDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressDTO;
-import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.AddressUpdateDTO;
 import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
-import microservice.client_service.Service.AddressService;
+import microservice.adress_service.Service.ClientAddressService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import microservice.client_service.Service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,15 +25,12 @@ import java.util.concurrent.CompletableFuture;
 @Tag(name = "Drugstore Microservice API (Client Service)", description = "Service for managing client addressees")
 public class AddressController {
 
-    private final AddressService addressService;
-    private final ClientService clientService;
+    private final ClientAddressService clientAddressService;
 
     @Autowired
-    public AddressController(AddressService addressService, ClientService clientService) {
-        this.addressService = addressService;
-        this.clientService = clientService;
+    public AddressController(ClientAddressService clientAddressService) {
+        this.clientAddressService = clientAddressService;
     }
-
     // Completable Future Commonly User to Connect Service Each Other
 
     @Operation(summary = "Get address by ID")
@@ -46,16 +41,9 @@ public class AddressController {
     })
     @GetMapping("/{addressId}")
     public CompletableFuture<ResponseWrapper<AddressDTO>> getAddressById(@PathVariable Long addressId) {
-        log.info("Request to get address with addressId: {}", addressId);
-        return addressService.getAddressById(addressId)
-                .thenApply(optionalAddressDTO -> {
-                    if (optionalAddressDTO.isEmpty()) {
-                        log.info("Address found for addressId: {}", addressId);
-                        return ResponseWrapper.notFound("Address", "ID");
-                    }
-                    log.warn("Address not found for addressId: {}", addressId);
-                    return ResponseWrapper.found(optionalAddressDTO.get(), "Address");
-                });
+        return clientAddressService.getAddressById(addressId)
+                .thenApply(optionalAddressDTO -> optionalAddressDTO.map(addressDTO -> ResponseWrapper.found(addressDTO, "Address"))
+                        .orElseGet(() -> ResponseWrapper.notFound("Address")));
     }
 
 
@@ -67,20 +55,8 @@ public class AddressController {
     })
     @GetMapping("/client/{clientId}")
     public CompletableFuture<ResponseEntity<ResponseWrapper<List<AddressDTO>>>> getAddressesByClientId(@PathVariable Long clientId) {
-        log.info("Request to get addresses for clientId: {}", clientId);
-
-        boolean isClientExisting = clientService.validateExistingClient(clientId);
-        if (!isClientExisting) {
-            log.error("getAddressesByClientId -> Failed to get addresses for clientId: {}.", clientId);
-            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ResponseWrapper.notFound("Address", "Client ID")));
-        }
-
-        return addressService.getAddressesByClientId(clientId)
-                .thenApply(addressDTOS -> {
-                    log.info("getAddressesByClientId -> Addresses successfully fetched for clientId: {}", clientId);
-                    return ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.found(addressDTOS, "Client Addresses"));
-                });
+        return clientAddressService.getAddressesByClientId(clientId)
+                .thenApply(addressDTOS -> ResponseEntity.status(HttpStatus.OK).body(ResponseWrapper.found(addressDTOS, "Client Addresses")));
     }
 
 
@@ -92,38 +68,24 @@ public class AddressController {
     })
     @PostMapping("/add")
     public ResponseEntity<ResponseWrapper<Void>> insertAddress(@Valid @RequestBody AddressInsertDTO addressInsertDTO, @RequestParam Long clientID) {
-        log.info("Request to add address for clientId: {}", clientID);
-
-        Result<Void> addResult = addressService.addAddress(addressInsertDTO, clientID);
+        Result<Void> addResult = clientAddressService.addAddress(addressInsertDTO, clientID);
         if (!addResult.isSuccess()) {
-            log.error("Failed to add address for clientID: {}. Error: {}", clientID, addResult.getErrorMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseWrapper.badRequest(addResult.getErrorMessage()));
         }
 
-        log.info("Address successfully created for clientID: {}", clientID);
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created("Address"));
     }
 
 
-    @Operation(summary = "Delete address by ID")
+    @Operation(summary = "Delete address by Id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Address successfully deleted"),
             @ApiResponse(responseCode = "404", description = "Address not found"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @DeleteMapping("/delete/{addressId}")
-    public ResponseEntity<ResponseWrapper<Void>> deleteAddressById(@PathVariable Long addressId) {
-        log.info("Delete Address: Request to delete address with addressId: {}", addressId);
-
-        boolean isAddressExisting = addressService.validateExistingAddress(addressId);
-        if (!isAddressExisting) {
-            log.error("Delete Address: Failed to found address with ID: {}", addressId);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Address", "ID"));
-        }
-
-
-        log.info("Delete Address: Address successfully deleted with addressId: {}", addressId);
-        addressService.deleteAddressById(addressId);
+    public ResponseEntity<ResponseWrapper<Void>> deleteAddressById(@PathVariable Long addressId,  @RequestParam Long clientId) {
+        clientAddressService.deleteAddressFromClient(addressId, clientId);
 
         return ResponseEntity.ok(ResponseWrapper.ok("Address", "Delete"));
     }

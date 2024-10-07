@@ -31,7 +31,7 @@ public class CartFacadeFacadeServiceImpl implements CartFacadeService {
     public CompletableFuture<Void> createClientCart(Long clientId) {
         return CompletableFuture.runAsync(() -> {
             log.info("Starting to create client cart for client ID: {}", clientId);
-            String url = cartServiceUrlProvider.get() + "/v1/api/ecommerce/carts/create/{clientId}";
+            String url = cartServiceUrlProvider.get() + "/v1/drugstore/ecommerce-carts/create/" + clientId;
                 ResponseEntity<ResponseWrapper<Void>> responseEntity = restTemplate.exchange(
                         url,
                         HttpMethod.POST,

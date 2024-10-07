@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Positive;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CompleteOrderRequest {
+public class OrderPaymentStatus {
     @JsonProperty("is_order_paid")
     @NotNull(message = "is_order_paid is obligatory")
     private boolean isOrderPaid;
@@ -20,10 +20,4 @@ public class CompleteOrderRequest {
     @NotNull(message = "order_id is obligatory")
     @Positive(message = "order_id must be positive")
     private Long orderId;
-
-    @JsonProperty("address_id")
-    private Long addressId;
-
-    @JsonProperty("client_id")
-    private Long clientId;
 }

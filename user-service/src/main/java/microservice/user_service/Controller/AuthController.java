@@ -60,9 +60,8 @@ public class AuthController {
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ResponseWrapper.unauthorized(findingResult.getErrorMessage()));
         }
 
-
         CompletableFuture<String> processLoginFuture = authService.processLogin(userDTO);
         String JWT_TOKEN = processLoginFuture.join();
-        return ResponseEntity.ok(ResponseWrapper.ok("User" ,"Authorize", JWT_TOKEN));
+        return ResponseEntity.ok(ResponseWrapper.ok(JWT_TOKEN,"User" ,"Authorize"));
     }
 }

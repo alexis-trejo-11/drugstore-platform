@@ -4,9 +4,11 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Client.Adress.Addre
 import at.backend.drugstore.microservice.common_classes.DTOs.Client.ClientDTO;
 import lombok.extern.slf4j.Slf4j;
 import microservice.ecommerce_order_service.Model.ShippingData;
+import microservice.ecommerce_order_service.Model.ShippingStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Random;
 
 @Service
@@ -17,7 +19,7 @@ public class ShippingService {
         ShippingData shippingData = new ShippingData();
         StringBuilder address = new StringBuilder();
         address.append(addressDTO.getStreet());
-        address.append(" #").append(addressDTO.getHouseNumber());
+        address.append(" #").append(String.valueOf(addressDTO.getHouseNumber()));
 
         if (addressDTO.getInnerNumber() != null) {
             address.append(" (interior #").append(addressDTO.getInnerNumber()).append(")");
@@ -27,12 +29,15 @@ public class ShippingService {
         shippingData.setCity(addressDTO.getCity());
         shippingData.setState(addressDTO.getState());
         shippingData.setCountry(addressDTO.getCountry());
+        shippingData.setServiceType("Standard");
         shippingData.setPostalCode(String.valueOf(addressDTO.getZipCode()));
         shippingData.setPhoneNumber(clientDTO.getPhone());
         shippingData.setRecipientName(clientDTO.getFirstName() + " " + clientDTO.getLastName());
         shippingData.setShippingCost(BigDecimal.ZERO);
+        shippingData.setShippingStatus(ShippingStatus.SHIPPED);
         shippingData.setTrackingNumber(generateTrackingNumber());
-
+        shippingData.setCreatedAt(LocalDateTime.now());
+        shippingData.setUpdatedAt(LocalDateTime.now());
 
         return shippingData;
     }

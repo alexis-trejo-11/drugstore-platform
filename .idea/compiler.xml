@@ -7,14 +7,15 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.34/ec547ef414ab1d2c040118fb9c1c265ada63af14/lombok-1.18.34.jar" />
         </processorPath>
+        <module name="backend.drugstore.address-service.test" />
+        <module name="at.backend.drugstore.backend.drugstore.ecommerce_order-service.test" />
+        <module name="at.backend.drugstore.microservice.backend.drugstore.inventory-service.test" />
+        <module name="at.backend.drugstore.microservice.backend.drugstore.ecommerce_payment-service.test" />
+        <module name="at.backend.drugstore.microservice.backend.drugstore.ecommerce_sale-service.test" />
         <module name="at.backend.drugstore.backend.drugstore.common-classes.test" />
         <module name="at.backend.drugstore.backend.drugstore.employee-service.test" />
         <module name="at.backend.drugstore.microservice.backend.drugstore.sale-service.test" />
-        <module name="at.backend.drugstore.microservice.backend.drugstore.inventory-service.test" />
-        <module name="at.backend.drugstore.microservice.backend.drugstore.ecommerce_order-service.test" />
-        <module name="at.backend.drugstore.microservice.backend.drugstore.ecommerce_payment-service.test" />
         <module name="at.backend.drugstore.backend.drugstore.common-classes.main" />
-        <module name="at.backend.drugstore.microservice.backend.drugstore.ecommerce_sale-service.test" />
         <module name="at.backend.drugstore.backend.drugstore.ecommerce_cart-service.test" />
         <module name="at.backend.drugstore.backend.drugstore.client-service.test" />
         <module name="at.backend.drugstore.microservice.backend.drugstore.user-service.test" />
@@ -30,7 +31,7 @@
         <module name="at.backend.drugstore.microservice.backend.drugstore.product-service.main" />
         <module name="at.backend.drugstore.microservice.backend.drugstore.inventory-service.main" />
         <module name="at.backend.drugstore.backend.drugstore.employee-service.main" />
-        <module name="at.backend.drugstore.microservice.backend.drugstore.ecommerce_order-service.main" />
+        <module name="at.backend.drugstore.backend.drugstore.ecommerce_order-service.main" />
         <module name="at.backend.drugstore.microservice.backend.drugstore.ecommerce_payment-service.main" />
         <module name="at.backend.drugstore.backend.drugstore.ecommerce_cart-service.main" />
         <module name="at.backend.drugstore.microservice.backend.drugstore.sale-service.main" />
@@ -44,6 +45,7 @@
         </processorPath>
         <module name="at.backend.drugstore.microservice.backend.drugstore.user-service.main" />
         <module name="at.backend.drugstore.backend.drugstore.client-service.main" />
+        <module name="backend.drugstore.address-service.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="17" />

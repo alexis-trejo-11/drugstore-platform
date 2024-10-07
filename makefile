@@ -10,6 +10,10 @@ create tables:
     docker cp ./flyway/queries/V1__create_client_tables.sql drugstore_databases:/tmp/V1__create_client_tables.sql
     docker exec -i drugstore_databases psql -U postgres -d drugstore_clients_db -f /tmp/V1__create_client_tables.sql
 
+    # address
+    docker cp ./flyway/queries/V1__create_address_tables.sql drugstore_databases:/tmp/V1__create_address_tables.sql
+    docker exec -i drugstore_databases psql -U postgres -d drugstore_addresses_db -f /tmp/V1__create_address_tables.sql
+
     # employees
     docker cp ./flyway/queries/V1__create_employee_tables.sql drugstore_databases:/tmp/V1__create_employee_tables.sql
     docker exec -i drugstore_databases psql -U postgres -d drugstore_employees_db -f /tmp/V1__create_employee_tables.sql
