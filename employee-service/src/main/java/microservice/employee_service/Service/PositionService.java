@@ -3,6 +3,7 @@ package microservice.employee_service.Service;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.Postion.PositionDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.Postion.PositionInsertDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.Postion.PositionUpdateDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,7 +13,6 @@ public interface PositionService {
     void createPosition(PositionInsertDTO positionInsertDTO);
     Page<PositionDTO> getPositionsSortedByNameAsc(Pageable pageable, boolean sortedAsc);
     PositionDTO getPositionById(Long positionId);
-    void updatePosition(PositionUpdateDTO positionUpdateDTO);
-    void deletePosition(Long positionId);
-    boolean validateExisitingPosition(Long positionId);
+    Result<Void> updatePosition(PositionUpdateDTO positionUpdateDTO);
+    Result<Void> deletePosition(Long positionId);
     }

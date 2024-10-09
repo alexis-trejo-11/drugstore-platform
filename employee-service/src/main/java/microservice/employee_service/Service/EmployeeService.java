@@ -9,11 +9,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface EmployeeService {
-    void addEmployee(EmployeeInsertDTO employeeDTO);
+    Result<Void> createEmployee(EmployeeInsertDTO employeeDTO);
     Page<EmployeeDTO> getEmployeesByPagesSortedByName(Pageable pageable);
-    EmployeeDTO getEmployeeById(Long employeeId);
-    void updateEmployee(EmployeeUpdateDTO employeeUpdateDTO);
-    void deleteEmployee(Long employeeId);
+    Result<EmployeeDTO> getEmployeeById(Long employeeId);
+    Result<Void> updateEmployee(EmployeeUpdateDTO employeeUpdateDTO);
+    Result<Void> deleteEmployee(Long employeeId);
     Result<EmployeeDTO> getEmployeeByEmailOrPhoneOrID(RequestEmployeeUser requestEmployeeUser);
     boolean validateExisitingEmployee(Long employeeId);
 }

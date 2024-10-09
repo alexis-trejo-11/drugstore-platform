@@ -12,9 +12,10 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class PositionUpdateDTO {
 
-    @NotNull(message = "id is obligatory")
-    @Positive(message = "id must be positive")
-    private Long id;
+    @JsonProperty("position_id")
+    @NotNull(message = "position_id is obligatory")
+    @Positive(message = "position_id must be positive")
+    private Long positionId;
 
     @JsonProperty("position_name")
     @NotNull(message = "position_name is obligatory")
