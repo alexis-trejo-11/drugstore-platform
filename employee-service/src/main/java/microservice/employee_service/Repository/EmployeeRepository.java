@@ -17,7 +17,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     List<Employee> findByGenre(Genre genre);
 
-    List<Employee> findByBirthDateBetween(Date startDate, Date endDate);
+    List<Employee> findByDateOfBirthBetween(Date startDate, Date endDate);
 
     Optional<Employee> findByCompanyEmail(String companyEmail);
 

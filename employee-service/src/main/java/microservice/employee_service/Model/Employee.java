@@ -27,11 +27,12 @@ public class Employee implements Serializable {
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
 
+    @Column(name = "genre", nullable = false)
     @Enumerated(EnumType.STRING)
     private Genre genre;
 
-    @Column(name = "birth_date")
-    private Date birthDate;
+    @Column(name = "date_of_birth", nullable = false)
+    private Date dateOfBirth;
 
     @Column(name = "company_email")
     private String companyEmail;
@@ -39,7 +40,7 @@ public class Employee implements Serializable {
     @Column(name = "company_phone")
     private String companyPhone;
 
-    @Column(name = "hired_at")
+    @Column(name = "hired_at", nullable = false)
     private LocalDateTime hiredAt;
 
     @Column(name = "fired_at")
@@ -60,16 +61,5 @@ public class Employee implements Serializable {
 
     @OneToOne(mappedBy = "employee")
     private PhoneNumber phoneNumber;
-
-    public Employee(EmployeeInsertDTO employeeInsertDTO) {
-        this.firstName = employeeInsertDTO.getFirstName();
-        this.lastName = employeeInsertDTO.getLastName();
-        this.birthDate = employeeInsertDTO.getBirthDate();
-        this.hiredAt = employeeInsertDTO.getHiredAt();
-        this.isEmployeeActive = true;
-        this.genre = Genre.valueOf(employeeInsertDTO.getGenre());
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
 
 }

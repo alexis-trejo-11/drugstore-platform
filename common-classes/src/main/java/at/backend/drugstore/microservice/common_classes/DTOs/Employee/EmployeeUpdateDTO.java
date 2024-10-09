@@ -13,9 +13,10 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 public class EmployeeUpdateDTO {
-    @NotNull(message = "id is obligatory")
-    @Positive(message = "id must be positive")
-    private Long id;
+    @JsonProperty("employee_id")
+    @NotNull(message = "employee_id is obligatory")
+    @Positive(message = "employee_id must be positive")
+    private Long EmployeeId;
 
     @JsonProperty("first_name")
     @NotNull(message = "first_name is obligatory")

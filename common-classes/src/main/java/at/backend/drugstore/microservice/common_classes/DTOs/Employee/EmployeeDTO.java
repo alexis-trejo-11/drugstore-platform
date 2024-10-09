@@ -23,8 +23,8 @@ public class EmployeeDTO {
     @JsonProperty("genre")
     private String genre;
 
-    @JsonProperty("birthdate")
-    private Date birthDate;
+    @JsonProperty("date_of_birth")
+    private Date dateOfBirth;
 
     @JsonProperty("company_email")
     private String companyEmail;

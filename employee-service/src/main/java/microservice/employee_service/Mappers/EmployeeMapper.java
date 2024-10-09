@@ -30,17 +30,17 @@ public interface EmployeeMapper {
             @Mapping(target = "phoneNumber", ignore = true),
             @Mapping(target = "employeeActive", expression = "java(true)"),
             @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())"),
+            @Mapping(target = "hiredAt", expression = "java(java.time.LocalDateTime.now())"),
             @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())"),
             @Mapping(source = "employeeInsertDTO.genre", target = "genre")
     })
     Employee insertDtoToEmployee(EmployeeInsertDTO employeeInsertDTO);
 
-    @Mapping(target = "firedAt", ignore = true)
+    @Mapping(target = "hiredAt", ignore = true)
     @Mapping(target = "position", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "companyPhone", ignore = true)
     @Mapping(target = "companyEmail", ignore = true)
-    @Mapping(source = "employeeUpdateDTO.genre", target = "genre")
     void updateEntity(@MappingTarget Employee employee, EmployeeUpdateDTO employeeUpdateDTO);
 
     default String genreToString(Genre genre) {

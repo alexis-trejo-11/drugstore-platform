@@ -5,6 +5,7 @@ import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeIn
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.EmployeeUpdateDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.User.RequestEmployeeUser;
 import at.backend.drugstore.microservice.common_classes.Utils.Result;
+import jakarta.ws.rs.NotFoundException;
 import microservice.employee_service.Mappers.EmployeeMapper;
 import microservice.employee_service.Model.Employee;
 import microservice.employee_service.Model.Position;
@@ -26,32 +27,37 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final CompanyHelper companyHelper;
     private final EmployeeMapper employeeMapper;
+    private final PositionRepository positionRepository;
 
     @Autowired
     public EmployeeServiceImpl(EmployeeRepository employeeRepository,
                                CompanyHelper companyHelper,
-                               EmployeeMapper employeeMapper) {
+                               EmployeeMapper employeeMapper,
+                               PositionRepository positionRepository) {
         this.employeeRepository = employeeRepository;
         this.companyHelper = companyHelper;
         this.employeeMapper = employeeMapper;
+        this.positionRepository = positionRepository;
     }
 
     @Override
     @Transactional
-    public void addEmployee(EmployeeInsertDTO employeeDTO) {
-        Employee employee = new Employee(employeeDTO);
+    public Result<Void> createEmployee(EmployeeInsertDTO employeeInsertDTO) {
+        Employee employee = employeeMapper.insertDtoToEmployee(employeeInsertDTO);
 
-        employeeRepository.saveAndFlush(employee);
+        Optional<Position> optionalPosition = positionRepository.findById(employeeInsertDTO.getPositionId());
+        if (optionalPosition.isEmpty()) {
+            return Result.error("Position provided not found");
 
-        String employeeEmail = companyHelper.companyEmailGenerator(employee.getFirstName(), employee.getLastName(), employee.getId());
-        employee.setCompanyEmail(employeeEmail);
-
-        String phoneNumber = companyHelper.getAndAssignCompanyPhone(employee);
-        if (phoneNumber != null) {
-            employee.setCompanyPhone(phoneNumber);
         }
+        employee.setPosition(optionalPosition.get());
 
         employeeRepository.saveAndFlush(employee);
+
+        // Assign email and phone in a second task
+        companyHelper.assignEmailAndPhoneAsync(employee);
+
+        return Result.success();
     }
 
     @Override
@@ -65,9 +71,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional
     @Cacheable(value = "employeeById", key = "#employeeId")
-    public EmployeeDTO getEmployeeById(Long employeeId) {
-            Employee employee = employeeRepository.findById(employeeId).orElse(null);
-            return employeeMapper.employeeToDTO(employee);
+    public Result<EmployeeDTO> getEmployeeById(Long employeeId) {
+            Optional<Employee> optionalEmployee = employeeRepository.findById(employeeId);
+            return optionalEmployee.map(employee ->  Result.success(employeeMapper.employeeToDTO(employee)))
+                    .orElseGet(() -> Result.error("employee not found") );
     }
 
     @Override
@@ -92,19 +99,25 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
-    public void updateEmployee(EmployeeUpdateDTO employeeUpdateDTO) {
-            Employee employee = employeeRepository.findById(employeeUpdateDTO.getId()).orElse(null);
-            if (employee == null) {return;}
-
+    public Result<Void> updateEmployee(EmployeeUpdateDTO employeeUpdateDTO) {
+        Optional<Employee> optionalEmployee = employeeRepository.findById(employeeUpdateDTO.getEmployeeId());
+        return optionalEmployee.map(employee -> {
             employeeMapper.updateEntity(employee, employeeUpdateDTO);
-
             employeeRepository.saveAndFlush(employee);
+
+            return Result.success();
+        }).orElseGet(() -> Result.error("employee not found"));
     }
 
     @Override
     @Transactional
-    public void deleteEmployee(Long employeeId) {
+    public Result<Void> deleteEmployee(Long employeeId) {
+        if (!employeeRepository.existsById(employeeId)) {
+            return Result.error("employee");
+        }
+
         employeeRepository.deleteById(employeeId);
+        return Result.success();
     }
 
     @Override
@@ -112,5 +125,4 @@ public class EmployeeServiceImpl implements EmployeeService {
     public boolean validateExisitingEmployee(Long employeeId) {
         return employeeRepository.findById(employeeId).isPresent();
     }
-
 }

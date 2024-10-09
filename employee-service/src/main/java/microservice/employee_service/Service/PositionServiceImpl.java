@@ -3,6 +3,7 @@ package microservice.employee_service.Service;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.Postion.PositionInsertDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.Postion.PositionDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.Postion.PositionUpdateDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import lombok.extern.slf4j.Slf4j;
 import microservice.employee_service.Mappers.PositionMapper;
 import microservice.employee_service.Model.Position;
@@ -65,23 +66,24 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     @Transactional
-    public void updatePosition(PositionUpdateDTO positionUpdateDTO) {
-        Position position = positionRepository.findById(positionUpdateDTO.getId()).orElse(null);
-        if (position == null) { return; }
+    public Result<Void> updatePosition(PositionUpdateDTO positionUpdateDTO) {
+        Optional<Position> optionalPosition = positionRepository.findById(positionUpdateDTO.getPositionId());
+        return optionalPosition.map(position -> {
+            positionMapper.updateDTOtoEntity(positionUpdateDTO, position);
+            positionRepository.saveAndFlush(position);
 
-        positionMapper.updateDTOtoEntity(positionUpdateDTO, position);
-
-        positionRepository.saveAndFlush(position);
+            return Result.success();
+        }).orElseGet(() -> Result.error("Position not found"));
     }
 
     @Override
     @Transactional
-    public void deletePosition(Long positionId) {
-        positionRepository.deleteById(positionId);
-    }
+    public Result<Void> deletePosition(Long positionId) {
+       if (!positionRepository.existsById(positionId)) {
+           return Result.error("Position not found");
+       }
 
-    @Override
-    public boolean validateExisitingPosition(Long positionId) {
-        return positionRepository.findById(positionId).isPresent();
+       positionRepository.deleteById(positionId);
+       return Result.success();
     }
 }

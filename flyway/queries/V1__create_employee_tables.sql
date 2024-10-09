@@ -13,16 +13,16 @@ CREATE TABLE employees (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    genre VARCHAR(50),
-    birth_date DATE,
+    genre VARCHAR(50) NOT NULL,
+    date_of_birth DATE NOT NULL,
     company_email VARCHAR(255),
     company_phone VARCHAR(50),
-    hired_at TIMESTAMP,
+    hired_at TIMESTAMP NOT NULL,
     fired_at TIMESTAMP,
     is_employee_active BOOLEAN,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    position_id INT,
+    position_id INT NOT NULL,
     FOREIGN KEY (position_id) REFERENCES positions(id) ON DELETE CASCADE
 );
 
@@ -56,7 +56,7 @@ INSERT INTO positions (position_name, salary, classification_workday, created_at
 VALUES ('Inventory Specialist', 45000.00, 'FULL_TIME', NOW(), NOW());
 
 -- Insert into Employee Table
-INSERT INTO employees (first_name, last_name, genre, birth_date, company_email, company_phone, hired_at, fired_at, is_employee_active, created_at, updated_at, position_id)
+INSERT INTO employees (first_name, last_name, genre, date_of_birth, company_email, company_phone, hired_at, fired_at, is_employee_active, created_at, updated_at, position_id)
 VALUES
     ('John', 'Doe', 'MALE', '1985-05-15', 'john.doe@company.com', '555-1234', NOW(), NULL, TRUE, NOW(), NOW(), 1),
     ('Jane', 'Smith', 'FEMALE', '1990-07-20', 'jane.smith@company.com', '555-5678', NOW(), NULL, TRUE, NOW(), NOW(), 2),

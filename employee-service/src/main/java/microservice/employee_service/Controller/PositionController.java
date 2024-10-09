@@ -4,6 +4,7 @@ import at.backend.drugstore.microservice.common_classes.Utils.ResponseWrapper;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.Postion.PositionInsertDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.Postion.PositionDTO;
 import at.backend.drugstore.microservice.common_classes.DTOs.Employee.Postion.PositionUpdateDTO;
+import at.backend.drugstore.microservice.common_classes.Utils.Result;
 import lombok.extern.slf4j.Slf4j;
 import microservice.employee_service.Service.PositionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,8 +53,8 @@ public class PositionController {
     })
     @GetMapping("/by-name")
     public ResponseEntity<ResponseWrapper<Page<PositionDTO>>> getPositionsOrderByName(@RequestParam(defaultValue = "0") int page,
-                                                                                 @RequestParam(defaultValue = "10") int size,
-                                                                                 @RequestParam(defaultValue = "true") boolean sortedAsc) {
+                                                                                      @RequestParam(defaultValue = "10") int size,
+                                                                                      @RequestParam(defaultValue = "true") boolean sortedAsc) {
         Pageable pageable = PageRequest.of(page, size);
         Page<PositionDTO> positionDTOS = positionService.getPositionsSortedByNameAsc(pageable, sortedAsc);
 
@@ -69,12 +70,10 @@ public class PositionController {
     public ResponseEntity<ResponseWrapper<PositionDTO>> getPositionById(@PathVariable Long positionId) {
         PositionDTO positionDTO = positionService.getPositionById(positionId);
         if (positionDTO == null) {
-            log.warn("Position with ID {} not found.", positionId);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(false, null, "Position with Id " + positionId + " Not Found.", HttpStatus.NOT_FOUND.value()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Position"));
         }
-        log.info("Fetched position with ID {}.", positionId);
-        return ResponseEntity.ok(new ResponseWrapper<>(true, positionDTO, "Position Successfully Fetched.", HttpStatus.OK.value()));
+
+        return ResponseEntity.ok(ResponseWrapper.found(positionDTO, "Position"));
     }
 
     @Operation(summary = "Update an existing position")
@@ -84,16 +83,12 @@ public class PositionController {
     })
     @PutMapping("/update")
     public ResponseEntity<ResponseWrapper<Void>> updatePosition(@Valid @RequestBody PositionUpdateDTO positionUpdateDTO) {
-       boolean isPositionUpdated = positionService.validateExisitingPosition(positionUpdateDTO.getId());
-        if (!isPositionUpdated) {
-            log.warn("Position with ID {} not found for update.", positionUpdateDTO.getId());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Position", "Id"));
+        Result<Void> updateResult = positionService.updatePosition(positionUpdateDTO);
+        if (!updateResult.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Position"));
         }
 
-        positionService.updatePosition(positionUpdateDTO);
-        log.info("Position with ID {} successfully updated.", positionUpdateDTO.getId());
-
-        return ResponseEntity.ok(new ResponseWrapper<>(true, null, "Position Successfully Updated.", HttpStatus.OK.value()));
+        return ResponseEntity.ok(ResponseWrapper.ok("Position", "Update"));
     }
 
     @Operation(summary = "Delete position by ID")
@@ -103,14 +98,10 @@ public class PositionController {
     })
     @DeleteMapping("/{positionId}")
     public ResponseEntity<ResponseWrapper<Void>> deletePosition(@PathVariable Long positionId) {
-        boolean isPositionExisting = positionService.validateExisitingPosition(positionId);
-        if (!isPositionExisting) {
-            log.warn("Position with ID {} not found for deletion.", positionId);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Position", "Id"));
+        Result<Void> deleteResult = positionService.deletePosition(positionId);
+        if (!deleteResult.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseWrapper.notFound("Position"));
         }
-
-        positionService.deletePosition(positionId);
-        log.info("Position with ID {} successfully deleted.", positionId);
 
         return ResponseEntity.ok(ResponseWrapper.ok("Position", "Delete"));
     }
