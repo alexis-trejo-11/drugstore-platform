@@ -1,5 +1,12 @@
 package microservice.product_service.app.domain.model;
 
+import lombok.Getter;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Getter
 public enum ProductCategory {
     ANALGESICS("Analgesics"),
     ANTIBIOTICS("Antibiotics"),
@@ -20,7 +27,9 @@ public enum ProductCategory {
         this.displayName = displayName;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public static List<String> getAllNames() {
+        return Arrays.stream(ProductCategory.values())
+                .map(ProductCategory::getDisplayName)
+                .toList();
     }
 }
