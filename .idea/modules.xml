@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/product-service/at.backend.drugstore.microservice.backend.drugstore.product-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/product-service/at.backend.drugstore.microservice.backend.drugstore.product-service.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/product-service/at.backend.drugstore.microservice.backend.drugstore.product-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/product-service/at.backend.drugstore.microservice.backend.drugstore.product-service.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/backend.drugstore.iml" filepath="$PROJECT_DIR$/.idea/modules/backend.drugstore.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.iml" filepath="$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.main.iml" />
