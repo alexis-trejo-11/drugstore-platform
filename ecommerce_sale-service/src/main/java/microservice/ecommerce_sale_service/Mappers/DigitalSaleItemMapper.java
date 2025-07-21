@@ -23,7 +23,7 @@ public interface DigitalSaleItemMapper {
     @Mapping(target = "productId", source = "orderItemDTO.productId")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "digitalSale", ignore = true)
-    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "addedAt", expression = "java(java.time.LocalDateTime.now())")
     DigitalSaleItem toEntity(OrderItemDTO orderItemDTO);
 
     @Mapping(target = "productQuantity", source = "orderItemDTO.productQuantity")
@@ -32,7 +32,7 @@ public interface DigitalSaleItemMapper {
     @Mapping(target = "productId", source = "orderItemDTO.productId")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "digitalSale", ignore = true)
-    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "addedAt", expression = "java(java.time.LocalDateTime.now())")
     void updateEntityFromDTO(OrderItemDTO orderItemDTO, @MappingTarget DigitalSaleItem digitalSaleItem);
 
     default void updateDigitalSale(DigitalSale digitalSale, @MappingTarget DigitalSaleItem digitalSaleItem) {

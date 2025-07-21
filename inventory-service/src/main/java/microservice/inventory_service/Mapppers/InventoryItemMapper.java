@@ -14,7 +14,7 @@ import org.mapstruct.factory.Mappers;
 public interface InventoryItemMapper {
 
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "addedAt", expression = "java(java.time.LocalDateTime.now())")
     InventoryItem insertDtoToEntity(InventoryItemInsertDTO inventoryItemInsertDTO);
 
     InventoryItemDTO entityToDTO(InventoryItem inventoryItem);

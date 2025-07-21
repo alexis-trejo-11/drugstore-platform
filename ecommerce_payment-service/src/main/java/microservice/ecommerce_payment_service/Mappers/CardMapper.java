@@ -14,7 +14,7 @@ public interface CardMapper {
     @Mapping(target = "cardType", source = "cardInsertDTO.cardType", qualifiedByName = "stringToCardType")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "cardValid", ignore = true)
-    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "addedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "clientId", source = "clientId")
     Card insertDtoToEntity(CardInsertDTO cardInsertDTO, Long clientId);

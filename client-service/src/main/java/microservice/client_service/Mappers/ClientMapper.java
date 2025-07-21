@@ -13,7 +13,7 @@ public interface ClientMapper {
 
     void updateClientFromDto(ClientInsertDTO clientInsertDTO, @MappingTarget Client client);
 
-    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "addedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "lastAction", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "active", constant = "true")
@@ -26,7 +26,7 @@ public interface ClientMapper {
     ClientDTO entityToDTO(Client client);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "addedAt", ignore = true)
     @Mapping(target = "lastAction", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "active", ignore = true)

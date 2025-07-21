@@ -14,7 +14,7 @@ import org.mapstruct.Named;
 public interface AddressMapper {
 
     @Mappings({
-            @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())"),
+            @Mapping(target = "addedAt", expression = "java(java.time.LocalDateTime.now())"),
             @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())"),
             @Mapping(target = "zipCode", expression = "java(Integer.parseInt(addressInsertDTO.getZipCode()))"),
             @Mapping(target = "addressType", source = "addressInsertDTO", qualifiedByName = "mapAddressType"),
