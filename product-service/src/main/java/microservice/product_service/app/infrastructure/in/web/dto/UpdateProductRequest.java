@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.PastOrPresent;
 import microservice.product_service.app.domain.model.ProductCategory;
+import microservice.product_service.app.domain.model.ProductId;
+import microservice.product_service.app.domain.port.in.command.UpdateProductCommand;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -60,4 +62,27 @@ public class UpdateProductRequest {
 
     @Size(max = 500, message = "Administration must not exceed 500 characters")
     private String administration;
+
+
+    public UpdateProductCommand toCommand(ProductId productId) {
+        return UpdateProductCommand.builder()
+                .productId(productId)
+                .name(this.getName())
+                .description(this.getDescription())
+                .activeIngredient(this.getActiveIngredient())
+                .manufacturer(this.getManufacturer())
+                .category(this.getCategory())
+                .price(this.getPrice())
+                .stockQuantity(this.getStockQuantity())
+                .barcode(this.getBarcode())
+                .batchNumber(this.getBatchNumber())
+                .expirationDate(this.getExpirationDate())
+                .manufactureDate(this.getManufactureDate())
+                .requiresPrescription(this.getRequiresPrescription() != null ? this.getRequiresPrescription() : false)
+                .contraindications(this.getContraindications())
+                .dosage(this.getDosage())
+                .administration(this.getAdministration())
+                .build();
+    }
+    
 }

@@ -4,7 +4,6 @@ import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 public enum ProductCategory {
@@ -27,7 +26,7 @@ public enum ProductCategory {
         this.displayName = displayName;
     }
 
-    public static List<String> getAllNames() {
+    public static List<String> getAllDisplayNames() {
         return Arrays.stream(ProductCategory.values())
                 .map(ProductCategory::getDisplayName)
                 .toList();

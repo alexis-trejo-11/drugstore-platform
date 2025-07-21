@@ -17,7 +17,7 @@ public interface OrderItemMapper {
             @Mapping(target = "productId", source = "cartItemDTO.productId"),
             @Mapping(target = "productQuantity", source = "cartItemDTO.productQuantity"),
             @Mapping(target = "order", source = "order"),
-            @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())"),
+            @Mapping(target = "addedAt", expression = "java(java.time.LocalDateTime.now())"),
     })
     OrderItem cartItemDTOToOrderItem(CartItemDTO cartItemDTO, Order order);
 

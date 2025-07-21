@@ -3,6 +3,7 @@ package microservice.product_service.app.infrastructure.in.web.dto;
 import lombok.Data;
 import jakarta.validation.constraints.*;
 import microservice.product_service.app.domain.model.ProductCategory;
+import microservice.product_service.app.domain.port.in.command.CreateProductCommand;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -56,4 +57,25 @@ public class CreateProductRequest {
 
     @Size(max = 500, message = "Administration must not exceed 500 characters")
     private String administration;
+    
+    
+    public CreateProductCommand toCommand() {
+        return CreateProductCommand.builder()
+                .name(this.getName())
+                .description(this.getDescription())
+                .activeIngredient(this.getActiveIngredient())
+                .manufacturer(this.getManufacturer())
+                .category(this.getCategory())
+                .price(this.getPrice())
+                .stockQuantity(this.getStockQuantity())
+                .barcode(this.getBarcode())
+                .batchNumber(this.getBatchNumber())
+                .expirationDate(this.getExpirationDate())
+                .manufactureDate(this.getManufactureDate())
+                .requiresPrescription(this.isRequiresPrescription())
+                .contraindications(this.getContraindications())
+                .dosage(this.getDosage())
+                .administration(this.getAdministration())
+                .build();
+    }
 }

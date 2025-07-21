@@ -29,7 +29,7 @@ public interface EmployeeMapper {
             @Mapping(target = "position", ignore = true),
             @Mapping(target = "phoneNumber", ignore = true),
             @Mapping(target = "employeeActive", expression = "java(true)"),
-            @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())"),
+            @Mapping(target = "addedAt", expression = "java(java.time.LocalDateTime.now())"),
             @Mapping(target = "hiredAt", expression = "java(java.time.LocalDateTime.now())"),
             @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())"),
             @Mapping(source = "employeeInsertDTO.genre", target = "genre")
@@ -38,7 +38,7 @@ public interface EmployeeMapper {
 
     @Mapping(target = "hiredAt", ignore = true)
     @Mapping(target = "position", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "addedAt", ignore = true)
     @Mapping(target = "companyPhone", ignore = true)
     @Mapping(target = "companyEmail", ignore = true)
     void updateEntity(@MappingTarget Employee employee, EmployeeUpdateDTO employeeUpdateDTO);

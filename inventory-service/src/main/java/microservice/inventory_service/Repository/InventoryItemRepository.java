@@ -19,7 +19,7 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, Lo
     List<InventoryItem> findByProductId(Long productId);
 
 
-    @Query("SELECT i FROM InventoryItem i WHERE i.createdAt BETWEEN :startDate AND :endDate")
+    @Query("SELECT i FROM InventoryItem i WHERE i.addedAt BETWEEN :startDate AND :endDate")
     List<InventoryItem> findByCreatedAtBetween(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate

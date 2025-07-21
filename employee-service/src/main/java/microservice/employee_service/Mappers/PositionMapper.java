@@ -14,7 +14,7 @@ public interface PositionMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "employees", ignore = true)
-    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "addedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     Position insertDtoToEntity(PositionInsertDTO positionInsertDTO);
 
@@ -23,7 +23,7 @@ public interface PositionMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "employees", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "addedAt", ignore = true)
     @Mapping(target = "classificationWorkday", expression = "java(stringToClassificationWorkday(positionUpdateDTO.getClassificationWorkday()))")
     void updateDTOtoEntity(PositionUpdateDTO positionUpdateDTO, @MappingTarget Position position);
 
