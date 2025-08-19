@@ -1,11 +1,10 @@
 package microservice.users.infrastructure.api.rest;
 
 import lombok.RequiredArgsConstructor;
-import microservice.users.core.models.User;
-import microservice.users.core.models.valueobjects.Email;
-import microservice.users.core.models.valueobjects.Password;
-import microservice.users.core.models.valueobjects.UserId;
-import microservice.users.core.ports.input.UserUseCases;
+import microservice.users.core.domain.models.valueobjects.Email;
+import microservice.users.core.domain.models.valueobjects.Password;
+import microservice.users.core.domain.models.valueobjects.UserId;
+import microservice.users.core.domain.ports.input.UserUseCases;
 import microservice.users.infrastructure.api.rest.dto.AuthenticationRequest;
 import microservice.users.infrastructure.api.rest.dto.ChangePasswordRequest;
 import microservice.users.infrastructure.api.rest.dto.UserResponse;

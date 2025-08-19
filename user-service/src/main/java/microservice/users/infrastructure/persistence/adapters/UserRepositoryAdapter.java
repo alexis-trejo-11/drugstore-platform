@@ -1,10 +1,9 @@
 package microservice.users.infrastructure.persistence.adapters;
 
 import lombok.RequiredArgsConstructor;
-import microservice.users.core.models.User;
-import microservice.users.core.models.valueobjects.Email;
-import microservice.users.core.models.valueobjects.UserId;
-import microservice.users.core.ports.output.UserRepository;
+import microservice.users.core.domain.models.valueobjects.Email;
+import microservice.users.core.domain.models.valueobjects.UserId;
+import microservice.users.core.domain.ports.output.UserRepository;
 import microservice.users.infrastructure.persistence.mappers.UserMapper;
 import microservice.users.infrastructure.persistence.repositories.UserJpaRepository;
 import org.springframework.stereotype.Repository;
