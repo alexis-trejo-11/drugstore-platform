@@ -3,10 +3,13 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/product-service/at.backend.drugstore.microservice.backend.drugstore.product-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/product-service/at.backend.drugstore.microservice.backend.drugstore.product-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/user-service/at.backend.drugstore.microservice.backend.drugstore.user-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/user-service/at.backend.drugstore.microservice.backend.drugstore.user-service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/backend.drugstore.iml" filepath="$PROJECT_DIR$/.idea/modules/backend.drugstore.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.iml" filepath="$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/auth-service/backend.drugstore.auth-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/auth-service/backend.drugstore.auth-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/auth-service/backend.drugstore.auth-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/auth-service/backend.drugstore.auth-service.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/client-service/backend.drugstore.client-service.iml" filepath="$PROJECT_DIR$/.idea/modules/client-service/backend.drugstore.client-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common-classes/backend.drugstore.common-classes.iml" filepath="$PROJECT_DIR$/.idea/modules/common-classes/backend.drugstore.common-classes.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common-classes/backend.drugstore.common-classes.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common-classes/backend.drugstore.common-classes.main.iml" />

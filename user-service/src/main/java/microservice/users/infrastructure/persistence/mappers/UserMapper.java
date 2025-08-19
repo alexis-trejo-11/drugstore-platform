@@ -1,6 +1,5 @@
 package microservice.users.infrastructure.persistence.mappers;
 
-import microservice.users.core.models.User;
 import microservice.users.infrastructure.persistence.models.UserModel;
 import org.springframework.stereotype.Component;
 

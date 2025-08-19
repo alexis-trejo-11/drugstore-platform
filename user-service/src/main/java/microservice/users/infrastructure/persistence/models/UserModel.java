@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import microservice.users.core.models.enums.UserRole;
+import microservice.users.core.domain.models.enums.UserRole;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

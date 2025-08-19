@@ -1,16 +1,14 @@
 package microservice.users.infrastructure.persistence.adapters;
 
 import lombok.RequiredArgsConstructor;
-import microservice.users.core.models.Customer;
-import microservice.users.core.models.valueobjects.CustomerId;
-import microservice.users.core.models.valueobjects.Email;
-import microservice.users.core.ports.output.CustomerRepository;
+import microservice.users.core.domain.models.valueobjects.Email;
 import microservice.users.infrastructure.persistence.mappers.CustomerMapper;
 import microservice.users.infrastructure.persistence.repositories.CustomerJpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -26,8 +24,8 @@ public class CustomerRepositoryAdapter implements CustomerRepository {
     }
 
     @Override
-    public Optional<Customer> findById(CustomerId id) {
-        return customerJpaRepository.findById(id.value())
+    public Optional<Customer> findById(UUID uuid) {
+        return customerJpaRepository.findById(uuid)
                 .map(customerMapper::toDomain);
     }
 
@@ -45,14 +43,15 @@ public class CustomerRepositoryAdapter implements CustomerRepository {
     }
 
     @Override
-    public void delete(CustomerId id) {
-        customerJpaRepository.deleteById(id.value());
+    public void delete(UUID uuid) {
+        customerJpaRepository.deleteById(uuid);
     }
 
     @Override
-    public boolean existsById(CustomerId id) {
-        return customerJpaRepository.existsById(id.value());
+    public boolean existsById(UUID uuid) {
+        return customerJpaRepository.existsById(uuid);
     }
+
 
     @Override
     public List<Customer> findByFirstNameAndLastName(String firstName, String lastName) {
