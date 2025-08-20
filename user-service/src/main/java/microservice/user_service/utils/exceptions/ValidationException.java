@@ -1,6 +1,5 @@
-package microservice.auth.app.shared.exceptions;
+package microservice.user_service.utils.exceptions;
 
-import microservice.user_service.utils.exceptions.DrugstoreException;
 import org.springframework.http.HttpStatus;
 
 public class ValidationException extends DrugstoreException {
