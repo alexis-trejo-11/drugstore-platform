@@ -2,10 +2,10 @@ package microservice.user_service.users.core.application.handlers.command;
 
 import microservice.user_service.users.core.application.command.UpdatePasswordCommand;
 import microservice.user_service.users.core.application.dto.CommandResult;
-import microservice.user_service.users.core.application.handlers.CommandHandler;
+import microservice.user_service.users.core.ports.input.CommandHandler;
 import microservice.user_service.users.core.domain.exceptions.UserNotFoundError;
 import microservice.user_service.users.core.domain.models.entities.User;
-import microservice.user_service.users.core.domain.ports.output.UserRepository;
+import microservice.user_service.users.core.ports.output.UserRepository;
 import microservice.user_service.users.core.domain.service.PasswordValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import microservice.user_service.utils.password.PasswordEncoder;
