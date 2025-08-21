@@ -16,6 +16,7 @@ public class User {
     private String hashedPassword;
     private UserStatus status;
     private UserRole role;
+    private String twoFactorId;
 
     // Personal information
     private String firstName;
@@ -24,8 +25,40 @@ public class User {
     private Gender gender;
 
     // Timestamps
+    private LocalDateTime lastLoginAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public void updateLastLogin() {
+        this.lastLoginAt = LocalDateTime.now();
+    }
+
+    public void validateNotDisabled() {
+        if (this.status == UserStatus.INACTIVE || this.status == UserStatus.SUSPENDED || this.status == UserStatus.DELETED) {
+            throw new IllegalStateException("User account is " + this.status);
+        }
+    }
+
+    public boolean isTwoFactorEnabled() {
+        return twoFactorId != null && !twoFactorId.isEmpty();
+    }
+    public void enableTwoFactor(String twoFactorId) {
+        this.twoFactorId = twoFactorId;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void disableTwoFactor() {
+        this.twoFactorId = null;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void activate() {
+        if (this.status != UserStatus.PENDING) {
+            throw new IllegalStateException("User account is not pending activation.");
+        }
+        this.status = UserStatus.ACTIVE;
+        this.updatedAt = LocalDateTime.now();
+    }
 
     public void updateProfile(String firstName, String lastName, Date dateOfBirth, Gender gender) {
         this.firstName = firstName;
@@ -35,17 +68,11 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-
-
     public void deactivate() {
         this.status = UserStatus.INACTIVE;
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void activate() {
-        this.status = UserStatus.ACTIVE;
-        this.updatedAt = LocalDateTime.now();
-    }
 
     public void ban() {
         this.status = UserStatus.SUSPENDED;
@@ -154,6 +181,10 @@ public class User {
 
     public void setHashedPassword(String hashedPassword) {
         this.hashedPassword = hashedPassword; // Should be from not hashed to hashed
+    }
+
+    public LocalDateTime getLastLoginAt() {
+        return lastLoginAt;
     }
 
     public void updateAuthFields(String email, String phoneNumber) {

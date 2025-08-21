@@ -2,13 +2,13 @@ package microservice.user_service.users.core.application.handlers.command;
 
 import microservice.user_service.users.core.application.command.CreateUserCommand;
 import microservice.user_service.users.core.application.dto.CommandResult;
-import microservice.user_service.users.core.application.handlers.CommandHandler;
+import microservice.user_service.users.core.ports.input.CommandHandler;
 import microservice.user_service.users.core.application.mappers.UserMapper;
 import microservice.user_service.users.core.domain.exceptions.EmailAlreadyTakenError;
 import microservice.user_service.users.core.domain.exceptions.PhoneAlreadyTakenError;
 import microservice.user_service.users.core.domain.models.entities.User;
-import microservice.user_service.users.core.domain.ports.output.EventPublisher;
-import microservice.user_service.users.core.domain.ports.output.UserRepository;
+import microservice.user_service.users.core.ports.output.EventPublisher;
+import microservice.user_service.users.core.ports.output.UserRepository;
 import microservice.user_service.users.core.domain.service.PasswordValidator;
 import microservice.user_service.utils.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
