@@ -28,7 +28,7 @@ public class ResponseWrapper<T> {
         return response;
     }
 
-    public ResponseWrapper<T> created(T data, String entity, Map<String, ?> metadata) {
+    public static <T> ResponseWrapper<T> created(T data, String entity, Map<String, ?> metadata) {
         String message = String.format("%s created successfully", entity);
         var response = new ResponseWrapper<T>();
         response.setSuccess(true);
@@ -39,12 +39,12 @@ public class ResponseWrapper<T> {
         return response;
     }
 
-    public ResponseWrapper<T> created(T data, String entity) {
-        return created(data, entity, Map.of());
+    public static <T> ResponseWrapper<T> created(T data, String entity) {
+        return ResponseWrapper.created(data, entity, Map.of());
     }
 
-    public ResponseWrapper<T> created(T data) {
-        return created(data, "Entity", Map.of());
+    public static <T> ResponseWrapper<T> created(T data) {
+        return ResponseWrapper.created(data, "Entity", Map.of());
     }
 
     public ResponseWrapper<T> found(T data, String entity, Map<String, ?> metadata) {
@@ -123,7 +123,7 @@ public class ResponseWrapper<T> {
         return response;
     }
 
-    public ResponseWrapper<Void> badRequest(ErrorDetails errorDetails) {
+    public static ResponseWrapper<Void> badRequest(ErrorDetails errorDetails) {
         var response = new ResponseWrapper<Void>();
         response.setSuccess(false);
         response.setMessage("Bad request");
@@ -138,7 +138,6 @@ public class ResponseWrapper<T> {
         return success(data, "Operation successful");
     }
 
-
     public ResponseWrapper<T> success(T data, String message) {
         return success(data, "Operation successful", Map.of());
     }
@@ -147,8 +146,8 @@ public class ResponseWrapper<T> {
         return success(null, "Operation successful");
     }
 
-    public ResponseWrapper<T> error(String message, Map<String, ?> metadata, ErrorDetails errorDetails) {
-        var response = new ResponseWrapper<T>();
+    public static ResponseWrapper<Void> error(String message, Map<String, ?> metadata, ErrorDetails errorDetails) {
+        var response = new ResponseWrapper<Void>();
         response.setSuccess(false);
         response.setMessage(message);
         response.setErrorDetails(errorDetails);
@@ -157,18 +156,15 @@ public class ResponseWrapper<T> {
         return response;
     }
 
-
-    public ResponseWrapper<T> error(String message, Map<String, ?> metadata) {
-        return error(message, metadata, null);
+    public static ResponseWrapper<Void> error(String message, Map<String, ?> metadata) {
+        return ResponseWrapper.error(message, metadata, null);
     }
 
-    public ResponseWrapper<T> error(String message) {
-        return error(message, Map.of(), null);
+    public static ResponseWrapper<Void> error(String message) {
+        return ResponseWrapper.error(message, Map.of(), null);
     }
 
-
-    public ResponseWrapper<T> error(String message, ErrorDetails errorDetails) {
-        return error(message, Map.of(), errorDetails);
+    public static ResponseWrapper<Void> error(String message, ErrorDetails errorDetails) {
+        return ResponseWrapper.error(message, Map.of(), errorDetails);
     }
 }
-

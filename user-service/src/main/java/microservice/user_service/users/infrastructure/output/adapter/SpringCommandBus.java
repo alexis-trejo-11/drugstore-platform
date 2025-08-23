@@ -28,8 +28,7 @@ public class SpringCommandBus implements CommandBus {
             Class<? extends Command> commandType = getCommandType(handler);
             if (handlers.containsKey(commandType)) {
                 throw new IllegalStateException(
-                        "Multiple handlers found for command: " + commandType.getSimpleName()
-                );
+                        "Multiple handlers found for command: " + commandType.getSimpleName());
             }
             handlers.put(commandType, handler);
             System.out.println("Registered command handler: " + handler.getClass().getSimpleName() +
@@ -43,15 +42,11 @@ public class SpringCommandBus implements CommandBus {
         CommandHandler<Command> handler = (CommandHandler<Command>) handlers.get(command.getClass());
         if (handler == null) {
             throw new IllegalArgumentException(
-                    "No handler registered for command: " + command.getClass().getSimpleName()
-            );
+                    "No handler registered for command: " + command.getClass().getSimpleName());
         }
 
-        try {
-            return handler.handle(command);
-        } catch (Exception e) {
-            throw new RuntimeException("Error executing command: " + command.getClass().getSimpleName(), e);
-        }
+        return handler.handle(command);
+
     }
 
     @SuppressWarnings("unchecked")
@@ -68,12 +63,10 @@ public class SpringCommandBus implements CommandBus {
         }
 
         throw new IllegalArgumentException(
-                "Could not determine command type for handler: " + handler.getClass().getSimpleName()
-        );
+                "Could not determine command type for handler: " + handler.getClass().getSimpleName());
     }
 
     public Map<Class<? extends Command>, CommandHandler<? extends Command>> getRegisteredHandlers() {
         return new HashMap<>(handlers);
     }
 }
-

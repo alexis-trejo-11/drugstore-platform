@@ -23,8 +23,7 @@ public class CreateUserCommandHandler implements CommandHandler<CreateUserComman
     public CreateUserCommandHandler(
             UserRepository userRepository,
             UserMapper userMapper,
-            PasswordEncoder passwordEncoder, EventPublisher eventPublisher
-    ) {
+            PasswordEncoder passwordEncoder, EventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
@@ -38,10 +37,10 @@ public class CreateUserCommandHandler implements CommandHandler<CreateUserComman
 
         String hashedPassword = passwordEncoder.hashPassword(command.password());
         User newUser = userMapper.fromCreateCommand(command, hashedPassword);
-        userRepository.save(newUser);
+        User userSaved = userRepository.save(newUser);
 
         eventPublisher.publish(userMapper.ToEvent(newUser));
-        return CommandResult.success("User created successfully", newUser.getId());
+        return CommandResult.success("User created successfully", userSaved.getId());
     }
 
     private void validateUniqueFields(CreateUserCommand command) {
@@ -49,8 +48,10 @@ public class CreateUserCommandHandler implements CommandHandler<CreateUserComman
             throw new EmailAlreadyTakenError(command.email());
         }
 
-        if (userRepository.existsByPhoneNumber(command.phoneNumber())) {
-            throw new PhoneAlreadyTakenError(command.phoneNumber());
+        if (command.phoneNumber() != null) {
+            if (userRepository.existsByPhoneNumber(command.phoneNumber())) {
+                throw new PhoneAlreadyTakenError(command.phoneNumber());
+            }
         }
     }
 }

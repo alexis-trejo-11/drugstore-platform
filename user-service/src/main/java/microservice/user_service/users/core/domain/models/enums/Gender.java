@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum Gender {
     MALE("male"),
     FEMALE("female"),
-    NON_BINARY("non-binary"),
+    PREFER_NOT_SAY("prefer_not_to_say"),
     OTHER("other");
 
     private final String value;

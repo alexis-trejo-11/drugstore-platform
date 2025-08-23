@@ -1,13 +1,10 @@
 package microservice.user_service.utils.page;
 
-
-
 public record PaginationMetadata(
         long totalElements,
         int totalPages,
         int currentPage,
-        int pageSize
-) {
+        int pageSize) {
     public PaginationMetadata {
         if (totalElements < 0) {
             throw new IllegalArgumentException("totalElements cannot be negative");
@@ -21,6 +18,14 @@ public record PaginationMetadata(
         if (pageSize <= 0) {
             throw new IllegalArgumentException("pageSize must be greater than zero");
         }
+    }
+
+    public static PaginationMetadata from(PageResponse<?> pageResponse) {
+        return new PaginationMetadata(
+                pageResponse.getTotalElements(),
+                pageResponse.getTotalPages(),
+                pageResponse.getPage(),
+                pageResponse.getSize());
     }
 
     public static PaginationMetadata empty() {

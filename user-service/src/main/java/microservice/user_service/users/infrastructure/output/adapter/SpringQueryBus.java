@@ -28,8 +28,7 @@ public class SpringQueryBus implements QueryBus {
             Class<? extends Query<?>> queryType = getQueryType(handler);
             if (handlers.containsKey(queryType)) {
                 throw new IllegalStateException(
-                        "Multiple handlers found for query: " + queryType.getSimpleName()
-                );
+                        "Multiple handlers found for query: " + queryType.getSimpleName());
             }
             handlers.put(queryType, handler);
             System.out.println("Registered query handler: " + handler.getClass().getSimpleName() +
@@ -43,15 +42,10 @@ public class SpringQueryBus implements QueryBus {
         QueryHandler<Query<T>, T> handler = (QueryHandler<Query<T>, T>) handlers.get(query.getClass());
         if (handler == null) {
             throw new IllegalArgumentException(
-                    "No handler registered for query: " + query.getClass().getSimpleName()
-            );
+                    "No handler registered for query: " + query.getClass().getSimpleName());
         }
 
-        try {
-            return handler.handle(query);
-        } catch (Exception e) {
-            throw new RuntimeException("Error executing query: " + query.getClass().getSimpleName(), e);
-        }
+        return handler.handle(query);
     }
 
     @SuppressWarnings("unchecked")
@@ -68,8 +62,7 @@ public class SpringQueryBus implements QueryBus {
         }
 
         throw new IllegalArgumentException(
-                "Could not determine query type for handler: " + handler.getClass().getSimpleName()
-        );
+                "Could not determine query type for handler: " + handler.getClass().getSimpleName());
     }
 
     public Map<Class<? extends Query<?>>, QueryHandler<? extends Query<?>, ?>> getRegisteredHandlers() {

@@ -2,7 +2,7 @@ package microservice.user_service.utils.exceptions;
 
 import org.springframework.http.HttpStatus;
 
-public class ValidationException extends DrugstoreException {
+public class ValidationException extends DomainException {
     public ValidationException(String message, String errorCode) {
         super(message, HttpStatus.BAD_REQUEST, errorCode);
     }

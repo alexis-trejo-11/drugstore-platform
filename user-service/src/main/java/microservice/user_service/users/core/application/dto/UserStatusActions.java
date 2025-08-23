@@ -7,4 +7,5 @@ public enum UserStatusActions {
     ACTIVATE,
     DEACTIVATE,
     BAN,
+    UNBAN,
 }

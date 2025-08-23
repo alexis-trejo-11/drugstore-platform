@@ -1,7 +1,6 @@
 package microservice.user_service.users.infrastructure.input.rest;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import microservice.user_service.users.core.application.command.CreateUserCommand;
@@ -12,10 +11,12 @@ import microservice.user_service.users.core.application.dto.UserPaginatedRespons
 import microservice.user_service.users.core.application.dto.UserResponse;
 import microservice.user_service.users.core.application.queries.GetUserByEmailQuery;
 import microservice.user_service.users.core.application.queries.GetUserByIdQuery;
+import microservice.user_service.users.core.application.queries.GetUserByPhoneNumberQuery;
 import microservice.user_service.users.core.application.queries.ListUserByRoleQuery;
 import microservice.user_service.users.core.application.queries.ListUserByStatusQuery;
 import microservice.user_service.users.core.domain.models.enums.UserRole;
 import microservice.user_service.users.core.domain.models.enums.UserStatus;
+import microservice.user_service.users.core.domain.models.valueobjects.PhoneNumber;
 import microservice.user_service.users.core.ports.input.CommandBus;
 import microservice.user_service.users.core.ports.input.QueryBus;
 import microservice.user_service.users.infrastructure.input.rest.dto.PageRequest;
@@ -26,20 +27,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v2/users")
 @RequiredArgsConstructor
 public class UserController {
     private final CommandBus commandBus;
     private final QueryBus queryBus;
 
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<Object> createUser(@Valid @RequestBody UserRequest userRequest) {
         CreateUserCommand command = userRequest.toCommand(UserRole.CUSTOMER);
 
         CommandResult commandResult = commandBus.dispatch(command);
-        if (!commandResult.success()) {
-            throw new IllegalArgumentException("Failed to create user: " + commandResult.message());
-        }
 
         return ResponseEntity.status(201).body(commandResult.data());
     }
@@ -90,7 +88,7 @@ public class UserController {
     }
 
     @GetMapping("/by-email/{email}")
-    public ResponseEntity<UserResponse> getUserById(@Valid @PathVariable @NotNull @Email String email) {
+    public ResponseEntity<UserResponse> getUserById(@Valid @PathVariable @NotNull String email) {
         GetUserByEmailQuery query = new GetUserByEmailQuery(email);
 
         UserResponse userResponse = queryBus.execute(query);
@@ -98,16 +96,27 @@ public class UserController {
         return ResponseEntity.ok(userResponse);
     }
 
-    @GetMapping("by-role/{role}")
-    public ResponseEntity<UserPaginatedResponse> listUserByRole(@PathVariable UserRole role, @ModelAttribute PageRequest pageRequest) {
-        ListUserByRoleQuery query = new ListUserByRoleQuery(role, pageRequest.toPageInput());
-         UserPaginatedResponse response = queryBus.execute(query);
-         return  ResponseEntity.ok(response);
+    @GetMapping("by-phone/{phone}")
+    public ResponseEntity<UserResponse> getUserByPhone(@Valid @PathVariable @NotNull String phone) {
+        GetUserByPhoneNumberQuery query = new GetUserByPhoneNumberQuery(PhoneNumber.of(phone));
+
+        UserResponse userResponse = queryBus.execute(query);
+
+        return ResponseEntity.ok(userResponse);
     }
 
-    @GetMapping("by-status/{role}")
-    public ResponseEntity<UserPaginatedResponse> listUserByRole(@PathVariable UserStatus userStatus, @ModelAttribute PageRequest pageRequest) {
-        ListUserByStatusQuery query = new ListUserByStatusQuery(userStatus, pageRequest.toPageInput());
+    @GetMapping("by-role/{role}")
+    public ResponseEntity<UserPaginatedResponse> listUserByRole(@PathVariable UserRole role,
+            @ModelAttribute PageRequest pageRequest) {
+        ListUserByRoleQuery query = new ListUserByRoleQuery(role, pageRequest.toPageInput());
+        UserPaginatedResponse response = queryBus.execute(query);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("by-status/{status}")
+    public ResponseEntity<UserPaginatedResponse> listUserByRole(@PathVariable UserStatus status,
+            @ModelAttribute PageRequest pageRequest) {
+        ListUserByStatusQuery query = new ListUserByStatusQuery(status, pageRequest.toPageInput());
 
         UserPaginatedResponse response = queryBus.execute(query);
         return ResponseEntity.ok(response);

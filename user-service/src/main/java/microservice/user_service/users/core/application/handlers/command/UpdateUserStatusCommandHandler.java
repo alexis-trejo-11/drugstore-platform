@@ -26,6 +26,7 @@ public class UpdateUserStatusCommandHandler implements CommandHandler<UpdateUser
         switch (command.actions()) {
             case ACTIVATE -> user.activate();
             case BAN -> user.ban();
+            case UNBAN -> user.unban();
             case DEACTIVATE -> user.deactivate();
             default -> throw new IllegalArgumentException("Invalid action: " + command.actions());
         }
