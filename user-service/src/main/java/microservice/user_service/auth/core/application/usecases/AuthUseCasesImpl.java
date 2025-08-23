@@ -4,6 +4,15 @@ import lombok.RequiredArgsConstructor;
 import microservice.user_service.auth.core.application.dto.LoginDTO;
 import microservice.user_service.auth.core.application.dto.SessionResponse;
 import microservice.user_service.auth.core.application.dto.SignupDTO;
+import microservice.user_service.auth.core.application.usecases.login.LoginUseCase;
+import microservice.user_service.auth.core.application.usecases.login.RefreshSessionUseCase;
+import microservice.user_service.auth.core.application.usecases.logout.LogoutAllUseCase;
+import microservice.user_service.auth.core.application.usecases.logout.LogoutUseCase;
+import microservice.user_service.auth.core.application.usecases.password.ChangePasswordUseCase;
+import microservice.user_service.auth.core.application.usecases.register.ActivateUserUseCase;
+import microservice.user_service.auth.core.application.usecases.register.RegisterUseCase;
+import microservice.user_service.auth.core.application.usecases.twoFa.Disable2FAUseCase;
+import microservice.user_service.auth.core.application.usecases.twoFa.Enable2FAUseCase;
 import microservice.user_service.auth.core.ports.input.AuthUseCases;
 import microservice.user_service.utils.response.Result;
 import org.springframework.stereotype.Service;
@@ -69,7 +78,7 @@ public class AuthUseCasesImpl implements AuthUseCases {
     }
 
     @Override
-    public void logout(String token ,UUID userId) {
+    public void logout(String token, UUID userId) {
         logoutUseCase.execute(token, userId);
     }
 

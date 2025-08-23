@@ -6,7 +6,8 @@ import microservice.user_service.users.core.application.mappers.UserMapper;
 import microservice.user_service.users.core.application.queries.SearchUserQuery;
 import microservice.user_service.users.core.domain.models.entities.User;
 import microservice.user_service.users.core.ports.output.UserRepository;
-import microservice.user_service.utils.page.Page;
+import microservice.user_service.utils.page.PageResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,7 @@ public class SearchQueryHandler implements QueryHandler<SearchUserQuery, UserPag
 
     @Override
     public UserPaginatedResponse handle(SearchUserQuery query) {
-        Page<User> userPage = userRepository.search(query.toJson(), query.pageInput());
+        PageResponse<User> userPage = userRepository.search(query.toJson(), query.pageInput());
         return userMapper.toPaginatedResponse(userPage);
     }
 }

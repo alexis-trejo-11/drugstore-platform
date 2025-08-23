@@ -1,19 +1,23 @@
 package microservice.user_service.auth.core.domain.session;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Session {
     private UUID id;
     private UUID userId;
     private String accessToken;
     private String refreshToken;
-    private String type = "Bearer";
+    private String type;
     private String userAgent;
     private String ipAddress;
     private String device;
@@ -29,8 +33,6 @@ public class Session {
         this.expiresAt = LocalDateTime.now().plusHours(24);
         this.active = true;
     }
-
-
 
     public void deactivate() {
         this.active = false;

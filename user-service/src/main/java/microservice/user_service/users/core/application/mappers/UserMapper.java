@@ -6,7 +6,7 @@ import microservice.user_service.users.core.application.dto.UserResponse;
 import microservice.user_service.users.core.domain.events.UserCreatedEvent;
 import microservice.user_service.users.core.domain.models.entities.User;
 import microservice.user_service.users.core.domain.models.enums.UserStatus;
-import microservice.user_service.utils.page.Page;
+import microservice.user_service.utils.page.PageResponse;
 import microservice.user_service.utils.page.PaginationMetadata;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +27,7 @@ public class UserMapper {
      * @return a new User domain entity.
      */
     public User fromCreateCommand(CreateUserCommand command, String hashedPassword) {
-        return new User.Builder()
+        return User.builder()
                 .email(command.email())
                 .phoneNumber(command.phoneNumber())
                 .firstName(command.firstName())
@@ -36,7 +36,6 @@ public class UserMapper {
                 .hashedPassword(hashedPassword)
 
                 // Generated fields
-                .id(UUID.randomUUID())
                 .status(UserStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -49,8 +48,7 @@ public class UserMapper {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
-                user.getPhoneNumber()
-        );
+                user.getPhoneNumber());
     }
 
     public UserResponse toResponse(User user) {
@@ -65,14 +63,14 @@ public class UserMapper {
                 .build();
     }
 
-    public UserPaginatedResponse toPaginatedResponse(Page<User> userPage) {
-        if (userPage == null || userPage.content() == null || userPage.content().isEmpty()) {
+    public UserPaginatedResponse toPaginatedResponse(PageResponse<User> userPage) {
+        if (userPage == null || userPage.getContent() == null || userPage.getContent().isEmpty()) {
             return new UserPaginatedResponse(List.of(), PaginationMetadata.empty());
         }
 
-        List<UserResponse> userResponses = userPage.content().stream()
+        List<UserResponse> userResponses = userPage.getContent().stream()
                 .map(this::toResponse)
                 .toList();
-        return new UserPaginatedResponse(userResponses, userPage.pageMetadata());
+        return new UserPaginatedResponse(userResponses, PaginationMetadata.from(userPage));
     }
 }

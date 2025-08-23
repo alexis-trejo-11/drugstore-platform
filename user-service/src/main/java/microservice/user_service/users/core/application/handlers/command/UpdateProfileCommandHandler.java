@@ -18,18 +18,16 @@ public class UpdateProfileCommandHandler implements CommandHandler<UpdateProfile
         this.userRepository = userRepository;
     }
 
-
     @Override
     public CommandResult handle(UpdateProfileCommand command) {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(() -> new UserNotFoundError(command.userId()));
 
         user.updateProfile(
-            command.firstName(),
-            command.lastName(),
-            command.dateOfBirth(),
-            command.gender()
-        );
+                command.firstName(),
+                command.lastName(),
+                command.dateOfBirth(),
+                command.gender());
 
         userRepository.save(user);
 

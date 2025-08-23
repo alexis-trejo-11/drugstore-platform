@@ -6,7 +6,7 @@ import microservice.user_service.users.core.application.mappers.UserMapper;
 import microservice.user_service.users.core.application.queries.ListUserByRoleQuery;
 import microservice.user_service.users.core.domain.models.entities.User;
 import microservice.user_service.users.core.ports.output.UserRepository;
-import microservice.user_service.utils.page.Page;
+import microservice.user_service.utils.page.PageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +23,7 @@ public class GetUserByRoleQueryHandler implements QueryHandler<ListUserByRoleQue
 
     @Override
     public UserPaginatedResponse handle(ListUserByRoleQuery query) {
-        Page<User> userPage = userRepository.ListByRole(query.role().toString(), query.pageInput());
+        PageResponse<User> userPage = userRepository.ListByRole(query.role(), query.pageInput());
         return userMapper.toPaginatedResponse(userPage);
     }
 }
