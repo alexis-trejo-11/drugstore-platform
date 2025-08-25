@@ -21,6 +21,10 @@ public class RefreshSessionUseCase {
             throw new UserNotFoundError(userId);
         }
 
+        if (token == null || token.isEmpty()) {
+            throw new IllegalArgumentException("Refresh token must be provided");
+        }
+
         Session refreshUserSession = sessionService.refreshUserSession(token, userId);
         return SessionResponse.from(refreshUserSession);
     }

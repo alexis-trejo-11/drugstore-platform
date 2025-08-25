@@ -1,16 +1,34 @@
 package microservice.user_service.auth.core.domain.event;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
+import org.springframework.context.ApplicationEvent;
+
+import lombok.Builder;
 import lombok.Getter;
-import microservice.user_service.users.core.domain.events.DomainEvent;
+
+import microservice.user_service.users.core.domain.models.enums.Gender;
 
 @Getter
-public class UserRegisteredEvent extends DomainEvent {
-    private final String userId;
-    private final String email;
+public class UserRegisteredEvent extends ApplicationEvent {
+    private final UUID userId;
+    private final String firstName;
+    private final String lastName;
+    private LocalDate dateOfBirth;
+    private Gender gender;
+    private final String userType;
 
-    public UserRegisteredEvent(String userId, String email) {
-        super();
+    @Builder
+    public UserRegisteredEvent(Object source, UUID userId, String firstName, String lastName, LocalDate dateOfBirth,
+            Gender gender, String userType) {
+        super(source);
         this.userId = userId;
-        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
+        this.userType = userType;
     }
+
 }

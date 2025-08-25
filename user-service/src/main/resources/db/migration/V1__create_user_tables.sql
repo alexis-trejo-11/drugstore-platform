@@ -7,12 +7,7 @@ CREATE TABLE users (
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'ACTIVE', 'INACTIVE', 'SUSPENDED', 'DELETED')),
     role VARCHAR(20) NOT NULL CHECK (role IN ('CUSTOMER', 'ADMIN', 'EMPLOYEE', 'GUEST')),
     two_factor_id VARCHAR(255),
-    
-    -- Personal information
-    first_name VARCHAR(100),
-    last_name VARCHAR(100),
-    date_of_birth DATE,
-    gender VARCHAR(10) CHECK (gender IN ('MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY')),
+    profile_id UUID UNIQUE,
     
     -- Timestamps
     last_login_at TIMESTAMP WITH TIME ZONE,
@@ -30,7 +25,6 @@ CREATE INDEX idx_users_status ON users(status);
 CREATE INDEX idx_users_created_at ON users(created_at);
 CREATE INDEX idx_users_role ON users(role);
 
-CREATE INDEX idx_users_name ON users(first_name, last_name);
 
 COMMENT ON TABLE users IS 'Tabla principal de usuarios del sistema';
 COMMENT ON COLUMN users.two_factor_id IS 'Referencia al ID de configuración 2FA (null si no está habilitado)';

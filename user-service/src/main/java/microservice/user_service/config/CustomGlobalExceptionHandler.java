@@ -23,7 +23,7 @@ public class CustomGlobalExceptionHandler {
 
     /* Validation Data Exceptions */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ResponseWrapper<Void>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ResponseWrapper<?>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> fieldsErrorMap = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -43,7 +43,7 @@ public class CustomGlobalExceptionHandler {
     }
 
     @ExceptionHandler(DomainException.class)
-    public ResponseEntity<ResponseWrapper<Void>> handleDomainException(DomainException ex) {
+    public ResponseEntity<ResponseWrapper<?>> handleDomainException(DomainException ex) {
         ErrorDetails errorDetails = new ErrorDetails();
         errorDetails.setErrorCode(ex.getErrorCode());
         errorDetails.setErrorMessage(ex.getMessage());
@@ -55,7 +55,7 @@ public class CustomGlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ResponseWrapper<Void>> handleConflictException(ConflictException ex) {
+    public ResponseEntity<ResponseWrapper<?>> handleConflictException(ConflictException ex) {
         ErrorDetails errorDetails = new ErrorDetails();
         errorDetails.setErrorCode(ex.getErrorCode());
         errorDetails.setErrorMessage(ex.getMessage());
@@ -67,7 +67,7 @@ public class CustomGlobalExceptionHandler {
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ResponseWrapper<Void>> handleNotFoundException(NotFoundException ex) {
+    public ResponseEntity<ResponseWrapper<?>> handleNotFoundException(NotFoundException ex) {
         ErrorDetails errorDetails = new ErrorDetails();
         errorDetails.setErrorCode(ex.getErrorCode());
         errorDetails.setErrorMessage(ex.getMessage());
@@ -80,7 +80,7 @@ public class CustomGlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ResponseWrapper<Void>> handleUnauthorizedException(UnauthorizedException ex) {
+    public ResponseEntity<ResponseWrapper<?>> handleUnauthorizedException(UnauthorizedException ex) {
         ErrorDetails errorDetails = new ErrorDetails();
         errorDetails.setErrorCode(ex.getErrorCode());
         errorDetails.setErrorMessage(ex.getMessage());
@@ -92,7 +92,7 @@ public class CustomGlobalExceptionHandler {
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ResponseWrapper<Void>> handleForbiddenException(ForbiddenException ex) {
+    public ResponseEntity<ResponseWrapper<?>> handleForbiddenException(ForbiddenException ex) {
         ErrorDetails errorDetails = new ErrorDetails();
         errorDetails.setErrorCode(ex.getErrorCode());
         errorDetails.setErrorMessage(ex.getMessage());
@@ -105,7 +105,7 @@ public class CustomGlobalExceptionHandler {
 
     /* Generic Exception */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ResponseWrapper<Void>> handleException(Exception ex) {
+    public ResponseEntity<ResponseWrapper<?>> handleException(Exception ex) {
         ErrorDetails errorDetails = new ErrorDetails();
         errorDetails.setErrorCode("INTERNAL_SERVER_ERROR");
         errorDetails.setErrorMessage("An unexpected error occurred");

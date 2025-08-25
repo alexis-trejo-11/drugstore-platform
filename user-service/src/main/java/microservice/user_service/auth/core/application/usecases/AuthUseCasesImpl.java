@@ -2,8 +2,8 @@ package microservice.user_service.auth.core.application.usecases;
 
 import lombok.RequiredArgsConstructor;
 import microservice.user_service.auth.core.application.dto.LoginDTO;
+import microservice.user_service.auth.core.application.dto.RegisterDTO;
 import microservice.user_service.auth.core.application.dto.SessionResponse;
-import microservice.user_service.auth.core.application.dto.SignupDTO;
 import microservice.user_service.auth.core.application.usecases.login.LoginUseCase;
 import microservice.user_service.auth.core.application.usecases.login.RefreshSessionUseCase;
 import microservice.user_service.auth.core.application.usecases.logout.LogoutAllUseCase;
@@ -22,18 +22,18 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class AuthUseCasesImpl implements AuthUseCases {
-    private LoginUseCase loginUseCase;
-    private RegisterUseCase registerUseCase;
-    private LogoutAllUseCase logoutAllUseCase;
-    private LogoutUseCase logoutUseCase;
-    private RefreshSessionUseCase refreshSessionUseCase;
-    private ChangePasswordUseCase changePasswordUseCase;
-    private ActivateUserUseCase activateUserUseCase;
-    private Enable2FAUseCase enable2FAUseCase;
-    private Disable2FAUseCase disable2FAUseCase;
+    private final LoginUseCase loginUseCase;
+    private final RegisterUseCase registerUseCase;
+    private final LogoutAllUseCase logoutAllUseCase;
+    private final LogoutUseCase logoutUseCase;
+    private final RefreshSessionUseCase refreshSessionUseCase;
+    private final ChangePasswordUseCase changePasswordUseCase;
+    private final ActivateUserUseCase activateUserUseCase;
+    private final Enable2FAUseCase enable2FAUseCase;
+    private final Disable2FAUseCase disable2FAUseCase;
 
     @Override
-    public Result<UUID> register(SignupDTO signupDTO) {
+    public Result<UUID> register(RegisterDTO signupDTO) {
         return registerUseCase.execute(signupDTO);
     }
 

@@ -18,7 +18,7 @@ public class ResponseWrapper<T> {
     public Map<String, ?> metadata;
     public ErrorDetails errorDetails;
 
-    public ResponseWrapper<T> success(T data, String message, Map<String, ?> metadata) {
+    public static <T> ResponseWrapper<T> success(T data, String message, Map<String, ?> metadata) {
         var response = new ResponseWrapper<T>();
         response.setSuccess(true);
         response.setMessage(message);
@@ -134,20 +134,20 @@ public class ResponseWrapper<T> {
         return response;
     }
 
-    public ResponseWrapper<T> success(T data) {
+    public static <T> ResponseWrapper<T> success(T data) {
         return success(data, "Operation successful");
     }
 
-    public ResponseWrapper<T> success(T data, String message) {
+    public static <T> ResponseWrapper<T> success(T data, String message) {
         return success(data, "Operation successful", Map.of());
     }
 
-    public ResponseWrapper<T> success() {
+    public static <T> ResponseWrapper<T> success() {
         return success(null, "Operation successful");
     }
 
-    public static ResponseWrapper<Void> error(String message, Map<String, ?> metadata, ErrorDetails errorDetails) {
-        var response = new ResponseWrapper<Void>();
+    public static <T> ResponseWrapper<T> error(String message, Map<String, ?> metadata, ErrorDetails errorDetails) {
+        var response = new ResponseWrapper<T>();
         response.setSuccess(false);
         response.setMessage(message);
         response.setErrorDetails(errorDetails);
@@ -156,15 +156,15 @@ public class ResponseWrapper<T> {
         return response;
     }
 
-    public static ResponseWrapper<Void> error(String message, Map<String, ?> metadata) {
+    public static <T> ResponseWrapper<T> error(String message, Map<String, ?> metadata) {
         return ResponseWrapper.error(message, metadata, null);
     }
 
-    public static ResponseWrapper<Void> error(String message) {
+    public static <T> ResponseWrapper<T> error(String message) {
         return ResponseWrapper.error(message, Map.of(), null);
     }
 
-    public static ResponseWrapper<Void> error(String message, ErrorDetails errorDetails) {
+    public static <T> ResponseWrapper<T> error(String message, ErrorDetails errorDetails) {
         return ResponseWrapper.error(message, Map.of(), errorDetails);
     }
 }
