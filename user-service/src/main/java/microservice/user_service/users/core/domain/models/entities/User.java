@@ -29,12 +29,6 @@ public class User {
     private UserRole role;
     private String twoFactorId;
 
-    // Personal information
-    private String firstName;
-    private String lastName;
-    private LocalDate dateOfBirth;
-    private Gender gender;
-
     // Timestamps
     private LocalDateTime lastLoginAt;
     private LocalDateTime createdAt;
@@ -73,14 +67,6 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateProfile(String firstName, String lastName, LocalDate dateOfBirth, Gender gender) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.dateOfBirth = dateOfBirth;
-        this.gender = gender;
-        this.updatedAt = LocalDateTime.now();
-    }
-
     public void deactivate() {
         this.status = UserStatus.INACTIVE;
         this.updatedAt = LocalDateTime.now();
@@ -111,13 +97,6 @@ public class User {
     public void restore() {
         this.status = UserStatus.ACTIVE;
         this.updatedAt = LocalDateTime.now();
-    }
-
-    public static void ValidatePasswordStrength(String plainPassword) {
-        if (plainPassword.length() < 8) {
-            throw new IllegalArgumentException("Password must be at least 8 characters long.");
-        }
-        // Additional checks can be added as needed
     }
 
     public void updateAuthFields(String email, String phoneNumber) {

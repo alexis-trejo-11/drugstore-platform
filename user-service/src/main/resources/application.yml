@@ -34,7 +34,7 @@ spring:
   # Redis - Configuración
   data:
     redis:
-      host: localhost  # Cambiado de 'redis' a 'localhost' para desarrollo
+      host: localhost
       port: 6378
       timeout: 60000
       lettuce:
@@ -149,12 +149,6 @@ logging:
     com.yourpackage: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-
-# Dev enviroments
-spring:
-  config:
-    activate:
-      on-profile: dev
 
 # Local Test
 debug: true

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.UUID;
 
 @Component
 public class UserMapper {
@@ -30,8 +29,6 @@ public class UserMapper {
         return User.builder()
                 .email(command.email())
                 .phoneNumber(command.phoneNumber())
-                .firstName(command.firstName())
-                .lastName(command.lastName())
                 .role(command.role())
                 .hashedPassword(hashedPassword)
 
@@ -45,8 +42,6 @@ public class UserMapper {
     public UserCreatedEvent ToEvent(User user) {
         return new UserCreatedEvent(
                 user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
                 user.getEmail(),
                 user.getPhoneNumber());
     }

@@ -36,8 +36,7 @@ public class LoginUseCase {
 
         userRepository.updateLastLogin(user.getId());
         Session session = sessionService.createUserSession(user, loginDTO.metadata());
-        SessionResponse sessionResponse = SessionResponse.from(session);
-        return Result.success(sessionResponse, "Login successful");
+        return Result.success(SessionResponse.from(session), "Login successful");
     }
 
     private Result<User> authenticateUser(LoginDTO loginDTO) {

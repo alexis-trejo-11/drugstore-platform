@@ -6,7 +6,6 @@ import microservice.user_service.users.core.domain.models.enums.UserStatus;
 import microservice.user_service.utils.page.PageInput;
 import microservice.user_service.utils.page.PageResponse;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
