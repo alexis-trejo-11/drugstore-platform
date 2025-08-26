@@ -1,6 +1,6 @@
 package microservice.auth.app.shared.exceptions;
 
-import microservice.user_service.utils.exceptions.DomainException;
+import user_service.utils.exceptions.DomainException;
 import org.springframework.http.HttpStatus;
 
 public class NotFoundException extends DomainException {

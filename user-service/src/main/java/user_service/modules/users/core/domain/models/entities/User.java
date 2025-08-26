@@ -1,0 +1,107 @@
+package user_service.modules.users.core.domain.models.entities;
+
+import user_service.modules.users.core.domain.exceptions.UserDisableError;
+import user_service.modules.users.core.domain.models.enums.UserRole;
+import user_service.modules.users.core.domain.models.enums.UserStatus;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User {
+    // Account information
+    private UUID id;
+    private String email;
+    private String phoneNumber;
+    private String hashedPassword;
+    private UserStatus status;
+    private UserRole role;
+    private String twoFactorId;
+
+    // Timestamps
+    private LocalDateTime lastLoginAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    public void updateLastLogin() {
+        this.lastLoginAt = LocalDateTime.now();
+    }
+
+    public void validateNotDisabled() {
+        if (this.status == UserStatus.INACTIVE || this.status == UserStatus.SUSPENDED
+                || this.status == UserStatus.DELETED) {
+            throw new UserDisableError("User account is " + this.status);
+        }
+    }
+
+    public boolean isTwoFactorEnabled() {
+        return twoFactorId != null && !twoFactorId.isEmpty();
+    }
+
+    public void enableTwoFactor(String twoFactorId) {
+        this.twoFactorId = twoFactorId;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void disableTwoFactor() {
+        this.twoFactorId = null;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void activate() {
+        if (this.status != UserStatus.PENDING) {
+            throw new IllegalStateException("User account is not pending activation.");
+        }
+        this.status = UserStatus.ACTIVE;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void deactivate() {
+        this.status = UserStatus.INACTIVE;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void ban() {
+        if (this.status == UserStatus.SUSPENDED) {
+            throw new IllegalStateException("User account is already suspended.");
+        }
+
+        this.status = UserStatus.SUSPENDED;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void unban() {
+        if (this.status != UserStatus.SUSPENDED) {
+            throw new IllegalStateException("User account is not suspended.");
+        }
+        this.status = UserStatus.ACTIVE;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void softDelete() {
+        this.status = UserStatus.DELETED;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void restore() {
+        this.status = UserStatus.ACTIVE;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updateAuthFields(String email, String phoneNumber) {
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+}
