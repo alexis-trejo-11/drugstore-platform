@@ -145,7 +145,7 @@ logging:
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type: TRACE
-    microservice.user_service: DEBUG
+    user_service: DEBUG
     com.yourpackage: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
