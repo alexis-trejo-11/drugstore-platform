@@ -14,8 +14,8 @@ import lombok.Data;
 @ConfigurationProperties(prefix = "jwt")
 public class JwtConfig {
     private String secret;
-    private long accessTokenExpiration;
-    private long refreshTokenExpiration;
+    private long accessTokenExpirationMinutes = 60;
+    private long refreshTokenExpirationMinutes = 43800; // 30 days
 
     @Bean
     public SecretKey secretKey() {

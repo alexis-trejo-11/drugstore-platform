@@ -17,15 +17,14 @@ public class RefreshSessionUseCase {
     private final UserRepository userRepository;
 
     public SessionResponse execute(UUID userId, String token) {
-        if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundError(userId);
-        }
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundError(userId));
 
         if (token == null || token.isEmpty()) {
             throw new IllegalArgumentException("Refresh token must be provided");
         }
 
-        Session refreshUserSession = sessionService.refreshUserSession(token, userId);
+        Session refreshUserSession = sessionService.refreshUserSession(token, user);
         return SessionResponse.from(refreshUserSession);
     }
 }
