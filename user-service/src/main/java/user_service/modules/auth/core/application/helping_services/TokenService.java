@@ -15,8 +15,8 @@ import user_service.utils.tokens.interfaces.TokenType;
 public class TokenService {
     private final TokenFactory tokenFactory;
 
-    public Token createToken(UserClaims userClaims, TokenType tokenType) {
-        Token token = tokenFactory.createToken(tokenType, tokenType.name(), userClaims.toMap());
+    public Token createToken(UserClaims userClaims, String subject, TokenType tokenType) {
+        Token token = tokenFactory.createToken(tokenType, subject, userClaims.toMap());
         return token;
     }
 

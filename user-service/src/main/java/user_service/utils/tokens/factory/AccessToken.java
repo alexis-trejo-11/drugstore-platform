@@ -32,7 +32,7 @@ public class AccessToken implements JwtToken {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date())
-                .setExpiration(Date.from(Instant.now().plusMillis(jwtConfig.getAccessTokenExpiration())))
+                .setExpiration(Date.from(Instant.now().plusSeconds(jwtConfig.getAccessTokenExpirationMinutes() * 60)))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -71,6 +71,6 @@ public class AccessToken implements JwtToken {
 
     @Override
     public LocalDateTime expiresAt() {
-        return LocalDateTime.now().plusSeconds(jwtConfig.getAccessTokenExpiration() / 1000);
+        return LocalDateTime.now().plusSeconds(jwtConfig.getAccessTokenExpirationMinutes() * 60);
     }
 }

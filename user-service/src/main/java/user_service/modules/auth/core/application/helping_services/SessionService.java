@@ -32,12 +32,13 @@ public class SessionService {
         sessionRepository.deactivateUserSession(userId, session.getRefreshToken());
     }
 
-    public Session refreshUserSession(String sessionId, UUID userId) {
-        Session session = sessionRepository.findUserSession(sessionId, userId)
-                .orElseThrow(() -> new UserSessionNotFound(userId));
+    public Session refreshUserSession(String sessionId, User user) {
+        Session session = sessionRepository.findUserSession(sessionId, user.getId())
+                .orElseThrow(() -> new UserSessionNotFound(user.getId()));
 
         var accessToken = authTokenService.createToken(
-                UserClaims.accessClaims(userId.toString()),
+                UserClaims.from(user),
+                user.getId().toString(),
                 TokenType.ACCESS);
 
         session.setAccessToken(accessToken.generate());
@@ -46,14 +47,11 @@ public class SessionService {
 
     public Session createUserSession(User user, LoginMetadata loginMetadata) {
         try {
-            UserClaims userClaims = new UserClaims(
-                    user.getId().toString(),
-                    user.getEmail(),
-                    user.getRole().getRoleName());
+            UserClaims userClaims = UserClaims.from(user);
 
-            var refreshToken = authTokenService.createToken(userClaims, TokenType.REFRESH);
+            var refreshToken = authTokenService.createToken(userClaims, user.getId().toString(), TokenType.REFRESH);
 
-            var accessToken = authTokenService.createToken(userClaims, TokenType.ACCESS);
+            var accessToken = authTokenService.createToken(userClaims, user.getId().toString(), TokenType.ACCESS);
 
             String safeUserAgent = loginMetadata != null ? loginMetadata.userAgent() : "";
             String safeIpAddress = loginMetadata != null ? loginMetadata.ipAddress() : "";
