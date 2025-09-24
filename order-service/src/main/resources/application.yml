@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: order-service
+
+  # Postgres
+  datasource:
+    url: jdbc:postgresql://localhost:5432/drugstore_orders
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8080

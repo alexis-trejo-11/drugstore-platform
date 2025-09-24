@@ -1,3 +1,10 @@
 rootProject.name = 'backend.drugstore'
 
-include 'product-service', 'cart-service', 'user-service', 'auth-service', 'order-service'
+include 'product-service'
+include 'cart-service'
+include'user-service'
+include 'auth-service'
+include'order-service'
+include 'libs:shared-kernel'
+
+project(':libs:shared-kernel').projectDir = new File(settingsDir, 'libs/shared-kernel')
