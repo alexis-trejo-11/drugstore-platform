@@ -1,6 +1,7 @@
 package microservice.order_service.application.queries.handler;
 
 import lombok.RequiredArgsConstructor;
+import microservice.order_service.application.queries.mapper.OrderQueryMapper;
 import microservice.order_service.domain.ports.output.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -2,59 +2,53 @@ package microservice.order_service.infrastructure.api.controller;
 
 
 import libs_kernel.response.ResponseWrapper;
-import microservice.order_service.infrastructure.api.controller.dto.OrderDetailResponse;
-import microservice.order_service.infrastructure.api.controller.dto.OrderResponse;
-import microservice.order_service.infrastructure.api.controller.dto.OrderSummaryResponse;
-import org.springframework.format.annotation.DateTimeFormat;
+import lombok.RequiredArgsConstructor;
+import microservice.order_service.application.queries.response.OrderQueryResponse;
+import microservice.order_service.application.queries.response.OrderSummaryQueryResponse;
+import microservice.order_service.application.queries.response.PagedOrderSummaryQueryResponse;
+import microservice.order_service.domain.ports.input.OrderApplicationFacade;
+import microservice.order_service.infrastructure.api.controller.dto.GetCustomerOrders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v2/customers/orders")
+@RequiredArgsConstructor
 public class CustomerOrderController {
+    private final OrderApplicationFacade orderService;
 
-    @GetMapping
-    public ResponseEntity<ResponseWrapper<List<OrderResponse>>> getCustomerOrders(
-            @PathVariable String customerId,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
 
-        OrderQuery query = OrderQuery.builder()
-                .customerId(customerId)
-                .status(status)
-                .startDate(startDate)
-                .endDate(endDate)
-                .page(page)
-                .size(size)
-                .build();
+    @GetMapping("/{customerId}")
+    public ResponseWrapper<PagedOrderSummaryQueryResponse> getCustomerOrders(
+            @ModelAttribute GetCustomerOrders query,
+            @PathVariable String customerId) {
 
-        List<OrderResponse> orders = orderQueryService.findOrdersByCustomer(query);
-        return ResponseEntity.ok(orders);
+        var orders = orderService.getOrdersByCustomer(
+                customerId,
+                query.getPage(),
+                query.getSize());
+
+        return ResponseWrapper.found(orders, "Orders");
     }
 
-    @GetMapping("/{orderId}")
-    public ResponseEntity<OrderDetailResponse> getCustomerOrderDetail(
+    @GetMapping("/{orderId}/{customerId}")
+    public ResponseWrapper<OrderQueryResponse> getCustomerOrderDetail(
             @PathVariable String customerId,
             @PathVariable String orderId) {
 
-        OrderDetailResponse order = orderQueryService.findOrderDetail(customerId, orderId);
-        return ResponseEntity.ok(order);
+        var response = orderService.getOrderByCustomerAndId(customerId, orderId);
+
+        return ResponseWrapper.found(response, "Order");
     }
 
     @GetMapping("/recent")
-    public ResponseEntity<List<OrderSummaryResponse>> getRecentOrders(
+    public ResponseEntity<List<OrderSummaryQueryResponse>> getRecentOrders(
             @PathVariable String customerId,
             @RequestParam(defaultValue = "5") int limit) {
 
-        List<OrderSummaryResponse> recentOrders = orderQueryService.findRecentOrders(customerId, limit);
+         var recentOrders = orderService.getRecentOrdersByCustomer(customerId, limit);
         return ResponseEntity.ok(recentOrders);
     }
-}
-
 }
