@@ -1,4 +1,4 @@
-package microservice.order_service.application.handlers;
+package microservice.order_service.application.commands.hander;
 
 import lombok.RequiredArgsConstructor;
 import microservice.order_service.application.commands.request.CreateOrderCommand;
@@ -6,7 +6,7 @@ import microservice.order_service.domain.models.Order;
 import microservice.order_service.domain.models.OrderItem;
 import microservice.order_service.domain.models.valueobjects.Money;
 import microservice.order_service.domain.models.valueobjects.ProductId;
-import microservice.order_service.domain.ports.input.OrderUseCases;
+import microservice.order_service.domain.ports.input.OrderCommandService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,14 +15,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CreateOrderCommandHandler {
     
-    private final OrderUseCases orderUseCases;
+    private final OrderCommandService orderCommandService;
 
     public Order handle(CreateOrderCommand command) {
         List<OrderItem> orderItems = command.items().stream()
                 .map(this::toOrderItem)
                 .toList();
 
-        return orderUseCases.createOrder(
+        return orderCommandService.createOrder(
                 command.getCustomerIdVO(),
                 orderItems,
                 command.deliveryMethod(),

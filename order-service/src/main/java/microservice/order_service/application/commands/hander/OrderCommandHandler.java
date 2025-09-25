@@ -1,4 +1,4 @@
-package microservice.order_service.application.handlers;
+package microservice.order_service.application.commands.hander;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +16,6 @@ import microservice.order_service.domain.models.valueobjects.CustomerId;
 import microservice.order_service.domain.models.valueobjects.OrderId;
 import microservice.order_service.domain.ports.output.OrderRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

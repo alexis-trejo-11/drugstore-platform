@@ -1,18 +1,17 @@
 package microservice.order_service.domain.ports.input;
 
-import microservice.order_service.domain.models.Order;
-import microservice.order_service.domain.models.OrderItem;
-import microservice.order_service.domain.models.enums.DeliveryMethod;
-import microservice.order_service.domain.models.enums.OrderStatus;
-import microservice.order_service.domain.models.valueobjects.CustomerId;
-import microservice.order_service.domain.models.valueobjects.DeliveryAddress;
-import microservice.order_service.domain.models.valueobjects.OrderId;
+import microservice.order_service.application.commands.request.CancelOrderCommand;
+import microservice.order_service.application.commands.request.CreateOrderCommand;
+import microservice.order_service.application.commands.request.UpdateOrderStatusCommand;
+import microservice.order_service.application.commands.response.CancelOrderCommandResponse;
+import microservice.order_service.application.commands.response.CreateOrderCommandResponse;
+import microservice.order_service.application.commands.response.UpdateOrderStatusCommandResponse;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-public interface OrderUseCases {
+public interface OrderCommandService {
+    CreateOrderCommandResponse createOrder(CreateOrderCommand command);
+    UpdateOrderStatusCommandResponse updateOrderStatus(UpdateOrderStatusCommand command);
+    CancelOrderCommandResponse cancelOrder(CancelOrderCommand command);
+    /*
     // CRUD Operations
     Order createOrder(CustomerId customerId, List<OrderItem> items, 
                      DeliveryMethod deliveryMethod, DeliveryAddress deliveryAddress, String notes);
@@ -59,4 +58,6 @@ public interface OrderUseCases {
     Order setEstimatedDeliveryDate(OrderId orderId, LocalDateTime estimatedDate);
     
     Order updateOrderNotes(OrderId orderId, String notes);
+
+    */
 }

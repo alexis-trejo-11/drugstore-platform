@@ -2,6 +2,8 @@ package microservice.order_service.domain.ports.output;
 
 import microservice.order_service.domain.models.Order;
 import microservice.order_service.domain.models.enums.OrderStatus;
+import microservice.order_service.domain.models.valueobjects.CustomerId;
+import microservice.order_service.domain.models.valueobjects.OrderId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,20 +12,20 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository {
-    Page<Order> findByCustomerIdOrderByCreatedAtDesc(String customerId, Pageable pageable);
+    Page<Order> findByCustomerID(CustomerId customerId, Pageable pageable);
 
-    Page<Order> findByCustomerIdAndStatusOrderByCreatedAtDesc(String customerId, OrderStatus status, Pageable pageable);
+    Page<Order> findByCustomerIdAndOrderStatus(CustomerId customerId, OrderStatus status, Pageable pageable);
 
-    Page<Order> findByCustomerIdAndCreatedAtBetweenOrderByCreatedAtDesc(String customerId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    Page<Order> findByCustomerIdAndRangeDate(CustomerId customerId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
-    Optional<Order> findByCustomerIdAndId(String customerId, String orderId);
+    Optional<Order> findByCustomerIdAndId(CustomerId customerId, OrderId orderId);
 
-    List<Order> findTop5ByCustomerIdOrderByCreatedAtDesc(String customerId, Pageable pageable);
+    List<Order> findRecentOrdersByCustomer(CustomerId customerId, int limit);
 
-    Long countByCustomerId(String customerId);
+    Long countByCustomerId(CustomerId customerId);
 
-    Long countByCustomerIdAndStatus(String customerId, OrderStatus status);
+    Long countByCustomerIdAndStatus(CustomerId customerId, OrderStatus status);
     Order save(Order order);
 
-    Optional<Order> findByCustomerIdAndOrderId(String customerId, String orderId);
+    Optional<Order> findByCustomerIdAndOrderId(CustomerId customerId, OrderId orderId);
 }
