@@ -17,14 +17,14 @@ public class OrderFactory {
     
     public static Order createDeliveryOrder(CustomerId customerId, List<OrderItem> items, 
                                           DeliveryAddress deliveryAddress, String notes) {
-        return Order.create(customerId, items, DeliveryMethod.DELIVERY, deliveryAddress, notes);
+        return Order.create(customerId, items, DeliveryMethod.STANDARD_DELIVERY, deliveryAddress, notes);
     }
     
     public static Order createPickupOrder(CustomerId customerId, List<OrderItem> items, String notes) {
-        return Order.create(customerId, items, DeliveryMethod.PICKUP, null, notes);
+        return Order.create(customerId, items, DeliveryMethod.STORE_PICKUP, null, notes);
     }
     
     public static OrderItem createOrderItem(ProductId productId, String productName, Money unitPrice, int quantity) {
-        return OrderItem.create(productId, productName, unitPrice, quantity);
+        return OrderItem.create(productId, productName, unitPrice, quantity, false);
     }
 }

@@ -1,4 +1,4 @@
-package microservice.order_service.application.commands.hander;
+package microservice.order_service.application.commands.handler;
 
 import lombok.RequiredArgsConstructor;
 import microservice.order_service.application.queries.mapper.OrderQueryMapper;
@@ -10,6 +10,7 @@ import microservice.order_service.domain.models.Order;
 import microservice.order_service.domain.models.enums.OrderStatus;
 import microservice.order_service.domain.models.valueobjects.CustomerId;
 import microservice.order_service.domain.models.valueobjects.OrderId;
+import microservice.order_service.domain.ports.input.OrderQueryService;
 import microservice.order_service.domain.ports.output.OrderRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class OrderQueryHandler {
+public class OrderQueryHandler  {
 
     private final OrderRepository orderRepository;
     private final OrderQueryMapper orderQueryMapper;

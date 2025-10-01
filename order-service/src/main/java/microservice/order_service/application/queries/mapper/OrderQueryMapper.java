@@ -68,7 +68,7 @@ public class OrderQueryMapper {
                 .productName(item.getProductName())
                 .unitPrice(item.getUnitPrice().amount())
                 .quantity(item.getQuantity())
-                .subtotal(item.getSubTotal().amount())
+                .subtotal(item.getSubtotal().amount())
                 .prescriptionRequired(item.isPrescriptionRequired())
                 .build();
     }

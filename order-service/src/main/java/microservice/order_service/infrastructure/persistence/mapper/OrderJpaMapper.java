@@ -40,19 +40,19 @@ public class OrderJpaMapper {
         return entity;
     }
 
-    private OrderItemModel toItemModel(OrderItem domain, OrderModel orderEntity) {
+    public OrderItemModel toItemModel(OrderItem domain, OrderModel orderEntity) {
         return OrderItemModel.builder()
                 .order(orderEntity)
                 .productId(domain.getProductId().value())
                 .productName(domain.getProductName())
                 .unitPrice(domain.getUnitPrice().amount())
                 .quantity(domain.getQuantity())
-                .subtotal(domain.getSubTotal().amount())
+                .subtotal(domain.getSubtotal().amount())
                 .prescriptionRequired(domain.isPrescriptionRequired())
                 .build();
     }
 
-    private DeliveryAddressEmbeddable mapDeliveryAddressToEmbeddable(DeliveryAddress domain) {
+    public DeliveryAddressEmbeddable mapDeliveryAddressToEmbeddable(DeliveryAddress domain) {
         if (domain == null) return null;
 
         return new DeliveryAddressEmbeddable(
@@ -65,7 +65,7 @@ public class OrderJpaMapper {
         );
     }
 
-    private DeliveryMethodModel mapDeliveryMethodToEntity(DeliveryMethod domain) {
+    public DeliveryMethodModel mapDeliveryMethodToEntity(DeliveryMethod domain) {
         return switch (domain) {
             case HOME_DELIVERY -> DeliveryMethodModel.HOME_DELIVERY;
             case STORE_PICKUP -> DeliveryMethodModel.STORE_PICKUP;
@@ -74,7 +74,7 @@ public class OrderJpaMapper {
         };
     }
 
-    private OrderStatusModel mapOrderStatusToEntity(OrderStatus domain) {
+    public OrderStatusModel mapOrderStatusToEntity(OrderStatus domain) {
         return switch (domain) {
             case PENDING -> OrderStatusModel.PENDING;
             case CONFIRMED -> OrderStatusModel.CONFIRMED;
@@ -102,7 +102,6 @@ public class OrderJpaMapper {
                 .id(new OrderId(entity.getId()))
                 .customerId(new CustomerId(entity.getCustomerId()))
                 .items(items)
-                .totalAmount(new Money(entity.getTotalAmount(), Currency.getInstance(entity.getCurrency())))
                 .deliveryMethod(mapDeliveryMethodToDomain(entity.getDeliveryMethod()))
                 .deliveryAddress(mapDeliveryAddressToDomain(entity.getDeliveryAddress()))
                 .status(mapOrderStatusToDomain(entity.getStatus()))
@@ -119,7 +118,6 @@ public class OrderJpaMapper {
                 .productName(entity.getProductName())
                 .unitPrice(new Money(entity.getUnitPrice(), Currency.getInstance("MXN")))
                 .quantity(entity.getQuantity())
-                .subTotal(new Money(entity.getSubtotal(), Currency.getInstance("MXN")))
                 .prescriptionRequired(entity.getPrescriptionRequired())
                 .build();
     }

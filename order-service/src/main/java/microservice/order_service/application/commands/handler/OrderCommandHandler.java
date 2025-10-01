@@ -1,4 +1,4 @@
-package microservice.order_service.application.commands.hander;
+package microservice.order_service.application.commands.handler;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +21,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Transactional
 public class OrderCommandHandler {
-
     private final OrderRepository orderRepository;
-    private final OrderDomainService orderDomainService;
     private final OrderCommandMapper commandMapper;
 
     public CreateOrderCommandResponse handle(CreateOrderCommand command) {
@@ -41,16 +39,15 @@ public class OrderCommandHandler {
         CustomerId customerId = new CustomerId(command.getCustomerId());
         OrderId orderId = new OrderId(command.getOrderId());
 
-        Order order = orderRepository.findByCustomerIdAndOrderId(customerId.toString(), orderId.toString())
-                .orElseThrow(() -> new OrderNotFoundException(
-                        "Order not found: " + command.getOrderId()));
+        Order order = orderRepository.findByCustomerIdAndOrderId(customerId, orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found: " + command.getOrderId()));
 
         OrderStatus previousStatus = order.getStatus();
         OrderStatus newStatus;
 
 
         newStatus = OrderStatus.valueOf(command.getNewStatus().toUpperCase());
-        order.UpdateStatus(newStatus);
+        order.changeStatus(newStatus);
 
         Order updatedOrder = orderRepository.save(order);
 
@@ -66,7 +63,7 @@ public class OrderCommandHandler {
         CustomerId customerId = new CustomerId(command.getCustomerId());
         OrderId orderId = new OrderId(command.getOrderId());
 
-        Order order = orderRepository.findByCustomerIdAndOrderId(customerId.toString(), orderId.toString())
+        Order order = orderRepository.findByCustomerIdAndOrderId(customerId, orderId)
                 .orElseThrow(() -> new OrderNotFoundException(
                         "Order not found: " + command.getOrderId()));
 
