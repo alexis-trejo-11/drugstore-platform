@@ -27,12 +27,12 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	// Config Server
-	//implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
-	//implementation 'org.springframework.cloud:spring-cloud-starter-config'
+	// Migrations
+	implementation 'org.flywaydb:flyway-core:10.17.0'
+	implementation 'org.flywaydb:flyway-database-postgresql:10.17.0'
 
 	// Postgres
-	implementation 'org.postgresql:postgresql'
+	implementation 'org.postgresql:postgresql:42.7.3'
 	runtimeOnly 'org.postgresql:postgresql'
 
 	testImplementation 'com.h2database:h2'

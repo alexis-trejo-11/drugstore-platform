@@ -13,19 +13,20 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface JpaOrderRepository extends JpaRepository<OrderModel, String> {
+public interface JpaOrderRepository extends JpaRepository<OrderModel, UUID> {
 
     @Query("SELECT o FROM OrderModel o WHERE o.customerId = :customerId ORDER BY o.createdAt DESC")
     Page<OrderModel> findByCustomerId(
-            @Param("customerId") String customerId,
+            @Param("customerId") UUID customerId,
             Pageable pageable
     );
 
     @Query("SELECT o FROM OrderModel o WHERE o.customerId = :customerId AND o.status = :status ORDER BY o.createdAt DESC")
     Page<OrderModel> findByCustomerIdAndStatus(
-            @Param("customerId") String customerId,
+            @Param("customerId") UUID customerId,
             @Param("status") OrderStatusModel status,
             Pageable pageable
     );
@@ -34,7 +35,7 @@ public interface JpaOrderRepository extends JpaRepository<OrderModel, String> {
             "AND o.createdAt BETWEEN :startDate AND :endDate " +
             "ORDER BY o.createdAt DESC")
     Page<OrderModel> findByCustomerIdAndDateRange(
-            @Param("customerId") String customerId,
+            @Param("customerId") UUID customerId,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable
@@ -42,30 +43,30 @@ public interface JpaOrderRepository extends JpaRepository<OrderModel, String> {
 
     @Query("SELECT o FROM OrderModel o WHERE o.customerId = :customerId AND o.id = :orderId")
     Optional<OrderModel> findByCustomerIdAndId(
-            @Param("customerId") String customerId,
-            @Param("orderId") String orderId
+            @Param("customerId") UUID customerId,
+            @Param("orderId") UUID orderId
     );
 
     @Query("SELECT o FROM OrderModel o WHERE o.customerId = :customerId " +
             "ORDER BY o.createdAt DESC")
     List<OrderModel> findRecentOrdersByCustomerId(
-            @Param("customerId") String customerId,
+            @Param("customerId") UUID customerId,
             Pageable pageable
     );
 
     @Query("SELECT COUNT(o) FROM OrderModel o WHERE o.customerId = :customerId")
-    Long countByCustomerId(@Param("customerId") String customerId);
+    Long countByCustomerId(@Param("customerId") UUID customerId);
 
     @Query("SELECT COUNT(o) FROM OrderModel o WHERE o.customerId = :customerId AND o.status = :status")
     Long countByCustomerIdAndStatus(
-            @Param("customerId") String customerId,
+            @Param("customerId") UUID customerId,
             @Param("status") OrderStatusModel status
     );
 
 
     @Query("SELECT o FROM OrderModel o WHERE o.customerId = :customerId AND o.id = :orderId")
     Optional<Order> findByCustomerIdAndOrderId(
-            @Param("customerId") String customerId,
-            @Param("orderId") String orderId
+            @Param("customerId") UUID customerId,
+            @Param("orderId") UUID orderId
     );
 }

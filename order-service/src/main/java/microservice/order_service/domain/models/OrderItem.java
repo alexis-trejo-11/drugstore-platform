@@ -7,7 +7,6 @@ import microservice.order_service.domain.models.valueobjects.ProductId;
 
 import java.util.Objects;
 
-@Builder
 @Getter
 public class OrderItem {
     private final ProductId productId;
@@ -17,6 +16,7 @@ public class OrderItem {
     private final Money subtotal;
     private final boolean prescriptionRequired;
 
+    @Builder
     public OrderItem(ProductId productId, String productName, Money unitPrice, int quantity, boolean prescriptionRequired) {
         this.productId = Objects.requireNonNull(productId, "Product ID cannot be null");
         this.productName = Objects.requireNonNull(productName, "Product name cannot be null");
@@ -27,7 +27,7 @@ public class OrderItem {
             throw new IllegalArgumentException("Quantity must be greater than 0");
         }
         this.quantity = quantity;
-        this.subTotal = unitPrice.multiply(quantity);
+        this.subtotal = unitPrice.multiply(quantity);
     }
 
     public static OrderItem create(ProductId productId, String productName, Money unitPrice, int quantity, boolean prescriptionRequired) {
@@ -54,6 +54,6 @@ public class OrderItem {
     @Override
     public String toString() {
         return String.format("OrderItem{productId=%s, productName='%s', quantity=%d, unitPrice=%s, subTotal=%s}",
-                productId, productName, quantity, unitPrice, subTotal);
+                productId, productName, quantity, unitPrice, subtotal);
     }
 }

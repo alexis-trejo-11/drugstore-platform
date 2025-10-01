@@ -3,6 +3,9 @@ package microservice.order_service.infrastructure.api.controller;
 
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
+import microservice.order_service.application.queries.request.GetOrderByCustomerAndIdQuery;
+import microservice.order_service.application.queries.request.GetOrdersByCustomerQuery;
+import microservice.order_service.application.queries.request.GetRecentOrdersByCustomerQuery;
 import microservice.order_service.application.queries.response.OrderQueryResponse;
 import microservice.order_service.application.queries.response.OrderSummaryQueryResponse;
 import microservice.order_service.application.queries.response.PagedOrderSummaryQueryResponse;
@@ -25,12 +28,9 @@ public class CustomerOrderController {
             @ModelAttribute GetCustomerOrders query,
             @PathVariable String customerId) {
 
-        var orders = orderService.getOrdersByCustomer(
-                customerId,
-                query.getPage(),
-                query.getSize());
-
-        return ResponseWrapper.found(orders, "Orders");
+        var command = query.toCommand(customerId);
+        var orderSummaryPaged = orderService.getOrdersByCustomer(command);
+        return ResponseWrapper.found(orderSummaryPaged, "Orders");
     }
 
     @GetMapping("/{orderId}/{customerId}")
@@ -38,7 +38,8 @@ public class CustomerOrderController {
             @PathVariable String customerId,
             @PathVariable String orderId) {
 
-        var response = orderService.getOrderByCustomerAndId(customerId, orderId);
+       var query = new GetOrderByCustomerAndIdQuery(customerId, orderId);
+       var response = orderService.getOrderByCustomerAndId(query);
 
         return ResponseWrapper.found(response, "Order");
     }
@@ -48,7 +49,9 @@ public class CustomerOrderController {
             @PathVariable String customerId,
             @RequestParam(defaultValue = "5") int limit) {
 
-         var recentOrders = orderService.getRecentOrdersByCustomer(customerId, limit);
+        var query = new GetRecentOrdersByCustomerQuery(customerId, limit);
+        var recentOrders = orderService.getRecentOrdersByCustomer(query);
+
         return ResponseEntity.ok(recentOrders);
     }
 }

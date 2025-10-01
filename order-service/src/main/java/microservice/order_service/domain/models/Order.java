@@ -1,7 +1,9 @@
 package microservice.order_service.domain.models;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import microservice.order_service.domain.models.enums.DeliveryMethod;
 import microservice.order_service.domain.models.enums.OrderStatus;
 import microservice.order_service.domain.models.events.OrderCreatedEvent;
@@ -21,64 +23,77 @@ import java.util.Optional;
 
 @Builder
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Order {
-    private final OrderId id;
-    private final CustomerId customerId;
-    private final List<OrderItem> items;
-    private final Money totalAmount;
-    private final DeliveryMethod deliveryMethod;
-    private final DeliveryAddress deliveryAddress;
+    private OrderId id;
+    private CustomerId customerId;
+    private List<OrderItem> items;
+    private Money totalAmount;
+    private DeliveryMethod deliveryMethod;
+    private DeliveryAddress deliveryAddress;
     private OrderStatus status;
-    private final LocalDateTime createdAt;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime estimatedDeliveryDate;
     private String notes;
-    
-    // Domain events
-    private final List<Object> domainEvents;
+    private List<Object> domainEvents;
 
-    private Order(OrderId id, CustomerId customerId, List<OrderItem> items, 
-                 DeliveryMethod deliveryMethod, DeliveryAddress deliveryAddress, String notes) {
-        this.id = Objects.requireNonNull(id, "Order ID cannot be null");
-        this.customerId = Objects.requireNonNull(customerId, "Customer ID cannot be null");
-        this.items = new ArrayList<>(Objects.requireNonNull(items, "Items cannot be null"));
-        this.deliveryMethod = Objects.requireNonNull(deliveryMethod, "Delivery method cannot be null");
-        this.deliveryAddress = deliveryMethod.requiresAddress() ? 
-            Objects.requireNonNull(deliveryAddress, "Delivery address is required for delivery orders") : 
-            deliveryAddress;
-        this.notes = notes;
-        
-        validateItems();
-        this.totalAmount = calculateTotalAmount();
-        this.status = OrderStatus.PENDING;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-        this.domainEvents = new ArrayList<>();
-        
+
+    public static Order create(CustomerId customerId, List<OrderItem> items,
+                               DeliveryMethod deliveryMethod, DeliveryAddress deliveryAddress, String notes) {
+        OrderId orderId = OrderId.generate();
+        LocalDateTime now = LocalDateTime.now();
+        Order order = new Order();
+        order.id = orderId;
+        order.customerId = customerId;
+        order.items = new ArrayList<>(items);
+        order.totalAmount = order.calculateTotalAmount();
+        order.deliveryMethod = deliveryMethod;
+        order.deliveryAddress = deliveryAddress;
+        order.status = OrderStatus.PENDING;
+        order.createdAt = now;
+        order.updatedAt = now;
+        order.notes = notes;
+        order.validateItems();
+        order.domainEvents = new ArrayList<>();
         // Raise domain event
-        this.domainEvents.add(new OrderCreatedEvent(this.id, this.customerId, this.totalAmount, this.createdAt));
+        order.domainEvents.add(new OrderCreatedEvent(orderId, customerId,order.totalAmount, now));
+        return order;
     }
 
-    public static Order create(CustomerId customerId, List<OrderItem> items, 
-                              DeliveryMethod deliveryMethod, DeliveryAddress deliveryAddress, String notes) {
-        return new Order(OrderId.generate(), customerId, items, deliveryMethod, deliveryAddress, notes);
+    public static Order createWithId(OrderId orderId, CustomerId customerId, List<OrderItem> items,
+                                     DeliveryMethod deliveryMethod, DeliveryAddress deliveryAddress, String notes) {
+        LocalDateTime now = LocalDateTime.now();
+        Order order = new Order();
+        order.id = orderId;
+        order.customerId = customerId;
+        order.items = new ArrayList<>(items);
+        order.totalAmount = order.calculateTotalAmount();
+        order.deliveryMethod = deliveryMethod;
+        order.deliveryAddress = deliveryAddress;
+        order.status = OrderStatus.PENDING;
+        order.createdAt = now;
+        order.updatedAt = now;
+        order.notes = notes;
+        order.validateItems();
+        order.domainEvents = new ArrayList<>();
+        // Raise domain event
+        order.domainEvents.add(new OrderCreatedEvent(orderId, customerId, order.totalAmount, now));
+        return order;
     }
 
-    public static Order createWithId(OrderId orderId, CustomerId customerId, List<OrderItem> items, 
-                                    DeliveryMethod deliveryMethod, DeliveryAddress deliveryAddress, String notes) {
-        return new Order(orderId, customerId, items, deliveryMethod, deliveryAddress, notes);
-    }
 
     public void changeStatus(OrderStatus newStatus) {
         if (!this.status.canTransitionTo(newStatus)) {
             throw new IllegalStateException(
-                String.format("Cannot transition from %s to %s", this.status, newStatus));
+                    String.format("Cannot transition from %s to %s", this.status, newStatus));
         }
-        
+
         OrderStatus oldStatus = this.status;
         this.status = newStatus;
         this.updatedAt = LocalDateTime.now();
-        
+
         // Raise domain event
         this.domainEvents.add(new OrderStatusChangedEvent(this.id, oldStatus, newStatus, this.updatedAt));
     }
@@ -92,7 +107,7 @@ public class Order {
     }
 
     public void markReadyForPickup() {
-        if (deliveryMethod != DeliveryMethod.PICKUP) {
+        if (deliveryMethod != DeliveryMethod.STORE_PICKUP) {
             throw new IllegalStateException("Only pickup orders can be marked as ready for pickup");
         }
         changeStatus(OrderStatus.READY_FOR_PICKUP);
@@ -150,32 +165,25 @@ public class Order {
     public List<OrderItem> getItems() {
         return Collections.unmodifiableList(items);
     }
-
     public int getTotalItemsCount() {
         return items.stream().mapToInt(OrderItem::getQuantity).sum();
     }
-
     public boolean hasItems() {
         return !items.isEmpty();
     }
-
     public boolean isDelivery() {
-        return deliveryMethod == DeliveryMethod.DELIVERY;
+        return deliveryMethod == DeliveryMethod.STANDARD_DELIVERY;
     }
-
     public boolean isPickup() {
-        return deliveryMethod == DeliveryMethod.PICKUP;
+        return deliveryMethod == DeliveryMethod.STORE_PICKUP;
     }
-
     public boolean canBeCancelled() {
         return !status.isTerminal();
     }
-
     public boolean canBeReturned() {
         return status == OrderStatus.DELIVERED || status == OrderStatus.PICKED_UP;
     }
 
-    // Domain events handling
     public List<Object> getDomainEvents() {
         return Collections.unmodifiableList(domainEvents);
     }
@@ -188,19 +196,19 @@ public class Order {
         if (items.isEmpty()) {
             throw new IllegalArgumentException("Order must have at least one item");
         }
-        
+
         // Check for duplicate products
         long uniqueProducts = items.stream()
                 .map(OrderItem::getProductId)
                 .distinct()
                 .count();
-        
+
         if (uniqueProducts != items.size()) {
             throw new IllegalArgumentException("Order cannot have duplicate products");
         }
     }
 
-    public void UpdateStatus(OrderStatus newOrderStatus) {
+    public void updateStatus(OrderStatus newOrderStatus) { // Fixed method name capitalization
         this.status = newOrderStatus;
         this.updatedAt = LocalDateTime.now();
     }

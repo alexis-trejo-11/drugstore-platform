@@ -26,21 +26,12 @@ public class OrderCommandMapper {
                 .map(this::toDomainOrderItem)
                 .toList();
 
-        BigDecimal totalAmount = items.stream()
-                .map(item -> item.getSubtotal().amount())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         return Order.builder()
                 .id(orderId)
                 .customerId(customerId)
                 .items(items)
-                .totalAmount(new Money(totalAmount, Currency.getInstance("MXN")))
                 .deliveryMethod(DeliveryMethod.valueOf(command.getDeliveryMethod().toUpperCase()))
                 .deliveryAddress(toDomainDeliveryAddress(command.getDeliveryAddress()))
-                .status(OrderStatus.PENDING)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .estimatedDeliveryDate(command.getEstimatedDeliveryDate())
                 .notes(command.getNotes())
                 .build();
     }
@@ -48,17 +39,11 @@ public class OrderCommandMapper {
     private OrderItem toDomainOrderItem(CreateOrderItemCommand command) {
         ProductId productId = new ProductId(command.getProductId());
         Money unitPrice = new Money(command.getUnitPrice(), Currency.getInstance("MXN"));
-        Money subtotal = new Money(
-                command.getUnitPrice().multiply(BigDecimal.valueOf(command.getQuantity())),
-                Currency.getInstance("MXN")
-        );
-
         return OrderItem.builder()
                 .productId(productId)
                 .productName(command.getProductName())
                 .unitPrice(unitPrice)
                 .quantity(command.getQuantity())
-                .subtotal(subtotal)
                 .prescriptionRequired(command.getPrescriptionRequired() != null ?
                         command.getPrescriptionRequired() : false)
                 .build();

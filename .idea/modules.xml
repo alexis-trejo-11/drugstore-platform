@@ -25,6 +25,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/eureka-server/backend.drugstore.eureka-server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/eureka-server/backend.drugstore.eureka-server.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/eureka-server/backend.drugstore.eureka-server.test.iml" filepath="$PROJECT_DIR$/.idea/modules/eureka-server/backend.drugstore.eureka-server.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/inventory-service/backend.drugstore.inventory-service.iml" filepath="$PROJECT_DIR$/.idea/modules/inventory-service/backend.drugstore.inventory-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libs/shared-kernel/backend.drugstore.libs.shared-kernel.main.iml" filepath="$PROJECT_DIR$/.idea/modules/libs/shared-kernel/backend.drugstore.libs.shared-kernel.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/backend.drugstore.main.iml" filepath="$PROJECT_DIR$/.idea/modules/backend.drugstore.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/order-service/backend.drugstore.order-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/order-service/backend.drugstore.order-service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/order-service/backend.drugstore.order-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/order-service/backend.drugstore.order-service.test.iml" />
