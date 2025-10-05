@@ -1,16 +1,39 @@
 package microservice.order_service.application.commands.response;
 
-import lombok.Builder;
-import lombok.Data;
-import microservice.order_service.domain.models.valueobjects.OrderId;
-
+import microservice.order_service.domain.models.Order;
+import microservice.order_service.domain.models.valueobjects.OrderID;
 import java.time.LocalDateTime;
 
-@Data
-@Builder
-public class CancelOrderCommandResponse {
-    private OrderId orderId;
-    private String status;
-    private String cancellationReason;
-    private LocalDateTime cancelledAt;
+public record CancelOrderCommandResponse(
+    OrderID orderId,
+    String status,
+    String cancellationReason,
+    LocalDateTime cancelledAt
+) {
+    public CancelOrderCommandResponse {
+        if (orderId == null) {
+            throw new IllegalArgumentException("orderId cannot be null");
+        }
+        if (status == null || status.isBlank()) {
+            throw new IllegalArgumentException("status cannot be null or blank");
+        }
+        if (cancellationReason == null || cancellationReason.isBlank()) {
+            throw new IllegalArgumentException("cancellationReason cannot be null or blank");
+        }
+        if (cancelledAt == null) {
+            throw new IllegalArgumentException("cancelledAt cannot be null");
+        }
+    }
+
+    public static CancelOrderCommandResponse of(
+            Order order,
+            String cancellationReason
+    ) {
+        return new CancelOrderCommandResponse(
+                order.getId(),
+                order.getStatus().toString(),
+                cancellationReason,
+                order.getUpdatedAt()
+        );
+    }
 }

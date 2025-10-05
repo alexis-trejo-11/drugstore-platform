@@ -2,8 +2,8 @@ package microservice.order_service.domain.ports.output;
 
 import microservice.order_service.domain.models.Order;
 import microservice.order_service.domain.models.enums.OrderStatus;
-import microservice.order_service.domain.models.valueobjects.CustomerId;
-import microservice.order_service.domain.models.valueobjects.OrderId;
+import microservice.order_service.domain.models.valueobjects.CustomerID;
+import microservice.order_service.domain.models.valueobjects.OrderID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,20 +12,17 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository {
-    Page<Order> findByCustomerID(CustomerId customerId, Pageable pageable);
+    Optional<Order> findById(OrderID orderId);
+    Optional<Order> findByCustomerIdAndOrderId(CustomerID customerId, OrderID orderId);
+    Page<Order> findByCustomerID(CustomerID customerId, Pageable pageable);
+    Page<Order> findByCustomerIdAndOrderStatus(CustomerID customerId, OrderStatus status, Pageable pageable);
+    Page<Order> findByCustomerIdAndRangeDate(CustomerID customerId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    Optional<Order> findByCustomerIdAndId(CustomerID customerId, OrderID orderId);
+    List<Order> findRecentOrdersByCustomer(CustomerID customerId, int limit);
 
-    Page<Order> findByCustomerIdAndOrderStatus(CustomerId customerId, OrderStatus status, Pageable pageable);
-
-    Page<Order> findByCustomerIdAndRangeDate(CustomerId customerId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-
-    Optional<Order> findByCustomerIdAndId(CustomerId customerId, OrderId orderId);
-
-    List<Order> findRecentOrdersByCustomer(CustomerId customerId, int limit);
-
-    Long countByCustomerId(CustomerId customerId);
-
-    Long countByCustomerIdAndStatus(CustomerId customerId, OrderStatus status);
+    Long countByCustomerId(CustomerID customerId);
+    Long countByCustomerIdAndStatus(CustomerID customerId, OrderStatus status);
     Order save(Order order);
-
-    Optional<Order> findByCustomerIdAndOrderId(CustomerId customerId, OrderId orderId);
+    void softDelete(Order order);
+    void hardDelete(Order order);
 }

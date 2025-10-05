@@ -1,17 +1,32 @@
 package microservice.order_service.application.commands.response;
 
-import lombok.Builder;
-import lombok.Data;
-import microservice.order_service.domain.models.valueobjects.OrderId;
+import microservice.order_service.domain.models.Order;
+import microservice.order_service.domain.models.valueobjects.OrderID;
 
 import java.time.LocalDateTime;
 
-@Data
-@Builder
-public class UpdateOrderStatusCommandResponse {
-    private OrderId orderId;
-    private String previousStatus;
-    private String newStatus;
-    private LocalDateTime updatedAt;
-}
+public record UpdateOrderStatusCommandResponse(
+    OrderID orderId,
+    String previousStatus,
+    String newStatus,
+    LocalDateTime updatedAt
+) {
+    public UpdateOrderStatusCommandResponse {
+        if (orderId == null) {
+            throw new IllegalArgumentException("OrderID cannot be null");
+        }
+        if (previousStatus == null || previousStatus.isBlank()) {
+            throw new IllegalArgumentException("Previous status cannot be null or empty");
+        }
+        if (newStatus == null || newStatus.isBlank()) {
+            throw new IllegalArgumentException("New status cannot be null or empty");
+        }
+        if (updatedAt == null) {
+            throw new IllegalArgumentException("UpdatedAt cannot be null");
+        }
+    }
 
+    public  static UpdateOrderStatusCommandResponse of(Order order, String previousStatus) {
+        return new UpdateOrderStatusCommandResponse(order.getId(), previousStatus, order.getStatus().name(), LocalDateTime.now());
+    }
+}

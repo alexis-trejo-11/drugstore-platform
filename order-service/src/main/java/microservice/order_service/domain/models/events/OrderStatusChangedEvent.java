@@ -1,12 +1,12 @@
 package microservice.order_service.domain.models.events;
 
 import microservice.order_service.domain.models.enums.OrderStatus;
-import microservice.order_service.domain.models.valueobjects.OrderId;
+import microservice.order_service.domain.models.valueobjects.OrderID;
 
 import java.time.LocalDateTime;
 
 public record OrderStatusChangedEvent(
-    OrderId orderId,
+    OrderID orderId,
     OrderStatus oldStatus,
     OrderStatus newStatus,
     LocalDateTime changedAt

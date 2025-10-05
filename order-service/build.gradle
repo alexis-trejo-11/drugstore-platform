@@ -7,7 +7,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(23)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 
@@ -67,6 +67,13 @@ dependencyManagement {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.named('bootRun') {
+    jvmArgs = [
+            '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005',
+            '-Dspring.devtools.restart.enabled=false'
+    ]
 }
 
 bootRun {

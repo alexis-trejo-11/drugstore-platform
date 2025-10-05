@@ -1,15 +1,15 @@
 package microservice.order_service.application.commands.response;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import microservice.order_service.domain.models.valueobjects.OrderId;
+import microservice.order_service.domain.models.valueobjects.OrderID;
 
 import java.time.LocalDateTime;
 
 @Data
-@Builder
+@AllArgsConstructor
 public class CreateOrderCommandResponse {
-    private OrderId orderId;
+    private OrderID orderId;
     private String status;
     private LocalDateTime createdAt;
 }

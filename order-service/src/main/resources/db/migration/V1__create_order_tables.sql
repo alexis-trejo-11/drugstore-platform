@@ -13,6 +13,7 @@ CREATE TABLE orders (
     status VARCHAR(20) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP,
+    deleted_at TIMESTAMP,
     estimated_delivery_date TIMESTAMP,
     notes VARCHAR(500),
 
@@ -42,6 +43,7 @@ CREATE TABLE order_items (
     product_name VARCHAR(255) NOT NULL,
     unit_price NUMERIC(10,2) NOT NULL,
     quantity INTEGER NOT NULL,
+    currency VARCHAR(3) NOT NULL DEFAULT 'MXN',
     subtotal NUMERIC(10,2) NOT NULL,
     prescription_required BOOLEAN DEFAULT FALSE,
 
@@ -172,7 +174,7 @@ INSERT INTO orders (
 );
 
 INSERT INTO order_items (
-    order_id, product_id, product_name, unit_price, quantity, subtotal, prescription_required
+    order_id, product_id, product_name, unit_price, quantity, subtotal, currency, prescription_required
 ) VALUES
 (
     '11111111-1111-1111-1111-111111111111',
@@ -181,6 +183,7 @@ INSERT INTO order_items (
     45.50,
     2,
     91.00,
+    'MXN',
     false
 ),
 (
@@ -190,5 +193,6 @@ INSERT INTO order_items (
     104.25,
     2,
     208.50,
+    'MXN',
     false
 );

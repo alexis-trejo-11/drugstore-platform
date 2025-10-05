@@ -1,9 +1,10 @@
 package microservice.order_service.application.queries.mapper;
 
 import microservice.order_service.application.queries.response.DeliveryAddressQueryResponse;
-import microservice.order_service.application.queries.response.OrderItemQueryResponse;
-import microservice.order_service.application.queries.response.OrderQueryResponse;
-import microservice.order_service.application.queries.response.OrderSummaryQueryResponse;
+import microservice.order_service.application.queries.response.OrderItemQueryResult;
+
+import microservice.order_service.application.queries.response.OrderQueryDetailResult;
+import microservice.order_service.application.queries.response.OrderQueryResult;
 import microservice.order_service.domain.models.Order;
 import microservice.order_service.domain.models.OrderItem;
 import microservice.order_service.domain.models.valueobjects.DeliveryAddress;
@@ -14,18 +15,18 @@ import java.util.List;
 @Component
 public class OrderQueryMapper {
 
-    public OrderQueryResponse toOrderResponse(Order domain) {
+    public OrderQueryDetailResult toOrderDetailResponse(Order domain) {
         if (domain == null) return null;
 
-        return OrderQueryResponse.builder()
-                .orderId(domain.getId().value())
-                .customerId(domain.getCustomerId().value())
+        return OrderQueryDetailResult.builder()
+                .orderId(domain.getId())
+                .customerId(domain.getCustomerId())
                 .items(toOrderItemResponseList(domain.getItems()))
                 .totalAmount(domain.getTotalAmount().amount())
                 .currency(domain.getTotalAmount().currency().toString())
-                .deliveryMethod(domain.getDeliveryMethod().name())
-                .deliveryAddress(toDeliveryAddressResponse(domain.getDeliveryAddress()))
-                .status(domain.getStatus().name())
+                .deliveryMethod(domain.getDeliveryMethod())
+                //.deliveryAddress(toDeliveryAddressResponse(domain.getDeliveryAddress()))
+                .status(domain.getStatus())
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())
                 .estimatedDeliveryDate(domain.getEstimatedDeliveryDate())
@@ -33,7 +34,7 @@ public class OrderQueryMapper {
                 .build();
     }
 
-    public OrderSummaryQueryResponse toOrderSummaryResponse(Order domain) {
+    public OrderQueryResult toOrderSummaryResponse(Order domain) {
         if (domain == null) return null;
 
         int totalItems = domain.getItems() != null ?
@@ -41,18 +42,19 @@ public class OrderQueryMapper {
                         .mapToInt(OrderItem::getQuantity)
                         .sum() : 0;
 
-        return OrderSummaryQueryResponse.builder()
+        return OrderQueryResult.builder()
                 .orderId(domain.getId())
                 .totalAmount(domain.getTotalAmount().amount())
                 .currency(domain.getTotalAmount().currency().toString())
-                .status(domain.getStatus().name())
+                .status(domain.getStatus())
                 .createdAt(domain.getCreatedAt())
                 .estimatedDeliveryDate(domain.getEstimatedDeliveryDate())
+                .deliveredMethod(domain.getDeliveryMethod())
                 .totalItems(totalItems)
                 .build();
     }
 
-    private List<OrderItemQueryResponse> toOrderItemResponseList(List<OrderItem> items) {
+    private List<OrderItemQueryResult> toOrderItemResponseList(List<OrderItem> items) {
         if (items == null) return null;
 
         return items.stream()
@@ -60,11 +62,10 @@ public class OrderQueryMapper {
                 .toList();
     }
 
-    private OrderItemQueryResponse toOrderItemResponse(OrderItem item) {
+    private OrderItemQueryResult toOrderItemResponse(OrderItem item) {
         if (item == null) return null;
-
-        return OrderItemQueryResponse.builder()
-                .productId(item.getProductId().value())
+        return OrderItemQueryResult.builder()
+                .productID(item.getProductId())
                 .productName(item.getProductName())
                 .unitPrice(item.getUnitPrice().amount())
                 .quantity(item.getQuantity())
