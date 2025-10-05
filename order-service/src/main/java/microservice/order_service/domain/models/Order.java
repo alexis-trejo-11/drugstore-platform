@@ -8,11 +8,8 @@ import microservice.order_service.domain.models.enums.DeliveryMethod;
 import microservice.order_service.domain.models.enums.OrderStatus;
 import microservice.order_service.domain.models.events.OrderCreatedEvent;
 import microservice.order_service.domain.models.events.OrderStatusChangedEvent;
-import microservice.order_service.domain.models.valueobjects.CustomerId;
-import microservice.order_service.domain.models.valueobjects.DeliveryAddress;
-import microservice.order_service.domain.models.valueobjects.Money;
-import microservice.order_service.domain.models.valueobjects.OrderId;
-import microservice.order_service.domain.models.valueobjects.ProductId;
+import microservice.order_service.domain.models.valueobjects.*;
+import microservice.order_service.domain.models.valueobjects.CustomerID;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,12 +23,12 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Order {
-    private OrderId id;
-    private CustomerId customerId;
+    private OrderID id;
+    private CustomerID customerId;
     private List<OrderItem> items;
     private Money totalAmount;
     private DeliveryMethod deliveryMethod;
-    private DeliveryAddress deliveryAddress;
+    private AddressID addressID;
     private OrderStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -40,9 +37,9 @@ public class Order {
     private List<Object> domainEvents;
 
 
-    public static Order create(CustomerId customerId, List<OrderItem> items,
-                               DeliveryMethod deliveryMethod, DeliveryAddress deliveryAddress, String notes) {
-        OrderId orderId = OrderId.generate();
+    public static Order create(CustomerID customerId, List<OrderItem> items,
+                               DeliveryMethod deliveryMethod, AddressID addressID, String notes) {
+        OrderID orderId = OrderID.generate();
         LocalDateTime now = LocalDateTime.now();
         Order order = new Order();
         order.id = orderId;
@@ -50,7 +47,7 @@ public class Order {
         order.items = new ArrayList<>(items);
         order.totalAmount = order.calculateTotalAmount();
         order.deliveryMethod = deliveryMethod;
-        order.deliveryAddress = deliveryAddress;
+        order.addressID = addressID;
         order.status = OrderStatus.PENDING;
         order.createdAt = now;
         order.updatedAt = now;
@@ -61,28 +58,6 @@ public class Order {
         order.domainEvents.add(new OrderCreatedEvent(orderId, customerId,order.totalAmount, now));
         return order;
     }
-
-    public static Order createWithId(OrderId orderId, CustomerId customerId, List<OrderItem> items,
-                                     DeliveryMethod deliveryMethod, DeliveryAddress deliveryAddress, String notes) {
-        LocalDateTime now = LocalDateTime.now();
-        Order order = new Order();
-        order.id = orderId;
-        order.customerId = customerId;
-        order.items = new ArrayList<>(items);
-        order.totalAmount = order.calculateTotalAmount();
-        order.deliveryMethod = deliveryMethod;
-        order.deliveryAddress = deliveryAddress;
-        order.status = OrderStatus.PENDING;
-        order.createdAt = now;
-        order.updatedAt = now;
-        order.notes = notes;
-        order.validateItems();
-        order.domainEvents = new ArrayList<>();
-        // Raise domain event
-        order.domainEvents.add(new OrderCreatedEvent(orderId, customerId, order.totalAmount, now));
-        return order;
-    }
-
 
     public void changeStatus(OrderStatus newStatus) {
         if (!this.status.canTransitionTo(newStatus)) {
@@ -156,7 +131,7 @@ public class Order {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Optional<OrderItem> findItem(ProductId productId) {
+    public Optional<OrderItem> findItem(ProductID productId) {
         return items.stream()
                 .filter(item -> item.getProductId().equals(productId))
                 .findFirst();

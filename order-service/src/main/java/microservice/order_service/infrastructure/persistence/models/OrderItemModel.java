@@ -18,14 +18,14 @@ import java.util.UUID;
 public class OrderItemModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID id;
+    private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private OrderModel order;
 
     @Column(name = "product_id", nullable = false, length = 36)
-    private UUID productId;
+    private String productId;
 
     @Column(name = "product_name", nullable = false)
     private String productName;

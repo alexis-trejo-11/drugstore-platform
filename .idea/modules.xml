@@ -6,7 +6,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.iml" filepath="$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/admin-service/backend.drugstore.admin-service.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/auth-service/backend.drugstore.auth-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/auth-service/backend.drugstore.auth-service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/auth-service/backend.drugstore.auth-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/auth-service/backend.drugstore.auth-service.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/client-service/backend.drugstore.client-service.iml" filepath="$PROJECT_DIR$/.idea/modules/client-service/backend.drugstore.client-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common-classes/backend.drugstore.common-classes.iml" filepath="$PROJECT_DIR$/.idea/modules/common-classes/backend.drugstore.common-classes.iml" />
@@ -25,9 +24,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/eureka-server/backend.drugstore.eureka-server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/eureka-server/backend.drugstore.eureka-server.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/eureka-server/backend.drugstore.eureka-server.test.iml" filepath="$PROJECT_DIR$/.idea/modules/eureka-server/backend.drugstore.eureka-server.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/inventory-service/backend.drugstore.inventory-service.iml" filepath="$PROJECT_DIR$/.idea/modules/inventory-service/backend.drugstore.inventory-service.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libs/shared-kernel/backend.drugstore.libs.shared-kernel.main.iml" filepath="$PROJECT_DIR$/.idea/modules/libs/shared-kernel/backend.drugstore.libs.shared-kernel.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/backend.drugstore.main.iml" filepath="$PROJECT_DIR$/.idea/modules/backend.drugstore.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/order-service/backend.drugstore.order-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/order-service/backend.drugstore.order-service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/order-service/backend.drugstore.order-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/order-service/backend.drugstore.order-service.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/product-service/backend.drugstore.product-service.iml" filepath="$PROJECT_DIR$/.idea/modules/product-service/backend.drugstore.product-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/sale-service/backend.drugstore.sale-service.iml" filepath="$PROJECT_DIR$/.idea/modules/sale-service/backend.drugstore.sale-service.iml" />

@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Getter
-@Builder
 public class User {
     private UserId id;
     private Email email;

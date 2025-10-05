@@ -5,15 +5,14 @@ import lombok.RequiredArgsConstructor;
 import microservice.order_service.application.commands.mapper.OrderCommandMapper;
 import microservice.order_service.application.commands.request.CancelOrderCommand;
 import microservice.order_service.application.commands.request.CreateOrderCommand;
+import microservice.order_service.application.commands.request.DeleteOrderCommand;
 import microservice.order_service.application.commands.request.UpdateOrderStatusCommand;
 import microservice.order_service.application.commands.response.CancelOrderCommandResponse;
 import microservice.order_service.application.commands.response.CreateOrderCommandResponse;
 import microservice.order_service.application.commands.response.UpdateOrderStatusCommandResponse;
-import microservice.order_service.application.exceptions.OrderNotFoundException;
+import microservice.order_service.application.exceptions.OrderNotFoundIDException;
 import microservice.order_service.domain.models.Order;
 import microservice.order_service.domain.models.enums.OrderStatus;
-import microservice.order_service.domain.models.valueobjects.CustomerId;
-import microservice.order_service.domain.models.valueobjects.OrderId;
 import microservice.order_service.domain.ports.output.OrderRepository;
 import org.springframework.stereotype.Service;
 
@@ -26,56 +25,44 @@ public class OrderCommandHandler {
 
     public CreateOrderCommandResponse handle(CreateOrderCommand command) {
         Order order = commandMapper.toDomainOrder(command);
-        Order savedOrder = orderRepository.save(order);
 
-        return CreateOrderCommandResponse.builder()
-                .orderId(savedOrder.getId())
-                .status(savedOrder.getStatus().name())
-                .createdAt(savedOrder.getCreatedAt())
-                .build();
+        Order orderSaved = orderRepository.save(order);
+
+        return new CreateOrderCommandResponse(orderSaved.getId(), orderSaved.getStatus().name(), orderSaved.getCreatedAt());
     }
 
     public UpdateOrderStatusCommandResponse handle(UpdateOrderStatusCommand command) {
-        CustomerId customerId = new CustomerId(command.getCustomerId());
-        OrderId orderId = new OrderId(command.getOrderId());
-
-        Order order = orderRepository.findByCustomerIdAndOrderId(customerId, orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found: " + command.getOrderId()));
+        Order order = orderRepository.findByCustomerIdAndOrderId(command.customerId(), command.orderId())
+                .orElseThrow(() -> new OrderNotFoundIDException(command.orderId()));
 
         OrderStatus previousStatus = order.getStatus();
         OrderStatus newStatus;
 
-
-        newStatus = OrderStatus.valueOf(command.getNewStatus().toUpperCase());
+        newStatus = OrderStatus.valueOf(command.newStatus().toUpperCase());
         order.changeStatus(newStatus);
 
         Order updatedOrder = orderRepository.save(order);
-
-        return UpdateOrderStatusCommandResponse.builder()
-                .orderId(updatedOrder.getId())
-                .previousStatus(previousStatus.name())
-                .newStatus(updatedOrder.getStatus().name())
-                .updatedAt(updatedOrder.getUpdatedAt())
-                .build();
+        return UpdateOrderStatusCommandResponse.of(updatedOrder, previousStatus.name());
     }
 
     public CancelOrderCommandResponse handle(CancelOrderCommand command) {
-        CustomerId customerId = new CustomerId(command.getCustomerId());
-        OrderId orderId = new OrderId(command.getOrderId());
+        Order order = orderRepository.findByCustomerIdAndOrderId(command.customerId(), command.orderId())
+                .orElseThrow(() -> new OrderNotFoundIDException(command.orderId()));
 
-        Order order = orderRepository.findByCustomerIdAndOrderId(customerId, orderId)
-                .orElseThrow(() -> new OrderNotFoundException(
-                        "Order not found: " + command.getOrderId()));
-
-        order.cancel(command.getCancellationReason());
-
+        order.cancel(command.reason());
         Order cancelledOrder = orderRepository.save(order);
 
-        return CancelOrderCommandResponse.builder()
-                .orderId(cancelledOrder.getId())
-                .status(cancelledOrder.getStatus().name())
-                .cancellationReason(command.getCancellationReason())
-                .cancelledAt(cancelledOrder.getUpdatedAt())
-                .build();
+        return CancelOrderCommandResponse.of(cancelledOrder, command.reason());
+    }
+
+    public void handle(DeleteOrderCommand command) {
+        Order order = orderRepository.findById(command.orderId())
+                .orElseThrow(() -> new OrderNotFoundIDException(command.orderId()));
+
+        if (command.isHardDelete()) {
+            orderRepository.hardDelete(order);
+        } else {
+            orderRepository.softDelete(order);
+        }
     }
 }

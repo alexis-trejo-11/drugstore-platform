@@ -2,10 +2,11 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.34/ec547ef414ab1d2c040118fb9c1c265ada63af14/lombok-1.18.34.jar" />
+          <entry name="$PROJECT_DIR$/../../../.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.34/ec547ef414ab1d2c040118fb9c1c265ada63af14/lombok-1.18.34.jar" />
         </processorPath>
         <module name="backend.drugstore.libs.test" />
         <module name="backend.drugstore.auth-service.test" />
@@ -22,8 +23,8 @@
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.34/ec547ef414ab1d2c040118fb9c1c265ada63af14/lombok-1.18.34.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.mapstruct/mapstruct-processor/1.5.5.Final/897f6f115930b936287bef552bf5fe28cc64717d/mapstruct-processor-1.5.5.Final.jar" />
+          <entry name="$PROJECT_DIR$/../../../.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.34/ec547ef414ab1d2c040118fb9c1c265ada63af14/lombok-1.18.34.jar" />
+          <entry name="$PROJECT_DIR$/../../../.gradle/caches/modules-2/files-2.1/org.mapstruct/mapstruct-processor/1.5.5.Final/897f6f115930b936287bef552bf5fe28cc64717d/mapstruct-processor-1.5.5.Final.jar" />
         </processorPath>
         <module name="backend.drugstore.cart-service.main" />
         <module name="at.backend.drugstore.microservice.backend.drugstore.product-service.main" />
@@ -31,9 +32,9 @@
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.34/ec547ef414ab1d2c040118fb9c1c265ada63af14/lombok-1.18.34.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok-mapstruct-binding/0.2.0/2f1cf9ced7b720ba4996c942b816669e63f0fa4f/lombok-mapstruct-binding-0.2.0.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.mapstruct/mapstruct-processor/1.5.5.Final/897f6f115930b936287bef552bf5fe28cc64717d/mapstruct-processor-1.5.5.Final.jar" />
+          <entry name="$PROJECT_DIR$/../../../.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.34/ec547ef414ab1d2c040118fb9c1c265ada63af14/lombok-1.18.34.jar" />
+          <entry name="$PROJECT_DIR$/../../../.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok-mapstruct-binding/0.2.0/2f1cf9ced7b720ba4996c942b816669e63f0fa4f/lombok-mapstruct-binding-0.2.0.jar" />
+          <entry name="$PROJECT_DIR$/../../../.gradle/caches/modules-2/files-2.1/org.mapstruct/mapstruct-processor/1.5.5.Final/897f6f115930b936287bef552bf5fe28cc64717d/mapstruct-processor-1.5.5.Final.jar" />
         </processorPath>
         <module name="at.backend.drugstore.microservice.backend.drugstore.user-service.main" />
       </profile>
@@ -43,5 +44,30 @@
       <module name="at.backend.drugstore.backend.drugstore.libs.main" target="21" />
       <module name="at.backend.drugstore.backend.drugstore.libs.test" target="21" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="at.backend.drugstore.microservice.backend.drugstore.product-service" options="-parameters" />
+      <module name="at.backend.drugstore.microservice.backend.drugstore.product-service.main" options="-parameters" />
+      <module name="at.backend.drugstore.microservice.backend.drugstore.product-service.test" options="-parameters" />
+      <module name="at.backend.drugstore.microservice.backend.drugstore.user-service" options="-parameters" />
+      <module name="at.backend.drugstore.microservice.backend.drugstore.user-service.main" options="-parameters" />
+      <module name="at.backend.drugstore.microservice.backend.drugstore.user-service.test" options="-parameters" />
+      <module name="backend.drugstore.auth-service" options="-parameters" />
+      <module name="backend.drugstore.auth-service.main" options="-parameters" />
+      <module name="backend.drugstore.auth-service.test" options="-parameters" />
+      <module name="backend.drugstore.cart-service" options="-parameters" />
+      <module name="backend.drugstore.cart-service.main" options="-parameters" />
+      <module name="backend.drugstore.cart-service.test" options="-parameters" />
+      <module name="backend.drugstore.libs" options="-parameters" />
+      <module name="backend.drugstore.libs.main" options="-parameters" />
+      <module name="backend.drugstore.libs.shared-kernel" options="-parameters" />
+      <module name="backend.drugstore.libs.shared-kernel.main" options="-parameters" />
+      <module name="backend.drugstore.libs.shared-kernel.test" options="-parameters" />
+      <module name="backend.drugstore.libs.test" options="-parameters" />
+      <module name="backend.drugstore.order-service" options="-parameters" />
+      <module name="backend.drugstore.order-service.main" options="-parameters" />
+      <module name="backend.drugstore.order-service.test" options="-parameters" />
+    </option>
   </component>
 </project>

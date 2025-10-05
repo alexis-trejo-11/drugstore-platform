@@ -1,22 +1,20 @@
 package microservice.order_service.application.commands.request;
 
-
-import lombok.Builder;
-import lombok.Data;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import microservice.order_service.domain.models.enums.DeliveryMethod;
+import microservice.order_service.domain.models.valueobjects.AddressID;
+import microservice.order_service.domain.models.valueobjects.CustomerID;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
-@Data
-@Builder
-public class CreateOrderCommand {
-    private UUID customerId;
-    private List<CreateOrderItemCommand> items;
-    private String deliveryMethod;
-    private CreateDeliveryAddressCommand deliveryAddress;
-    private LocalDateTime estimatedDeliveryDate;
-    private String notes;
-}
-
-
+public record CreateOrderCommand(
+        @NotNull CustomerID customerId,
+        @NotEmpty List<@NotNull CreateOrderItemCommand> items,
+        @NotEmpty DeliveryMethod deliveryMethod,
+        @NotNull AddressID addressID,
+        @Future LocalDateTime estimatedDeliveryDate,
+        String notes
+) {}

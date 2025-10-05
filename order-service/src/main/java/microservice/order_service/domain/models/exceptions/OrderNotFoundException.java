@@ -1,9 +1,9 @@
 package microservice.order_service.domain.models.exceptions;
 
-import microservice.order_service.domain.models.valueobjects.OrderId;
+import microservice.order_service.domain.models.valueobjects.OrderID;
 
 public class OrderNotFoundException extends RuntimeException {
-    public OrderNotFoundException(OrderId orderId) {
+    public OrderNotFoundException(OrderID orderId) {
         super("Order not found with ID: " + orderId);
     }
     

@@ -3,12 +3,11 @@ package microservice.order_service.infrastructure.persistence.repository;
 import lombok.RequiredArgsConstructor;
 import microservice.order_service.domain.models.Order;
 import microservice.order_service.domain.models.enums.OrderStatus;
-import microservice.order_service.domain.models.valueobjects.CustomerId;
-import microservice.order_service.domain.models.valueobjects.OrderId;
+import microservice.order_service.domain.models.valueobjects.CustomerID;
+import microservice.order_service.domain.models.valueobjects.OrderID;
 import microservice.order_service.domain.ports.output.OrderRepository;
 import microservice.order_service.infrastructure.persistence.mapper.OrderJpaMapper;
 import microservice.order_service.infrastructure.persistence.models.OrderModel;
-import microservice.order_service.infrastructure.persistence.models.OrderStatusModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -24,17 +23,16 @@ public class OrderRepositoryImpl implements OrderRepository {
     private final OrderJpaMapper mapper;
 
     @Override
-    public Page<Order> findByCustomerID(CustomerId customerId, Pageable pageable) {
-     Page<OrderModel> orderModelPage = orderJpaRepository.findByCustomerId(customerId.value(), pageable);
+    public Page<Order> findByCustomerID(CustomerID customerId, Pageable pageable) {
+     Page<OrderModel> orderModelPage = orderJpaRepository.findByCustomerId(customerId.toString(), pageable);
      return orderModelPage.map(mapper::toDomain);
     }
 
     @Override
-    public Page<Order> findByCustomerIdAndOrderStatus(CustomerId customerId, OrderStatus status, Pageable pageable) {
-        OrderStatusModel statusModel = mapper.mapOrderStatusToEntity(status);
+    public Page<Order> findByCustomerIdAndOrderStatus(CustomerID customerId, OrderStatus status, Pageable pageable) {
         Page<OrderModel> orderModelPage = orderJpaRepository.findByCustomerIdAndStatus(
-                customerId.value(),
-                statusModel,
+                customerId.toString(),
+                status.toString(),
                 pageable
         );
 
@@ -43,13 +41,13 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public Page<Order> findByCustomerIdAndRangeDate(
-            CustomerId customerId,
+            CustomerID customerId,
             LocalDateTime startDate,
             LocalDateTime endDate,
             Pageable pageable
     ) {
         Page<OrderModel> orderModelPage = orderJpaRepository.findByCustomerIdAndDateRange(
-                customerId.value(),
+                customerId.toString(),
                 startDate,
                 endDate,
                 pageable
@@ -58,19 +56,19 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Optional<Order> findByCustomerIdAndId(CustomerId customerId, OrderId orderId) {
+    public Optional<Order> findByCustomerIdAndId(CustomerID customerId, OrderID orderId) {
         Optional<OrderModel> orderModelOpt = orderJpaRepository.findByCustomerIdAndId(
-                customerId.value(),
-                orderId.value()
+                customerId.toString(),
+                orderId.toString()
         );
         return orderModelOpt.map(mapper::toDomain);
     }
 
     @Override
-    public List<Order> findRecentOrdersByCustomer(CustomerId customerId, int limit) {
+    public List<Order> findRecentOrdersByCustomer(CustomerID customerId, int limit) {
         Pageable pageable = Pageable.ofSize(limit);
         List<OrderModel> orderModels = orderJpaRepository.findRecentOrdersByCustomerId(
-                customerId.value(),
+                customerId.toString(),
                 pageable
         );
 
@@ -80,16 +78,15 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Long countByCustomerId(CustomerId customerId) {
-        return orderJpaRepository.countByCustomerId(customerId.value());
+    public Long countByCustomerId(CustomerID customerId) {
+        return orderJpaRepository.countByCustomerId(customerId.toString());
     }
 
     @Override
-    public Long countByCustomerIdAndStatus(CustomerId customerId, OrderStatus status) {
-        OrderStatusModel statusModel = mapper.mapOrderStatusToEntity(status);
+    public Long countByCustomerIdAndStatus(CustomerID customerId, OrderStatus status) {
         return orderJpaRepository.countByCustomerIdAndStatus(
-                customerId.value(),
-                statusModel
+                customerId.toString(),
+                status.toString()
         );
     }
 
@@ -102,10 +99,31 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Optional<Order> findByCustomerIdAndOrderId(CustomerId customerId, OrderId orderId) {
+    public void softDelete(Order order) {
+        OrderModel orderModel = mapper.toModel(order);
+        orderModel.setDeletedAt(LocalDateTime.now());
+
+        orderJpaRepository.save(orderModel);
+    }
+
+    @Override
+    public void hardDelete(Order order) {
+        OrderModel orderModel = mapper.toModel(order);
+        orderJpaRepository.delete(orderModel);
+    }
+
+    @Override
+    public Optional<Order> findById(OrderID orderId) {
+        return orderJpaRepository.findById(orderId.value())
+                .map(mapper::toDomain);
+
+    }
+
+    @Override
+    public Optional<Order> findByCustomerIdAndOrderId(CustomerID customerId, OrderID orderId) {
         Optional<OrderModel> orderModelOpt = orderJpaRepository.findByCustomerIdAndId(
-                customerId.value(),
-                orderId.value()
+                customerId.toString(),
+                orderId.toString()
         );
         return orderModelOpt.map(mapper::toDomain);
     }

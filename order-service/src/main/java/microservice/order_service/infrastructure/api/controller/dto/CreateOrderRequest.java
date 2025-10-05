@@ -1,6 +1,8 @@
 package microservice.order_service.infrastructure.api.controller.dto;
 
 
+import microservice.order_service.application.commands.request.CreateOrderCommand;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -8,7 +10,7 @@ public record CreateOrderRequest(
         String customerId,
         List<OrderItemRequest> items,
         String deliveryMethod,
-        AddressRequest deliveryAddress,
+        String addressId,
         String notes
 ) {
     public record OrderItemRequest(
@@ -24,4 +26,9 @@ public record CreateOrderRequest(
             String state,
             String zipCode
     ) {}
+
+
+    public CreateOrderCommand toCommand() {
+        return null;
+    }
 }

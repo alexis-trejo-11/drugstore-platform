@@ -17,13 +17,12 @@ public class OrderJpaMapper {
         if (domain == null) return null;
 
         OrderModel entity = OrderModel.builder()
-                .id(domain.getId().value())
-                .customerId(domain.getCustomerId().value())
+                .id(domain.getId().toString())
+                .customerId(domain.getCustomerId().toString())
                 .totalAmount(domain.getTotalAmount().amount())
                 .currency(domain.getTotalAmount().toString())
-                .deliveryMethod(mapDeliveryMethodToEntity(domain.getDeliveryMethod()))
-                .deliveryAddress(mapDeliveryAddressToEmbeddable(domain.getDeliveryAddress()))
-                .status(mapOrderStatusToEntity(domain.getStatus()))
+                .deliveryMethod(domain.getDeliveryMethod().toString())
+                .status(domain.getStatus().toString())
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())
                 .estimatedDeliveryDate(domain.getEstimatedDeliveryDate())
@@ -43,7 +42,7 @@ public class OrderJpaMapper {
     public OrderItemModel toItemModel(OrderItem domain, OrderModel orderEntity) {
         return OrderItemModel.builder()
                 .order(orderEntity)
-                .productId(domain.getProductId().value())
+                .productId(domain.getProductId().toString())
                 .productName(domain.getProductName())
                 .unitPrice(domain.getUnitPrice().amount())
                 .quantity(domain.getQuantity())
@@ -65,29 +64,6 @@ public class OrderJpaMapper {
         );
     }
 
-    public DeliveryMethodModel mapDeliveryMethodToEntity(DeliveryMethod domain) {
-        return switch (domain) {
-            case HOME_DELIVERY -> DeliveryMethodModel.HOME_DELIVERY;
-            case STORE_PICKUP -> DeliveryMethodModel.STORE_PICKUP;
-            case EXPRESS_DELIVERY -> DeliveryMethodModel.EXPRESS_DELIVERY;
-            case STANDARD_DELIVERY -> DeliveryMethodModel.STANDARD_DELIVERY;
-        };
-    }
-
-    public OrderStatusModel mapOrderStatusToEntity(OrderStatus domain) {
-        return switch (domain) {
-            case PENDING -> OrderStatusModel.PENDING;
-            case CONFIRMED -> OrderStatusModel.CONFIRMED;
-            case PREPARING -> OrderStatusModel.PROCESSING;
-            case READY_FOR_PICKUP ->OrderStatusModel.READY_FOR_PICKUP;
-            case OUT_FOR_DELIVERY-> OrderStatusModel.SHIPPED;
-            case DELIVERED -> OrderStatusModel.DELIVERED;
-            case PICKED_UP -> OrderStatusModel.PICKED_UP;
-            case CANCELLED -> OrderStatusModel.CANCELLED;
-            case RETURNED -> OrderStatusModel.RETURNED;
-        };
-    }
-
     public Order toDomain(OrderModel entity) {
         if (entity == null) return null;
 
@@ -99,12 +75,12 @@ public class OrderJpaMapper {
         }
 
         return Order.builder()
-                .id(new OrderId(entity.getId()))
-                .customerId(new CustomerId(entity.getCustomerId()))
+                .id(OrderID.of(entity.getId()))
+                .customerId(CustomerID.of(entity.getCustomerId()))
                 .items(items)
-                .deliveryMethod(mapDeliveryMethodToDomain(entity.getDeliveryMethod()))
-                .deliveryAddress(mapDeliveryAddressToDomain(entity.getDeliveryAddress()))
-                .status(mapOrderStatusToDomain(entity.getStatus()))
+                .deliveryMethod(DeliveryMethod.valueOf(entity.getDeliveryMethod()))
+                .totalAmount(new Money(entity.getTotalAmount(), Currency.getInstance("MXN")))
+                .status(OrderStatus.valueOf(entity.getStatus()))
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .estimatedDeliveryDate(entity.getEstimatedDeliveryDate())
@@ -114,7 +90,7 @@ public class OrderJpaMapper {
 
     private OrderItem toItemDomain(OrderItemModel entity) {
         return OrderItem.builder()
-                .productId(new ProductId(entity.getId()))
+                .productId(ProductID.of(entity.getId()))
                 .productName(entity.getProductName())
                 .unitPrice(new Money(entity.getUnitPrice(), Currency.getInstance("MXN")))
                 .quantity(entity.getQuantity())
@@ -124,7 +100,6 @@ public class OrderJpaMapper {
 
     private DeliveryAddress mapDeliveryAddressToDomain(DeliveryAddressEmbeddable entity) {
         if (entity == null) return null;
-
         return DeliveryAddress.builder()
                 .street(entity.getStreet())
                 .city(entity.getCity())
@@ -133,29 +108,6 @@ public class OrderJpaMapper {
                 .country(entity.getCountry())
                 .additionalInfo(entity.getAdditionalInfo())
                 .build();
-    }
-
-    private DeliveryMethod mapDeliveryMethodToDomain(DeliveryMethodModel entity) {
-        return switch (entity) {
-            case HOME_DELIVERY -> DeliveryMethod.HOME_DELIVERY;
-            case STORE_PICKUP -> DeliveryMethod.STORE_PICKUP;
-            case EXPRESS_DELIVERY -> DeliveryMethod.EXPRESS_DELIVERY;
-            case STANDARD_DELIVERY -> DeliveryMethod.STANDARD_DELIVERY;
-        };
-    }
-
-    private OrderStatus mapOrderStatusToDomain(OrderStatusModel entity) {
-        return switch (entity) {
-            case PENDING -> OrderStatus.PENDING;
-            case CONFIRMED -> OrderStatus.CONFIRMED;
-            case PROCESSING -> OrderStatus.PREPARING;
-            case SHIPPED -> OrderStatus.OUT_FOR_DELIVERY;
-            case DELIVERED -> OrderStatus.DELIVERED;
-            case CANCELLED -> OrderStatus.CANCELLED;
-            case RETURNED -> OrderStatus.RETURNED;
-            case READY_FOR_PICKUP -> OrderStatus.READY_FOR_PICKUP;
-            case PICKED_UP -> OrderStatus.PICKED_UP;
-        };
     }
 
     public List<Order> toDomainList(List<OrderModel> entities) {

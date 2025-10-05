@@ -17,13 +17,12 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderModel {
-
     @Id
     @Column(name = "order_id", length = 36)
-    private UUID id;
+    private String id;
 
     @Column(name = "customer_id", nullable = false, length = 36)
-    private UUID customerId;
+    private String customerId;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItemModel> items;
@@ -34,22 +33,20 @@ public class OrderModel {
     @Column(name = "currency", length = 3, nullable = false)
     private String currency;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "delivery_method", nullable = false, length = 20)
-    private DeliveryMethodModel deliveryMethod;
+    private String deliveryMethod;
 
-    @Embedded
-    private DeliveryAddressEmbeddable deliveryAddress;
-
-    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private OrderStatusModel status;
+    private String status;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @Column(name = "estimated_delivery_date")
     private LocalDateTime estimatedDeliveryDate;
