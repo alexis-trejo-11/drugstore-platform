@@ -1,124 +1,85 @@
 package libs_kernel.page;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.data.domain.Page;
-
 import java.util.List;
-import java.util.Map;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class PageResponse<T> {
+/**
+ * Interface that defines the contract for paginated responses.
+ * This interface provides read-only access to pagination metadata and content.
+ *
+ * @param <T> the type of elements in the page content
+ */
+public interface PageResponse<T> {
 
-    private final List<T> content;
-    private final int page;
-    private final int size;
-    private final long totalElements;
-    private final int totalPages;
-    private final boolean first;
-    private final boolean last;
-    private final boolean hasNext;
-    private final boolean hasPrevious;
+    /**
+     * Gets the content of the current page.
+     *
+     * @return a list of elements in the current page
+     */
+    List<T> content();
 
+    /**
+     * Gets the current page number (zero-based).
+     *
+     * @return the page number
+     */
+    int page();
 
-    public PageResponse(List<T> content, int page, int size, long totalElements,
-            int totalPages, boolean first, boolean last,
-            boolean hasNext, boolean hasPrevious) {
-        this.content = content;
-        this.page = page;
-        this.size = size;
-        this.totalElements = totalElements;
-        this.totalPages = totalPages;
-        this.first = first;
-        this.last = last;
-        this.hasNext = hasNext;
-        this.hasPrevious = hasPrevious;
-    }
+    /**
+     * Gets the size of the page.
+     *
+     * @return the number of elements per page
+     */
+    int size();
 
-    public static <T> PageResponse<T> from(Page<T> page) {
-        return new PageResponse<>(
-                page.getContent(),
-                page.getNumber(),
-                page.getSize(),
-                page.getTotalElements(),
-                page.getTotalPages(),
-                page.isFirst(),
-                page.isLast(),
-                page.hasNext(),
-                page.hasPrevious()
-        );
-    }
+    /**
+     * Gets the total number of elements across all pages.
+     *
+     * @return the total number of elements
+     */
+    long totalElements();
 
-    // Getters
-    @JsonProperty("content")
-    public List<T> getContent() {
-        return content;
-    }
+    /**
+     * Gets the total number of pages.
+     *
+     * @return the total number of pages
+     */
+    int totalPages();
 
-    @JsonProperty("page")
-    public int getPage() {
-        return page;
-    }
+    /**
+     * Checks if this is the first page.
+     *
+     * @return true if this is the first page, false otherwise
+     */
+    boolean first();
 
-    @JsonProperty("size")
-    public int getSize() {
-        return size;
-    }
+    /**
+     * Checks if this is the last page.
+     *
+     * @return true if this is the last page, false otherwise
+     */
+    boolean last();
 
-    @JsonProperty("totalElements")
-    public long getTotalElements() {
-        return totalElements;
-    }
+    /**
+     * Checks if there is a next page.
+     *
+     * @return true if there is a next page, false otherwise
+     */
+    boolean hasNext();
 
-    @JsonProperty("totalPages")
-    public int getTotalPages() {
-        return totalPages;
-    }
-
-    @JsonProperty("first")
-    public boolean isFirst() {
-        return first;
-    }
-
-    @JsonProperty("last")
-    public boolean isLast() {
-        return last;
-    }
-
-    @JsonProperty("hasNext")
-    public boolean hasNext() {
-        return hasNext;
-    }
-
-    @JsonProperty("hasPrevious")
-    public boolean hasPrevious() {
-        return hasPrevious;
-    }
+    /**
+     * Checks if there is a previous page.
+     *
+     * @return true if there is a previous page, false otherwise
+     */
+    boolean hasPrevious();
 
 
-    public static <T> PageResponse<T> empty(PageInput pageInput) {
-        return new PageResponse<>(
-                List.of(),
-                pageInput.page(),
-                pageInput.size(),
-                0,
-                0,
-                true,
-                true,
-                false,
-                false);
-    }
-
-    public static <T> PageResponse<T> empty() {
-        return new PageResponse<>(
-                List.of(),
-                1,
-                0,
-                0,
-                1,
-                true,
-                true,
-                false,
-                false);
-    }
+    /**
+     * Populates the PageResponse with data from a Spring Data Page object.
+     *
+     * @param page the Spring Data Page object
+     * @return the populated PageResponse
+     */
+    PageResponse<T> fromPage(org.springframework.data.domain.Page<T> page);
 }
+
