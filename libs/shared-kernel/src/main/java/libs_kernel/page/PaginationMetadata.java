@@ -23,10 +23,10 @@ public record PaginationMetadata(
 
     public static PaginationMetadata from(PageResponse<?> pageResponse) {
         return new PaginationMetadata(
-                pageResponse.getTotalElements(),
-                pageResponse.getTotalPages(),
-                pageResponse.getPage(),
-                pageResponse.getSize());
+                pageResponse.totalElements(),
+                pageResponse.totalPages(),
+                pageResponse.page(),
+                pageResponse.size());
     }
 
     public static PaginationMetadata empty() {

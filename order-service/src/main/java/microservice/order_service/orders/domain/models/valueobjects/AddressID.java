@@ -1,0 +1,19 @@
+package microservice.order_service.orders.domain.models.valueobjects;
+
+import java.util.UUID;
+
+public record AddressID(String value) {
+    public AddressID {
+        if (value == null) {
+            throw new IllegalArgumentException("AddressID cannot be null");
+        }
+    }
+
+    public static AddressID of(UUID value) {
+        return new AddressID(value.toString());
+    }
+    public static AddressID of(String value) {
+        return new AddressID(value);
+    }
+
+}

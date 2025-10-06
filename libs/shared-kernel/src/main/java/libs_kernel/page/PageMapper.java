@@ -41,7 +41,7 @@ public class PageMapper {
                 .map(mapper)
                 .collect(Collectors.toList());
 
-        return new PageResponse<>(
+        return new PageableResponse<>(
                 content,
                 page.getNumber(),
                 page.getSize(),
@@ -57,7 +57,7 @@ public class PageMapper {
      * Mapea una Page de Spring sin transformar el contenido
      */
     public <T> PageResponse<T> toPageResponse(Page<T> page) {
-        return new PageResponse<>(
+        return new PageableResponse<>(
                 page.getContent(),
                 page.getNumber(),
                 page.getSize(),
@@ -75,7 +75,7 @@ public class PageMapper {
     public <T> PageResponse<T> toPageResponse(List<T> content, PageInput pageInput, long totalElements) {
         int totalPages = (int) Math.ceil((double) totalElements / pageInput.size());
 
-        return new PageResponse<>(
+        return new PageableResponse<>(
                 content,
                 pageInput.page(),
                 pageInput.size(),
