@@ -2,19 +2,15 @@ package microservice.order_service.external.users.infrastructure.api.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Builder;
-import microservice.order_service.external.users.application.CreateUserCommand;
-import microservice.order_service.external.users.application.UpdateUserCommand;
+import microservice.order_service.external.users.application.command.CreateUserCommand;
+import microservice.order_service.external.users.application.command.UpdateUserCommand;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;
 import org.hibernate.validator.constraints.Length;
 
 @Builder
 public record UserInsertRequest(
-        @NotNull @NotEmpty @Length(min = 3, max = 100)
-        String firstName,
-
-        @NotNull @NotEmpty @Length(min = 3, max = 100)
-        String lastName,
-
+        @NotNull @NotEmpty @Length(min = 7, max = 100)
+        String name,
         @NotNull @NotEmpty @Email
         String email,
         @NotEmpty @Length(min = 8, max = 15)
@@ -27,7 +23,7 @@ public record UserInsertRequest(
 
     public CreateUserCommand toCommand() {
         return CreateUserCommand.builder()
-                .firstName(this.lastName)
+                .name(this.name)
                 .email(this.email)
                 .phoneNumber(this.phoneNumber)
                 .role(this.role)
@@ -38,7 +34,7 @@ public record UserInsertRequest(
     public UpdateUserCommand toCommand(String id) {
         return UpdateUserCommand.builder()
                 .id(UserID.of(id))
-                .firstName(this.lastName)
+                .name(this.name)
                 .email(this.email)
                 .phoneNumber(this.phoneNumber)
                 .role(this.role)

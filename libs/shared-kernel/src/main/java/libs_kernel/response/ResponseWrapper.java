@@ -1,5 +1,7 @@
 package libs_kernel.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +12,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseWrapper<T> {
     public boolean isSuccess;
     public String message;
@@ -40,11 +43,11 @@ public class ResponseWrapper<T> {
     }
 
     public static <T> ResponseWrapper<T> created(T data, String entity) {
-        return ResponseWrapper.created(data, entity, Map.of());
+        return ResponseWrapper.created(data, entity, null);
     }
 
     public static <T> ResponseWrapper<T> created(T data) {
-        return ResponseWrapper.created(data, "Entity", Map.of());
+        return ResponseWrapper.created(data, "Entity", null);
     }
 
     public static  <T> ResponseWrapper<T> found(T data, String entity, Map<String, ?> metadata) {
@@ -65,7 +68,6 @@ public class ResponseWrapper<T> {
         response.setMessage(message);
         response.setData(data);
         response.setTimestamp(LocalDateTime.now());
-        response.setMetadata(Map.of());
         return response;
     }
 
@@ -73,9 +75,7 @@ public class ResponseWrapper<T> {
         var response = new ResponseWrapper<Void>();
         response.setSuccess(true);
         response.setMessage("Entity not found");
-        response.setData(null);
         response.setTimestamp(LocalDateTime.now());
-        response.setMetadata(Map.of());
         return response;
     }
 
@@ -83,9 +83,7 @@ public class ResponseWrapper<T> {
         var response = new ResponseWrapper<Void>();
         response.setSuccess(false);
         response.setMessage("Unauthorized access");
-        response.setData(null);
         response.setTimestamp(LocalDateTime.now());
-        response.setMetadata(Map.of());
         response.setErrorDetails(errorDetails);
         return response;
     }
@@ -94,9 +92,7 @@ public class ResponseWrapper<T> {
         var response = new ResponseWrapper<Void>();
         response.setSuccess(false);
         response.setMessage("Forbidden access");
-        response.setData(null);
         response.setTimestamp(LocalDateTime.now());
-        response.setMetadata(Map.of());
         response.setErrorDetails(errorDetails);
         return response;
     }
@@ -105,9 +101,7 @@ public class ResponseWrapper<T> {
         var response = new ResponseWrapper<Void>();
         response.setSuccess(false);
         response.setMessage("Conflict occurred");
-        response.setData(null);
         response.setTimestamp(LocalDateTime.now());
-        response.setMetadata(Map.of());
         response.setErrorDetails(errorDetails);
         return response;
     }
@@ -116,9 +110,7 @@ public class ResponseWrapper<T> {
         var response = new ResponseWrapper<Void>();
         response.setSuccess(false);
         response.setMessage("Unprocessable entity");
-        response.setData(null);
         response.setTimestamp(LocalDateTime.now());
-        response.setMetadata(Map.of());
         response.setErrorDetails(errorDetails);
         return response;
     }
@@ -127,9 +119,7 @@ public class ResponseWrapper<T> {
         var response = new ResponseWrapper<Void>();
         response.setSuccess(false);
         response.setMessage("Bad request");
-        response.setData(null);
         response.setTimestamp(LocalDateTime.now());
-        response.setMetadata(Map.of());
         response.setErrorDetails(errorDetails);
         return response;
     }

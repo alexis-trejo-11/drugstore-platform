@@ -14,6 +14,7 @@ import java.util.List;
 public class UserResponseMapper implements ResponseMapper<UserResponse, User> {
     @Override
     public UserResponse toResponse(User user) {
+        if (user == null) return null;
         return UserResponse.builder()
                 .id(user.getId() != null ? user.getId().value() : null)
                 .name(user.getName() != null ? user.getName() : null)
@@ -28,11 +29,13 @@ public class UserResponseMapper implements ResponseMapper<UserResponse, User> {
 
     @Override
     public List<UserResponse> toResponses(List<User> users) {
+        if (users == null) return null;
         return users.stream().map(this::toResponse).toList();
     }
 
     @Override
     public PageResponse<UserResponse> toResponsePage(Page<User> users) {
+        if (users == null) return null;
         var responsePage = users.map(this::toResponse);
         return PageableResponse.from(responsePage);
     }
