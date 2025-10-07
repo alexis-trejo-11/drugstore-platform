@@ -41,17 +41,17 @@ public class AdminOrdersController {
     }
 
     @PutMapping("/{id}/cancel")
-    private ResponseWrapper<CancelOrderCommandResponse> cancelOrder(@PathVariable String orderId, @RequestParam String reason) {
-        var command = CancelOrderCommand.adminCancel(orderId, reason);
+    private ResponseWrapper<CancelOrderCommandResponse> cancelOrder(@PathVariable String id, @RequestParam String reason) {
+        var command = CancelOrderCommand.adminCancel(id, reason);
         var queryResult = orderService.cancelOrder(command);
 
         return ResponseWrapper.success(queryResult, "Order Successfully Canceled");
     }
 
     @DeleteMapping("/{id}")
-    private ResponseWrapper<Void> deleteOrder(String orderId, @RequestParam boolean isHard) {
-        var command = isHard ? DeleteOrderCommand.hardDelete(orderId)
-                : DeleteOrderCommand.softDelete(orderId);
+    private ResponseWrapper<Void> deleteOrder(@PathVariable String id, @RequestParam(defaultValue = "false") boolean isHard) {
+        var command = isHard ? DeleteOrderCommand.hardDelete(id)
+                : DeleteOrderCommand.softDelete(id);
 
         orderService.deleteOrder(command);
         return ResponseWrapper.success("Order Successfully Deleted");

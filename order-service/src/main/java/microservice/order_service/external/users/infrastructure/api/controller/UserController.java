@@ -5,7 +5,7 @@ import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import microservice.order_service.external.users.domain.entity.User;
-import microservice.order_service.external.users.domain.ports.input.UserService;
+import microservice.order_service.external.users.application.service.UserService;
 import microservice.order_service.external.users.infrastructure.api.dto.UserInsertRequest;
 import microservice.order_service.external.users.infrastructure.api.dto.UserResponse;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;
@@ -22,14 +22,14 @@ public class UserController {
     public ResponseWrapper<UserResponse> getUserById(@PathVariable String id) {
         User user = userService.getUserByID(UserID.of(id));
         UserResponse userResponse = responseMapper.toResponse(user);
-        return ResponseWrapper.success(userResponse);
+        return ResponseWrapper.found(userResponse, "User");
     }
 
     @GetMapping("/email/{email}")
     public ResponseWrapper<UserResponse> getUserByEmail(@PathVariable String email) {
         User user = userService.getUserByEmail(email);
         UserResponse userResponse = responseMapper.toResponse(user);
-        return ResponseWrapper.success(userResponse);
+        return ResponseWrapper.found(userResponse, "User");
     }
 
 
@@ -37,7 +37,7 @@ public class UserController {
     public ResponseWrapper<UserResponse> getUserByPhoneNumber(@PathVariable String phoneNumber) {
         User user = userService.getUserByPhoneNumber(phoneNumber);
         UserResponse userResponse = responseMapper.toResponse(user);
-        return ResponseWrapper.success(userResponse);
+        return ResponseWrapper.found(userResponse, "User");
     }
 
 
@@ -45,7 +45,7 @@ public class UserController {
     public ResponseWrapper<UserResponse> createUser(@Valid @RequestBody UserInsertRequest request) {
         User createdUser = userService.createUser(request.toCommand());
         UserResponse userResponse = responseMapper.toResponse(createdUser);
-        return ResponseWrapper.success(userResponse);
+        return ResponseWrapper.found(userResponse, "User");
     }
 
 
@@ -54,13 +54,13 @@ public class UserController {
         var command = request.toCommand(id);
         User updatedUser = userService.updateUser(command);
         UserResponse userResponse = responseMapper.toResponse(updatedUser);
-        return ResponseWrapper.success(userResponse);
+        return ResponseWrapper.success(userResponse, "User updated successfully");
     }
 
     @DeleteMapping("/{id}")
     public ResponseWrapper<Void> deleteUser(@PathVariable String id) {
         userService.deleteUser(UserID.of(id));
-        return ResponseWrapper.success();
+        return ResponseWrapper.success("User deleted successfully");
     }
 
 }

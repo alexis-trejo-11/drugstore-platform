@@ -1,8 +1,8 @@
-package microservice.order_service.external.users.domain.ports.input;
+package microservice.order_service.external.users.application.service;
 
 
-import microservice.order_service.external.users.application.CreateUserCommand;
-import microservice.order_service.external.users.application.UpdateUserCommand;
+import microservice.order_service.external.users.application.command.CreateUserCommand;
+import microservice.order_service.external.users.application.command.UpdateUserCommand;
 import microservice.order_service.external.users.domain.entity.User;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;
 

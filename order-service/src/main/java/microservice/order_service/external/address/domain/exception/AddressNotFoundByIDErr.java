@@ -5,6 +5,6 @@ import microservice.order_service.orders.domain.models.valueobjects.AddressID;
 
 public class AddressNotFoundByIDErr extends NotFoundException {
     public AddressNotFoundByIDErr(AddressID addressID) {
-        super("Delivery Address", addressID.value());
+        super("Delivery Address", "id", addressID.value());
     }
 }

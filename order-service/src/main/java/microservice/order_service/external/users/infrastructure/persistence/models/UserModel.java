@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -44,6 +43,17 @@ public class UserModel {
     @Column(name = "status")
     private String status;
 
+    public void update(String name, String email, String phoneNumber, String role, String status) {
+        this.name = name;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+        this.status = status;
+    }
+
+    public void restore() {
+        this.deletedAt = null;
+    }
 
     @PrePersist
     protected void onCreate() {
