@@ -7,18 +7,14 @@ CREATE TABLE addresses (
     postal_code VARCHAR(20) NOT NULL,
     country VARCHAR(100) NOT NULL,
     additional_info VARCHAR(500),
+    user_id VARCHAR(36) NOT NULL,
+    is_default BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- Foreign key
+    CONSTRAINT fk_address_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Migrate existing address data from orders to addresses table
-ALTER TABLE orders ADD COLUMN address_id VARCHAR(36);
-
-ALTER TABLE orders
-ADD CONSTRAINT fk_order_address
-FOREIGN KEY (address_id) REFERENCES addresses(id);
-
 -- Indexes for new table and foreign key
-CREATE INDEX idx_orders_address_id ON orders(address_id);
 CREATE INDEX idx_addresses_city ON addresses(city);
 CREATE INDEX idx_addresses_state ON addresses(state);

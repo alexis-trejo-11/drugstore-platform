@@ -1,5 +1,6 @@
 package microservice.order_service.orders.domain.models;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import microservice.order_service.orders.domain.models.valueobjects.Money;
@@ -8,15 +9,17 @@ import microservice.order_service.orders.domain.models.valueobjects.ProductID;
 import java.util.Objects;
 
 @Getter
+@AllArgsConstructor
+@Builder
 public class OrderItem {
-    private final ProductID productID;
-    private final String productName;
-    private final Money unitPrice;
-    private final int quantity;
-    private final Money subtotal;
-    private final boolean prescriptionRequired;
+    private Long id;
+    private ProductID productID;
+    private String productName;
+    private Money unitPrice;
+    private int quantity;
+    private Money subtotal;
+    private boolean prescriptionRequired;
 
-    @Builder
     public OrderItem(ProductID productID, String productName, Money unitPrice, int quantity, boolean prescriptionRequired) {
         this.productID = Objects.requireNonNull(productID, "Product ID cannot be null");
         this.productName = Objects.requireNonNull(productName, "Product firsName cannot be null");
@@ -34,7 +37,7 @@ public class OrderItem {
         return new OrderItem(productID, productName, unitPrice, quantity, prescriptionRequired);
     }
 
-    public OrderItem updateQuantity(int newQuantity) {
+    public OrderItem updateQuantity( int newQuantity) {
         return new OrderItem(this.productID, this.productName, this.unitPrice, newQuantity, this.prescriptionRequired);
     }
 

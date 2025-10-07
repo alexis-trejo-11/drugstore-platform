@@ -12,12 +12,9 @@ import microservice.order_service.orders.domain.models.events.OrderCreatedEvent;
 import microservice.order_service.orders.domain.models.events.OrderStatusChangedEvent;
 import microservice.order_service.orders.domain.models.valueobjects.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Builder
 @Getter
@@ -26,7 +23,6 @@ import java.util.Optional;
 public class Order {
     private OrderID id;
     private List<OrderItem> items;
-    private Money totalAmount;
     private DeliveryMethod deliveryMethod;
     private AddressID addressID;
     private OrderStatus status;
@@ -38,7 +34,6 @@ public class Order {
     private User user;
     private List<Object> domainEvents;
 
-
     public static Order create(User user, List<OrderItem> items,
                                DeliveryMethod deliveryMethod, AddressID addressID, String notes) {
         OrderID orderID = OrderID.generate();
@@ -47,7 +42,6 @@ public class Order {
         order.id = orderID;
         order.user = user;
         order.items = new ArrayList<>(items);
-        order.totalAmount = order.calculateTotalAmount();
         order.deliveryMethod = deliveryMethod;
         order.addressID = addressID;
         order.status = OrderStatus.PENDING;
@@ -57,7 +51,7 @@ public class Order {
         order.validateItems();
         order.domainEvents = new ArrayList<>();
         // Raise domain event
-        order.domainEvents.add(new OrderCreatedEvent(orderID, user.getId(),order.totalAmount, now));
+        order.domainEvents.add(new OrderCreatedEvent(orderID, user.getId(),order.calculateTotalAmount(), now));
         return order;
     }
 
@@ -191,10 +185,22 @@ public class Order {
     }
 
     private Money calculateTotalAmount() {
+        if (items == null || items.isEmpty()) {
+            return Money.of(BigDecimal.ZERO, Currency.getInstance("MXN"));
+        }
+
         return items.stream()
+                .filter(Objects::nonNull)
                 .map(OrderItem::getSubtotal)
-                .reduce(Money::add)
-                .orElseThrow(() -> new IllegalStateException("Cannot calculate total for empty order"));
+                .filter(Objects::nonNull)
+                .reduce(Money.of(BigDecimal.ZERO, Currency.getInstance("MXN")), Money::add);
+    }
+
+    public Money getTotalAmount() {
+        if (items.isEmpty()) {
+            return Money.of(BigDecimal.ZERO , Currency.getInstance("MXN"));
+        }
+        return calculateTotalAmount();
     }
 
     @Override
@@ -213,6 +219,6 @@ public class Order {
     @Override
     public String toString() {
         return String.format("Order{id=%s, userID=%s, status=%s, totalAmount=%s, itemCount=%d, createdAt=%s}",
-                id, user.getId(), status, totalAmount, items.size(), createdAt);
+                id, user.getId(), status, calculateTotalAmount(), items.size(), createdAt);
     }
 }

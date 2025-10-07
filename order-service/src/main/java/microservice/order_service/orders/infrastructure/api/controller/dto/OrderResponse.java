@@ -10,7 +10,7 @@ public record OrderResponse(
         String orderId,
         String userID,
         String status,
-        BigDecimal totalAmount,
+        String totalAmount,
         Integer totalItems,
         String deliveryMethod
 ) {}
