@@ -6,9 +6,11 @@ import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.address.infrastructure.persistence.Model.DeliveryAddressModel;
 import microservice.order_service.orders.domain.models.valueobjects.AddressID;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class AddressModelMapper implements ModelMapper<DeliveryAddress, DeliveryAddressModel> {
     @Override
     public DeliveryAddressModel fromDomain(DeliveryAddress address) {

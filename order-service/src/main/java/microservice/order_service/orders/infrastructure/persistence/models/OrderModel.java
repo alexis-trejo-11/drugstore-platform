@@ -21,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderModel {
     @Id
-    @Column(name = "order_id", length = 36)
+    @Column(name = "id", length = 36)
     private String id;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -34,9 +34,6 @@ public class OrderModel {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItemModel> items;
-
-    @Column(name = "currency", length = 3, nullable = false)
-    private String currency;
 
     @Column(name = "delivery_method", nullable = false, length = 20)
     private String deliveryMethod;

@@ -21,7 +21,7 @@ public class OrderResponseMapper implements ResponseMapper<OrderResponse, OrderQ
                 .orderId(result.id() != null ? result.id().value() : null)
                 .userID(result.userID() != null ? result.userID().value() : null)
                 .status(result.status() != null ? result.status().name() : null)
-                .totalAmount(result.totalAmount())
+                .totalAmount(result.totalAmount() != null ? result.totalAmount().toFormattedString() : null)
                 .totalItems(result.totalItems())
                 .deliveryMethod(result.deliveryMethod() != null ? result.deliveryMethod().name() : null)
                 .build();

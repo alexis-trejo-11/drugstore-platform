@@ -20,8 +20,7 @@ public class OrderQueryMapper implements ResultMapper<OrderQueryResult, Order> {
                 .id(order.getId())
                 .userID(order.getUser().getId() != null ? order.getUser().getId() : null)
                 .status(order.getStatus())
-                .totalAmount(order.getTotalAmount().amount())
-                .currency(order.getTotalAmount().currency().getDisplayName())
+                .totalAmount(order.getTotalAmount())
                 .deliveryMethod(order.getDeliveryMethod())
                 .totalItems(order.getTotalItemsCount())
                 .build();

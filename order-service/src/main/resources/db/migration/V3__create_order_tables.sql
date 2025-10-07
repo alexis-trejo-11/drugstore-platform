@@ -1,6 +1,7 @@
 CREATE TABLE orders (
     id VARCHAR(36) PRIMARY KEY,
-    customer_id VARCHAR(36) NOT NULL,
+    user_id VARCHAR(36) NOT NULL,
+    address_id VARCHAR(36),
     currency VARCHAR(3) NOT NULL DEFAULT 'MXN',
     delivery_method VARCHAR(20) NOT NULL,
     status VARCHAR(20) NOT NULL,
@@ -10,21 +11,25 @@ CREATE TABLE orders (
     estimated_delivery_date TIMESTAMP,
     notes VARCHAR(500),
     -- Constraints
+    CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_orders_address FOREIGN KEY (address_id) REFERENCES addresses(id),
     CONSTRAINT chk_delivery_method CHECK (delivery_method IN ('HOME_DELIVERY', 'STORE_PICKUP', 'EXPRESS_DELIVERY', 'STANDARD_DELIVERY')),
     CONSTRAINT chk_order_status CHECK (status IN ('PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'RETURNED')),
     CONSTRAINT chk_currency CHECK (currency IN ('MXN', 'USD', 'EUR'))
 );
 
 -- Indexes
-CREATE INDEX idx_orders_customer_id ON orders(customer_id);
-CREATE INDEX idx_orders_customer_status ON orders(customer_id, status);
-CREATE INDEX idx_orders_customer_created_at ON orders(customer_id, created_at DESC);
+CREATE INDEX idx_orders_user_id ON orders(user_id);
+CREATE INDEX idx_orders_customer_status ON orders(user_id, status);
+CREATE INDEX idx_orders_customer_created_at ON orders(user_id, created_at DESC);
 CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_orders_created_at ON orders(created_at DESC);
+CREATE INDEX idx_orders_address_id ON orders(address_id);
+
 
 COMMENT ON TABLE orders IS 'Main table for customer orders';
 COMMENT ON COLUMN orders.id IS 'Unique identifier for each order (UUID format)';
-COMMENT ON COLUMN orders.customer_id IS 'Client identifier (UUID format)';
+COMMENT ON COLUMN orders.user_id IS 'Client identifier (UUID format)';
 COMMENT ON COLUMN orders.status IS 'Current status of the order';
 
 CREATE TABLE order_items (
@@ -35,7 +40,7 @@ CREATE TABLE order_items (
     unit_price NUMERIC(10,2) NOT NULL,
     quantity INTEGER NOT NULL,
     currency VARCHAR(3) NOT NULL DEFAULT 'MXN',
-    prescription_required BOOLEAN DEFAULT FALSE,
+    is_prescription_required BOOLEAN DEFAULT FALSE,
 
     -- Foreign key
     CONSTRAINT fk_order_items_id FOREIGN KEY (order_id) REFERENCES orders(id),
@@ -50,7 +55,7 @@ CREATE INDEX idx_order_items_id ON order_items(id);
 CREATE INDEX idx_order_items_product_id ON order_items(product_id);
 
 COMMENT ON TABLE order_items IS 'Items/products for each order';
-COMMENT ON COLUMN order_items.prescription_required IS 'Indicates if the product requires a prescription';
+COMMENT ON COLUMN order_items.is_prescription_required IS 'Indicates if the product requires a prescription';
 
 -- Function to update updated_at column on orders table
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -67,23 +72,23 @@ CREATE TRIGGER trigger_orders_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
-CREATE OR REPLACE FUNCTION get_customer_order_count(p_customer_id VARCHAR)
+CREATE OR REPLACE FUNCTION get_customer_order_count(p_user_id VARCHAR)
 RETURNS BIGINT AS $$
 BEGIN
-    RETURN (SELECT COUNT(*) FROM orders WHERE customer_id = p_customer_id);
+    RETURN (SELECT COUNT(*) FROM orders WHERE user_id = p_user_id);
 END;
 $$ LANGUAGE plpgsql;
 
 
 
--- Index for queries filtering by customer_id and date range
-CREATE INDEX idx_orders_customer_date_range ON orders(customer_id, created_at DESC)
+-- Index for queries filtering by user_id and date range
+CREATE INDEX idx_orders_customer_date_range ON orders(user_id, created_at DESC)
 WHERE created_at IS NOT NULL;
 
 -- Partial Index for active orders (not delivered or cancelled)
-CREATE INDEX idx_orders_active ON orders(customer_id, created_at DESC)
+CREATE INDEX idx_orders_active ON orders(user_id, created_at DESC)
 WHERE status NOT IN ('DELIVERED', 'CANCELLED');
 
 -- Index to optimize recent orders retrieval
-CREATE INDEX idx_orders_recent ON orders(customer_id, created_at DESC)
+CREATE INDEX idx_orders_recent ON orders(user_id, created_at DESC)
 INCLUDE (id, status);

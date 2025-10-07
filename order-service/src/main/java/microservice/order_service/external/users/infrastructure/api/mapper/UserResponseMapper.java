@@ -16,7 +16,9 @@ public class UserResponseMapper implements ResponseMapper<UserResponse, User> {
     public UserResponse toResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId() != null ? user.getId().value() : null)
-                .name(user.getFirstName() + " " + user.getLastName())
+                .name(user.getName() != null ? user.getName() : null)
+                .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)
+                .updatedAt(user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null)
                 .email(user.getEmail() != null ? user.getEmail() : null)
                 .phoneNumber(user.getPhoneNumber() != null ? user.getPhoneNumber() : null)
                 .role(user.getRole() != null ? user.getRole() : null)

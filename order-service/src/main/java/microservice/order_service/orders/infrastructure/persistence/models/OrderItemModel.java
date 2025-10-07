@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 public class OrderItemModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
@@ -38,6 +38,8 @@ public class OrderItemModel {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "prescription_required")
-    private Boolean prescriptionRequired;
+    @Column(name = "is_prescription_required")
+    private Boolean isPrescriptionRequired;
+
+    public boolean isPrescriptionRequired() { return isPrescriptionRequired != null && isPrescriptionRequired; }
 }

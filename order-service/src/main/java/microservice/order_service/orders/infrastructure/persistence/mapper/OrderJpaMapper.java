@@ -1,6 +1,7 @@
 package microservice.order_service.orders.infrastructure.persistence.mapper;
 
 import libs_kernel.mapper.ModelMapper;
+import lombok.RequiredArgsConstructor;
 import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.address.infrastructure.persistence.Model.DeliveryAddressModel;
 import microservice.order_service.external.users.domain.entity.User;
@@ -20,10 +21,11 @@ import java.util.Currency;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
-    public ModelMapper<OrderItem, OrderItemModel> itemMapper;
-    private ModelMapper<DeliveryAddress,DeliveryAddressModel> addressMapper;
-    private ModelMapper<User, UserModel> userMapper;
+    private final ModelMapper<OrderItem, OrderItemModel> itemMapper;
+    private final ModelMapper<DeliveryAddress,DeliveryAddressModel> addressMapper;
+    private final ModelMapper<User, UserModel> userMapper;
 
     @Override
     public OrderModel fromDomain(Order order) {
@@ -31,14 +33,12 @@ public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
                 .id(order.getId().value() != null ? order.getId().value() : null)
                 .items(itemMapper.fromDomains(order.getItems()))
                 .deliveryAddressModel(addressMapper.fromDomain(order.getDeliveryAddress()) != null ? addressMapper.fromDomain(order.getDeliveryAddress()) : null)
-                .currency(order.getTotalAmount().currency().getCurrencyCode() != null ? order.getTotalAmount().currency().getCurrencyCode() : null)
                 .status(order.getStatus() != null ? order.getStatus().name() : null)
                 .user(order.getUser() != null ? userMapper.fromDomain(order.getUser()) : null)
                 .createdAt(order.getCreatedAt() != null ? order.getCreatedAt() : LocalDateTime.now())
                 .updatedAt(order.getUpdatedAt() != null ? order.getUpdatedAt() : LocalDateTime.now())
                 .estimatedDeliveryDate(order.getEstimatedDeliveryDate() != null ? order.getEstimatedDeliveryDate() : null)
                 .notes(order.getNotes() != null ? order.getNotes() : null)
-
                 .build();
     }
 

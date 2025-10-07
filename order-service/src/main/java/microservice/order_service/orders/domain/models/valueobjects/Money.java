@@ -75,4 +75,14 @@ public record Money(BigDecimal amount, Currency currency) {
     public String toString() {
         return currency.getSymbol() + amount.toString();
     }
+
+    public String toFormattedString() {
+        if (currency == null) {
+            return String.format("%.2f", amount);
+        }
+        if (amount == null) {
+            return String.format("%s 0.00", currency.getSymbol());
+        }
+        return String.format("%s %.2f", currency.getSymbol(), amount);
+    }
 }
