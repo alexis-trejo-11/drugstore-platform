@@ -15,30 +15,29 @@ public class OrderItem {
     private Long id;
     private ProductID productID;
     private String productName;
-    private Money unitPrice;
     private int quantity;
     private Money subtotal;
     private boolean prescriptionRequired;
 
-    public OrderItem(ProductID productID, String productName, Money unitPrice, int quantity, boolean prescriptionRequired) {
+    public OrderItem(ProductID productID, String productName, Money subtotal, int quantity, boolean prescriptionRequired) {
         this.productID = Objects.requireNonNull(productID, "Product ID cannot be null");
         this.productName = Objects.requireNonNull(productName, "Product firsName cannot be null");
-        this.unitPrice = Objects.requireNonNull(unitPrice, "Unit price cannot be null");
+        this.subtotal = Objects.requireNonNull(subtotal, "Subtotal cannot be null");
         this.prescriptionRequired = prescriptionRequired;
 
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than 0");
         }
+
         this.quantity = quantity;
-        this.subtotal = unitPrice.multiply(quantity);
     }
 
     public static OrderItem create(ProductID productID, String productName, Money unitPrice, int quantity, boolean prescriptionRequired) {
         return new OrderItem(productID, productName, unitPrice, quantity, prescriptionRequired);
     }
 
-    public OrderItem updateQuantity( int newQuantity) {
-        return new OrderItem(this.productID, this.productName, this.unitPrice, newQuantity, this.prescriptionRequired);
+    public OrderItem updateQuantity(int newQuantity) {
+        return new OrderItem(this.productID, this.productName, this.subtotal, newQuantity, this.prescriptionRequired);
     }
 
     @Override
@@ -56,7 +55,7 @@ public class OrderItem {
 
     @Override
     public String toString() {
-        return String.format("OrderItem{productID=%s, productName='%s', quantity=%d, unitPrice=%s, subTotal=%s}",
-                productID, productName, quantity, unitPrice, subtotal);
+        return String.format("OrderItem{productID=%s, productName='%s', quantity=%d, subtotal=%s}",
+                productID, productName, quantity, subtotal);
     }
 }

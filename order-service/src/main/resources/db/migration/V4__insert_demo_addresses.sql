@@ -8,28 +8,28 @@ VALUES
 ('5555-5555-5555-5555', 'Carol White', 'carol.white@example.com', '+1234567894', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'CUSTOMER', 'ACTIVE');
 
 
--- Insert demo data into addresses table for testing
-INSERT INTO addresses (id, user_id, street, city, state, postal_code, country, additional_info, created_at, updated_at)
+-- Insert demo data into addresses table (updated schema)
+INSERT INTO addresses (id, country, city, state, neighborhood, zip_code, street, building_type, inner_number, outer_number, additional_info, user_id, is_default, created_at, updated_at)
 VALUES
-('1111-1111-1111-1111', '1111-1111-1111-1111', '123 Main St', 'Springfield', 'Illinois', '62701', 'USA', 'Near the park', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('2222-2222-2222-2222', '2222-2222-2222-2222', '456 Oak Ave', 'Metropolis', 'New York', '10001', 'USA', 'Apt 2B', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('3333-3333-3333-3333', '3333-3333-3333-3333', '789 Pine Rd', 'Gotham', 'New Jersey', '07001', 'USA', 'Suite 300', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('4444-4444-4444-4444', '4444-4444-4444-4444', '101 Maple Dr', 'Star City', 'California', '90001', 'USA', 'Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('5555-5555-5555-5555', '5555-5555-5555-5555', '202 Birch Blvd', 'Central City', 'Kansas', '66002', 'USA', 'Warehouse', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('6666-6666-6666-6666', '1111-1111-1111-1111', '77 Elm St', 'Smallville', 'Kansas', '66003', 'USA', 'Farmhouse', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('7777-7777-7777-7777', '2222-2222-2222-2222', '88 Cedar Ave', 'Coast City', 'California', '90002', 'USA', 'Penthouse', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+('1111-1111-1111-1111', 'USA', 'Springfield', 'Illinois', 'Downtown', '62701', '123 Main St', 'House', NULL, '123', 'Near the park', '1111-1111-1111-1111', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('2222-2222-2222-2222', 'USA', 'Metropolis', 'New York', 'Midtown', '10001', '456 Oak Ave', 'Apartment', '2B', '456', 'Apt 2B', '2222-2222-2222-2222', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('3333-3333-3333-3333', 'USA', 'Gotham', 'New Jersey', 'Financial District', '07001', '789 Pine Rd', 'Office', '300', '789', 'Suite 300', '3333-3333-3333-3333', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('4444-4444-4444-4444', 'USA', 'Star City', 'California', 'Industrial Zone', '90001', '101 Maple Dr', 'Office', NULL, '101', 'Office', '4444-4444-4444-4444', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('5555-5555-5555-5555', 'USA', 'Central City', 'Kansas', 'Logistics Park', '66002', '202 Birch Blvd', 'Warehouse', NULL, '202', 'Warehouse', '5555-5555-5555-5555', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('6666-6666-6666-6666', 'USA', 'Smallville', 'Kansas', 'Rural Area', '66003', '77 Elm St', 'House', NULL, '77', 'Farmhouse', '1111-1111-1111-1111', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('7777-7777-7777-7777', 'USA', 'Coast City', 'California', 'Harbor', '90002', '88 Cedar Ave', 'Apartment', 'PH', '88', 'Penthouse', '2222-2222-2222-2222', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Insert demo data into orders table referencing addresses
-INSERT INTO orders (id, user_id, currency, delivery_method, status, created_at, updated_at, estimated_delivery_date, notes)
+INSERT INTO orders (id, user_id, address_id, delivery_method, status, shipping_cost, tax_amount, delivery_tracking_number, delivery_attempt, days_since_ready_for_pickup, payment_id, created_at, updated_at, estimated_delivery_date, notes)
 VALUES
-('aaaa-aaaa-aaaa-aaaa', '1111-1111-1111-1111', 'USD', 'HOME_DELIVERY', 'DELIVERED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '2 days', 'Leave at front door'),
-('bbbb-bbbb-bbbb-bbbb', '2222-2222-2222-2222', 'USD', 'STORE_PICKUP', 'PROCESSING', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '3 days', 'Call on arrival'),
-('cccc-cccc-cccc-cccc', '3333-3333-3333-3333', 'USD', 'EXPRESS_DELIVERY', 'SHIPPED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 day', 'Fragile items'),
-('dddd-dddd-dddd-dddd', '4444-4444-4444-4444', 'USD', 'STANDARD_DELIVERY', 'DELIVERED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '4 days', 'Deliver to office'),
-('eeee-eeee-eeee-eeee', '5555-5555-5555-5555', 'USD', 'HOME_DELIVERY', 'CANCELLED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '2 days', 'Order cancelled by customer');
+('aaaa-aaaa-aaaa-aaaa', '1111-1111-1111-1111', '1111-1111-1111-1111', 'HOME_DELIVERY', 'DELIVERED', 5.99, 2.50, 'TRK-001-2024', 1, 0, 'pay-001', CURRENT_TIMESTAMP - INTERVAL '5 days', CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 'Leave at front door'),
+('bbbb-bbbb-bbbb-bbbb', '2222-2222-2222-2222', '2222-2222-2222-2222', 'STORE_PICKUP', 'PROCESSING', 0.00, 1.80, NULL, 0, 2, 'pay-002', CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 day', 'Call on arrival'),
+('cccc-cccc-cccc-cccc', '3333-3333-3333-3333', '3333-3333-3333-3333', 'EXPRESS_DELIVERY', 'SHIPPED', 15.99, 4.20, 'TRK-002-2024', 0, 0, 'pay-003', CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 day', 'Fragile items'),
+('dddd-dddd-dddd-dddd', '4444-4444-4444-4444', '4444-4444-4444-4444', 'STANDARD_DELIVERY', 'DELIVERED', 3.99, 1.25, 'TRK-003-2024', 2, 0, 'pay-004', CURRENT_TIMESTAMP - INTERVAL '7 days', CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 'Deliver to office'),
+('eeee-eeee-eeee-eeee', '5555-5555-5555-5555', '5555-5555-5555-5555', 'HOME_DELIVERY', 'CANCELLED', 5.99, 3.15, NULL, 0, 0, NULL, CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP + INTERVAL '2 days', 'Order cancelled by customer');
 
 -- Insert demo data into order_items table referencing orders
-INSERT INTO order_items (order_id, product_id, product_name, unit_price, quantity, currency, is_prescription_required)
+INSERT INTO order_items (order_id, product_id, product_name, subtotal, quantity, currency, is_prescription_required)
 VALUES
 -- Order 1
 ('aaaa-aaaa-aaaa-aaaa', 'prod-001', 'Paracetamol 500mg', 5.00, 2, 'USD', FALSE),

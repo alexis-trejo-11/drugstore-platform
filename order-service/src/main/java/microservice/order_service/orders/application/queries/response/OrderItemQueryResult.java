@@ -7,22 +7,20 @@ import microservice.order_service.orders.domain.models.valueobjects.ProductID;
 
 import java.math.BigDecimal;
 
-@Data
 @Builder
-public class OrderItemQueryResult {
-    private ProductID productID;
-    private String productName;
-    private BigDecimal unitPrice;
-    private Integer quantity;
-    private BigDecimal subtotal;
-
-
+public record OrderItemQueryResult(
+        ProductID productID,
+        String productName,
+        Integer quantity,
+        BigDecimal subtotal
+) {
 
     public static OrderItemQueryResult from(OrderItem item) {
+        if (item == null) return null;
+
         return OrderItemQueryResult.builder()
                 .productID(item.getProductID())
                 .productName(item.getProductName())
-                .unitPrice(item.getUnitPrice().amount())
                 .quantity(item.getQuantity())
                 .subtotal(item.getSubtotal().amount())
                 .build();

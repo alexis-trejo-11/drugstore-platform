@@ -17,12 +17,13 @@ public class OrderQueryMapper implements ResultMapper<OrderQueryResult, Order> {
     @Override
     public OrderQueryResult toResult(Order order) {
         return OrderQueryResult.builder()
-                .id(order.getId())
+                .id(order.getId() != null ? order.getId() : null)
                 .userID(order.getUser().getId() != null ? order.getUser().getId() : null)
-                .status(order.getStatus())
-                .totalAmount(order.getTotalAmount())
-                .deliveryMethod(order.getDeliveryMethod())
+                .status(order.getStatus() != null ? order.getStatus(): null)
+                .totalAmount(order.getTotalAmount() != null ? order.getTotalAmount() : null)
+                .deliveryMethod(order.getDeliveryMethod() != null ? order.getDeliveryMethod() : null)
                 .totalItems(order.getTotalItemsCount())
+                .createdAt(order.getCreatedAt() != null ? order.getCreatedAt() : null)
                 .build();
     }
 

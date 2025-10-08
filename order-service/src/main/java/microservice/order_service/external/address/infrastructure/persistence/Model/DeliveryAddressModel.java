@@ -9,7 +9,7 @@ import microservice.order_service.external.users.infrastructure.persistence.mode
 import java.util.Objects;
 
 @Entity
-@Table(name = "delivery_addresses")
+@Table(name = "addresses")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,21 +24,8 @@ public class DeliveryAddressModel {
     @ManyToOne(fetch = FetchType.LAZY)
     public UserModel user;
 
-    @Column(name = "street", nullable = false, length = 255)
-    private String street;
-
-    @Column(name = "inner_number")
-    private Integer innerNumber;
-
-    @Column(name = "outer_number", nullable = false)
-    private Integer outerNumber;
-
-    @Column(name = "neighborhood", length = 100)
-    private String neighborhood;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "building_type", length = 20)
-    private BuildingType buildingType;
+    @Column(name = "country", nullable = false, length = 50)
+    private String country;
 
     @Column(name = "city", nullable = false, length = 100)
     private String city;
@@ -49,8 +36,20 @@ public class DeliveryAddressModel {
     @Column(name = "zip_code", nullable = false, length = 10)
     private String zipCode;
 
-    @Column(name = "country", nullable = false, length = 50)
-    private String country;
+    @Column(name = "neighborhood", length = 100)
+    private String neighborhood;
+
+    @Column(name = "street", nullable = false, length = 255)
+    private String street;
+
+    @Column(name = "building_type", length = 50)
+    private String buildingType;
+
+    @Column(name = "inner_number")
+    private Integer innerNumber;
+
+    @Column(name = "outer_number", nullable = false)
+    private Integer outerNumber;
 
     @Column(name = "additional_info", length = 500)
     private String additionalInfo;

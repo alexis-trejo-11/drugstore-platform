@@ -1,4 +1,4 @@
-package microservice.order_service.orders.infrastructure.api.controller.dto;
+package microservice.order_service.orders.infrastructure.api.dto;
 
 import libs_kernel.page.PageInput;
 import lombok.AllArgsConstructor;

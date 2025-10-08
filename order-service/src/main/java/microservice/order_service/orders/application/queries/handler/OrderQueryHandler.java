@@ -3,7 +3,7 @@ package microservice.order_service.orders.application.queries.handler;
 import libs_kernel.mapper.ResultMapper;
 import lombok.RequiredArgsConstructor;
 import microservice.order_service.orders.application.queries.request.*;
-import microservice.order_service.orders.application.queries.response.OrderQueryDetailResult;
+import microservice.order_service.orders.application.queries.response.OrderDetailResult;
 import microservice.order_service.orders.application.queries.response.OrderQueryResult;
 import microservice.order_service.orders.domain.models.Order;
 import microservice.order_service.orders.domain.ports.output.OrderRepository;
@@ -26,14 +26,14 @@ public class OrderQueryHandler  {
                  .map(orderQueryMapper::toResult);
     }
 
-    public Optional<OrderQueryDetailResult> handle(GetOrderDetailByIDQuery query) {
+    public Optional<OrderDetailResult> handle(GetOrderDetailByIDQuery query) {
         return orderRepository.findByID(query.orderID())
-                .map(OrderQueryDetailResult::from);
+                .map(OrderDetailResult::from);
     }
 
-    public Optional<OrderQueryDetailResult> handle(GetOrderByIDAndUserIDQuery query) {
+    public Optional<OrderDetailResult> handle(GetOrderByIDAndUserIDQuery query) {
         return orderRepository.findByUserIDAndOrderID(query.userID(), query.orderID())
-                .map(OrderQueryDetailResult::from);
+                .map(OrderDetailResult::from);
     }
 
     public Page<OrderQueryResult> handle(GetOrdersByUserIDQuery query) {

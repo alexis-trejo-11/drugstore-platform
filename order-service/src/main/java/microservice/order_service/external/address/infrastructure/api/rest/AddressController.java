@@ -20,13 +20,13 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v2/addresses")
+@RequestMapping("/api/v2/users/addresses")
 public class AddressController {
     private final AddressService addressService;
     private final ResponseMapper<DeliveryAddressResponse, DeliveryAddress> mapper;
 
     @GetMapping("/{id}")
-    public ResponseWrapper<DeliveryAddressResponse> getAddressByID(String id) {
+    public ResponseWrapper<DeliveryAddressResponse> getAddressByID(@PathVariable String id) {
         var addressID = AddressID.of(id);
         var address = addressService.getAddressByID(addressID);
 
@@ -35,7 +35,7 @@ public class AddressController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseWrapper<List<DeliveryAddressResponse>> getAddressesByUserID(String userId) {
+    public ResponseWrapper<List<DeliveryAddressResponse>> getAddressesByUserID(@PathVariable String userId) {
         var userID = UserID.of(userId);
         var queryResult = addressService.getAddressesByUserID(userID);
 
@@ -44,7 +44,7 @@ public class AddressController {
     }
 
     @GetMapping("/default/user/{id}")
-    public ResponseWrapper<DeliveryAddressResponse> getDefaultAddressByUserID(String id) {
+    public ResponseWrapper<DeliveryAddressResponse> getDefaultAddressByUserID(@PathVariable String id) {
         var userID = UserID.of(id);
         var queryResult = addressService.getDefaultAddressByUserID(userID);
 
@@ -54,7 +54,7 @@ public class AddressController {
 
 
     @GetMapping("/orders/{id}")
-    public ResponseWrapper<DeliveryAddressResponse> getAddressByOrderID(String id) {
+    public ResponseWrapper<DeliveryAddressResponse> getAddressByOrderID(@PathVariable String id) {
         var orderID = OrderID.of(id);
         var address = addressService.getAddressByOrderID(orderID);
 
