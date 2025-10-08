@@ -1,18 +1,18 @@
 package microservice.order_service.external.address.domain.model;
 
-import lombok.Getter;
-
-@Getter
 public enum BuildingType {
     HOUSE ("House"),
     APARTMENT ("Apartment"),
     OFFICE ("Office"),
-    Condominium ("Condominium"),
+    CONDOMINIUM("CONDOMINIUM"),
     WAREHOUSE ("Warehouse"),
     COMMERCIAL ("Commercial"),
     OTHER ("Other");
 
+    private final String displayName;
+
     BuildingType(String displayName) {
+        this.displayName = displayName;
     }
 
     public static BuildingType fromString(String value) {
@@ -22,5 +22,15 @@ public enum BuildingType {
             }
         }
         return OTHER;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+
+    @Override
+    public String toString() {
+        return displayName;
     }
 }

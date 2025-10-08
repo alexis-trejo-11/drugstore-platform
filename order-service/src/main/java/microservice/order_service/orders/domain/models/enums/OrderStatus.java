@@ -3,6 +3,7 @@ package microservice.order_service.orders.domain.models.enums;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -43,5 +44,15 @@ public enum OrderStatus {
 
     public boolean isActive() {
         return !isTerminal();
+    }
+
+    public static List<OrderStatus> getActiveStatuses() {
+        return Arrays.asList(PENDING, CONFIRMED, PREPARING, READY_FOR_PICKUP, OUT_FOR_DELIVERY);
+    }
+
+    // TODO: Add and Change to Display Name instead of name
+    @Override
+    public String toString() {
+        return this.name();
     }
 }

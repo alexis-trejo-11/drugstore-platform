@@ -18,6 +18,7 @@ public class AddressResponseMapper implements ResponseMapper<DeliveryAddressResp
 
     @Override
     public DeliveryAddressResponse toResponse(DeliveryAddress address) {
+        if (address == null) return null;
         return DeliveryAddressResponse.builder()
                 .id(address.getId() != null ? address.getId().value() : null)
                 .city(address.getCity() != null ? address.getCity() : null)

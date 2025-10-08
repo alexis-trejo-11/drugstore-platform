@@ -44,11 +44,16 @@ public class UserModel {
     private String status;
 
     public void update(String name, String email, String phoneNumber, String role, String status) {
-        this.name = name;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.role = role;
-        this.status = status;
+        if (name != null) this.name = name;
+        if (email != null) this.email = email;
+        if (phoneNumber != null) this.phoneNumber = phoneNumber;
+        if (role != null) this.role = role;
+        if (status != null) this.status = status;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public UserModel(String id) {
+        this.id = id;
     }
 
     public void restore() {

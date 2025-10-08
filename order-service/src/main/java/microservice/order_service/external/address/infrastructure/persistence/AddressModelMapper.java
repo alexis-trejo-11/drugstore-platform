@@ -2,10 +2,14 @@ package microservice.order_service.external.address.infrastructure.persistence;
 
 import libs_kernel.mapper.ModelMapper;
 import libs_kernel.page.PageResponse;
+import lombok.RequiredArgsConstructor;
 import microservice.order_service.external.address.domain.model.BuildingType;
 import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.address.infrastructure.persistence.Model.DeliveryAddressModel;
+import microservice.order_service.external.users.domain.entity.User;
+import microservice.order_service.external.users.infrastructure.persistence.models.UserModel;
 import microservice.order_service.orders.domain.models.valueobjects.AddressID;
+import microservice.order_service.orders.domain.models.valueobjects.UserID;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +17,7 @@ import java.util.List;
 
 @Component
 public class AddressModelMapper implements ModelMapper<DeliveryAddress, DeliveryAddressModel> {
+
     @Override
     public DeliveryAddressModel fromDomain(DeliveryAddress address) {
         if (address == null) return null;
@@ -25,9 +30,11 @@ public class AddressModelMapper implements ModelMapper<DeliveryAddress, Delivery
                 .innerNumber(address.getInnerNumber() != null ? address.getInnerNumber() : null)
                 .outerNumber(address.getOuterNumber() != null ? address.getOuterNumber() : null)
                 .neighborhood(address.getNeighborhood() != null ? address.getNeighborhood() : null)
-                .buildingType(address.getBuildingType() != null ? address.getBuildingType().name() : null)
+                .buildingType(address.getBuildingType() != null ? address.getBuildingType().getDisplayName() : null)
                 .zipCode(address.getZipCode() != null ? address.getZipCode() : null)
                 .additionalInfo(address.getAdditionalInfo() != null ? address.getAdditionalInfo() : null)
+                .isDefault(address.isDefault())
+                .user(address.getUserID() != null ? new UserModel(address.getUserID().value()) : null)
                 .build();
     }
 
@@ -46,6 +53,8 @@ public class AddressModelMapper implements ModelMapper<DeliveryAddress, Delivery
                 .buildingType(model.getBuildingType() != null ? BuildingType.fromString(model.getBuildingType()) : null)
                 .zipCode(model.getZipCode() != null ? model.getZipCode() : null)
                 .additionalInfo(model.getAdditionalInfo() != null ? model.getAdditionalInfo() : null)
+                .isDefault(model.isDefault())
+                .userID(model.getId() != null ? UserID.of(model.getUser().getId()) : null)
                 .build();
     }
 

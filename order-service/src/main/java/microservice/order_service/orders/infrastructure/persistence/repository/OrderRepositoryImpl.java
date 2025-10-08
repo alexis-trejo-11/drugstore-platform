@@ -4,6 +4,7 @@ import libs_kernel.mapper.ModelMapper;
 import lombok.RequiredArgsConstructor;
 import microservice.order_service.orders.domain.models.Order;
 import microservice.order_service.orders.domain.models.enums.OrderStatus;
+import microservice.order_service.orders.domain.models.valueobjects.AddressID;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;
 import microservice.order_service.orders.domain.models.valueobjects.OrderID;
 import microservice.order_service.orders.domain.ports.output.OrderRepository;
@@ -75,6 +76,16 @@ public class OrderRepositoryImpl implements OrderRepository {
         return orderModels.stream()
                 .map(mapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public boolean existsAnyByAddressIDAndOngoingStatus(AddressID addressID) {
+        List<OrderStatus> ongoingStatuses = OrderStatus.getActiveStatuses();
+
+        return orderJpaRepository.existsByAddressIdAndStatusInNative(
+                addressID.value(),
+                ongoingStatuses.stream().map(OrderStatus::name).toList()
+        );
     }
 
     @Override

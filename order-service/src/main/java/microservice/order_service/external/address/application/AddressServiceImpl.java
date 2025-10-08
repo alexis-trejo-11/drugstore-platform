@@ -5,6 +5,9 @@ import microservice.order_service.external.address.domain.exception.*;
 import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.address.domain.ports.input.AddressService;
 import microservice.order_service.external.address.domain.ports.output.AddressRepository;
+import microservice.order_service.external.users.application.service.UserService;
+import microservice.order_service.external.users.domain.exceptions.UserNotFoundByIDErr;
+import microservice.order_service.external.users.infrastructure.persistence.repository.JpaUserRepository;
 import microservice.order_service.orders.application.exceptions.OrderNotFoundIDException;
 import microservice.order_service.orders.domain.models.Order;
 import microservice.order_service.orders.domain.models.valueobjects.AddressID;
@@ -19,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService {
     private final AddressRepository addressRepository;
+    private final JpaUserRepository userRepository;
     private final OrderRepository orderRepository;
 
     @Override
@@ -52,43 +56,95 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public AddressID createAddress(DeliveryAddress address) {
-        DeliveryAddress addressSaved = addressRepository.save(address);
-        return addressSaved.getId();
+        if (!userRepository.existsById(address.getUserID().value())) {
+            throw new UserNotFoundByIDErr(address.getUserID());
+        }
+
+        List<DeliveryAddress> userAddresses = addressRepository.findAllByUserID(address.getUserID());
+        if (userAddresses.isEmpty()) {
+            address.markAsDefault();
+        } else if (address.isDefault()) {
+            for (DeliveryAddress addr : userAddresses) {
+                addr.unsetDefault();
+            }
+            addressRepository.bulkUpdate(userAddresses);
+        }
+
+        DeliveryAddress addressCreated = addressRepository.save(address);
+        return addressCreated.getId();
     }
 
     @Override
     public void updateAddress(DeliveryAddress address) {
-        getAddressOrThrow(address.getId());
-        addressRepository.save(address);
+        DeliveryAddress existingAddress = getAddressOrThrow(address.getId());
+        if (orderRepository.existsAnyByAddressIDAndOngoingStatus(address.getId())) {
+            throw new AddressInUseConflict(address.getId());
+        }
+
+        var addressUpdated = existingAddress.update(
+                address.getCountry(),
+                address.getState(),
+                address.getCity(),
+                address.getStreet(),
+                address.getInnerNumber(),
+                address.getOuterNumber(),
+                address.getNeighborhood(),
+                address.getBuildingType(),
+                address.getZipCode(),
+                address.getAdditionalInfo()
+        );
+        addressRepository.save(addressUpdated);
     }
 
     @Override
     public void setDefaultAddress(UserID userID, AddressID addressID) {
         List<DeliveryAddress> userAddresses = addressRepository.findAllByUserID(userID);
+
         boolean found = false;
         for (DeliveryAddress address : userAddresses) {
-            if (address.getId().equals(addressID)) {
+            if (address.getId().value().equals(addressID.value())) {
                 address.markAsDefault();
                 found = true;
             } else {
                 address.unsetDefault();
             }
         }
-
         if (!found) {
             throw new AddressNotFoundForUserErr(userID, addressID);
         }
+
+        addressRepository.bulkUpdate(userAddresses);
     }
 
     @Override
     public void deleteAddress(AddressID addressID) {
         DeliveryAddress address = getAddressOrThrow(addressID);
+
+        if (orderRepository.existsAnyByAddressIDAndOngoingStatus(addressID)) {
+            throw new AddressInUseConflict(addressID);
+        }
+
+
+        if (address.isDefault()) {
+            List<DeliveryAddress> userAddresses = addressRepository.findAllByUserID(address.getUserID());
+            if (userAddresses.size() > 1) {
+                for (DeliveryAddress addr : userAddresses) {
+                    if (!addr.getId().value().equals(addressID.value())) {
+                        addr.markAsDefault();
+                        break;
+                    }
+                }
+                addressRepository.bulkUpdate(userAddresses);
+            }
+        }
+
         addressRepository.delete(address);
     }
-
 
     private DeliveryAddress getAddressOrThrow(AddressID addressID) {
         return addressRepository.findByID(addressID)
                 .orElseThrow(() -> new AddressNotFoundByIDErr(addressID));
     }
+
+
 }

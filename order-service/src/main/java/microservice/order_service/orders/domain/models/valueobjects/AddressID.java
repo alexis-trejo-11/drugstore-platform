@@ -15,5 +15,7 @@ public record AddressID(String value) {
     public static AddressID of(String value) {
         return new AddressID(value);
     }
-
+    public static AddressID generate() {
+        return new AddressID(UUID.randomUUID().toString());
+    }
 }

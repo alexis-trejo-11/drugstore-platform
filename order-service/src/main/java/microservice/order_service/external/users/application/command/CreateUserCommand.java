@@ -19,7 +19,6 @@ public record CreateUserCommand(
 
     public User toDomain() {
         return User.builder()
-                .id(new UserID(id))
                 .phoneNumber(phoneNumber())
                 .email(email())
                 .name(name())

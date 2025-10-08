@@ -2,7 +2,10 @@ package microservice.order_service.external.address.infrastructure.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import microservice.order_service.external.address.domain.model.BuildingType;
 import microservice.order_service.external.address.domain.model.DeliveryAddress;
@@ -13,12 +16,7 @@ import org.hibernate.validator.constraints.Length;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record DeliveryAddressRequest(
-        @NotNull(message = "User ID is required")
-        @NotBlank(message = "User ID is required")
-        @JsonProperty("user_id")
-        String userID,
-
+public record UpdateAddressRequest(
         @NotBlank(message = "Street is required")
         @Size(max = 120, message = "Street must be at most 120 characters")
         String street,
@@ -60,17 +58,12 @@ public record DeliveryAddressRequest(
 
         @JsonProperty("additional_info")
         @Size(max = 200, message = "Additional info must be at most 200 characters")
-        String additionalInfo,
-
-        @JsonProperty("is_default")
-        @NotNull(message = "isDefault flag is required")
-        Boolean isDefault
+        String additionalInfo
 ) {
 
 
-    public DeliveryAddressRequest normalize() {
-        return new DeliveryAddressRequest(
-                trimOrNull(userID),
+    public UpdateAddressRequest normalize() {
+        return new UpdateAddressRequest(
                 trimOrNull(street),
                 innerNumber,
                 outerNumber,
@@ -80,8 +73,7 @@ public record DeliveryAddressRequest(
                 trimOrNull(state),
                 zipCode != null ? zipCode.trim() : null,
                 trimOrNull(country),
-                trimOrNull(additionalInfo),
-                isDefault
+                trimOrNull(additionalInfo)
         );
     }
 
@@ -91,28 +83,10 @@ public record DeliveryAddressRequest(
         return t.isEmpty() ? null : t;
     }
 
-    public DeliveryAddress toDomain() {
-        var normalized = normalize();
-        return DeliveryAddress.create(
-                UserID.of(normalized.userID),
-                normalized.country,
-                normalized.state,
-                normalized.city,
-                normalized.street,
-                normalized.innerNumber,
-                normalized.outerNumber,
-                normalized.neighborhood,
-                normalized.buildingType,
-                normalized.zipCode,
-                normalized.additionalInfo,
-                normalized.isDefault
-        );
-    }
-
-    public DeliveryAddress toDomainWithID(AddressID id) {
+    public DeliveryAddress toDomain(AddressID addressID, UserID userID) {
         var normalized = normalize();
         return DeliveryAddress.builder()
-                .id(id)
+                .id(addressID)
                 .street(normalized.street)
                 .innerNumber(normalized.innerNumber)
                 .outerNumber(normalized.outerNumber)
@@ -123,7 +97,24 @@ public record DeliveryAddressRequest(
                 .zipCode(normalized.zipCode)
                 .country(normalized.country)
                 .additionalInfo(normalized.additionalInfo)
-                .userID(UserID.of(normalized.userID))
+                .userID(userID)
+                .build();
+    }
+
+    public DeliveryAddress toDomain(AddressID addressID) {
+        var normalized = normalize();
+        return DeliveryAddress.builder()
+                .id(addressID)
+                .street(normalized.street)
+                .innerNumber(normalized.innerNumber)
+                .outerNumber(normalized.outerNumber)
+                .neighborhood(normalized.neighborhood)
+                .buildingType(normalized.buildingType)
+                .city(normalized.city)
+                .state(normalized.state)
+                .zipCode(normalized.zipCode)
+                .country(normalized.country)
+                .additionalInfo(normalized.additionalInfo)
                 .build();
     }
 }
