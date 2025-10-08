@@ -2,6 +2,7 @@ package microservice.order_service.external.address.infrastructure.persistence;
 
 import libs_kernel.mapper.ModelMapper;
 import libs_kernel.page.PageResponse;
+import microservice.order_service.external.address.domain.model.BuildingType;
 import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.address.infrastructure.persistence.Model.DeliveryAddressModel;
 import microservice.order_service.orders.domain.models.valueobjects.AddressID;
@@ -24,7 +25,7 @@ public class AddressModelMapper implements ModelMapper<DeliveryAddress, Delivery
                 .innerNumber(address.getInnerNumber() != null ? address.getInnerNumber() : null)
                 .outerNumber(address.getOuterNumber() != null ? address.getOuterNumber() : null)
                 .neighborhood(address.getNeighborhood() != null ? address.getNeighborhood() : null)
-                .buildingType(address.getBuildingType() != null ? address.getBuildingType() : null)
+                .buildingType(address.getBuildingType() != null ? address.getBuildingType().name() : null)
                 .zipCode(address.getZipCode() != null ? address.getZipCode() : null)
                 .additionalInfo(address.getAdditionalInfo() != null ? address.getAdditionalInfo() : null)
                 .build();
@@ -42,7 +43,7 @@ public class AddressModelMapper implements ModelMapper<DeliveryAddress, Delivery
                 .innerNumber(model.getInnerNumber() != null ? model.getInnerNumber() : null)
                 .outerNumber(model.getOuterNumber() != null ? model.getOuterNumber() : null)
                 .neighborhood(model.getNeighborhood() != null ? model.getNeighborhood() : null)
-                .buildingType(model.getBuildingType() != null ? model.getBuildingType() : null)
+                .buildingType(model.getBuildingType() != null ? BuildingType.fromString(model.getBuildingType()) : null)
                 .zipCode(model.getZipCode() != null ? model.getZipCode() : null)
                 .additionalInfo(model.getAdditionalInfo() != null ? model.getAdditionalInfo() : null)
                 .build();

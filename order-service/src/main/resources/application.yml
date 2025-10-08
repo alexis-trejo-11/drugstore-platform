@@ -18,6 +18,19 @@ spring:
     schemas: public
     clean-disabled: false
 
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    tags-sorter: alpha
+    operations-sorter: alpha
+    doc-expansion: none
+  packages-to-scan: microservice.order_service
+  paths-to-match: /api/**
+  cache:
+    disabled: true
 
 server:
   port: 8080

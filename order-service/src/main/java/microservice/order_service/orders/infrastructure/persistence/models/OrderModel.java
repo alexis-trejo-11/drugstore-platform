@@ -24,6 +24,33 @@ public class OrderModel {
     @Column(name = "id", length = 36)
     private String id;
 
+    @Column(name = "delivery_method", nullable = false, length = 20)
+    private String deliveryMethod;
+
+    @Column(name = "status", nullable = false, length = 20)
+    private String status;
+
+    @Column(name = "notes", length = 500)
+    private String notes;
+
+    // Numeric Values
+    @Column(name = "shipping_cost", nullable = false, precision = 10, scale = 2)
+    private BigDecimal shippingCost;
+
+    @Column(name = "tax_amount", nullable = false, precision = 10, scale = 2)
+    private BigDecimal taxAmount;
+
+    // Shipping
+    @Column(name = "delivery_tracking_number", length = 100)
+    private String deliveryTrackingNumber;
+
+    @Column(name = "delivery_attempt", nullable = false)
+    private Integer deliveryAttempt;
+
+    @Column(name = "days_since_ready_for_pickup", nullable = false)
+    private Integer daysSinceReadyForPickup;
+
+    // Relationships
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private UserModel user;
@@ -35,11 +62,12 @@ public class OrderModel {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItemModel> items;
 
-    @Column(name = "delivery_method", nullable = false, length = 20)
-    private String deliveryMethod;
+    @Column(name = "payment_id", length = 36)
+    private String paymentID;
 
-    @Column(name = "status", nullable = false, length = 20)
-    private String status;
+    // TimeStamps
+    @Column(name = "estimated_delivery_date")
+    private LocalDateTime estimatedDeliveryDate;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -49,12 +77,6 @@ public class OrderModel {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    @Column(name = "estimated_delivery_date")
-    private LocalDateTime estimatedDeliveryDate;
-
-    @Column(name = "notes", length = 500)
-    private String notes;
 
     @PrePersist
     protected void onCreate() {

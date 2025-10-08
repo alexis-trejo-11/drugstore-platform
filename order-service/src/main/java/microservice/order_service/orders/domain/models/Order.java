@@ -8,8 +8,6 @@ import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.users.domain.entity.User;
 import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
 import microservice.order_service.orders.domain.models.enums.OrderStatus;
-import microservice.order_service.orders.domain.models.events.OrderCreatedEvent;
-import microservice.order_service.orders.domain.models.events.OrderStatusChangedEvent;
 import microservice.order_service.orders.domain.models.valueobjects.*;
 
 import java.math.BigDecimal;
@@ -22,36 +20,57 @@ import java.util.*;
 @AllArgsConstructor
 public class Order {
     private OrderID id;
-    private List<OrderItem> items;
     private DeliveryMethod deliveryMethod;
-    private AddressID addressID;
     private OrderStatus status;
+    private String notes;
+
+    private String deliveryTrackingNumber;
+    private Integer deliveryAttempt;
+    private Integer daysSinceReadyForPickup;
+
+    // Numeric Values
+    private Money shippingCost;
+    private Money taxAmount;
+
+    // Relationships
+    private User user;
+    private DeliveryAddress deliveryAddress;
+    private PaymentID paymentID;
+
+    // TimeStamps
+    private LocalDateTime estimatedDeliveryDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private LocalDateTime estimatedDeliveryDate;
-    private String notes;
-    private DeliveryAddress deliveryAddress;
-    private User user;
-    private List<Object> domainEvents;
 
-    public static Order create(User user, List<OrderItem> items,
-                               DeliveryMethod deliveryMethod, AddressID addressID, String notes) {
+    private List<OrderItem> items;
+
+    public static Order create(
+            DeliveryMethod deliveryMethod,
+            String notes,
+            Money shippingCost,
+            Money taxAmount,
+            List<OrderItem> items,
+            User user,
+            DeliveryAddress address
+            ) {
         OrderID orderID = OrderID.generate();
         LocalDateTime now = LocalDateTime.now();
         Order order = new Order();
+
         order.id = orderID;
-        order.user = user;
-        order.items = new ArrayList<>(items);
         order.deliveryMethod = deliveryMethod;
-        order.addressID = addressID;
         order.status = OrderStatus.PENDING;
+        order.notes = notes;
+        order.shippingCost = shippingCost != null ? shippingCost : Money.of(BigDecimal.ZERO, Currency.getInstance("MXN"));
+        order.taxAmount = taxAmount != null ? taxAmount : Money.of(BigDecimal.ZERO, Currency.getInstance("MXN"));
+        order.user = user;
+        order.deliveryAddress = address;
+        order.items = new ArrayList<>(items);
         order.createdAt = now;
         order.updatedAt = now;
-        order.notes = notes;
+
         order.validateItems();
-        order.domainEvents = new ArrayList<>();
-        // Raise domain event
-        order.domainEvents.add(new OrderCreatedEvent(orderID, user.getId(),order.calculateTotalAmount(), now));
+
         return order;
     }
 
@@ -65,11 +84,10 @@ public class Order {
         this.status = newStatus;
         this.updatedAt = LocalDateTime.now();
 
-        // Raise domain event
-        this.domainEvents.add(new OrderStatusChangedEvent(this.id, oldStatus, newStatus, this.updatedAt));
     }
 
-    public void confirm() {
+    public void confirm(PaymentID paymentID) {
+        this.paymentID = paymentID;
         changeStatus(OrderStatus.CONFIRMED);
     }
 
@@ -84,11 +102,21 @@ public class Order {
         changeStatus(OrderStatus.READY_FOR_PICKUP);
     }
 
-    public void markOutForDelivery() {
+    public void markOutForDelivery(String deliveryTrackingNumber) {
         if (deliveryMethod != DeliveryMethod.EXPRESS_DELIVERY && deliveryMethod != DeliveryMethod.STANDARD_DELIVERY ) {
             throw new IllegalStateException("Only delivery orders can be marked as out for delivery");
         }
         changeStatus(OrderStatus.OUT_FOR_DELIVERY);
+
+        this.deliveryTrackingNumber = deliveryTrackingNumber;
+    }
+
+    public void complete() {
+        if (deliveryMethod == DeliveryMethod.STORE_PICKUP) {
+            markAsPickedUp();
+        } else {
+            markAsDelivered();
+        }
     }
 
     public void markAsDelivered() {
@@ -107,11 +135,27 @@ public class Order {
         changeStatus(OrderStatus.CANCELLED);
     }
 
-    public void returnOrder() {
+    public void returnOrder(String reason) {
+        if (reason == null || reason.isBlank()) {
+            throw new IllegalArgumentException("Return reason must be provided");
+        }
+
+        if (reason.equals("Customer Not Attended")) {
+            deliveryAttempt++;
+        }
+
+        // Cancel order if more than 3 delivery attempts. TODO: Notify customer
+        if (deliveryAttempt > 3) {
+            cancel("Max delivery attempts reached");
+            return;
+        }
+
         if (status != OrderStatus.DELIVERED && status != OrderStatus.PICKED_UP) {
             throw new IllegalStateException("Only delivered or picked up orders can be returned");
         }
+
         changeStatus(OrderStatus.RETURNED);
+        deliveryTrackingNumber = null;
     }
 
     public void setEstimatedDeliveryDate(LocalDateTime estimatedDate) {
@@ -122,18 +166,64 @@ public class Order {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateNotes(String newNotes) {
-        this.notes = newNotes;
-        this.updatedAt = LocalDateTime.now();
-    }
-
     public Optional<OrderItem> findItem(ProductID productID) {
         return items.stream()
                 .filter(item -> item.getProductID().equals(productID))
                 .findFirst();
     }
 
+    public void updateDeliveryAddress(DeliveryAddress newAddress) {
+        if (deliveryMethod != DeliveryMethod.STANDARD_DELIVERY && deliveryMethod != DeliveryMethod.EXPRESS_DELIVERY) {
+            throw new IllegalStateException("Cannot update address for non-delivery orders");
+        }
+
+        if (status != OrderStatus.PENDING && status != OrderStatus.CONFIRMED) {
+            throw new IllegalStateException("Can only update address for PENDING or CONFIRMED orders");
+        }
+
+        if (newAddress == null) {
+            throw new IllegalArgumentException("New address cannot be null");
+        }
+
+        this.deliveryAddress = newAddress;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updateDeliveryMethod(DeliveryMethod newMethod) {
+        if (status != OrderStatus.PENDING && status != OrderStatus.CONFIRMED) {
+            throw new IllegalStateException("Can only update delivery method for PENDING or CONFIRMED orders");
+        }
+
+        if (newMethod == null) {
+            throw new IllegalArgumentException("New delivery method cannot be null");
+        }
+
+        if (newMethod == this.deliveryMethod) {
+            throw new IllegalArgumentException("New delivery method must be different from current method");
+        }
+
+        // If changing to a delivery method, ensure address is set
+        if (newMethod.requiresAddress() && this.deliveryAddress == null) {
+            throw new IllegalStateException("Cannot change to a delivery method without a valid address");
+        }
+
+        this.deliveryMethod = newMethod;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void readyForPickup() {
+        if (deliveryMethod != DeliveryMethod.STORE_PICKUP) {
+            throw new IllegalStateException("Only pickup orders can be marked as ready for pickup");
+        }
+        changeStatus(OrderStatus.READY_FOR_PICKUP);
+        this.daysSinceReadyForPickup = 0;
+    }
+
     public List<OrderItem> getItems() {
+        if (items == null) {
+            return Collections.emptyList();
+        }
+
         return Collections.unmodifiableList(items);
     }
     public int getTotalItemsCount() {
@@ -153,14 +243,6 @@ public class Order {
     }
     public boolean canBeReturned() {
         return status == OrderStatus.DELIVERED || status == OrderStatus.PICKED_UP;
-    }
-
-    public List<Object> getDomainEvents() {
-        return Collections.unmodifiableList(domainEvents);
-    }
-
-    public void clearDomainEvents() {
-        domainEvents.clear();
     }
 
     private void validateItems() {
@@ -185,9 +267,7 @@ public class Order {
     }
 
     private Money calculateTotalAmount() {
-        if (items == null || items.isEmpty()) {
-            return Money.of(BigDecimal.ZERO, Currency.getInstance("MXN"));
-        }
+        if (items == null || items.isEmpty()) return Money.of(BigDecimal.ZERO, Currency.getInstance("MXN"));
 
         return items.stream()
                 .filter(Objects::nonNull)
@@ -201,6 +281,10 @@ public class Order {
             return Money.of(BigDecimal.ZERO , Currency.getInstance("MXN"));
         }
         return calculateTotalAmount();
+    }
+
+    public AddressID getAddressID() {
+        return deliveryAddress != null ? deliveryAddress.getId() : null;
     }
 
     @Override

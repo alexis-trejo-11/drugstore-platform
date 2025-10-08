@@ -22,8 +22,8 @@ public class OrderItemJpaMapper  implements ModelMapper<OrderItem, OrderItemMode
                 .productId(item.getProductID() != null ? item.getProductID().value() : null)
                 .productName(item.getProductName() != null ? item.getProductName() : null)
                 .quantity(Math.max(item.getQuantity(), 0))
-                .currency(item.getUnitPrice() != null ? item.getUnitPrice().currency().getCurrencyCode() : null)
-                .unitPrice(item.getUnitPrice() != null ? item.getUnitPrice().amount() : null)
+                .currency(item.getSubtotal() != null ? item.getSubtotal().currency().getCurrencyCode() : null)
+                .subtotal(item.getSubtotal() != null ? item.getSubtotal().amount() : null)
                 .isPrescriptionRequired(item.isPrescriptionRequired())
                 .build();
     }
@@ -34,8 +34,8 @@ public class OrderItemJpaMapper  implements ModelMapper<OrderItem, OrderItemMode
                 .id(orderItemModel.getId() != null ? orderItemModel.getId() : null)
                 .productID(orderItemModel.getProductId() != null ? ProductID.of(orderItemModel.getProductId()) : null)
                 .productName(orderItemModel.getProductName() != null ? orderItemModel.getProductName() : null)
-                .unitPrice(orderItemModel.getUnitPrice() != null && orderItemModel.getCurrency() != null ?
-                        Money.of(orderItemModel.getUnitPrice(), java.util.Currency.getInstance(orderItemModel.getCurrency())) : null)
+                .subtotal(orderItemModel.getSubtotal() != null && orderItemModel.getCurrency() != null ?
+                        Money.of(orderItemModel.getSubtotal(), java.util.Currency.getInstance(orderItemModel.getCurrency())) : null)
                 .quantity(Math.max(orderItemModel.getQuantity(), 0))
                 .prescriptionRequired(orderItemModel.isPrescriptionRequired())
                 .build();

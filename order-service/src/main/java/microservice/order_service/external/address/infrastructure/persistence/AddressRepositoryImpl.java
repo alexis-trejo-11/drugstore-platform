@@ -15,8 +15,8 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class AddressRepositoryImpl implements AddressRepository {
-    private JpaAddressRepository jpaAddressRepository;
-    private ModelMapper<DeliveryAddress, DeliveryAddressModel> addressMapper;
+    private final JpaAddressRepository jpaAddressRepository;
+    private final ModelMapper<DeliveryAddress, DeliveryAddressModel> addressMapper;
 
     @Override
     public Optional<DeliveryAddress> findByID(AddressID addressID) {

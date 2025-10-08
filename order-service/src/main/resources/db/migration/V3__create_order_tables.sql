@@ -2,20 +2,37 @@ CREATE TABLE orders (
     id VARCHAR(36) PRIMARY KEY,
     user_id VARCHAR(36) NOT NULL,
     address_id VARCHAR(36),
-    currency VARCHAR(3) NOT NULL DEFAULT 'MXN',
     delivery_method VARCHAR(20) NOT NULL,
     status VARCHAR(20) NOT NULL,
+    notes TEXT DEFAULT '',
+
+    -- Numeric Values
+    shipping_cost NUMERIC(10,2) NOT NULL,
+    tax_amount NUMERIC(10,2) NOT NULL,
+
+    -- Shipping
+    delivery_tracking_number VARCHAR(100),
+    delivery_attempt INTEGER NOT NULL DEFAULT 0,
+    days_since_ready_for_pickup INTEGER NOT NULL DEFAULT 0,
+
+    -- Payment
+    payment_id VARCHAR(36),
+
+    -- Timestamps
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP,
     deleted_at TIMESTAMP,
     estimated_delivery_date TIMESTAMP,
-    notes VARCHAR(500),
+
     -- Constraints
     CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT fk_orders_address FOREIGN KEY (address_id) REFERENCES addresses(id),
     CONSTRAINT chk_delivery_method CHECK (delivery_method IN ('HOME_DELIVERY', 'STORE_PICKUP', 'EXPRESS_DELIVERY', 'STANDARD_DELIVERY')),
     CONSTRAINT chk_order_status CHECK (status IN ('PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'RETURNED')),
-    CONSTRAINT chk_currency CHECK (currency IN ('MXN', 'USD', 'EUR'))
+    CONSTRAINT chk_shipping_cost_positive CHECK (shipping_cost >= 0),
+    CONSTRAINT chk_tax_amount_positive CHECK (tax_amount >= 0),
+    CONSTRAINT chk_delivery_attempt_positive CHECK (delivery_attempt >= 0),
+    CONSTRAINT chk_days_since_pickup_positive CHECK (days_since_ready_for_pickup >= 0)
 );
 
 -- Indexes
@@ -25,19 +42,27 @@ CREATE INDEX idx_orders_customer_created_at ON orders(user_id, created_at DESC);
 CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_orders_created_at ON orders(created_at DESC);
 CREATE INDEX idx_orders_address_id ON orders(address_id);
+CREATE INDEX idx_orders_payment_id ON orders(payment_id);
+CREATE INDEX idx_orders_tracking_number ON orders(delivery_tracking_number);
 
 
 COMMENT ON TABLE orders IS 'Main table for customer orders';
 COMMENT ON COLUMN orders.id IS 'Unique identifier for each order (UUID format)';
 COMMENT ON COLUMN orders.user_id IS 'Client identifier (UUID format)';
 COMMENT ON COLUMN orders.status IS 'Current status of the order';
+COMMENT ON COLUMN orders.shipping_cost IS 'Cost of shipping for the order';
+COMMENT ON COLUMN orders.tax_amount IS 'Tax amount applied to the order';
+COMMENT ON COLUMN orders.delivery_tracking_number IS 'Tracking number for delivery';
+COMMENT ON COLUMN orders.delivery_attempt IS 'Number of delivery attempts made';
+COMMENT ON COLUMN orders.days_since_ready_for_pickup IS 'Days since order was ready for pickup';
+COMMENT ON COLUMN orders.payment_id IS 'Payment identifier (no foreign key constraint)';
 
 CREATE TABLE order_items (
     id BIGSERIAL PRIMARY KEY,
     order_id VARCHAR(36) NOT NULL,
     product_id VARCHAR(36) NOT NULL,
     product_name VARCHAR(255) NOT NULL,
-    unit_price NUMERIC(10,2) NOT NULL,
+    subtotal NUMERIC(10,2) NOT NULL,
     quantity INTEGER NOT NULL,
     currency VARCHAR(3) NOT NULL DEFAULT 'MXN',
     is_prescription_required BOOLEAN DEFAULT FALSE,
@@ -46,7 +71,7 @@ CREATE TABLE order_items (
     CONSTRAINT fk_order_items_id FOREIGN KEY (order_id) REFERENCES orders(id),
 
     -- Constraints
-    CONSTRAINT chk_unit_price_positive CHECK (unit_price >= 0),
+    CONSTRAINT chk_subtotal_positive CHECK (subtotal >= 0),
     CONSTRAINT chk_quantity_positive CHECK (quantity > 0)
 );
 

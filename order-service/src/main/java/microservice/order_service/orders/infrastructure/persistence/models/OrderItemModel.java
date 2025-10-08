@@ -32,8 +32,8 @@ public class OrderItemModel {
     @Column(name = "currency", length = 3, nullable = false)
     private String currency;
 
-    @Column(name = "unit_price", precision = 10, scale = 2, nullable = false)
-    private BigDecimal unitPrice;
+    @Column(name = "subtotal", precision = 10, scale = 2, nullable = false)
+    private BigDecimal subtotal;
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;

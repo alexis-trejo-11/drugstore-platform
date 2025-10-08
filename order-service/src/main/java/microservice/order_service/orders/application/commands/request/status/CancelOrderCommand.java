@@ -1,4 +1,4 @@
-package microservice.order_service.orders.application.commands.request;
+package microservice.order_service.orders.application.commands.request.status;
 
 import lombok.Builder;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;

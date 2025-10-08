@@ -10,6 +10,7 @@ import microservice.order_service.orders.domain.models.Order;
 
 import microservice.order_service.orders.domain.models.OrderItem;
 import microservice.order_service.orders.domain.models.enums.OrderStatus;
+import microservice.order_service.orders.domain.models.valueobjects.Money;
 import microservice.order_service.orders.domain.models.valueobjects.OrderID;
 import microservice.order_service.orders.infrastructure.persistence.models.OrderItemModel;
 import microservice.order_service.orders.infrastructure.persistence.models.OrderModel;
@@ -31,14 +32,25 @@ public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
     public OrderModel fromDomain(Order order) {
         return OrderModel.builder()
                 .id(order.getId().value() != null ? order.getId().value() : null)
+                .deliveryMethod(order.getDeliveryMethod() != null ? order.getDeliveryMethod().name() : null)
+                .status(order.getStatus() != null ? order.getStatus().name() : null)
+                .notes(order.getNotes() != null ? order.getNotes() : "")
+
                 .items(itemMapper.fromDomains(order.getItems()))
                 .deliveryAddressModel(addressMapper.fromDomain(order.getDeliveryAddress()) != null ? addressMapper.fromDomain(order.getDeliveryAddress()) : null)
-                .status(order.getStatus() != null ? order.getStatus().name() : null)
                 .user(order.getUser() != null ? userMapper.fromDomain(order.getUser()) : null)
+                .paymentID(order.getPaymentID() != null ? order.getPaymentID().value() : null)
+
+                .taxAmount(order.getTaxAmount() != null ? order.getTaxAmount().amount() : null)
+                .shippingCost(order.getShippingCost() != null ? order.getShippingCost().amount() : null)
+
+                .deliveryTrackingNumber(order.getDeliveryTrackingNumber() != null ? order.getDeliveryTrackingNumber() : null)
+                .deliveryAttempt(order.getDeliveryAttempt() != null ? order.getDeliveryAttempt() : null)
+                .daysSinceReadyForPickup( order.getDaysSinceReadyForPickup() != null ? order.getDaysSinceReadyForPickup() : null)
+
                 .createdAt(order.getCreatedAt() != null ? order.getCreatedAt() : LocalDateTime.now())
                 .updatedAt(order.getUpdatedAt() != null ? order.getUpdatedAt() : LocalDateTime.now())
                 .estimatedDeliveryDate(order.getEstimatedDeliveryDate() != null ? order.getEstimatedDeliveryDate() : null)
-                .notes(order.getNotes() != null ? order.getNotes() : null)
                 .build();
     }
 
@@ -46,14 +58,24 @@ public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
     public Order toDomain(OrderModel orderModel) {
         return Order.builder()
                 .id(orderModel.getId() != null ? OrderID.of(orderModel.getId()) : null)
+                .deliveryMethod(orderModel.getDeliveryMethod() != null ? microservice.order_service.orders.domain.models.enums.DeliveryMethod.valueOf(orderModel.getDeliveryMethod()) : null)
+                .status(orderModel.getStatus() != null ? OrderStatus.valueOf(orderModel.getStatus()) : null)
+
                 .deliveryAddress(addressMapper.toDomain(orderModel.getDeliveryAddressModel()) != null ? addressMapper.toDomain(orderModel.getDeliveryAddressModel()) : null)
                 .user(orderModel.getUser() != null ? userMapper.toDomain(orderModel.getUser()) : null)
                 .items(orderModel.getItems() != null ? itemMapper.toDomains(orderModel.getItems()) : List.of())
-                .status(orderModel.getStatus() != null ? OrderStatus.valueOf(orderModel.getStatus()) : null)
+                .paymentID(orderModel.getPaymentID() != null ? microservice.order_service.orders.domain.models.valueobjects.PaymentID.of(orderModel.getPaymentID()) : null)
+
+                .shippingCost(Money.of(orderModel.getShippingCost(), Currency.getInstance("MXN")))
+                .taxAmount(Money.of(orderModel.getTaxAmount(), Currency.getInstance("MXN")))
+
+                .deliveryTrackingNumber(orderModel.getDeliveryTrackingNumber() != null ? orderModel.getDeliveryTrackingNumber() : null)
+                .deliveryAttempt(orderModel.getDeliveryAttempt() != null ? orderModel.getDeliveryAttempt() : null)
+                .daysSinceReadyForPickup(orderModel.getDaysSinceReadyForPickup() != null ? orderModel.getDaysSinceReadyForPickup() : null)
+
                 .createdAt(orderModel.getCreatedAt() != null ? orderModel.getCreatedAt() : null)
                 .updatedAt(orderModel.getUpdatedAt() != null ? orderModel.getUpdatedAt() : null)
                 .estimatedDeliveryDate(orderModel.getEstimatedDeliveryDate() != null ? orderModel.getEstimatedDeliveryDate() : null)
-                .notes(orderModel.getNotes() != null ? orderModel.getNotes() : null)
                 .build();
     }
 

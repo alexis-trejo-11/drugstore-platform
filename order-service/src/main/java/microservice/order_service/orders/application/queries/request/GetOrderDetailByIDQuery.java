@@ -10,7 +10,7 @@ public record GetOrderDetailByIDQuery(OrderID orderID) {
         this.orderID = orderID;
     }
 
-    public GetOrderDetailByIDQuery of(String orderID) {
+    public static GetOrderDetailByIDQuery of(String orderID) {
         return new GetOrderDetailByIDQuery(OrderID.of(orderID));
     }
 

@@ -85,4 +85,8 @@ public record Money(BigDecimal amount, Currency currency) {
         }
         return String.format("%s %.2f", currency.getSymbol(), amount);
     }
+
+    public static Money zero() {
+        return new Money(BigDecimal.ZERO, Currency.getInstance("MXN"));
+    }
 }

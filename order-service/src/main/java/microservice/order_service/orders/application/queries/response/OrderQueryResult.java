@@ -15,8 +15,8 @@ public record OrderQueryResult(
     OrderID id,
     UserID userID,
     Money totalAmount,
-    String currency,
     OrderStatus status,
     DeliveryMethod deliveryMethod,
-    Integer totalItems
+    Integer totalItems,
+    LocalDateTime createdAt
 ) {}

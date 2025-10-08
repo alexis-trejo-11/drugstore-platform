@@ -1,10 +1,10 @@
-package microservice.order_service.orders.infrastructure.api.controller.mapper;
+package microservice.order_service.orders.infrastructure.api.mapper;
 
 import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.page.PageResponse;
 import libs_kernel.page.PageableResponse;
 import microservice.order_service.orders.application.queries.response.OrderQueryResult;
-import microservice.order_service.orders.infrastructure.api.controller.dto.OrderResponse;
+import microservice.order_service.orders.infrastructure.api.dto.OrderResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +24,7 @@ public class OrderResponseMapper implements ResponseMapper<OrderResponse, OrderQ
                 .totalAmount(result.totalAmount() != null ? result.totalAmount().toFormattedString() : null)
                 .totalItems(result.totalItems())
                 .deliveryMethod(result.deliveryMethod() != null ? result.deliveryMethod().name() : null)
+                .createdAt(result.createdAt())
                 .build();
     }
 

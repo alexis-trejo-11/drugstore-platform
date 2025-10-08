@@ -7,6 +7,7 @@ public enum BuildingType {
     HOUSE ("House"),
     APARTMENT ("Apartment"),
     OFFICE ("Office"),
+    Condominium ("Condominium"),
     WAREHOUSE ("Warehouse"),
     COMMERCIAL ("Commercial"),
     OTHER ("Other");
