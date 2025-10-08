@@ -305,4 +305,8 @@ public class Order {
         return String.format("Order{id=%s, userID=%s, status=%s, totalAmount=%s, itemCount=%d, createdAt=%s}",
                 id, user.getId(), status, calculateTotalAmount(), items.size(), createdAt);
     }
+
+    public boolean isOngoing() {
+        return status.isActive();
+    }
 }

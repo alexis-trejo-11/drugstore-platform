@@ -24,6 +24,10 @@ public class DeliveryAddressModel {
     @ManyToOne(fetch = FetchType.LAZY)
     public UserModel user;
 
+    @Column(name = "user_id", nullable = false, length = 36, insertable = false, updatable = false)
+    private String userId;
+
+
     @Column(name = "country", nullable = false, length = 50)
     private String country;
 
@@ -46,37 +50,16 @@ public class DeliveryAddressModel {
     private String buildingType;
 
     @Column(name = "inner_number")
-    private Integer innerNumber;
+    private String innerNumber;
 
     @Column(name = "outer_number", nullable = false)
-    private Integer outerNumber;
+    private String outerNumber;
 
     @Column(name = "additional_info", length = 500)
     private String additionalInfo;
 
     @Column(name = "is_default", nullable = false)
     private boolean isDefault;
-
-    // Métodos de utilidad
-    public String getFullAddress() {
-        return String.format("%s %d%s, %s, %s, %s %s",
-                street,
-                outerNumber,
-                innerNumber != null ? " Int. " + innerNumber : "",
-                city,
-                state,
-                country,
-                zipCode
-        );
-    }
-
-    public boolean isComplete() {
-        return street != null && !street.trim().isEmpty() &&
-                city != null && !city.trim().isEmpty() &&
-                state != null && !state.trim().isEmpty() &&
-                country != null && !country.trim().isEmpty() &&
-                zipCode != null && !zipCode.trim().isEmpty();
-    }
 
     @Override
     public boolean equals(Object o) {

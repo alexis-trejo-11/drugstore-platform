@@ -64,4 +64,9 @@ public interface JpaOrderRepository extends JpaRepository<OrderModel, String> {
             @Param("userID") String userID,
             @Param("orderID") String orderId
     );
+
+    @Query(value = "SELECT COUNT(*) > 0 FROM orders o WHERE o.address_id = :addressId AND o.status IN :statuses",
+            nativeQuery = true)
+    boolean existsByAddressIdAndStatusInNative(@Param("addressId") String addressId,
+                                               @Param("statuses") List<String> statuses);
 }

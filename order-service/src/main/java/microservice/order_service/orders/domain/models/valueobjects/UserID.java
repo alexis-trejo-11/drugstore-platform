@@ -9,11 +9,17 @@ public record UserID(String value) {
         }
     }
 
+    public static UserID generate() {
+        return new UserID(UUID.randomUUID().toString());
+    }
+
     public static UserID of(UUID value) {
         return new UserID(value.toString());
     }
     public static UserID of(String value) {
         return new UserID(value);
     }
-
+    public static UserID generateRandom() {
+        return new UserID(UUID.randomUUID().toString());
+    }
 }

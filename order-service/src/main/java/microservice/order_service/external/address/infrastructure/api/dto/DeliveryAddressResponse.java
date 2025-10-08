@@ -15,10 +15,10 @@ public record DeliveryAddressResponse(
         String street,
 
         @JsonProperty("inner_number")
-        Integer innerNumber,
+        String innerNumber,
 
         @JsonProperty("outer_number")
-        Integer outerNumber,
+        String outerNumber,
 
         String neighborhood,
 
@@ -46,7 +46,7 @@ public record DeliveryAddressResponse(
 
     @JsonProperty("full_address")
     public String getFullAddress() {
-        return String.format("%s %d%s, %s, %s, %s %s",
+        return String.format("%s %s%s, %s, %s, %s %s",
                 street,
                 outerNumber,
                 innerNumber != null ? " Int. " + innerNumber : "",
