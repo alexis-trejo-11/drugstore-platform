@@ -54,7 +54,7 @@ public class AddressModelMapper implements ModelMapper<DeliveryAddress, Delivery
                 .zipCode(model.getZipCode() != null ? model.getZipCode() : null)
                 .additionalInfo(model.getAdditionalInfo() != null ? model.getAdditionalInfo() : null)
                 .isDefault(model.isDefault())
-                .userID(model.getId() != null ? UserID.of(model.getUser().getId()) : null)
+                .userID(model.getUserId() != null ? UserID.of(model.getUser().getId()) : null)
                 .build();
     }
 

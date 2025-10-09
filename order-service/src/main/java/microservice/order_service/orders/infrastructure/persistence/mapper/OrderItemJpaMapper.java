@@ -5,6 +5,7 @@ import microservice.order_service.orders.domain.models.OrderItem;
 import microservice.order_service.orders.domain.models.valueobjects.Money;
 import microservice.order_service.orders.domain.models.valueobjects.ProductID;
 import microservice.order_service.orders.infrastructure.persistence.models.OrderItemModel;
+import microservice.order_service.orders.infrastructure.persistence.models.OrderModel;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -14,25 +15,27 @@ import java.util.List;
 public class OrderItemJpaMapper  implements ModelMapper<OrderItem, OrderItemModel> {
     @Override
     public OrderItemModel fromDomain(OrderItem item) {
-        if (item == null) {
-            return null;
-        }
+        if (item == null) return null;
+
         return OrderItemModel.builder()
                 .id(item.getId() != null ? item.getId() : null)
-                .productId(item.getProductID() != null ? item.getProductID().value() : null)
+                .productID(item.getProductID() != null ? item.getProductID().value() : null)
                 .productName(item.getProductName() != null ? item.getProductName() : null)
                 .quantity(Math.max(item.getQuantity(), 0))
                 .currency(item.getSubtotal() != null ? item.getSubtotal().currency().getCurrencyCode() : null)
                 .subtotal(item.getSubtotal() != null ? item.getSubtotal().amount() : null)
+                .order(item.getOrderID() != null ? new OrderModel(item.getOrderID().value()) : null)
                 .isPrescriptionRequired(item.isPrescriptionRequired())
                 .build();
     }
 
     @Override
     public OrderItem toDomain(OrderItemModel orderItemModel) {
+        if (orderItemModel == null) return null;
+
         return OrderItem.builder()
                 .id(orderItemModel.getId() != null ? orderItemModel.getId() : null)
-                .productID(orderItemModel.getProductId() != null ? ProductID.of(orderItemModel.getProductId()) : null)
+                .productID(orderItemModel.getProductID() != null ? ProductID.of(orderItemModel.getProductID()) : null)
                 .productName(orderItemModel.getProductName() != null ? orderItemModel.getProductName() : null)
                 .subtotal(orderItemModel.getSubtotal() != null && orderItemModel.getCurrency() != null ?
                         Money.of(orderItemModel.getSubtotal(), java.util.Currency.getInstance(orderItemModel.getCurrency())) : null)

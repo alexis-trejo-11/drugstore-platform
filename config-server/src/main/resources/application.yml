@@ -8,4 +8,7 @@ spring:
     config:
       server:
         native:
-          search-locations: file:///Users/alexistrejo/Documents/Java/API_Drugstore_Microservices/config-data
+          search-locations:
+            - file:./config-data
+            - file:../config-data
+            - classpath:/config-data

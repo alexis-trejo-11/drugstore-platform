@@ -8,8 +8,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface JpaUserRepository extends JpaRepository<UserModel, String> {
-    @Query("SELECT u FROM UserModel u WHERE u.id = ?1 AND u.deletedAt IS NULL")
-    Optional<UserModel> findActiveById(@Param(value = "id") String id);
+    @Query("SELECT u FROM UserModel u JOIN FETCH u.addresses WHERE u.id = :id AND u.deletedAt IS NULL")
+    Optional<UserModel> findActiveByIdWithAddress(@Param(value = "id") String id);
 
     boolean existsByEmail(String email);
 

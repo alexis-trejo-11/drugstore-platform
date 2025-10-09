@@ -6,5 +6,6 @@ include'user-service'
 include 'auth-service'
 include'order-service'
 include 'libs:shared-kernel'
+include 'config-server'
 
 project(':libs:shared-kernel').projectDir = new File(settingsDir, 'libs/shared-kernel')

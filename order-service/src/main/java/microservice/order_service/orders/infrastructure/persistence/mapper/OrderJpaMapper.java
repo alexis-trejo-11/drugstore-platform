@@ -34,8 +34,8 @@ public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
     public OrderModel fromDomain(Order order) {
         return OrderModel.builder()
                 .id(order.getId().value() != null ? order.getId().value() : null)
-                .deliveryMethod(order.getDeliveryMethod() != null ? order.getDeliveryMethod().name() : null)
-                .status(order.getStatus() != null ? order.getStatus().name() : null)
+                .deliveryMethod(order.getDeliveryMethod() != null ? order.getDeliveryMethod().getCode() : null)
+                .status(order.getStatus() != null ? order.getStatus().getCode() : null)
                 .notes(order.getNotes() != null ? order.getNotes() : "")
                 .items(itemMapper.fromDomains(order.getItems()))
                 .deliveryAddressModel(order.getDeliveryAddress() != null ? new DeliveryAddressModel(order.getDeliveryAddress().getId().value()) : null)
@@ -57,6 +57,9 @@ public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
 
     @Override
     public Order toDomain(OrderModel orderModel) {
+        // Warning: This is a temporary fix
+        Currency currency = orderModel.getItems().getFirst().getCurrency() != null ? Currency.getInstance(orderModel.getItems().getFirst().getCurrency()) : Currency.getInstance("MXN");
+
         return Order.builder()
                 .id(orderModel.getId() != null ? OrderID.of(orderModel.getId()) : null)
                 .deliveryMethod(orderModel.getDeliveryMethod() != null ? DeliveryMethod.fromName(orderModel.getDeliveryMethod()) : null)
@@ -67,8 +70,9 @@ public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
                 .items(orderModel.getItems() != null ? itemMapper.toDomains(orderModel.getItems()) : List.of())
                 .paymentID(orderModel.getPaymentID() != null ? PaymentID.of(orderModel.getPaymentID()) : null)
 
-                .shippingCost(Money.of(orderModel.getShippingCost(), Currency.getInstance("MXN")))
-                .taxAmount(Money.of(orderModel.getTaxAmount(), Currency.getInstance("MXN")))
+                .orderCurrency(currency)
+                .shippingCost(Money.of(orderModel.getShippingCost(), currency))
+                .taxAmount(Money.of(orderModel.getTaxAmount(), currency))
 
                 .deliveryTrackingNumber(orderModel.getDeliveryTrackingNumber() != null ? orderModel.getDeliveryTrackingNumber() : null)
                 .deliveryAttempt(orderModel.getDeliveryAttempt() != null ? orderModel.getDeliveryAttempt() : null)

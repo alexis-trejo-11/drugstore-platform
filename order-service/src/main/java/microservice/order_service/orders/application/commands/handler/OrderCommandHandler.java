@@ -24,12 +24,7 @@ public class OrderCommandHandler {
     private final UserService userService;
 
     public CreateOrderCommandResponse handle(CreateOrderCommand command) {
-        command.validate();
-
         User user = userService.getUserByID(command.userID());
-        List<OrderItem> items = command.items().stream()
-                .map(CreateOrderCommand.CreateOrderItemCommand::toEntity)
-                .toList();
 
         DeliveryAddress deliveryAddress = null;
         if (command.deliveryMethod().requiresAddress()) {
@@ -40,12 +35,19 @@ public class OrderCommandHandler {
         Order order = OrderFactory.createOrder(
                 command.deliveryMethod(), command.notes(),
                 command.moneyShippingCost(), command.moneyTaxAmount(),
-                items,  user,  deliveryAddress
+                user,  deliveryAddress, command.currency()
         );
+
+        List<OrderItem> items = command.items().stream()
+                .map(CreateOrderItemCommand::toEntity)
+                .toList();
+
+        order.assignItems(items);
 
         // TODO: Publish Domain Event "OrderCreatedEvent"
         Order orderSaved = orderRepository.save(order);
-        return new CreateOrderCommandResponse(orderSaved.getId(), orderSaved.getStatus().name(), orderSaved.getCreatedAt());
+
+        return CreateOrderCommandResponse.from(orderSaved);
     }
 
     public void handle(UpdateOrderDeliverMethodCommand command) {

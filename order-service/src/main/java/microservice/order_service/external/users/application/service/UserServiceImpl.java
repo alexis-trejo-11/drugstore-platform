@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByID(UserID userID) {
-        UserModel model = userRepository.findActiveById(userID.value())
+        UserModel model = userRepository.findActiveByIdWithAddress(userID.value())
                 .orElseThrow(() -> new UserNotFoundByIDErr(userID));
 
         return modelMapper.toDomain(model);

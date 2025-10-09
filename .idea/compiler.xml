@@ -59,6 +59,9 @@
       <module name="backend.drugstore.cart-service" options="-parameters" />
       <module name="backend.drugstore.cart-service.main" options="-parameters" />
       <module name="backend.drugstore.cart-service.test" options="-parameters" />
+      <module name="backend.drugstore.config-server" options="-parameters" />
+      <module name="backend.drugstore.config-server.main" options="-parameters" />
+      <module name="backend.drugstore.config-server.test" options="-parameters" />
       <module name="backend.drugstore.libs" options="-parameters" />
       <module name="backend.drugstore.libs.main" options="-parameters" />
       <module name="backend.drugstore.libs.shared-kernel" options="-parameters" />

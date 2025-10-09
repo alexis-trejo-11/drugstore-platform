@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import microservice.order_service.orders.domain.models.valueobjects.Money;
+import microservice.order_service.orders.domain.models.valueobjects.OrderID;
 import microservice.order_service.orders.domain.models.valueobjects.ProductID;
 
 import java.util.Objects;
@@ -13,6 +14,7 @@ import java.util.Objects;
 @Builder
 public class OrderItem {
     private Long id;
+    private OrderID orderID;
     private ProductID productID;
     private String productName;
     private int quantity;
@@ -38,6 +40,10 @@ public class OrderItem {
 
     public OrderItem updateQuantity(int newQuantity) {
         return new OrderItem(this.productID, this.productName, this.subtotal, newQuantity, this.prescriptionRequired);
+    }
+
+    public void assignOrder(OrderID orderID) {
+        this.orderID = orderID;
     }
 
     @Override

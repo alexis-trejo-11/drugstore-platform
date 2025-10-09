@@ -1,6 +1,7 @@
 package microservice.order_service.external.users.infrastructure.persistence.repository;
 
 import libs_kernel.mapper.ModelMapper;
+import lombok.RequiredArgsConstructor;
 import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.address.infrastructure.persistence.Model.DeliveryAddressModel;
 import microservice.order_service.external.users.domain.entity.User;
@@ -13,7 +14,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class UserModelMapper implements ModelMapper<User, UserModel> {
+    private final ModelMapper<DeliveryAddress, DeliveryAddressModel> addressMapper;
+
     @Override
     public UserModel fromDomain(User user) {
         if (user == null) return null;
@@ -42,6 +46,7 @@ public class UserModelMapper implements ModelMapper<User, UserModel> {
                 .status(userModel.getStatus() != null ? userModel.getStatus() : null)
                 .createdAt(userModel.getCreatedAt() != null ? userModel.getCreatedAt() : null)
                 .updatedAt(userModel.getUpdatedAt() != null ? userModel.getUpdatedAt() : null)
+                .addresses(userModel.getAddresses() != null ? addressMapper.toDomains(userModel.getAddresses()) : null)
                 .build();
 
     }

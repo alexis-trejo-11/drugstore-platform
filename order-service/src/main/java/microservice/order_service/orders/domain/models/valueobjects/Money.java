@@ -20,8 +20,6 @@ public record Money(BigDecimal amount, Currency currency) {
         amount = amount.setScale(currency.getDefaultFractionDigits(), RoundingMode.HALF_UP);
     }
 
-
-
     public static Money of(BigDecimal amount, Currency currency) {
         return new Money(amount, currency);
     }
@@ -88,5 +86,9 @@ public record Money(BigDecimal amount, Currency currency) {
 
     public static Money zero() {
         return new Money(BigDecimal.ZERO, Currency.getInstance("MXN"));
+    }
+
+    public static Money zero(Currency currency) {
+        return new Money(BigDecimal.ZERO, currency);
     }
 }

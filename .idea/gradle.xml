@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/auth-service" />
             <option value="$PROJECT_DIR$/cart-service" />
+            <option value="$PROJECT_DIR$/config-server" />
             <option value="$PROJECT_DIR$/libs" />
             <option value="$PROJECT_DIR$/libs/shared-kernel" />
             <option value="$PROJECT_DIR$/order-service" />
