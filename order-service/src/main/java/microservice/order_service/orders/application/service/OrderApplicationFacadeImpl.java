@@ -120,5 +120,10 @@ public class OrderApplicationFacadeImpl implements OrderApplicationFacade {
                         "Order not found for user: " + query.userID() + " and order: " + query.orderID()));
     }
 
+    @Override
+    public Page<OrderQueryResult> searchOrders(SearchOrdersQuery query) {
+        return queryHandler.handle(query);
+    }
+
 
 }

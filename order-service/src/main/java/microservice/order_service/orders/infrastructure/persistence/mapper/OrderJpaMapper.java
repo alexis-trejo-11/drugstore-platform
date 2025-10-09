@@ -9,9 +9,11 @@ import microservice.order_service.external.users.infrastructure.persistence.mode
 import microservice.order_service.orders.domain.models.Order;
 
 import microservice.order_service.orders.domain.models.OrderItem;
+import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
 import microservice.order_service.orders.domain.models.enums.OrderStatus;
 import microservice.order_service.orders.domain.models.valueobjects.Money;
 import microservice.order_service.orders.domain.models.valueobjects.OrderID;
+import microservice.order_service.orders.domain.models.valueobjects.PaymentID;
 import microservice.order_service.orders.infrastructure.persistence.models.OrderItemModel;
 import microservice.order_service.orders.infrastructure.persistence.models.OrderModel;
 import org.springframework.data.domain.Page;
@@ -35,10 +37,9 @@ public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
                 .deliveryMethod(order.getDeliveryMethod() != null ? order.getDeliveryMethod().name() : null)
                 .status(order.getStatus() != null ? order.getStatus().name() : null)
                 .notes(order.getNotes() != null ? order.getNotes() : "")
-
                 .items(itemMapper.fromDomains(order.getItems()))
-                .deliveryAddressModel(addressMapper.fromDomain(order.getDeliveryAddress()) != null ? addressMapper.fromDomain(order.getDeliveryAddress()) : null)
-                .user(order.getUser() != null ? userMapper.fromDomain(order.getUser()) : null)
+                .deliveryAddressModel(order.getDeliveryAddress() != null ? new DeliveryAddressModel(order.getDeliveryAddress().getId().value()) : null)
+                .user(order.getUser() != null ? new UserModel(order.getUser().getId().value()) : null)
                 .paymentID(order.getPaymentID() != null ? order.getPaymentID().value() : null)
 
                 .taxAmount(order.getTaxAmount() != null ? order.getTaxAmount().amount() : null)
@@ -58,13 +59,13 @@ public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
     public Order toDomain(OrderModel orderModel) {
         return Order.builder()
                 .id(orderModel.getId() != null ? OrderID.of(orderModel.getId()) : null)
-                .deliveryMethod(orderModel.getDeliveryMethod() != null ? microservice.order_service.orders.domain.models.enums.DeliveryMethod.valueOf(orderModel.getDeliveryMethod()) : null)
-                .status(orderModel.getStatus() != null ? OrderStatus.valueOf(orderModel.getStatus()) : null)
+                .deliveryMethod(orderModel.getDeliveryMethod() != null ? DeliveryMethod.fromName(orderModel.getDeliveryMethod()) : null)
+                .status(orderModel.getStatus() != null ? OrderStatus.fromName(orderModel.getStatus()) : null)
 
                 .deliveryAddress(addressMapper.toDomain(orderModel.getDeliveryAddressModel()) != null ? addressMapper.toDomain(orderModel.getDeliveryAddressModel()) : null)
                 .user(orderModel.getUser() != null ? userMapper.toDomain(orderModel.getUser()) : null)
                 .items(orderModel.getItems() != null ? itemMapper.toDomains(orderModel.getItems()) : List.of())
-                .paymentID(orderModel.getPaymentID() != null ? microservice.order_service.orders.domain.models.valueobjects.PaymentID.of(orderModel.getPaymentID()) : null)
+                .paymentID(orderModel.getPaymentID() != null ? PaymentID.of(orderModel.getPaymentID()) : null)
 
                 .shippingCost(Money.of(orderModel.getShippingCost(), Currency.getInstance("MXN")))
                 .taxAmount(Money.of(orderModel.getTaxAmount(), Currency.getInstance("MXN")))

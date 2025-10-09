@@ -1,4 +1,4 @@
-package microservice.order_service.orders.infrastructure.api.dto;
+package microservice.order_service.orders.infrastructure.api.dto.response;
 
 
 import microservice.order_service.orders.application.queries.response.OrderItemQueryResult;

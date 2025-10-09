@@ -4,8 +4,8 @@ import libs_kernel.mapper.EntityDetailMapper;
 import microservice.order_service.external.address.infrastructure.api.dto.DeliveryAddressResponse;
 import microservice.order_service.external.users.infrastructure.api.dto.UserResponse;
 import microservice.order_service.orders.application.queries.response.OrderDetailResult;
-import microservice.order_service.orders.infrastructure.api.dto.OrderDetailResponse;
-import microservice.order_service.orders.infrastructure.api.dto.OrderItemResponse;
+import microservice.order_service.orders.infrastructure.api.dto.response.OrderDetailResponse;
+import microservice.order_service.orders.infrastructure.api.dto.response.OrderItemResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

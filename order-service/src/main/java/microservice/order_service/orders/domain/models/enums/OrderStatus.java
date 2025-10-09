@@ -26,6 +26,13 @@ public enum OrderStatus {
         this.description = description;
     }
 
+    public static OrderStatus fromName(String name) {
+        return Arrays.stream(OrderStatus.values())
+                .filter(status -> status.name().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No enum constant with name " + name));
+    }
+
     public boolean canTransitionTo(OrderStatus newStatus) {
         return switch (this) {
             case PENDING -> Arrays.asList(CONFIRMED, CANCELLED).contains(newStatus);

@@ -4,8 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum DeliveryMethod {
-    HOME_DELIVERY("home_delivery", "Order will be delivered to customer's address"),
-    STORE_PICKUP("pickup", "Customer will pick up the order from store"),
+    STORE_PICKUP("store_pickup", "Customer will pick up the order from store"),
     EXPRESS_DELIVERY("express_delivery", "Order will be delivered quickly"),
     STANDARD_DELIVERY("standard_delivery", "Order will be delivered with standard shipping");
 
@@ -18,7 +17,16 @@ public enum DeliveryMethod {
     }
 
     public boolean requiresAddress() {
-        return this == HOME_DELIVERY || this == EXPRESS_DELIVERY || this == STANDARD_DELIVERY;
+        return this == EXPRESS_DELIVERY || this == STANDARD_DELIVERY;
+    }
+
+    public static DeliveryMethod fromName(String name) {
+        for (DeliveryMethod method : DeliveryMethod.values()) {
+            if (method.name().equalsIgnoreCase(name)) {
+                return method;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with name " + name);
     }
 
 }
