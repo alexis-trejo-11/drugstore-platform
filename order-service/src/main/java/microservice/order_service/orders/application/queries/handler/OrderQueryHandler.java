@@ -21,21 +21,25 @@ public class OrderQueryHandler  {
     private final OrderRepository orderRepository;
     private final ResultMapper<OrderQueryResult, Order> orderQueryMapper;
 
+    @Transactional(readOnly = true)
     public Optional<OrderQueryResult> handle(GetOrderByIDQuery query) {
          return orderRepository.findByID(query.orderID())
                  .map(orderQueryMapper::toResult);
     }
 
+    @Transactional(readOnly = true)
     public Optional<OrderDetailResult> handle(GetOrderDetailByIDQuery query) {
         return orderRepository.findByID(query.orderID())
                 .map(OrderDetailResult::from);
     }
 
+    @Transactional(readOnly = true)
     public Optional<OrderDetailResult> handle(GetOrderByIDAndUserIDQuery query) {
         return orderRepository.findByUserIDAndOrderID(query.userID(), query.orderID())
                 .map(OrderDetailResult::from);
     }
 
+    @Transactional(readOnly = true)
     public Page<OrderQueryResult> handle(GetOrdersByUserIDQuery query) {
         Page<Order> orderPage = orderRepository.findByUserID(
                 query.userID(),
@@ -44,6 +48,7 @@ public class OrderQueryHandler  {
         return orderPage.map(orderQueryMapper::toResult);
     }
 
+    @Transactional(readOnly = true)
     public Page<OrderQueryResult> handle(GetOrdersByUserIDAndStatusQuery query) {
         Page<Order> orderPage = orderRepository.findByUserIDAndOrderStatus(
                 query.getUserID(),
@@ -54,6 +59,7 @@ public class OrderQueryHandler  {
         return orderPage.map(orderQueryMapper::toResult);
     }
 
+    @Transactional(readOnly = true)
     public Page<OrderQueryResult> handle(GetOrdersByUserIDAndDateRangeQuery query) {
         Page<Order> orderPage = orderRepository.findByUserIDAndRangeDate(
                 query.userID(),
@@ -63,6 +69,11 @@ public class OrderQueryHandler  {
         );
 
         return orderPage.map(orderQueryMapper::toResult);
+    }
 
+    @Transactional(readOnly = true)
+    public Page<OrderQueryResult> handle(SearchOrdersQuery query) {
+        Page<Order> orderPage = orderRepository.findBySpecification(query);
+        return orderPage.map(orderQueryMapper::toResult);
     }
 }

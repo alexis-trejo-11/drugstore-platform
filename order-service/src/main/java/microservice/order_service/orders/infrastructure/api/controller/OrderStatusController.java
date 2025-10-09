@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import microservice.order_service.orders.application.commands.request.status.*;
 import microservice.order_service.orders.application.commands.response.CancelOrderCommandResponse;
 import microservice.order_service.orders.domain.ports.input.OrderApplicationFacade;
-import microservice.order_service.orders.infrastructure.api.dto.ConfirmOrderRequest;
+import microservice.order_service.orders.infrastructure.api.dto.request.ConfirmOrderRequest;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

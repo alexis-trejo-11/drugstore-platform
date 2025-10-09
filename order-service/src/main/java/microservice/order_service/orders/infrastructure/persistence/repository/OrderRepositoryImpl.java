@@ -2,6 +2,7 @@ package microservice.order_service.orders.infrastructure.persistence.repository;
 
 import libs_kernel.mapper.ModelMapper;
 import lombok.RequiredArgsConstructor;
+import microservice.order_service.orders.application.queries.request.SearchOrdersQuery;
 import microservice.order_service.orders.domain.models.Order;
 import microservice.order_service.orders.domain.models.enums.OrderStatus;
 import microservice.order_service.orders.domain.models.valueobjects.AddressID;
@@ -9,8 +10,10 @@ import microservice.order_service.orders.domain.models.valueobjects.UserID;
 import microservice.order_service.orders.domain.models.valueobjects.OrderID;
 import microservice.order_service.orders.domain.ports.output.OrderRepository;
 import microservice.order_service.orders.infrastructure.persistence.models.OrderModel;
+import microservice.order_service.orders.infrastructure.persistence.specification.OrderSpecifications;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -66,19 +69,6 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> findRecentOrdersByUser(UserID customerID, int limit) {
-        Pageable pageable = Pageable.ofSize(limit);
-        List<OrderModel> orderModels = orderJpaRepository.findRecentOrdersByUserId(
-                customerID.toString(),
-                pageable
-        );
-
-        return orderModels.stream()
-                .map(mapper::toDomain)
-                .toList();
-    }
-
-    @Override
     public boolean existsAnyByAddressIDAndOngoingStatus(AddressID addressID) {
         List<OrderStatus> ongoingStatuses = OrderStatus.getActiveStatuses();
 
@@ -121,6 +111,13 @@ public class OrderRepositoryImpl implements OrderRepository {
     public void hardDelete(Order order) {
         OrderModel orderModel = mapper.fromDomain(order);
         orderJpaRepository.delete(orderModel);
+    }
+
+    @Override
+    public Page<Order> findBySpecification(SearchOrdersQuery query) {
+        Specification<OrderModel> spec = OrderSpecifications.withSearchCriteria(query);
+        Page<OrderModel> orderModels = orderJpaRepository.findAll(spec, query.pageable());
+        return orderModels.map(mapper::toDomain);
     }
 
     @Override

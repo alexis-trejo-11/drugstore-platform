@@ -10,6 +10,7 @@ public interface OrderQueryService {
     OrderDetailResult getOrderByID(GetOrderDetailByIDQuery query);
     OrderDetailResult getOrderByIDAndUserID(GetOrderByIDAndUserIDQuery query);
 
+    Page<OrderQueryResult> searchOrders(SearchOrdersQuery query);
     Page<OrderQueryResult> getOrdersByUserID(GetOrdersByUserIDQuery query);
     Page<OrderQueryResult> getOrdersByUserIDAndStatus(GetOrdersByUserIDAndStatusQuery query);
     Page<OrderQueryResult> getOrdersByUserIDAndDateRange(GetOrdersByUserIDAndDateRangeQuery Query);

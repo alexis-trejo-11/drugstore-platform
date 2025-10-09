@@ -22,30 +22,30 @@ VALUES
 -- Insert demo data into orders table referencing addresses
 INSERT INTO orders (id, user_id, address_id, delivery_method, status, shipping_cost, tax_amount, delivery_tracking_number, delivery_attempt, days_since_ready_for_pickup, payment_id, created_at, updated_at, estimated_delivery_date, notes)
 VALUES
-('aaaa-aaaa-aaaa-aaaa', '1111-1111-1111-1111', '1111-1111-1111-1111', 'HOME_DELIVERY', 'DELIVERED', 5.99, 2.50, 'TRK-001-2024', 1, 0, 'pay-001', CURRENT_TIMESTAMP - INTERVAL '5 days', CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 'Leave at front door'),
-('bbbb-bbbb-bbbb-bbbb', '2222-2222-2222-2222', '2222-2222-2222-2222', 'STORE_PICKUP', 'PROCESSING', 0.00, 1.80, NULL, 0, 2, 'pay-002', CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 day', 'Call on arrival'),
-('cccc-cccc-cccc-cccc', '3333-3333-3333-3333', '3333-3333-3333-3333', 'EXPRESS_DELIVERY', 'SHIPPED', 15.99, 4.20, 'TRK-002-2024', 0, 0, 'pay-003', CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 day', 'Fragile items'),
-('dddd-dddd-dddd-dddd', '4444-4444-4444-4444', '4444-4444-4444-4444', 'STANDARD_DELIVERY', 'DELIVERED', 3.99, 1.25, 'TRK-003-2024', 2, 0, 'pay-004', CURRENT_TIMESTAMP - INTERVAL '7 days', CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 'Deliver to office'),
-('eeee-eeee-eeee-eeee', '5555-5555-5555-5555', '5555-5555-5555-5555', 'HOME_DELIVERY', 'CANCELLED', 5.99, 3.15, NULL, 0, 0, NULL, CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP + INTERVAL '2 days', 'Order cancelled by customer');
+('aaaa-aaaa-aaaa-aaaa', '1111-1111-1111-1111', '1111-1111-1111-1111', 'standard_delivery', 'delivered', 5.99, 2.50, 'TRK-001-2024', 1, 0, 'pay-001', CURRENT_TIMESTAMP - INTERVAL '5 days', CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 'Leave at front door'),
+('bbbb-bbbb-bbbb-bbbb', '2222-2222-2222-2222', '2222-2222-2222-2222', 'store_pickup', 'preparing', 0.00, 1.80, NULL, 0, 2, 'pay-002', CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 day', 'Call on arrival'),
+('cccc-cccc-cccc-cccc', '3333-3333-3333-3333', '3333-3333-3333-3333', 'express_delivery', 'out_for_delivery', 15.99, 4.20, 'TRK-002-2024', 0, 0, 'pay-003', CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 day', 'Fragile items'),
+('dddd-dddd-dddd-dddd', '4444-4444-4444-4444', '4444-4444-4444-4444', 'standard_delivery', 'delivered', 3.99, 1.25, 'TRK-003-2024', 2, 0, 'pay-004', CURRENT_TIMESTAMP - INTERVAL '7 days', CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 'Deliver to office'),
+('eeee-eeee-eeee-eeee', '5555-5555-5555-5555', '5555-5555-5555-5555', 'standard_delivery', 'cancelled', 5.99, 3.15, NULL, 0, 0, NULL, CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP + INTERVAL '2 days', 'Order cancelled by customer');
 
 -- Insert demo data into order_items table referencing orders
 INSERT INTO order_items (order_id, product_id, product_name, subtotal, quantity, currency, is_prescription_required)
 VALUES
 -- Order 1
-('aaaa-aaaa-aaaa-aaaa', 'prod-001', 'Paracetamol 500mg', 5.00, 2, 'USD', FALSE),
-('aaaa-aaaa-aaaa-aaaa', 'prod-002', 'Alcohol Gel 250ml', 8.50, 1, 'USD', FALSE),
-('aaaa-aaaa-aaaa-aaaa', 'prod-003', 'Vitamin C 1000mg', 17.00, 1, 'USD', FALSE),
+('aaaa-aaaa-aaaa-aaaa', 'prod-001', 'Paracetamol 500mg', 100.00, 2, 'MXN', FALSE),
+('aaaa-aaaa-aaaa-aaaa', 'prod-002', 'Alcohol Gel 250ml', 170.00, 1, 'MXN', FALSE),
+('aaaa-aaaa-aaaa-aaaa', 'prod-003', 'Vitamin C 1000mg', 340.00, 1, 'MXN', FALSE),
 -- Order 2
-('bbbb-bbbb-bbbb-bbbb', 'prod-004', 'Ibuprofen 400mg', 7.25, 1, 'USD', FALSE),
-('bbbb-bbbb-bbbb-bbbb', 'prod-005', 'KN95 Mask', 7.75, 2, 'USD', FALSE),
+('bbbb-bbbb-bbbb-bbbb', 'prod-004', 'Ibuprofen 400mg', 145.00, 1, 'MXN', FALSE),
+('bbbb-bbbb-bbbb-bbbb', 'prod-005', 'KN95 Mask', 155.00, 2, 'MXN', FALSE),
 -- Order 3
-('cccc-cccc-cccc-cccc', 'prod-006', 'Children Cough Syrup', 12.90, 1, 'USD', TRUE),
-('cccc-cccc-cccc-cccc', 'prod-007', 'Digital Thermometer', 18.00, 1, 'USD', FALSE),
-('cccc-cccc-cccc-cccc', 'prod-008', 'Sterile Gauze', 9.00, 2, 'USD', FALSE),
+('cccc-cccc-cccc-cccc', 'prod-006', 'Children Cough Syrup', 258.00, 1, 'MXN', TRUE),
+('cccc-cccc-cccc-cccc', 'prod-007', 'Digital Thermometer', 360.00, 1, 'MXN', FALSE),
+('cccc-cccc-cccc-cccc', 'prod-008', 'Sterile Gauze', 180.00, 2, 'MXN', FALSE),
 -- Order 4
-('dddd-dddd-dddd-dddd', 'prod-009', 'Antiseptic Cream', 6.20, 1, 'USD', FALSE),
-('dddd-dddd-dddd-dddd', 'prod-010', 'Adhesive Bandages', 4.50, 2, 'USD', FALSE),
+('dddd-dddd-dddd-dddd', 'prod-009', 'Antiseptic Cream', 124.0, 1, 'MXN', FALSE),
+('dddd-dddd-dddd-dddd', 'prod-010', 'Adhesive Bandages', 9.00, 2, 'MXN', FALSE),
 -- Order 5
-('eeee-eeee-eeee-eeee', 'prod-011', 'Throat Lozenges', 8.80, 1, 'USD', FALSE),
-('eeee-eeee-eeee-eeee', 'prod-012', 'Saline Solution', 9.50, 2, 'USD', FALSE),
-('eeee-eeee-eeee-eeee', 'prod-013', 'Latex Gloves', 9.50, 1, 'USD', FALSE);
+('eeee-eeee-eeee-eeee', 'prod-011', 'Throat Lozenges', 176.00, 1, 'MXN', FALSE),
+('eeee-eeee-eeee-eeee', 'prod-012', 'Saline Solution', 190.00, 2, 'MXN', FALSE),
+('eeee-eeee-eeee-eeee', 'prod-013', 'Latex Gloves', 190.00, 1, 'MXN', FALSE);

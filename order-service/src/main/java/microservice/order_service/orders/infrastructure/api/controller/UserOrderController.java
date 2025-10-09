@@ -11,9 +11,9 @@ import microservice.order_service.orders.application.queries.request.GetOrderByI
 import microservice.order_service.orders.application.queries.response.OrderDetailResult;
 import microservice.order_service.orders.application.queries.response.OrderQueryResult;
 import microservice.order_service.orders.domain.ports.input.OrderApplicationFacade;
-import microservice.order_service.orders.infrastructure.api.dto.GetUserOrdersRequest;
-import microservice.order_service.orders.infrastructure.api.dto.OrderDetailResponse;
-import microservice.order_service.orders.infrastructure.api.dto.OrderResponse;
+import microservice.order_service.orders.infrastructure.api.dto.request.GetUserOrdersRequest;
+import microservice.order_service.orders.infrastructure.api.dto.response.OrderDetailResponse;
+import microservice.order_service.orders.infrastructure.api.dto.response.OrderResponse;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

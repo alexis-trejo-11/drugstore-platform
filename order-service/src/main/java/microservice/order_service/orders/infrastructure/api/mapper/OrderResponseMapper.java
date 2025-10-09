@@ -4,7 +4,7 @@ import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.page.PageResponse;
 import libs_kernel.page.PageableResponse;
 import microservice.order_service.orders.application.queries.response.OrderQueryResult;
-import microservice.order_service.orders.infrastructure.api.dto.OrderResponse;
+import microservice.order_service.orders.infrastructure.api.dto.response.OrderResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 

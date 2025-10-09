@@ -16,7 +16,7 @@ public class OrderFactory {
         }
 
         switch (deliveryMethod) {
-            case STANDARD_DELIVERY, EXPRESS_DELIVERY, HOME_DELIVERY -> {
+            case STANDARD_DELIVERY, EXPRESS_DELIVERY -> {
                 return createDeliveryOrder(deliveryMethod, notes, shippingCost, taxAmount, items, user, address);
             }
             case STORE_PICKUP -> {

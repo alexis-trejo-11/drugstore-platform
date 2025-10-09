@@ -1,4 +1,4 @@
-package microservice.order_service.orders.infrastructure.api.dto;
+package microservice.order_service.orders.infrastructure.api.dto.request;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;

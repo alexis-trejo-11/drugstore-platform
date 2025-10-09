@@ -27,8 +27,8 @@ CREATE TABLE orders (
     -- Constraints
     CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT fk_orders_address FOREIGN KEY (address_id) REFERENCES addresses(id),
-    CONSTRAINT chk_delivery_method CHECK (delivery_method IN ('HOME_DELIVERY', 'STORE_PICKUP', 'EXPRESS_DELIVERY', 'STANDARD_DELIVERY')),
-    CONSTRAINT chk_order_status CHECK (status IN ('PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'RETURNED')),
+    CONSTRAINT chk_delivery_method CHECK (delivery_method IN ('store_pickup', 'standard_delivery' ,'express_delivery')),
+    CONSTRAINT chk_order_status CHECK (status IN ('pending', 'confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery', 'delivered', 'picked_up', 'cancelled', 'returned')),
     CONSTRAINT chk_shipping_cost_positive CHECK (shipping_cost >= 0),
     CONSTRAINT chk_tax_amount_positive CHECK (tax_amount >= 0),
     CONSTRAINT chk_delivery_attempt_positive CHECK (delivery_attempt >= 0),

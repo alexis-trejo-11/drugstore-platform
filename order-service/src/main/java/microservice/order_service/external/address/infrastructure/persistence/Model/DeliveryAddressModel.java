@@ -75,6 +75,10 @@ public class DeliveryAddressModel {
                 Objects.equals(country, that.country);
     }
 
+    public DeliveryAddressModel(String id) {
+        this.id = id;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(street, innerNumber, outerNumber, city, state, zipCode, country);

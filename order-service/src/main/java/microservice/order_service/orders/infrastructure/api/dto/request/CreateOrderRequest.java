@@ -1,4 +1,4 @@
-package microservice.order_service.orders.infrastructure.api.dto;
+package microservice.order_service.orders.infrastructure.api.dto.request;
 
 import microservice.order_service.orders.application.commands.request.CreateOrderCommand;
 import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
