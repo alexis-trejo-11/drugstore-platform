@@ -24,7 +24,7 @@ public class OrderItemModel {
     private OrderModel order;
 
     @Column(name = "product_id", nullable = false, length = 36)
-    private String productId;
+    private String productID;
 
     @Column(name = "product_name", nullable = false)
     private String productName;
@@ -42,4 +42,5 @@ public class OrderItemModel {
     private Boolean isPrescriptionRequired;
 
     public boolean isPrescriptionRequired() { return isPrescriptionRequired != null && isPrescriptionRequired; }
+
 }

@@ -51,11 +51,11 @@ public class OrderModel {
     private Integer daysSinceReadyForPickup;
 
     // Relationships
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private UserModel user;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private DeliveryAddressModel deliveryAddressModel;
 
@@ -87,5 +87,9 @@ public class OrderModel {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public OrderModel(String id) {
+        this.id = id;
     }
 }

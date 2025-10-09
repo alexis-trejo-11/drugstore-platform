@@ -5,8 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import microservice.order_service.external.address.domain.model.DeliveryAddress;
+import microservice.order_service.external.address.infrastructure.persistence.Model.DeliveryAddressModel;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -42,6 +45,10 @@ public class UserModel {
 
     @Column(name = "status")
     private String status;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private List<DeliveryAddressModel> addresses;
 
     public void update(String name, String email, String phoneNumber, String role, String status) {
         if (name != null) this.name = name;

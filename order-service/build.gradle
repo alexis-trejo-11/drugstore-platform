@@ -45,6 +45,10 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
+    // Config Server
+    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+
 	// Common library
 	implementation project(':libs:shared-kernel')
 
@@ -77,6 +81,11 @@ tasks.named('bootRun') {
             '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005',
             '-Dspring.devtools.restart.enabled=false'
     ]
+}
+
+tasks.register('buildDockerImage', Exec) {
+    dependsOn bootJar
+    commandLine 'docker', 'build', '-t', 'order-service:latest', '.'
 }
 
 bootRun {

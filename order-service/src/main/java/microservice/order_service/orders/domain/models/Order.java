@@ -31,6 +31,7 @@ public class Order {
     // Numeric Values
     private Money shippingCost;
     private Money taxAmount;
+    private Currency orderCurrency;
 
     // Relationships
     private User user;
@@ -44,34 +45,59 @@ public class Order {
 
     private List<OrderItem> items;
 
-    public static Order create(
-            DeliveryMethod deliveryMethod,
-            String notes,
-            Money shippingCost,
-            Money taxAmount,
-            List<OrderItem> items,
-            User user,
-            DeliveryAddress address
-            ) {
-        OrderID orderID = OrderID.generate();
-        LocalDateTime now = LocalDateTime.now();
+    public static Order create(DeliveryMethod deliveryMethod, String notes,
+                               Money shippingCost, Money taxAmount,
+                               User user, DeliveryAddress address,
+                               Currency orderCurrency) {
         Order order = new Order();
+        OrderID orderID = OrderID.generate();
+        Currency currency = validateAndGetCurrency(shippingCost, taxAmount, orderCurrency);
 
         order.id = orderID;
         order.deliveryMethod = deliveryMethod;
         order.status = OrderStatus.PENDING;
         order.notes = notes;
-        order.shippingCost = shippingCost != null ? shippingCost : Money.of(BigDecimal.ZERO, Currency.getInstance("MXN"));
-        order.taxAmount = taxAmount != null ? taxAmount : Money.of(BigDecimal.ZERO, Currency.getInstance("MXN"));
+        order.orderCurrency = currency;
+        order.taxAmount = taxAmount;
+        order.shippingCost = shippingCost;
         order.user = user;
         order.deliveryAddress = address;
-        order.items = new ArrayList<>(items);
-        order.createdAt = now;
-        order.updatedAt = now;
-
-        order.validateItems();
-
+        order.deliveryAttempt = 0;
+        order.daysSinceReadyForPickup = 0;
+        order.createdAt = LocalDateTime.now();
+        order.updatedAt = LocalDateTime.now();
         return order;
+    }
+
+
+    private static Currency validateAndGetCurrency(Money shippingCost, Money taxAmount, Currency defaultCurrency) {
+        Currency currency = defaultCurrency;
+
+        if (shippingCost != null) {
+            currency = shippingCost.currency();
+        } else if (taxAmount != null) {
+            currency = taxAmount.currency();
+        }
+
+        if (shippingCost != null && !shippingCost.currency().equals(currency)) {
+            throw new CurrencyMismatchException("Shipping cost currency mismatch");
+        }
+        if (taxAmount != null && !taxAmount.currency().equals(currency)) {
+            throw new CurrencyMismatchException("Tax amount currency mismatch");
+        }
+
+        return currency;
+    }
+
+    public void assignItems(List<OrderItem> items) {
+        for (OrderItem item : items) {
+            item.assignOrder(this.id);
+        }
+
+        this.items = new ArrayList<>(items);
+        validateItems();
+
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void changeStatus(OrderStatus newStatus) {
@@ -80,7 +106,6 @@ public class Order {
                     String.format("Cannot transition from %s to %s", this.status, newStatus));
         }
 
-        OrderStatus oldStatus = this.status;
         this.status = newStatus;
         this.updatedAt = LocalDateTime.now();
 
@@ -220,15 +245,14 @@ public class Order {
     }
 
     public List<OrderItem> getItems() {
-        if (items == null) {
-            return Collections.emptyList();
-        }
+        if (items == null)  return Collections.emptyList();
 
         return Collections.unmodifiableList(items);
     }
     public int getTotalItemsCount() {
         return items.stream().mapToInt(OrderItem::getQuantity).sum();
     }
+
     public boolean hasItems() {
         return !items.isEmpty();
     }
@@ -246,7 +270,7 @@ public class Order {
     }
 
     private void validateItems() {
-        if (items.isEmpty()) {
+        if (items == null || items.isEmpty()) {
             throw new IllegalArgumentException("Order must have at least one item");
         }
 
@@ -267,18 +291,22 @@ public class Order {
     }
 
     private Money calculateTotalAmount() {
-        if (items == null || items.isEmpty()) return Money.of(BigDecimal.ZERO, Currency.getInstance("MXN"));
+        if (items == null || items.isEmpty()) return Money.zero(orderCurrency);
 
-        return items.stream()
+        Money itemsTotal = items.stream()
                 .filter(Objects::nonNull)
                 .map(OrderItem::getSubtotal)
                 .filter(Objects::nonNull)
-                .reduce(Money.of(BigDecimal.ZERO, Currency.getInstance("MXN")), Money::add);
+                .reduce(Money.zero(orderCurrency), Money::add);
+
+        return itemsTotal
+                .add(shippingCost != null ? shippingCost : Money.zero(orderCurrency))
+                .add(taxAmount != null ? taxAmount : Money.zero(orderCurrency));
     }
 
     public Money getTotalAmount() {
         if (items.isEmpty()) {
-            return Money.of(BigDecimal.ZERO , Currency.getInstance("MXN"));
+            return Money.zero();
         }
         return calculateTotalAmount();
     }
