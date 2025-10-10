@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import microservice.order_service.external.users.application.service.UserService;
 import microservice.order_service.orders.application.commands.request.status.*;
 import microservice.order_service.orders.application.commands.response.CancelOrderCommandResponse;
-import microservice.order_service.orders.application.commands.response.UpdateOrderStatusCommandResponse;
+import microservice.order_service.orders.application.commands.response.UpdateOrderStatusCommandResult;
 import microservice.order_service.orders.application.exceptions.OrderNotFoundIDException;
 import microservice.order_service.orders.domain.models.Order;
 import microservice.order_service.orders.domain.models.enums.OrderStatus;
@@ -19,7 +19,7 @@ public class OrderStatusCommandHandler {
     private final OrderRepository orderRepository;
     private final UserService userService;
 
-    public UpdateOrderStatusCommandResponse handle(PrepareOrderCommand command) {
+    public UpdateOrderStatusCommandResult handle(PrepareOrderCommand command) {
         Order order = orderRepository.findByID(command.orderID())
                 .orElseThrow(() -> new OrderNotFoundIDException(command.orderID()));
         OrderStatus previousStatus = order.getStatus();
@@ -27,10 +27,10 @@ public class OrderStatusCommandHandler {
         order.startPreparing();
 
         Order updatedOrder = orderRepository.save(order);
-        return UpdateOrderStatusCommandResponse.of(updatedOrder, previousStatus.name());
+        return UpdateOrderStatusCommandResult.of(updatedOrder, previousStatus.name());
     }
 
-    public UpdateOrderStatusCommandResponse handle(OrderReadyToPickupCommand command) {
+    public UpdateOrderStatusCommandResult handle(OrderReadyToPickupCommand command) {
         Order order = orderRepository.findByID(command.orderID())
                 .orElseThrow(() -> new OrderNotFoundIDException(command.orderID()));
         OrderStatus previousStatus = order.getStatus();
@@ -38,49 +38,51 @@ public class OrderStatusCommandHandler {
         order.readyForPickup();
         Order updatedOrder = orderRepository.save(order);
 
-        return UpdateOrderStatusCommandResponse.of(updatedOrder, previousStatus.name());
+        return UpdateOrderStatusCommandResult.of(updatedOrder, previousStatus.name());
     }
 
-    public UpdateOrderStatusCommandResponse handle(ConfirmOrderCommand command) {
+    public UpdateOrderStatusCommandResult handle(ConfirmOrderCommand command) {
         Order order = orderRepository.findByID(command.orderID())
                 .orElseThrow(() -> new OrderNotFoundIDException(command.orderID()));
-        OrderStatus previousStatus = order.getStatus();
 
-        order.confirm(command.paymentID());
+        OrderStatus previousStatus = order.getStatus();
+        order.confirm(command.paymentID(), command.estimatedDeliveryDate());
 
         Order updatedOrder = orderRepository.save(order);
-        return UpdateOrderStatusCommandResponse.of(updatedOrder, previousStatus.name());
+        return UpdateOrderStatusCommandResult.of(updatedOrder, previousStatus.name());
     }
 
-    public UpdateOrderStatusCommandResponse handle(ShipOrderCommand command) {
+    public UpdateOrderStatusCommandResult handle(ShipOrderCommand command) {
         Order order = orderRepository.findByID(command.orderID())
                 .orElseThrow(() -> new OrderNotFoundIDException(command.orderID()));
-        OrderStatus previousStatus = order.getStatus();
 
+        OrderStatus previousStatus = order.getStatus();
         order.markOutForDelivery(command.deliveryTrackNumber());
 
         Order updatedOrder = orderRepository.save(order);
-        return UpdateOrderStatusCommandResponse.of(updatedOrder, previousStatus.name());
+        return UpdateOrderStatusCommandResult.of(updatedOrder, previousStatus.name());
     }
 
-    public UpdateOrderStatusCommandResponse handle(CompleteOrderCommand command) {
+    public UpdateOrderStatusCommandResult handle(CompleteOrderCommand command) {
         Order order = orderRepository.findByID(command.orderID())
                 .orElseThrow(() -> new OrderNotFoundIDException(command.orderID()));
-        OrderStatus previousStatus = order.getStatus();
 
+        OrderStatus previousStatus = order.getStatus();
         order.complete();
+
         Order updatedOrder = orderRepository.save(order);
-        return UpdateOrderStatusCommandResponse.of(updatedOrder, previousStatus.name());
+        return UpdateOrderStatusCommandResult.of(updatedOrder, previousStatus.name());
     }
 
-    public UpdateOrderStatusCommandResponse handle(OrderDeliverFailCommand command) {
+    public UpdateOrderStatusCommandResult handle(OrderDeliverFailCommand command) {
         Order order = orderRepository.findByID(command.orderID())
                 .orElseThrow(() -> new OrderNotFoundIDException(command.orderID()));
-        OrderStatus previousStatus = order.getStatus();
 
+        OrderStatus previousStatus = order.getStatus();
         order.returnOrder(command.reason());
+
         Order updatedOrder = orderRepository.save(order);
-        return UpdateOrderStatusCommandResponse.of(updatedOrder, previousStatus.name());
+        return UpdateOrderStatusCommandResult.of(updatedOrder, previousStatus.name());
     }
 
     public CancelOrderCommandResponse handle(CancelOrderCommand command) {

@@ -11,7 +11,7 @@ import microservice.order_service.orders.application.queries.handler.OrderQueryH
 import microservice.order_service.orders.application.commands.request.CreateOrderCommand;
 import microservice.order_service.orders.application.commands.response.CancelOrderCommandResponse;
 import microservice.order_service.orders.application.commands.response.CreateOrderCommandResponse;
-import microservice.order_service.orders.application.commands.response.UpdateOrderStatusCommandResponse;
+import microservice.order_service.orders.application.commands.response.UpdateOrderStatusCommandResult;
 import microservice.order_service.orders.application.commands.handler.OrderCommandHandler;
 import microservice.order_service.orders.application.exceptions.OrderNotFoundIDException;
 import microservice.order_service.orders.application.queries.request.*;
@@ -50,7 +50,7 @@ public class OrderApplicationFacadeImpl implements OrderApplicationFacade {
     }
 
     @Override
-    public UpdateOrderStatusCommandResponse readyForPickupOrder(OrderReadyToPickupCommand command) {
+    public UpdateOrderStatusCommandResult readyForPickupOrder(OrderReadyToPickupCommand command) {
         return statusCommandHandler.handle(command);
     }
 
@@ -60,27 +60,27 @@ public class OrderApplicationFacadeImpl implements OrderApplicationFacade {
     }
 
     @Override
-    public UpdateOrderStatusCommandResponse confirmOrder(ConfirmOrderCommand command) {
+    public UpdateOrderStatusCommandResult confirmOrder(ConfirmOrderCommand command) {
         return statusCommandHandler.handle(command);
     }
 
     @Override
-    public UpdateOrderStatusCommandResponse startPreparingOrder(PrepareOrderCommand command) {
+    public UpdateOrderStatusCommandResult startPreparingOrder(PrepareOrderCommand command) {
         return statusCommandHandler.handle(command);
     }
 
     @Override
-    public UpdateOrderStatusCommandResponse completeOrder(CompleteOrderCommand command) {
+    public UpdateOrderStatusCommandResult completeOrder(CompleteOrderCommand command) {
         return statusCommandHandler.handle(command);
     }
 
     @Override
-    public UpdateOrderStatusCommandResponse shipOrder(ShipOrderCommand command) {
+    public UpdateOrderStatusCommandResult shipOrder(ShipOrderCommand command) {
         return statusCommandHandler.handle(command);
     }
 
     @Override
-    public UpdateOrderStatusCommandResponse returnOrder(OrderDeliverFailCommand command) {
+    public UpdateOrderStatusCommandResult returnOrder(OrderDeliverFailCommand command) {
         return statusCommandHandler.handle(command);
     }
 

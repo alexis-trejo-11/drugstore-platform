@@ -12,6 +12,15 @@ spring:
           service-url: http://localhost:8080
           name: order-service
 
+  devtools:
+    restart:
+      enabled: true
+      exclude: static/**,public/**
+      poll-interval: 1000
+      quiet-period: 400
+    livereload:
+      enabled: true
+
   # Postgres
   datasource:
     url: jdbc:postgresql://localhost:5431/drugstore_orders

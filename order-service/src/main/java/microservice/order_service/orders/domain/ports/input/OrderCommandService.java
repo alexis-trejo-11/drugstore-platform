@@ -7,7 +7,7 @@ import microservice.order_service.orders.application.commands.request.CreateOrde
 import microservice.order_service.orders.application.commands.request.DeleteOrderCommand;
 import microservice.order_service.orders.application.commands.response.CancelOrderCommandResponse;
 import microservice.order_service.orders.application.commands.response.CreateOrderCommandResponse;
-import microservice.order_service.orders.application.commands.response.UpdateOrderStatusCommandResponse;
+import microservice.order_service.orders.application.commands.response.UpdateOrderStatusCommandResult;
 
 public interface OrderCommandService {
     CreateOrderCommandResponse createOrder(CreateOrderCommand command);
@@ -16,15 +16,15 @@ public interface OrderCommandService {
     void deleteOrder(DeleteOrderCommand command);
 
     // Common Status Updates
-    UpdateOrderStatusCommandResponse confirmOrder(ConfirmOrderCommand command);
-    UpdateOrderStatusCommandResponse startPreparingOrder(PrepareOrderCommand command);
-    UpdateOrderStatusCommandResponse completeOrder(CompleteOrderCommand command);
+    UpdateOrderStatusCommandResult confirmOrder(ConfirmOrderCommand command);
+    UpdateOrderStatusCommandResult startPreparingOrder(PrepareOrderCommand command);
+    UpdateOrderStatusCommandResult completeOrder(CompleteOrderCommand command);
 
     // Shipping and Delivery
-    UpdateOrderStatusCommandResponse shipOrder(ShipOrderCommand command);
-    UpdateOrderStatusCommandResponse returnOrder(OrderDeliverFailCommand command);
+    UpdateOrderStatusCommandResult shipOrder(ShipOrderCommand command);
+    UpdateOrderStatusCommandResult returnOrder(OrderDeliverFailCommand command);
     CancelOrderCommandResponse cancelOrder(CancelOrderCommand command);
 
     // Pickup and In-Store Orders
-    UpdateOrderStatusCommandResponse readyForPickupOrder(OrderReadyToPickupCommand command);
+    UpdateOrderStatusCommandResult readyForPickupOrder(OrderReadyToPickupCommand command);
 }

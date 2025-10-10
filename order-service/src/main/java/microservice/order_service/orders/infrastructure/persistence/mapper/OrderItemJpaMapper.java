@@ -1,8 +1,10 @@
 package microservice.order_service.orders.infrastructure.persistence.mapper;
 
 import libs_kernel.mapper.ModelMapper;
+import microservice.order_service.orders.domain.models.Order;
 import microservice.order_service.orders.domain.models.OrderItem;
 import microservice.order_service.orders.domain.models.valueobjects.Money;
+import microservice.order_service.orders.domain.models.valueobjects.OrderID;
 import microservice.order_service.orders.domain.models.valueobjects.ProductID;
 import microservice.order_service.orders.infrastructure.persistence.models.OrderItemModel;
 import microservice.order_service.orders.infrastructure.persistence.models.OrderModel;
@@ -32,7 +34,6 @@ public class OrderItemJpaMapper  implements ModelMapper<OrderItem, OrderItemMode
     @Override
     public OrderItem toDomain(OrderItemModel orderItemModel) {
         if (orderItemModel == null) return null;
-
         return OrderItem.builder()
                 .id(orderItemModel.getId() != null ? orderItemModel.getId() : null)
                 .productID(orderItemModel.getProductID() != null ? ProductID.of(orderItemModel.getProductID()) : null)

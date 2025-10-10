@@ -59,7 +59,7 @@ public class OrderModel {
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private DeliveryAddressModel deliveryAddressModel;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<OrderItemModel> items;
 
     @Column(name = "payment_id", length = 36)
