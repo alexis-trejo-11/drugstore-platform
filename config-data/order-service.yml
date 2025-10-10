@@ -1,6 +1,16 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: order-service
+  boot:
+    admin:
+      client:
+        url: http://localhost:8080
+        instance:
+          service-url: http://localhost:8080
+          name: order-service
 
   # Postgres
   datasource:
@@ -18,6 +28,37 @@ spring:
     schemas: public
     clean-disabled: false
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      cors:
+        allowed-origins: "*"
+        allowed-methods: "*"
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+    info:
+      enabled: true
+    metrics:
+      enabled: true
+    env:
+      enabled: true
+    loggers:
+      enabled: true
+  info:
+    env:
+      enabled: true
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+    mail:
+      enabled: true
+
 springdoc:
   api-docs:
     path: /api-docs
@@ -32,5 +73,3 @@ springdoc:
   cache:
     disabled: true
 
-server:
-  port: 8080

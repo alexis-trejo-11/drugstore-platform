@@ -1,4 +1,4 @@
-rootProject.name = 'backend.drugstore'
+rootProject.name = 'com.alexisTrejo.drugstore.backend'
 
 include 'product-service'
 include 'cart-service'
@@ -7,5 +7,7 @@ include 'auth-service'
 include'order-service'
 include 'libs:shared-kernel'
 include 'config-server'
+include 'admin-service'
+
 
 project(':libs:shared-kernel').projectDir = new File(settingsDir, 'libs/shared-kernel')
