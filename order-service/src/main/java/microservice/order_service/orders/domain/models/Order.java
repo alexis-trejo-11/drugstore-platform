@@ -8,9 +8,9 @@ import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.users.domain.entity.User;
 import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
 import microservice.order_service.orders.domain.models.enums.OrderStatus;
+import microservice.order_service.orders.domain.models.exceptions.CurrencyMismatchException;
 import microservice.order_service.orders.domain.models.valueobjects.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -111,8 +111,9 @@ public class Order {
 
     }
 
-    public void confirm(PaymentID paymentID) {
+    public void confirm(PaymentID paymentID, LocalDateTime estimatedDeliveryDate) {
         this.paymentID = paymentID;
+        this.estimatedDeliveryDate = estimatedDeliveryDate;
         changeStatus(OrderStatus.CONFIRMED);
     }
 
@@ -165,7 +166,7 @@ public class Order {
             throw new IllegalArgumentException("Return reason must be provided");
         }
 
-        if (reason.equals("Customer Not Attended")) {
+        if (reason.equals("CustomerNotAvailable") || reason.equals("TimeoutWindowMissed")) {
             deliveryAttempt++;
         }
 
@@ -173,10 +174,6 @@ public class Order {
         if (deliveryAttempt > 3) {
             cancel("Max delivery attempts reached");
             return;
-        }
-
-        if (status != OrderStatus.DELIVERED && status != OrderStatus.PICKED_UP) {
-            throw new IllegalStateException("Only delivered or picked up orders can be returned");
         }
 
         changeStatus(OrderStatus.RETURNED);

@@ -39,9 +39,10 @@ public enum OrderStatus {
             case CONFIRMED -> Arrays.asList(PREPARING, CANCELLED).contains(newStatus);
             case PREPARING -> Arrays.asList(READY_FOR_PICKUP, OUT_FOR_DELIVERY, CANCELLED).contains(newStatus);
             case READY_FOR_PICKUP -> Arrays.asList(PICKED_UP, CANCELLED).contains(newStatus);
-            case OUT_FOR_DELIVERY -> Arrays.asList(DELIVERED, CANCELLED).contains(newStatus);
+            case OUT_FOR_DELIVERY -> Arrays.asList(DELIVERED, CANCELLED, RETURNED).contains(newStatus);
+            case RETURNED -> Arrays.asList(OUT_FOR_DELIVERY, CANCELLED).contains(newStatus);
             case DELIVERED, PICKED_UP -> Objects.equals(RETURNED, newStatus);
-            case CANCELLED, RETURNED -> false;
+            case CANCELLED -> false;
         };
     }
 

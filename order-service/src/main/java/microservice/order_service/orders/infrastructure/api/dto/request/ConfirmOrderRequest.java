@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 public class ConfirmOrderRequest {
 
     @NotNull(message = "Estimated delivery date cannot be null")
-    @NotBlank(message = "Estimated delivery date cannot be blank")
     @Future(message = "Estimated delivery date must be in the future")
     private LocalDateTime estimatedDeliveryDate;
 

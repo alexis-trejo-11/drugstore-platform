@@ -27,8 +27,16 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Common library
+    implementation project(':libs:shared-kernel')
+
+    // Spring Boot Admin
+    implementation 'de.codecentric:spring-boot-admin-starter-client:3.1.5'
 
     // Open API
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
@@ -37,10 +45,9 @@ dependencies {
     implementation 'org.flywaydb:flyway-core:10.17.0'
     implementation 'org.flywaydb:flyway-database-postgresql:10.17.0'
 
-    // Postgres
+    // Database
     implementation 'org.postgresql:postgresql:42.7.3'
     runtimeOnly 'org.postgresql:postgresql'
-
     testImplementation 'com.h2database:h2'
 
     // Lombok
@@ -52,11 +59,6 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
-    // Common library
-    implementation project(':libs:shared-kernel')
-
-    // Spring Boot Admin
-    implementation 'de.codecentric:spring-boot-admin-starter-client:3.1.5'
 }
 
 dependencyManagement {
@@ -70,10 +72,11 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.named('bootRun') {
+bootRun {
     jvmArgs = [
-            '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005',
-            '-Dspring.devtools.restart.enabled=false'
+            "-XX:+TieredCompilation",
+            "-XX:TieredStopAtLevel=1",
+            "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     ]
 }
 
