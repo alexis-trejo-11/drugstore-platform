@@ -25,7 +25,7 @@ public class DeliveryAddressModel {
     public UserModel user;
 
     @Column(name = "user_id", nullable = false, length = 36, insertable = false, updatable = false)
-    private String userId;
+    private String userID;
 
 
     @Column(name = "country", nullable = false, length = 50)

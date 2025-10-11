@@ -17,11 +17,11 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class OrderStatusCommandHandler {
     private final OrderRepository orderRepository;
-    private final UserService userService;
 
     public UpdateOrderStatusCommandResult handle(PrepareOrderCommand command) {
         Order order = orderRepository.findByID(command.orderID())
                 .orElseThrow(() -> new OrderNotFoundIDException(command.orderID()));
+
         OrderStatus previousStatus = order.getStatus();
 
         order.startPreparing();

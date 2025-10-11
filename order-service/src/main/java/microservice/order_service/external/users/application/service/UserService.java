@@ -15,4 +15,5 @@ public interface UserService {
     User updateUser(UpdateUserCommand command);
     void deleteUser(UserID userID);
     void restoreUser(UserID userID);
+    boolean existsByID(UserID userID);
 }

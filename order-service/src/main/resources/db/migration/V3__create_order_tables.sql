@@ -9,6 +9,7 @@ CREATE TABLE orders (
     -- Numeric Values
     shipping_cost NUMERIC(10,2) NOT NULL,
     tax_amount NUMERIC(10,2) NOT NULL,
+    currency VARCHAR(3) NOT NULL DEFAULT 'MXN',
 
     -- Shipping
     delivery_tracking_number VARCHAR(100),

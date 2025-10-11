@@ -8,7 +8,8 @@ import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.users.domain.entity.User;
 import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
 import microservice.order_service.orders.domain.models.enums.OrderStatus;
-import microservice.order_service.orders.domain.models.exceptions.CurrencyMismatchException;
+import microservice.order_service.orders.application.exceptions.CurrencyMismatchException;
+import microservice.order_service.orders.domain.models.exceptions.*;
 import microservice.order_service.orders.domain.models.valueobjects.*;
 
 import java.time.LocalDateTime;
@@ -34,8 +35,8 @@ public class Order {
     private Currency orderCurrency;
 
     // Relationships
-    private User user;
-    private DeliveryAddress deliveryAddress;
+    private UserID userID;
+    private AddressID addressID;
     private PaymentID paymentID;
 
     // TimeStamps
@@ -43,29 +44,37 @@ public class Order {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private List<OrderItem> items;
+    private List<OrderItem> items = new ArrayList<>();
 
-    public static Order create(DeliveryMethod deliveryMethod, String notes,
-                               Money shippingCost, Money taxAmount,
-                               User user, DeliveryAddress address,
-                               Currency orderCurrency) {
+    public static Order create(
+            UserID userID,
+            DeliveryMethod deliveryMethod,
+            AddressID addressID,
+            String notes,
+            Money shippingCost,
+            Money taxAmount,
+            Currency orderCurrency
+    ) {
+
+        validateCreateParameters(userID, deliveryMethod, addressID, shippingCost, taxAmount, orderCurrency);
+        Currency validatedCurrency = validateAndGetCurrency(shippingCost, taxAmount, orderCurrency);
+
         Order order = new Order();
-        OrderID orderID = OrderID.generate();
-        Currency currency = validateAndGetCurrency(shippingCost, taxAmount, orderCurrency);
-
-        order.id = orderID;
+        order.id = OrderID.generate();
+        order.userID = userID;
         order.deliveryMethod = deliveryMethod;
+        order.addressID = addressID;
         order.status = OrderStatus.PENDING;
         order.notes = notes;
-        order.orderCurrency = currency;
+        order.orderCurrency = validatedCurrency;
         order.taxAmount = taxAmount;
         order.shippingCost = shippingCost;
-        order.user = user;
-        order.deliveryAddress = address;
         order.deliveryAttempt = 0;
         order.daysSinceReadyForPickup = 0;
+        order.items = new ArrayList<>();
         order.createdAt = LocalDateTime.now();
         order.updatedAt = LocalDateTime.now();
+
         return order;
     }
 
@@ -89,13 +98,41 @@ public class Order {
         return currency;
     }
 
+    private static void validateCreateParameters(
+            UserID userID,
+            DeliveryMethod deliveryMethod,
+            AddressID deliveryAddressID,
+            Money shippingCost,
+            Money taxAmount,
+            Currency orderCurrency) {
+
+        if (userID == null) {
+            throw new InvalidOrderDataException("User ID cannot be null");
+        }
+
+        if (deliveryMethod == null) {
+            throw new InvalidOrderDataException("Delivery method cannot be null");
+        }
+
+        if (deliveryMethod.requiresAddress() && deliveryAddressID == null) {
+            throw new MissingDeliveryAddressException();
+        }
+
+        if (orderCurrency == null && shippingCost == null && taxAmount == null) {
+            throw new InvalidOrderDataException("At least one currency reference must be provided");
+        }
+    }
+
     public void assignItems(List<OrderItem> items) {
+        if (items == null || items.isEmpty()) {
+            throw new EmptyOrderException();
+        }
+
+        validateNoDuplicateProducts(items);
+
         for (OrderItem item : items) {
             item.assignOrder(this.id);
         }
-
-        this.items = new ArrayList<>(items);
-        validateItems();
 
         this.updatedAt = LocalDateTime.now();
     }
@@ -194,7 +231,7 @@ public class Order {
                 .findFirst();
     }
 
-    public void updateDeliveryAddress(DeliveryAddress newAddress) {
+    public void updateDeliveryAddress(AddressID addressID) {
         if (deliveryMethod != DeliveryMethod.STANDARD_DELIVERY && deliveryMethod != DeliveryMethod.EXPRESS_DELIVERY) {
             throw new IllegalStateException("Cannot update address for non-delivery orders");
         }
@@ -203,33 +240,34 @@ public class Order {
             throw new IllegalStateException("Can only update address for PENDING or CONFIRMED orders");
         }
 
-        if (newAddress == null) {
-            throw new IllegalArgumentException("New address cannot be null");
+        if (addressID == null) {
+            throw new IllegalArgumentException("New address ID cannot be null");
         }
 
-        this.deliveryAddress = newAddress;
+        this.addressID = addressID;
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateDeliveryMethod(DeliveryMethod newMethod) {
-        if (status != OrderStatus.PENDING && status != OrderStatus.CONFIRMED) {
-            throw new IllegalStateException("Can only update delivery method for PENDING or CONFIRMED orders");
+    public void updateDeliveryMethod(DeliveryMethod newMethod, AddressID newAddressID) {
+        if (!canModifyDeliveryMethod()) {
+            throw new InvalidOrderStateTransitionException(status, status);
         }
 
         if (newMethod == null) {
-            throw new IllegalArgumentException("New delivery method cannot be null");
+            throw new InvalidOrderDataException("New delivery method cannot be null");
         }
 
         if (newMethod == this.deliveryMethod) {
-            throw new IllegalArgumentException("New delivery method must be different from current method");
+            throw new DeliveryMethodMismatchException("New delivery method must be different from current method");
         }
 
-        // If changing to a delivery method, ensure address is set
-        if (newMethod.requiresAddress() && this.deliveryAddress == null) {
-            throw new IllegalStateException("Cannot change to a delivery method without a valid address");
+        // If changing to a delivery method, ensure address is provided
+        if (newMethod.requiresAddress() && newAddressID == null) {
+            throw new MissingDeliveryAddressException();
         }
 
         this.deliveryMethod = newMethod;
+        this.addressID = newAddressID;
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -259,32 +297,26 @@ public class Order {
     public boolean isPickup() {
         return deliveryMethod == DeliveryMethod.STORE_PICKUP;
     }
+
     public boolean canBeCancelled() {
         return !status.isTerminal();
     }
+
     public boolean canBeReturned() {
         return status == OrderStatus.DELIVERED || status == OrderStatus.PICKED_UP;
     }
 
-    private void validateItems() {
-        if (items == null || items.isEmpty()) {
-            throw new IllegalArgumentException("Order must have at least one item");
-        }
-
-        // Check for duplicate products
-        long uniqueProducts = items.stream()
-                .map(OrderItem::getProductID)
-                .distinct()
-                .count();
-
-        if (uniqueProducts != items.size()) {
-            throw new IllegalArgumentException("Order cannot have duplicate products");
-        }
+    public boolean canModifyDeliveryMethod() {
+        return status == OrderStatus.PENDING || status == OrderStatus.CONFIRMED;
     }
 
-    public void updateStatus(OrderStatus newOrderStatus) {
-        this.status = newOrderStatus;
-        this.updatedAt = LocalDateTime.now();
+    private void validateNoDuplicateProducts(List<OrderItem> items) {
+        Set<ProductID> productIds = new HashSet<>();
+        for (OrderItem item : items) {
+            if (!productIds.add(item.getProductID())) {
+                throw new DuplicateProductInOrderException(item.getProductID());
+            }
+        }
     }
 
     private Money calculateTotalAmount() {
@@ -302,14 +334,10 @@ public class Order {
     }
 
     public Money getTotalAmount() {
-        if (items.isEmpty()) {
-            return Money.zero();
+        if (!hasItems()) {
+            return Money.zero(orderCurrency);
         }
         return calculateTotalAmount();
-    }
-
-    public AddressID getAddressID() {
-        return deliveryAddress != null ? deliveryAddress.getId() : null;
     }
 
     @Override
@@ -328,7 +356,7 @@ public class Order {
     @Override
     public String toString() {
         return String.format("Order{id=%s, userID=%s, status=%s, totalAmount=%s, itemCount=%d, createdAt=%s}",
-                id, user.getId(), status, calculateTotalAmount(), items.size(), createdAt);
+                id, userID, status, calculateTotalAmount(), items.size(), createdAt);
     }
 
     public boolean isOngoing() {

@@ -2,7 +2,6 @@ package microservice.order_service.orders.application.queries.response;
 
 import lombok.Builder;
 import microservice.order_service.external.address.domain.model.DeliveryAddress;
-import microservice.order_service.external.address.infrastructure.api.dto.DeliveryAddressResponse;
 import microservice.order_service.external.users.domain.entity.User;
 import microservice.order_service.orders.domain.models.Order;
 import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
@@ -38,29 +37,58 @@ public record OrderDetailResult(
     LocalDateTime updatedAt,
     LocalDateTime estimatedDeliveryDate
 ) {
-    public static OrderDetailResult from(Order order) {
+    public static OrderDetailResult from(Order order, User user, DeliveryAddress address) {
+        if  (order == null) return null;
+
+        var resultItems = order.getItems().stream()
+                .map(OrderItemQueryResult::from)
+                .toList();
+
         return OrderDetailResult.builder()
                 .id(order.getId())
                 .totalAmount(order.getTotalAmount())
                 .deliveryMethod(order.getDeliveryMethod())
                 .status(order.getStatus())
                 .notes(order.getNotes() != null ? order.getNotes() : "")
-
                 .shippingCost(order.getShippingCost() != null ? order.getShippingCost() :  Money.zero())
                 .taxAmount(order.getTaxAmount() != null ? order.getTaxAmount() : Money.zero())
-
                 .daysSinceReadyForPickup(order.getDaysSinceReadyForPickup() != null ? order.getDaysSinceReadyForPickup() : null)
                 .deliveryAttempt(order.getDeliveryAttempt() != null ? order.getDeliveryAttempt() : null)
                 .deliveryTrackingNumber(order.getDeliveryTrackingNumber() != null ? order.getDeliveryTrackingNumber() : null)
-
-                .user(order.getUser())
-                .items(order.getItems().stream().map(OrderItemQueryResult::from).toList())
-                .deliveryAddress(order.getDeliveryAddress())
+                .user(user)
+                .items(resultItems)
+                .deliveryAddress(address)
                 .paymentID(order.getPaymentID())
-
+                .estimatedDeliveryDate(order.getEstimatedDeliveryDate())
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
+                .build();
+    }
+
+    public static OrderDetailResult from(Order order, User user) {
+        if (order == null) return null;
+
+        var resultItems = order.getItems().stream()
+                .map(OrderItemQueryResult::from)
+                .toList();
+
+        return OrderDetailResult.builder()
+                .id(order.getId())
+                .totalAmount(order.getTotalAmount())
+                .deliveryMethod(order.getDeliveryMethod())
+                .status(order.getStatus())
+                .notes(order.getNotes() != null ? order.getNotes() : "")
+                .shippingCost(order.getShippingCost() != null ? order.getShippingCost() :  Money.zero())
+                .taxAmount(order.getTaxAmount() != null ? order.getTaxAmount() : Money.zero())
+                .daysSinceReadyForPickup(order.getDaysSinceReadyForPickup() != null ? order.getDaysSinceReadyForPickup() : null)
+                .deliveryAttempt(order.getDeliveryAttempt() != null ? order.getDeliveryAttempt() : null)
+                .deliveryTrackingNumber(order.getDeliveryTrackingNumber() != null ? order.getDeliveryTrackingNumber() : null)
+                .user(user)
+                .items(resultItems)
+                .paymentID(order.getPaymentID())
                 .estimatedDeliveryDate(order.getEstimatedDeliveryDate())
+                .createdAt(order.getCreatedAt())
+                .updatedAt(order.getUpdatedAt())
                 .build();
     }
 }

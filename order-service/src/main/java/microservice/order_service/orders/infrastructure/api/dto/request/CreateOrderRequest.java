@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
-import microservice.order_service.orders.application.commands.handler.CreateOrderItemCommand;
+import microservice.order_service.orders.application.commands.request.CreateOrderItemCommand;
 import microservice.order_service.orders.application.commands.request.CreateOrderCommand;
 import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
 import microservice.order_service.orders.domain.models.valueobjects.AddressID;

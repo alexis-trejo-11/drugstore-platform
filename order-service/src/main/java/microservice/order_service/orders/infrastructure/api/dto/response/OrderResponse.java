@@ -18,7 +18,7 @@ public record OrderResponse(
         String orderId,
 
         @Schema(
-                description = "Unique identifier of the user who placed the order",
+                description = "Unique identifier of the userID who placed the order",
                 example = "USER-987654321",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )

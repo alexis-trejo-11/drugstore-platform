@@ -1,7 +1,5 @@
 package microservice.order_service.orders.application.queries.mapper;
 
-import libs_kernel.mapper.DomainMapper;
-
 import libs_kernel.mapper.ResultMapper;
 import microservice.order_service.orders.application.queries.response.OrderQueryResult;
 import microservice.order_service.orders.domain.models.Order;
@@ -18,7 +16,7 @@ public class OrderQueryMapper implements ResultMapper<OrderQueryResult, Order> {
     public OrderQueryResult toResult(Order order) {
         return OrderQueryResult.builder()
                 .id(order.getId() != null ? order.getId() : null)
-                .userID(order.getUser().getId() != null ? order.getUser().getId() : null)
+                .userID(order.getUserID() != null ? order.getUserID(): null)
                 .status(order.getStatus() != null ? order.getStatus(): null)
                 .totalAmount(order.getTotalAmount() != null ? order.getTotalAmount() : null)
                 .deliveryMethod(order.getDeliveryMethod() != null ? order.getDeliveryMethod() : null)

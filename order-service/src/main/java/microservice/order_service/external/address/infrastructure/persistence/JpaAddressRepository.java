@@ -10,10 +10,10 @@ import java.util.Optional;
 
 public interface JpaAddressRepository extends JpaRepository<DeliveryAddressModel, String> {
 
-    @Query("SELECT a FROM DeliveryAddressModel a WHERE a.user.id = :userID AND a.isDefault = true")
+    @Query("SELECT a FROM DeliveryAddressModel a WHERE a.userID = :userID AND a.isDefault = true")
     Optional<DeliveryAddressModel> findDefaultByUserId(@Param("userID") String userID);
 
-    @Query("SELECT a FROM DeliveryAddressModel a WHERE a.user.id = :userID")
+    @Query("SELECT a FROM DeliveryAddressModel a WHERE a.userID = :userID")
     List<DeliveryAddressModel> findByUserId(@Param("userID") String userID);
 
     int countByUserId(String userID);

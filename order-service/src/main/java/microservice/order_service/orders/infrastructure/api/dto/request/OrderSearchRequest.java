@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 @Schema(description = "Order search criteria")
 public record OrderSearchRequest(
-        @Schema(description = "User ID to filter by", example = "user-123")
+        @Schema(description = "User ID to filter by", example = "userID-123")
         String userId,
 
         @Schema(description = "Order status to filter by", example = "PENDING")

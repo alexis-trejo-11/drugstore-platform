@@ -1,4 +1,4 @@
-package microservice.order_service.orders.application.commands.handler;
+package microservice.order_service.orders.application.commands.request;
 
 import lombok.Builder;
 import microservice.order_service.orders.domain.models.OrderItem;

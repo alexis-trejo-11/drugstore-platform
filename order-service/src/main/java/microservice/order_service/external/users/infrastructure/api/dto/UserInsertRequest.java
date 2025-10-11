@@ -10,10 +10,10 @@ import microservice.order_service.orders.domain.models.valueobjects.UserID;
 import org.hibernate.validator.constraints.Length;
 
 @Builder
-@Schema(description = "Request DTO for creating or updating a user")
+@Schema(description = "Request DTO for creating or updating a userID")
 public record UserInsertRequest(
         @Schema(
-                description = "Full name of the user",
+                description = "Full name of the userID",
                 example = "Carol White",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 7,
@@ -24,7 +24,7 @@ public record UserInsertRequest(
         String name,
 
         @Schema(
-                description = "Email address of the user",
+                description = "Email address of the userID",
                 example = "carol.white@example.com",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 format = "email",
@@ -34,7 +34,7 @@ public record UserInsertRequest(
         String email,
 
         @Schema(
-                description = "Phone number of the user",
+                description = "Phone number of the userID",
                 example = "+1234567890",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 8,
@@ -46,7 +46,7 @@ public record UserInsertRequest(
         String phoneNumber,
 
         @Schema(
-                description = "Role assigned to the user",
+                description = "Role assigned to the userID",
                 example = "CUSTOMER",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 3,
@@ -57,7 +57,7 @@ public record UserInsertRequest(
         String role,
 
         @Schema(
-                description = "Current status of the user account",
+                description = "Current status of the userID account",
                 example = "ACTIVE",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 3,

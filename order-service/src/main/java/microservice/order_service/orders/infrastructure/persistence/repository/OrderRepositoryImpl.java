@@ -27,40 +27,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     private final ModelMapper<Order, OrderModel> mapper;
 
     @Override
-    public Page<Order> findByUserID(UserID customerID, Pageable pageable) {
-     Page<OrderModel> orderModelPage = orderJpaRepository.findByUserId(customerID.toString(), pageable);
-     return orderModelPage.map(mapper::toDomain);
-    }
-
-    @Override
-    public Page<Order> findByUserIDAndOrderStatus(UserID customerID, OrderStatus status, Pageable pageable) {
-        Page<OrderModel> orderModelPage = orderJpaRepository.findByUserIdAndStatus(
-                customerID.toString(),
-                status.toString(),
-                pageable
-        );
-
-        return orderModelPage.map(mapper::toDomain);
-    }
-
-    @Override
-    public Page<Order> findByUserIDAndRangeDate(
-            UserID customerID,
-            LocalDateTime startDate,
-            LocalDateTime endDate,
-            Pageable pageable
-    ) {
-        Page<OrderModel> orderModelPage = orderJpaRepository.findByUserIdAndDateRange(
-                customerID.toString(),
-                startDate,
-                endDate,
-                pageable
-        );
-        return orderModelPage.map(mapper::toDomain);
-    }
-
-    @Override
-    public Optional<Order> findByUserIDAndID(UserID customerID, OrderID orderID) {
+    public Optional<Order> findByIDAndUserID(OrderID orderID, UserID customerID) {
         Optional<OrderModel> orderModelOpt = orderJpaRepository.findByUserIdAndId(
                 customerID.toString(),
                 orderID.toString()

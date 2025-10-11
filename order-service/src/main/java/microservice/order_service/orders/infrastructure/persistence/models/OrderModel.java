@@ -40,6 +40,9 @@ public class OrderModel {
     @Column(name = "tax_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal taxAmount;
 
+    @Column(name = "currency", nullable = false, length = 3)
+    private String currency;
+
     // Shipping
     @Column(name = "delivery_tracking_number", length = 100)
     private String deliveryTrackingNumber;
@@ -55,9 +58,16 @@ public class OrderModel {
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private UserModel user;
 
+    @Column(name = "user_id", insertable = false, updatable = false, length = 36)
+    private String userID;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private DeliveryAddressModel deliveryAddressModel;
+
+
+    @Column(name = "address_id", insertable = false, updatable = false, length = 36)
+    private String addressId;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<OrderItemModel> items;
