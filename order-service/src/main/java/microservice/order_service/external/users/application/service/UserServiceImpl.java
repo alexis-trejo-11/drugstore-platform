@@ -98,6 +98,11 @@ public class UserServiceImpl implements UserService {
         userRepository.save(model);
     }
 
+    @Override
+    public boolean existsByID(UserID userID) {
+        return userRepository.existsById(userID.value());
+    }
+
     public void validateUserCredentials(String email, String phoneNumber) {
         if (email != null) {
             if (userRepository.existsByEmail(email)) {

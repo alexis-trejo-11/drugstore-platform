@@ -1,4 +1,4 @@
-package microservice.order_service.orders.domain.models.exceptions;
+package microservice.order_service.orders.application.exceptions;
 
 public class CurrencyMismatchException extends RuntimeException {
     public CurrencyMismatchException(String message) {

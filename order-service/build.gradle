@@ -64,8 +64,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
 
-    // Logstash Encoder para ELK
+    // Logstash Encoder for Elk
     implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+    implementation 'org.codehaus.janino:janino:3.1.10'
 }
 
 dependencyManagement {

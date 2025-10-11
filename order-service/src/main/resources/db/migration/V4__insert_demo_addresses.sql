@@ -20,13 +20,13 @@ VALUES
 ('7777-7777-7777-7777', 'USA', 'Coast City', 'California', 'Harbor', '90002', '88 Cedar Ave', 'Apartment', 'PH', '88', 'Penthouse', '2222-2222-2222-2222', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Insert demo data into orders table referencing addresses
-INSERT INTO orders (id, user_id, address_id, delivery_method, status, shipping_cost, tax_amount, delivery_tracking_number, delivery_attempt, days_since_ready_for_pickup, payment_id, created_at, updated_at, estimated_delivery_date, notes)
+INSERT INTO orders (id, user_id, address_id, currency, delivery_method, status, shipping_cost, tax_amount, delivery_tracking_number, delivery_attempt, days_since_ready_for_pickup, payment_id, created_at, updated_at, estimated_delivery_date, notes)
 VALUES
-('aaaa-aaaa-aaaa-aaaa', '1111-1111-1111-1111', '1111-1111-1111-1111', 'standard_delivery', 'delivered', 5.99, 2.50, 'TRK-001-2024', 1, 0, 'pay-001', CURRENT_TIMESTAMP - INTERVAL '5 days', CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 'Leave at front door'),
-('bbbb-bbbb-bbbb-bbbb', '2222-2222-2222-2222', '2222-2222-2222-2222', 'store_pickup', 'preparing', 0.00, 1.80, NULL, 0, 2, 'pay-002', CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 day', 'Call on arrival'),
-('cccc-cccc-cccc-cccc', '3333-3333-3333-3333', '3333-3333-3333-3333', 'express_delivery', 'out_for_delivery', 15.99, 4.20, 'TRK-002-2024', 0, 0, 'pay-003', CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 day', 'Fragile items'),
-('dddd-dddd-dddd-dddd', '4444-4444-4444-4444', '4444-4444-4444-4444', 'standard_delivery', 'delivered', 3.99, 1.25, 'TRK-003-2024', 2, 0, 'pay-004', CURRENT_TIMESTAMP - INTERVAL '7 days', CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 'Deliver to office'),
-('eeee-eeee-eeee-eeee', '5555-5555-5555-5555', '5555-5555-5555-5555', 'standard_delivery', 'cancelled', 5.99, 3.15, NULL, 0, 0, NULL, CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP + INTERVAL '2 days', 'Order cancelled by customer');
+('aaaa-aaaa-aaaa-aaaa', '1111-1111-1111-1111', '1111-1111-1111-1111', 'MXN', 'standard_delivery', 'delivered', 5.99, 2.50, 'TRK-001-2024', 1, 0, 'pay-001', CURRENT_TIMESTAMP - INTERVAL '5 days', CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 'Leave at front door'),
+('bbbb-bbbb-bbbb-bbbb', '2222-2222-2222-2222', '2222-2222-2222-2222', 'MXN', 'store_pickup', 'preparing', 0.00, 1.80, NULL, 0, 2, 'pay-002', CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 day', 'Call on arrival'),
+('cccc-cccc-cccc-cccc', '3333-3333-3333-3333', '3333-3333-3333-3333', 'MXN', 'express_delivery', 'out_for_delivery', 15.99, 4.20, 'TRK-002-2024', 0, 0, 'pay-003', CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1 day', 'Fragile items'),
+('dddd-dddd-dddd-dddd', '4444-4444-4444-4444', '4444-4444-4444-4444', 'MXN', 'standard_delivery', 'delivered', 3.99, 1.25, 'TRK-003-2024', 2, 0, 'pay-004', CURRENT_TIMESTAMP - INTERVAL '7 days', CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 'Deliver to office'),
+('eeee-eeee-eeee-eeee', '5555-5555-5555-5555', '5555-5555-5555-5555', 'MXN', 'standard_delivery', 'cancelled', 5.99, 3.15, NULL, 0, 0, NULL, CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP + INTERVAL '2 days', 'Order cancelled by customer');
 
 -- Insert demo data into order_items table referencing orders
 INSERT INTO order_items (order_id, product_id, product_name, subtotal, quantity, currency, is_prescription_required)

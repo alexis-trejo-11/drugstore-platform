@@ -28,15 +28,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v2/users")
 @Tag(
         name = "User Management",
-        description = "APIs for managing users - create, retrieve, update, and soft delete user accounts"
+        description = "APIs for managing users - create, retrieve, update, and soft delete userID accounts"
 )
 public class UserController {
     private final UserService userService;
     private final ResponseMapper<UserResponse, User> responseMapper;
 
     @Operation(
-            summary = "Get user by ID",
-            description = "Retrieves a user by their unique identifier. Returns 404 if user not found or inactive."
+            summary = "Get userID by ID",
+            description = "Retrieves a userID by their unique identifier. Returns 404 if userID not found or inactive."
     )
     @ApiResponses({
             @ApiResponse(
@@ -51,13 +51,13 @@ public class UserController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Invalid user ID format",
+                    description = "Invalid userID ID format",
                     content = @Content(schema = @Schema(implementation = SwaggerResponseWrapper.class))
             )
     })
     @Parameter(
             name = "id",
-            description = "Unique identifier of the user",
+            description = "Unique identifier of the userID",
             example = "550e8400-e29b-41d4-a716-446655440000",
             required = true,
             in = ParameterIn.PATH
@@ -70,8 +70,8 @@ public class UserController {
     }
 
     @Operation(
-            summary = "Get user by email",
-            description = "Retrieves a user by their email address. Returns 404 if user not found or inactive."
+            summary = "Get userID by email",
+            description = "Retrieves a userID by their email address. Returns 404 if userID not found or inactive."
     )
     @ApiResponses({
             @ApiResponse(
@@ -92,7 +92,7 @@ public class UserController {
     })
     @Parameter(
             name = "email",
-            description = "Email address of the user",
+            description = "Email address of the userID",
             example = "carol.white@example.com",
             required = true,
             in = ParameterIn.PATH
@@ -105,8 +105,8 @@ public class UserController {
     }
 
     @Operation(
-            summary = "Get user by phone number",
-            description = "Retrieves a user by their phone number. Returns 404 if user not found or inactive."
+            summary = "Get userID by phone number",
+            description = "Retrieves a userID by their phone number. Returns 404 if userID not found or inactive."
     )
     @ApiResponses({
             @ApiResponse(
@@ -127,7 +127,7 @@ public class UserController {
     })
     @Parameter(
             name = "phoneNumber",
-            description = "Phone number of the user",
+            description = "Phone number of the userID",
             example = "+1234567890",
             required = true,
             in = ParameterIn.PATH
@@ -140,8 +140,8 @@ public class UserController {
     }
 
     @Operation(
-            summary = "Create a new user",
-            description = "Creates a new user account with the provided details. Validates email uniqueness and phone number format."
+            summary = "Create a new userID",
+            description = "Creates a new userID account with the provided details. Validates email uniqueness and phone number format."
     )
     @ApiResponses({
             @ApiResponse(
@@ -173,8 +173,8 @@ public class UserController {
     }
 
     @Operation(
-            summary = "Update user details",
-            description = "Updates an existing user's information. Validates email uniqueness (excluding current user) and maintains data integrity."
+            summary = "Update userID details",
+            description = "Updates an existing userID's information. Validates email uniqueness (excluding current userID) and maintains data integrity."
     )
     @ApiResponses({
             @ApiResponse(
@@ -194,14 +194,14 @@ public class UserController {
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "Email or phone number already in use by another user",
+                    description = "Email or phone number already in use by another userID",
                     content = @Content(schema = @Schema(implementation = SwaggerResponseWrapper.class))
             )
     })
     @Parameters({
             @Parameter(
                     name = "id",
-                    description = "Unique identifier of the user to update",
+                    description = "Unique identifier of the userID to update",
                     example = "550e8400-e29b-41d4-a716-446655440000",
                     required = true,
                     in = ParameterIn.PATH
@@ -221,8 +221,8 @@ public class UserController {
     }
 
     @Operation(
-            summary = "Restore soft-deleted user",
-            description = "Restores a previously soft-deleted user account. The user becomes active again with all original data intact."
+            summary = "Restore soft-deleted userID",
+            description = "Restores a previously soft-deleted userID account. The userID becomes active again with all original data intact."
     )
     @ApiResponses({
             @ApiResponse(
@@ -243,7 +243,7 @@ public class UserController {
     })
     @Parameter(
             name = "id",
-            description = "Unique identifier of the user to restore",
+            description = "Unique identifier of the userID to restore",
             example = "550e8400-e29b-41d4-a716-446655440000",
             required = true,
             in = ParameterIn.PATH
@@ -255,8 +255,8 @@ public class UserController {
     }
 
     @Operation(
-            summary = "Soft delete user",
-            description = "Performs a soft delete on the user account. The user data is preserved but marked as deleted and becomes inactive."
+            summary = "Soft delete userID",
+            description = "Performs a soft delete on the userID account. The userID data is preserved but marked as deleted and becomes inactive."
     )
     @ApiResponses({
             @ApiResponse(
@@ -277,7 +277,7 @@ public class UserController {
     })
     @Parameter(
             name = "id",
-            description = "Unique identifier of the user to delete",
+            description = "Unique identifier of the userID to delete",
             example = "550e8400-e29b-41d4-a716-446655440000",
             required = true,
             in = ParameterIn.PATH

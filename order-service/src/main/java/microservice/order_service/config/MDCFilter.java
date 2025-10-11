@@ -45,7 +45,7 @@ public class MDCFilter implements Filter {
 
     private String extractUserId(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
-        // ... extract user ID from token or session
+        // ... extract userID ID from token or session
         return "";
     }
 

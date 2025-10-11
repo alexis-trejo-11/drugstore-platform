@@ -18,7 +18,7 @@ public class OrderSpecifications {
             // User ID filter
             if (query.userId() != null) {
                 predicates.add(criteriaBuilder.equal(
-                        root.get("user").get("id"),
+                        root.get("userID").get("id"),
                         query.userId().value()
                 ));
             }

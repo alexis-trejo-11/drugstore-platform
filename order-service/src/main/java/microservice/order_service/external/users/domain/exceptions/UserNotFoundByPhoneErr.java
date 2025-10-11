@@ -4,6 +4,6 @@ import libs_kernel.exceptions.NotFoundException;
 
 public class UserNotFoundByPhoneErr extends NotFoundException {
     public UserNotFoundByPhoneErr(String emailValue) {
-        super("user", "email", emailValue);
+        super("userID", "email", emailValue);
     }
 }

@@ -11,9 +11,7 @@ import microservice.order_service.orders.domain.models.Order;
 import microservice.order_service.orders.domain.models.OrderItem;
 import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
 import microservice.order_service.orders.domain.models.enums.OrderStatus;
-import microservice.order_service.orders.domain.models.valueobjects.Money;
-import microservice.order_service.orders.domain.models.valueobjects.OrderID;
-import microservice.order_service.orders.domain.models.valueobjects.PaymentID;
+import microservice.order_service.orders.domain.models.valueobjects.*;
 import microservice.order_service.orders.infrastructure.persistence.models.OrderItemModel;
 import microservice.order_service.orders.infrastructure.persistence.models.OrderModel;
 import org.springframework.data.domain.Page;
@@ -27,8 +25,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
     private final ModelMapper<OrderItem, OrderItemModel> itemMapper;
-    private final ModelMapper<DeliveryAddress,DeliveryAddressModel> addressMapper;
-    private final ModelMapper<User, UserModel> userMapper;
 
     @Override
     public OrderModel fromDomain(Order order) {
@@ -38,8 +34,8 @@ public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
                 .status(order.getStatus() != null ? order.getStatus().getCode() : null)
                 .notes(order.getNotes() != null ? order.getNotes() : "")
                 .items(itemMapper.fromDomains(order.getItems()))
-                .deliveryAddressModel(order.getDeliveryAddress() != null ? new DeliveryAddressModel(order.getDeliveryAddress().getId().value()) : null)
-                .user(order.getUser() != null ? new UserModel(order.getUser().getId().value()) : null)
+                .deliveryAddressModel(order.getAddressID() != null ? new DeliveryAddressModel(order.getAddressID().value()) : null)
+                .user(order.getUserID() != null ? new UserModel(order.getUserID().value()) : null)
                 .paymentID(order.getPaymentID() != null ? order.getPaymentID().value() : null)
 
                 .taxAmount(order.getTaxAmount() != null ? order.getTaxAmount().amount() : null)
@@ -57,20 +53,22 @@ public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
 
     @Override
     public Order toDomain(OrderModel orderModel) {
-        // Warning: This is a temporary fix
-        Currency currency = orderModel.getItems().getFirst().getCurrency() != null ? Currency.getInstance(orderModel.getItems().getFirst().getCurrency()) : Currency.getInstance("MXN");
+        if (orderModel == null) return null;
+
+        Currency currency = Currency.getInstance(orderModel.getCurrency());
 
         return Order.builder()
                 .id(orderModel.getId() != null ? OrderID.of(orderModel.getId()) : null)
                 .deliveryMethod(orderModel.getDeliveryMethod() != null ? DeliveryMethod.fromName(orderModel.getDeliveryMethod()) : null)
                 .status(orderModel.getStatus() != null ? OrderStatus.fromName(orderModel.getStatus()) : null)
+                .notes(orderModel.getNotes() != null ? orderModel.getNotes() : "")
 
-                .deliveryAddress(addressMapper.toDomain(orderModel.getDeliveryAddressModel()) != null ? addressMapper.toDomain(orderModel.getDeliveryAddressModel()) : null)
-                .user(orderModel.getUser() != null ? userMapper.toDomain(orderModel.getUser()) : null)
+                .addressID(orderModel.getAddressId() != null ? AddressID.of(orderModel.getAddressId()) : null)
+                .userID(orderModel.getUserID() != null ? UserID.of(orderModel.getUserID()) : null)
                 .items(orderModel.getItems() != null ? itemMapper.toDomains(orderModel.getItems()) : List.of())
                 .paymentID(orderModel.getPaymentID() != null ? PaymentID.of(orderModel.getPaymentID()) : null)
 
-                .orderCurrency(currency)
+                .orderCurrency(Currency.getInstance(orderModel.getCurrency()))
                 .shippingCost(Money.of(orderModel.getShippingCost(), currency))
                 .taxAmount(Money.of(orderModel.getTaxAmount(), currency))
 

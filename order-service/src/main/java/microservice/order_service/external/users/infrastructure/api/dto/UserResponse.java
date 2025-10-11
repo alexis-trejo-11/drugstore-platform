@@ -5,17 +5,17 @@ import lombok.Builder;
 import microservice.order_service.external.users.domain.entity.User;
 
 @Builder
-@Schema(description = "User response DTO containing user details")
+@Schema(description = "User response DTO containing userID details")
 public record UserResponse(
         @Schema(
-                description = "Unique identifier of the user",
+                description = "Unique identifier of the userID",
                 example = "550e8400-e29b-41d4-a716-446655440000",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         String id,
 
         @Schema(
-                description = "Full name of the user",
+                description = "Full name of the userID",
                 example = "Carol White",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 minLength = 1,
@@ -24,7 +24,7 @@ public record UserResponse(
         String name,
 
         @Schema(
-                description = "Email address of the user",
+                description = "Email address of the userID",
                 example = "carol.white@example.com",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 format = "email"
@@ -32,7 +32,7 @@ public record UserResponse(
         String email,
 
         @Schema(
-                description = "Phone number of the user",
+                description = "Phone number of the userID",
                 example = "+1234567890",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 pattern = "^\\+?[\\d\\s-()]+$"
@@ -40,7 +40,7 @@ public record UserResponse(
         String phoneNumber,
 
         @Schema(
-                description = "Role of the user in the system",
+                description = "Role of the userID in the system",
                 example = "CUSTOMER",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 allowableValues = {"ADMIN", "CUSTOMER", "MANAGER", "EMPLOYEE"}
@@ -48,7 +48,7 @@ public record UserResponse(
         String role,
 
         @Schema(
-                description = "Current status of the user account",
+                description = "Current status of the userID account",
                 example = "ACTIVE",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 allowableValues = {"ACTIVE", "INACTIVE", "SUSPENDED", "PENDING"}
@@ -56,7 +56,7 @@ public record UserResponse(
         String status,
 
         @Schema(
-                description = "Timestamp when the user was created",
+                description = "Timestamp when the userID was created",
                 example = "2024-01-15T10:30:00.000Z",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 format = "date-time"
@@ -64,7 +64,7 @@ public record UserResponse(
         String createdAt,
 
         @Schema(
-                description = "Timestamp when the user was last updated",
+                description = "Timestamp when the userID was last updated",
                 example = "2024-01-20T14:45:30.000Z",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 format = "date-time"

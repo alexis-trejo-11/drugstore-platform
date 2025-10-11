@@ -8,6 +8,7 @@ import microservice.order_service.external.users.domain.entity.User;
 import microservice.order_service.orders.application.commands.request.*;
 import microservice.order_service.orders.application.commands.response.CreateOrderCommandResponse;
 import microservice.order_service.orders.application.exceptions.OrderNotFoundIDException;
+import microservice.order_service.orders.application.exceptions.UserAddressNotFound;
 import microservice.order_service.orders.domain.models.Order;
 import microservice.order_service.orders.domain.models.OrderFactory;
 import microservice.order_service.orders.domain.models.OrderItem;
@@ -29,13 +30,18 @@ public class OrderCommandHandler {
         DeliveryAddress deliveryAddress = null;
         if (command.deliveryMethod().requiresAddress()) {
             deliveryAddress = user.findAddressByID(command.addressID())
-                    .orElseThrow(() -> new IllegalArgumentException("Address not found for ID: " + command.addressID()));
+                    .orElseThrow(() -> new UserAddressNotFound(command.addressID()));
         }
 
         Order order = OrderFactory.createOrder(
-                command.deliveryMethod(), command.notes(),
-                command.moneyShippingCost(), command.moneyTaxAmount(),
-                user,  deliveryAddress, command.currency()
+                command.userID(),
+                command.deliveryMethod(),
+                command.notes(),
+                command.moneyShippingCost(),
+                command.moneyTaxAmount(),
+                command.currency(),
+                deliveryAddress != null ? deliveryAddress.getId() : null
+
         );
 
         List<OrderItem> items = command.items().stream()
@@ -46,16 +52,7 @@ public class OrderCommandHandler {
 
         // TODO: Publish Domain Event "OrderCreatedEvent"
         Order orderSaved = orderRepository.save(order);
-
         return CreateOrderCommandResponse.from(orderSaved);
-    }
-
-    public void handle(UpdateOrderDeliverMethodCommand command) {
-        Order order = orderRepository.findByID(command.orderID())
-                .orElseThrow(() -> new OrderNotFoundIDException(command.orderID()));
-
-        order.updateDeliveryMethod(command.newMethod());
-        orderRepository.save(order);
     }
 
     public void handle(UpdateOrderAddressCommand command) {
@@ -68,11 +65,20 @@ public class OrderCommandHandler {
 
         DeliveryAddress newAddress = userService.getUserByID(command.userID())
                 .findAddressByID(command.addressID())
-                .orElseThrow(() -> new IllegalArgumentException("Address not found for ID: " + command.addressID()));
+                .orElseThrow(() -> new UserAddressNotFound(command.addressID()));
 
-        order.updateDeliveryAddress(newAddress);
+        order.updateDeliveryAddress(newAddress.getId());
         orderRepository.save(order);
     }
+
+    public void handle(UpdateOrderDeliverMethodCommand command) {
+        Order order = orderRepository.findByID(command.orderID())
+                .orElseThrow(() -> new OrderNotFoundIDException(command.orderID()));
+
+        order.updateDeliveryMethod(command.newMethod(), command.addressID());
+        orderRepository.save(order);
+    }
+
 
 
     public void handle(DeleteOrderCommand command) {

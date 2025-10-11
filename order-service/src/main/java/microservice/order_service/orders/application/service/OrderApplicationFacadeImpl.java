@@ -88,14 +88,12 @@ public class OrderApplicationFacadeImpl implements OrderApplicationFacade {
     // Queries
     @Override
     public OrderQueryResult getOrderByID(GetOrderByIDQuery query) {
-        return queryHandler.handle(query)
-                .orElseThrow(() -> new OrderNotFoundIDException(query.orderID()));
+        return queryHandler.handle(query);
     }
 
     @Override
     public OrderDetailResult getOrderByID(GetOrderDetailByIDQuery query) {
-        return queryHandler.handle(query)
-                .orElseThrow(() -> new OrderNotFoundIDException(query.orderID()));
+        return queryHandler.handle(query);
     }
 
     @Override
@@ -115,9 +113,7 @@ public class OrderApplicationFacadeImpl implements OrderApplicationFacade {
 
     @Override
     public OrderDetailResult getOrderByIDAndUserID(GetOrderByIDAndUserIDQuery query) {
-        return queryHandler.handle(query)
-                .orElseThrow(() -> new OrderNotFoundException(
-                        "Order not found for user: " + query.userID() + " and order: " + query.orderID()));
+        return queryHandler.handle(query);
     }
 
     @Override
