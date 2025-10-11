@@ -3,7 +3,7 @@ package microservice.order_service;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"microservice.order_service", "libs_kernel.log.audit_logger"})
 public class OrderServiceApplication {
 
     public static void main(String[] args) {
