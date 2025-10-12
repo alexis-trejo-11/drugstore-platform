@@ -33,6 +33,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // Jackson Java 8 Date/Time module
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
     // Common library
     implementation project(':libs:shared-kernel')
 

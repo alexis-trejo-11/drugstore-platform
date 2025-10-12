@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    //TODO: Exclude deleted from queries
     private final JpaUserRepository userRepository;
     private final ModelMapper<User, UserModel> modelMapper;
 
