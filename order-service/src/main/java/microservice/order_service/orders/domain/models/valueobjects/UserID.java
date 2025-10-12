@@ -1,12 +1,21 @@
 package microservice.order_service.orders.domain.models.valueobjects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.UUID;
 
-public record UserID(String value) {
+public record UserID(@JsonProperty("value") String value) {
+
     public UserID {
         if (value == null) {
             throw new IllegalArgumentException("UserID cannot be null");
         }
+    }
+
+    @JsonCreator
+    public static UserID of(@JsonProperty("value") String value) {
+        return new UserID(value);
     }
 
     public static UserID generate() {
@@ -16,9 +25,7 @@ public record UserID(String value) {
     public static UserID of(UUID value) {
         return new UserID(value.toString());
     }
-    public static UserID of(String value) {
-        return new UserID(value);
-    }
+
     public static UserID generateRandom() {
         return new UserID(UUID.randomUUID().toString());
     }

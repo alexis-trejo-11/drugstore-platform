@@ -3,6 +3,7 @@ package microservice.order_service.external.users.domain.entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.orders.domain.models.valueobjects.AddressID;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;
@@ -15,6 +16,7 @@ import java.util.Optional;
 @Getter
 @AllArgsConstructor
 @Builder
+@NoArgsConstructor
 public class User {
     private UserID id;
     private String name;

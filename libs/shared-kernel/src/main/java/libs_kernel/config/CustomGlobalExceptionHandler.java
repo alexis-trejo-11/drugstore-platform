@@ -49,7 +49,7 @@ public class CustomGlobalExceptionHandler {
         var response = ResponseWrapper.error("Domain Exception Occurred", errorDetails);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
-
+    
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ResponseWrapper<?>> handleConflictException(ConflictException ex) {
         ErrorDetails errorDetails = new ErrorDetails();

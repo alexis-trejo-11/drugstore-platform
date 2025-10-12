@@ -1,28 +1,30 @@
 package microservice.order_service.external.address.domain.model;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 import microservice.order_service.orders.domain.models.valueobjects.AddressID;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;
 
 import java.util.Objects;
 
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class DeliveryAddress {
-    private final AddressID id;
-    private final String country;
-    private final String state;
-    private final String city;
-    private final String neighborhood;
-    private final String zipCode;
-    private final String street;
-    private final BuildingType buildingType;
-    private final String innerNumber;
-    private final String outerNumber;
-    private final String additionalInfo;
+    private AddressID id;
+    private String country;
+    private String state;
+    private String city;
+    private String neighborhood;
+    private String zipCode;
+    private String street;
+    private BuildingType buildingType;
+    private String innerNumber;
+    private String outerNumber;
+    private String additionalInfo;
     @Setter
     private boolean isDefault;
     private UserID userID;

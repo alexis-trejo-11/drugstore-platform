@@ -2,6 +2,7 @@ package microservice.order_service.external.address.infrastructure.persistence;
 
 import libs_kernel.mapper.ModelMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.address.domain.ports.output.AddressRepository;
 import microservice.order_service.external.address.infrastructure.persistence.Model.DeliveryAddressModel;
@@ -14,6 +15,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class AddressRepositoryImpl implements AddressRepository {
     private final JpaAddressRepository jpaAddressRepository;
     private final ModelMapper<DeliveryAddress, DeliveryAddressModel> addressMapper;
