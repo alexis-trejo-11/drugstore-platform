@@ -15,7 +15,7 @@ public interface ProductMapper {
 
     @Mapping(target = "id", expression = "java(generateProductId())")
     @Mapping(target = "status", constant = "ACTIVE")
-    @Mapping(target = "addedAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "stockQuantity", defaultValue = "0")
     Product createCommandToProduct(CreateProductCommand command);
@@ -29,6 +29,6 @@ public interface ProductMapper {
 
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "id", source = "productId")
-    @Mapping(target = "addedAt", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     void updateProductFromCommand(UpdateProductCommand command, @MappingTarget Product product);
 }

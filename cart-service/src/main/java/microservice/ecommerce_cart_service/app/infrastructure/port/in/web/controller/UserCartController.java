@@ -31,8 +31,8 @@ public class UserCartController {
     @GetMapping("/{userId}")
     private ResponseWrapper<CartSummary> getUserCart(@Valid @PathVariable UUID userId) {
         GetCartByCustomerIdQuery query = new GetCartByCustomerIdQuery(new CustomerId(userId));
-        Cart cart = cartQueryUseCase.getCartByCustomerId(query);
-        return ResponseWrapper.found(CartSummary.emptyCart(cart), "Cart");
+        CartSummary cart = cartQueryUseCase.getCartByCustomerId(query);
+        return ResponseWrapper.found(cart, "Cart");
     }
 
     @PostMapping("/{userId}/items")

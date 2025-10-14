@@ -18,11 +18,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @RequiredArgsConstructor
 class CartSummaryService {
-    private ProductFacadeService productFacadeService;
+    private final ProductFacadeService productFacadeService;
 
     public CartSummary createCartSummary(Cart cart) {
         return getEmptySummary(cart);

@@ -43,7 +43,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/drugstore_orders
     username: alexistrejo
-    password: adminAlexis123
+    password: alexisAdmin1475963 
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect

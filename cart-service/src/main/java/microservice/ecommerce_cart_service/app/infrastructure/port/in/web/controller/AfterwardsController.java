@@ -19,6 +19,9 @@ import microservice.ecommerce_cart_service.app.shared.QueryPageData;
 import microservice.ecommerce_cart_service.app.shared.ResponseWrapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Sort;
+import microservice.ecommerce_cart_service.app.domain.entities.valueobjects.CartId;
+
 
 @Slf4j
 @RestController
@@ -27,17 +30,17 @@ import org.springframework.web.bind.annotation.*;
 public class AfterwardsController {
     private final AfterwardUseCase afterwardUseCase;
 
-    @GetMapping("/{clientId}")
+    @GetMapping("/{cartId}")
     public ResponseWrapper<AfterwardsSummary> getAfterwardProductsByClientId(
             HttpServletRequest request,
-            @PathVariable String clientId,
+            @PathVariable String cartId,
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sort,
-            @RequestParam(defaultValue = "asc") String sortDirection
+            @RequestParam Sort.Direction sortDirection
     ) {
         GetCartAfterwardsQuery query = new GetCartAfterwardsQuery(
-                CustomerId.from(clientId),
+                CartId.from(cartId),
                 new QueryPageData(offset, size, sort, sortDirection)
         );
         AfterwardsSummary afterwardsSummary = afterwardUseCase.getCartAfterwards(query);
