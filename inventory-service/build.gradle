@@ -47,8 +47,6 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 	implementation 'org.postgresql:postgresql'
 
-	// Common Classes
-	implementation project(':common-classes')
 
 	// Postgres
 	compileOnly 'org.projectlombok:lombok'

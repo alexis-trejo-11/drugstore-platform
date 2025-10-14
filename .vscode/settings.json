@@ -7,6 +7,10 @@
   "java.import.gradle.jvmArguments": "",
   "java.compile.nullAnalysis.mode": "automatic",
   "java.configuration.detectJdksAtStart": false,
+  "java.import.gradle.home": "",
+  "java.import.gradle.java.home": "",
+  "java.configuration.maven.globalSettings": "",
+  "java.configuration.workspaceFolder": "/root/Documents/java/API_Drugstore_Microservices",
   "java.configuration.runtimes": [
     {
       "name": "JavaSE-21",
@@ -29,5 +33,8 @@
     "**/.metadata/**",
     "**/archetype-resources/**",
     "**/META-INF/maven/**"
-  ]
+  ],
+  "java.import.gradle.projectSynchronization": "off",
+  "java.autobuild.enabled": false,
+  "java.maxConcurrentBuilds": 1
 }
