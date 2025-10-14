@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Debug Order Service",
+      "request": "launch",
+      "mainClass": "microservice.order_service.OrderServiceApplication",
+      "projectName": "order-service",
+      "args": "",
+      "vmArgs": "-XX:+TieredCompilation -XX:TieredStopAtLevel=1",
+      "preLaunchTask": "Gradle: Build Order Service"
+    },
+    {
+      "type": "java",
+      "name": "Attach to Order Service",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5005
+    }
+  ]
+}
