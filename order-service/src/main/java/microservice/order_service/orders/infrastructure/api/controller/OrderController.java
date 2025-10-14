@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import libs_kernel.config.RateLimit;
 import libs_kernel.mapper.EntityDetailMapper;
 import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.page.PageResponse;
@@ -33,6 +34,8 @@ import microservice.order_service.orders.infrastructure.api.dto.response.OrderDe
 import microservice.order_service.orders.infrastructure.api.dto.response.OrderResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.TimeUnit;
 
 @Tag(
         name = "Orders",
@@ -166,14 +169,13 @@ public class OrderController {
                                               "success": false,
                                               "code": 404,
                                               "message": "Order not found",
-                                              "data": null,
-                                              "errors": null
                                             }
                                             """
                             ))),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @GetMapping("/{id}")
+    @RateLimit(maxRequests = 10, duration = 60, durationUnit = TimeUnit.SECONDS)
     public ResponseWrapper<OrderResponse> getOrderByID(@NotNull @PathVariable String id) {
         var query = GetOrderByIDQuery.of(id);
         var queryResult = orderService.getOrderByID(query);

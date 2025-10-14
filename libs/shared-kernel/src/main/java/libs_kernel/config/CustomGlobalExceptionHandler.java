@@ -16,6 +16,16 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class CustomGlobalExceptionHandler {
+    /* Rate Limit Exception */
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ResponseWrapper<?>> handleRateLimitExceededException(RateLimitExceededException ex) {
+        ErrorDetails errorDetails = new ErrorDetails();
+        errorDetails.setErrorCode("RATE_LIMIT_EXCEEDED");
+        errorDetails.setErrorMessage(ex.getMessage());
+
+        var response = ResponseWrapper.error("Too Many Requests", errorDetails);
+        return new ResponseEntity<>(response, HttpStatus.TOO_MANY_REQUESTS);
+    }
 
     /* Validation Data Exceptions */
     @ExceptionHandler(MethodArgumentNotValidException.class)
