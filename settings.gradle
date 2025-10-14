@@ -2,7 +2,7 @@ rootProject.name = 'com.alexisTrejo.drugstore.backend'
 
 include 'product-service'
 include 'cart-service'
-include'user-service'
+//include 'user-service'
 include 'auth-service'
 include'order-service'
 include 'libs:shared-kernel'

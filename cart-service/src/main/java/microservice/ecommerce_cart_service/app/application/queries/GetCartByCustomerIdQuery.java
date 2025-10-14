@@ -7,11 +7,10 @@ import lombok.NoArgsConstructor;
 import microservice.ecommerce_cart_service.app.domain.entities.valueobjects.CustomerId;
 import microservice.ecommerce_cart_service.app.shared.QueryPageData;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class GetCartByCustomerIdQuery {
     private CustomerId customerId;
-    private boolean includeItems;
-    private GetCartItemsQuery itemsQuery;
+    
+    public GetCartByCustomerIdQuery(CustomerId customerId) {
+        this.customerId = customerId;
+    }
 }

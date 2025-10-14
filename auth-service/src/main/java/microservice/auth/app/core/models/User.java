@@ -2,13 +2,16 @@ package microservice.auth.app.core.models;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.AllArgsConstructor;
 import microservice.auth.app.core.valueobjects.*;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
+@AllArgsConstructor
 @Getter
+@Builder
 public class User {
     private UserId id;
     private Email email;
@@ -17,8 +20,6 @@ public class User {
     private UserRole role;
     private LocalDateTime joinedAt;
     private LocalDateTime lastLoginAt;
-    private boolean isActive = true;
-    private boolean hasTwoFactorAuthEnabled = false;
 
     protected User(UserId id, Email email, PhoneNumber phoneNumber, Password password, UserRole role) {
         this.id = Objects.requireNonNull(id);

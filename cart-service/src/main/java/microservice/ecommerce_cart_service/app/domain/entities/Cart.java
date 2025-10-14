@@ -17,7 +17,7 @@ import java.util.List;
 public class Cart {
     private CartId id;
     private CustomerId customerId;
-    private List<CartItem> cartItems = new ArrayList<>();
+    private List<CartItem> cartItems; 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

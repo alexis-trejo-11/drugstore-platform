@@ -57,13 +57,7 @@ public class CartQueryUseCaseImpl implements CartQueryUseCase {
     }
 
     private Cart getCartWithItems(GetCartByCustomerIdQuery query) {
-        Cart cart = cartRepository.findByCustomerId(query.getCustomerId())
-                .orElseThrow(() -> new EntityNotFoundException("cart not found"));
-
-        List<CartItem> cartItems = cartItemRepository.listByCartId(cart.getId(), query.getItemsQuery());
-        cart.setItems(cartItems);
-
-        return cart;
+      return null;
     }
 
     public CartSummary getCartWithDetails(Cart cart, List<Product> products) {
