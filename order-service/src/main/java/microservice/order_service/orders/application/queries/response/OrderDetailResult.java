@@ -16,26 +16,21 @@ import java.util.List;
 @Builder
 public record OrderDetailResult(
     OrderID id,
-    Money totalAmount,
     DeliveryMethod deliveryMethod,
     OrderStatus status,
     String notes,
+    Money taxAmount,
+    Money totalAmount,
 
-    User user,
+    DeliveryInfoQueryResult deliveryInfo,
+    PickupInfoQueryResult pickupInfo,
     List<OrderItemQueryResult> items,
+    User user,
     DeliveryAddress deliveryAddress,
     PaymentID paymentID,
 
-    Integer daysSinceReadyForPickup,
-    String deliveryTrackingNumber,
-    Integer deliveryAttempt,
-
-    Money shippingCost,
-    Money taxAmount,
-
     LocalDateTime createdAt,
-    LocalDateTime updatedAt,
-    LocalDateTime estimatedDeliveryDate
+    LocalDateTime updatedAt
 ) {
     public static OrderDetailResult from(Order order, User user, DeliveryAddress address) {
         if  (order == null) return null;
@@ -46,22 +41,21 @@ public record OrderDetailResult(
 
         return OrderDetailResult.builder()
                 .id(order.getId())
-                .totalAmount(order.getTotalAmount())
                 .deliveryMethod(order.getDeliveryMethod())
                 .status(order.getStatus())
                 .notes(order.getNotes() != null ? order.getNotes() : "")
-                .shippingCost(order.getShippingCost() != null ? order.getShippingCost() :  Money.zero())
                 .taxAmount(order.getTaxAmount() != null ? order.getTaxAmount() : Money.zero())
-                .daysSinceReadyForPickup(order.getDaysSinceReadyForPickup() != null ? order.getDaysSinceReadyForPickup() : null)
-                .deliveryAttempt(order.getDeliveryAttempt() != null ? order.getDeliveryAttempt() : null)
-                .deliveryTrackingNumber(order.getDeliveryTrackingNumber() != null ? order.getDeliveryTrackingNumber() : null)
+                .totalAmount(order.getTotalAmount() != null ? order.getTotalAmount() : Money.zero())
+
+                .deliveryInfo(order.getDeliveryInfo() != null ? DeliveryInfoQueryResult.from(order.getDeliveryInfo()) : null)
+                .pickupInfo(order.getPickupInfo() != null ? PickupInfoQueryResult.from(order.getPickupInfo()) : null)
                 .user(user)
                 .items(resultItems)
                 .deliveryAddress(address)
                 .paymentID(order.getPaymentID())
-                .estimatedDeliveryDate(order.getEstimatedDeliveryDate())
-                .createdAt(order.getCreatedAt())
-                .updatedAt(order.getUpdatedAt())
+
+                .createdAt(order.getOrderTimestamps().getCreatedAt())
+                .updatedAt(order.getOrderTimestamps().getUpdatedAt())
                 .build();
     }
 
@@ -74,21 +68,20 @@ public record OrderDetailResult(
 
         return OrderDetailResult.builder()
                 .id(order.getId())
-                .totalAmount(order.getTotalAmount())
                 .deliveryMethod(order.getDeliveryMethod())
                 .status(order.getStatus())
                 .notes(order.getNotes() != null ? order.getNotes() : "")
-                .shippingCost(order.getShippingCost() != null ? order.getShippingCost() :  Money.zero())
                 .taxAmount(order.getTaxAmount() != null ? order.getTaxAmount() : Money.zero())
-                .daysSinceReadyForPickup(order.getDaysSinceReadyForPickup() != null ? order.getDaysSinceReadyForPickup() : null)
-                .deliveryAttempt(order.getDeliveryAttempt() != null ? order.getDeliveryAttempt() : null)
-                .deliveryTrackingNumber(order.getDeliveryTrackingNumber() != null ? order.getDeliveryTrackingNumber() : null)
+                .totalAmount(order.getTotalAmount() != null ? order.getTotalAmount() : Money.zero())
+
+                .deliveryInfo(order.getDeliveryInfo() != null ? DeliveryInfoQueryResult.from(order.getDeliveryInfo()) : null)
+                .pickupInfo(order.getPickupInfo() != null ? PickupInfoQueryResult.from(order.getPickupInfo()) : null)
                 .user(user)
                 .items(resultItems)
                 .paymentID(order.getPaymentID())
-                .estimatedDeliveryDate(order.getEstimatedDeliveryDate())
-                .createdAt(order.getCreatedAt())
-                .updatedAt(order.getUpdatedAt())
+
+                .createdAt(order.getOrderTimestamps().getCreatedAt())
+                .updatedAt(order.getOrderTimestamps().getUpdatedAt())
                 .build();
     }
 }

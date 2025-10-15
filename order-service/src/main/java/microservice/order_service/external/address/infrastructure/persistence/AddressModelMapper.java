@@ -1,14 +1,11 @@
 package microservice.order_service.external.address.infrastructure.persistence;
 
 import libs_kernel.mapper.ModelMapper;
-import libs_kernel.page.PageResponse;
-import lombok.RequiredArgsConstructor;
 import microservice.order_service.external.address.domain.model.BuildingType;
 import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.address.infrastructure.persistence.Model.DeliveryAddressModel;
-import microservice.order_service.external.users.domain.entity.User;
 import microservice.order_service.external.users.infrastructure.persistence.models.UserModel;
-import microservice.order_service.orders.domain.models.valueobjects.AddressID;
+import microservice.order_service.external.address.domain.model.AddressID;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;

@@ -10,7 +10,7 @@ import microservice.order_service.external.users.domain.exceptions.UserNotFoundB
 import microservice.order_service.external.users.infrastructure.persistence.repository.JpaUserRepository;
 import microservice.order_service.orders.application.exceptions.OrderNotFoundIDException;
 import microservice.order_service.orders.domain.models.Order;
-import microservice.order_service.orders.domain.models.valueobjects.AddressID;
+import microservice.order_service.external.address.domain.model.AddressID;
 import microservice.order_service.orders.domain.models.valueobjects.OrderID;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;
 import microservice.order_service.orders.domain.ports.output.OrderRepository;

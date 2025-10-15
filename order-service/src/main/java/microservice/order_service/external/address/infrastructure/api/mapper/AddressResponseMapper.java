@@ -1,13 +1,10 @@
 package microservice.order_service.external.address.infrastructure.api.mapper;
 
-import libs_kernel.mapper.ModelMapper;
 import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.page.PageResponse;
 import libs_kernel.page.PageableResponse;
 import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.address.infrastructure.api.dto.DeliveryAddressResponse;
-import microservice.order_service.external.address.infrastructure.persistence.Model.DeliveryAddressModel;
-import microservice.order_service.orders.domain.models.valueobjects.AddressID;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 

@@ -18,7 +18,6 @@ public class LoggingUserServiceDecorator implements UserService {
 
     @Override
     public User getUserByID(UserID userID) {
-        log.info("Get user by ID: {}", userID.value());
         try {
             User user = delegate.getUserByID(userID);
             log.debug("Found user id={} email={}", userID.value(), user.getEmail());
@@ -31,7 +30,6 @@ public class LoggingUserServiceDecorator implements UserService {
 
     @Override
     public User getUserByEmail(String email) {
-        log.info("Get user by email: {}", email);
         try {
             User user = delegate.getUserByEmail(email);
             log.debug("Found user email={} id={}", email, user.getId().value());
@@ -44,7 +42,6 @@ public class LoggingUserServiceDecorator implements UserService {
 
     @Override
     public User getUserByPhoneNumber(String phoneNumber) {
-        log.info("Get user by phone number: {}", phoneNumber);
         try {
             User user = delegate.getUserByPhoneNumber(phoneNumber);
             log.debug("Found user phone={} id={}", phoneNumber, user.getId().value());

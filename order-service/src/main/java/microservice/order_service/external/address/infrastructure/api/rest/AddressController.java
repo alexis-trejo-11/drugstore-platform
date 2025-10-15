@@ -1,9 +1,7 @@
 package microservice.order_service.external.address.infrastructure.api.rest;
 
 import jakarta.validation.Valid;
-import libs_kernel.mapper.DomainMapper;
 import libs_kernel.mapper.ResponseMapper;
-import libs_kernel.mapper.ResultMapper;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import microservice.order_service.external.address.domain.model.DeliveryAddress;
@@ -11,7 +9,7 @@ import microservice.order_service.external.address.domain.ports.input.AddressSer
 import microservice.order_service.external.address.infrastructure.api.dto.DeliveryAddressRequest;
 import microservice.order_service.external.address.infrastructure.api.dto.DeliveryAddressResponse;
 import microservice.order_service.external.address.infrastructure.api.dto.UpdateAddressRequest;
-import microservice.order_service.orders.domain.models.valueobjects.AddressID;
+import microservice.order_service.external.address.domain.model.AddressID;
 import microservice.order_service.orders.domain.models.valueobjects.OrderID;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;
 import org.springframework.http.HttpStatus;

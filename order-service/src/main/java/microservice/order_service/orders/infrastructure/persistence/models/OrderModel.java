@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import microservice.order_service.external.address.infrastructure.persistence.Model.DeliveryAddressModel;
 import microservice.order_service.external.users.domain.entity.User;
 import microservice.order_service.external.users.infrastructure.persistence.models.UserModel;
+import microservice.order_service.orders.domain.models.enums.Currency;
+import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
+import microservice.order_service.orders.domain.models.enums.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,60 +27,50 @@ public class OrderModel {
     @Column(name = "id", length = 36)
     private String id;
 
-    @Column(name = "delivery_method", nullable = false, length = 20)
-    private String deliveryMethod;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "delivery_method", nullable = false)
+    private DeliveryMethod deliveryMethod;
 
-    @Column(name = "status", nullable = false, length = 20)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private OrderStatus status;
 
     @Column(name = "notes", length = 500)
     private String notes;
 
-    // Numeric Values
-    @Column(name = "shipping_cost", nullable = false, precision = 10, scale = 2)
-    private BigDecimal shippingCost;
+    @Column(name = "tax_fee", nullable = false, precision = 10, scale = 2)
+    private BigDecimal taxFee;
 
-    @Column(name = "tax_amount", nullable = false, precision = 10, scale = 2)
-    private BigDecimal taxAmount;
+    @Column(name = "service_fee", nullable = false, precision = 10, scale = 2)
+    private BigDecimal serviceFee;
 
-    @Column(name = "currency", nullable = false, length = 3)
-    private String currency;
+    @Enumerated(EnumType.STRING)
+    private Currency currency;
 
-    // Shipping
-    @Column(name = "delivery_tracking_number", length = 100)
-    private String deliveryTrackingNumber;
-
-    @Column(name = "delivery_attempt", nullable = false)
-    private Integer deliveryAttempt;
-
-    @Column(name = "days_since_ready_for_pickup", nullable = false)
-    private Integer daysSinceReadyForPickup;
-
-    // Relationships
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private UserModel user;
 
+    @OneToOne(mappedBy = "orderModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private DeliveryInfoModel deliveryInfo;
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private PickupInfo pickupInfo;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderItemModel> items;
+
     @Column(name = "user_id", insertable = false, updatable = false, length = 36)
     private String userID;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "address_id", referencedColumnName = "id")
-    private DeliveryAddressModel deliveryAddressModel;
-
-
-    @Column(name = "address_id", insertable = false, updatable = false, length = 36)
-    private String addressId;
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
-    private List<OrderItemModel> items;
 
     @Column(name = "payment_id", length = 36)
     private String paymentID;
 
-    // TimeStamps
-    @Column(name = "estimated_delivery_date")
-    private LocalDateTime estimatedDeliveryDate;
+    @Column(name = "estimated_delivery_date", length = 16)
+    private String deliveryInfoID;
+
+    @Column(name = "pickup_info_id", length = 36)
+    private String pickupInfoID;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

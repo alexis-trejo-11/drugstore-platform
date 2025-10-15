@@ -1,7 +1,6 @@
 package microservice.order_service.orders.domain.models;
 
-import microservice.order_service.external.address.domain.model.DeliveryAddress;
-import microservice.order_service.external.users.domain.entity.User;
+import microservice.order_service.external.address.domain.model.AddressID;
 import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
 import microservice.order_service.orders.domain.models.valueobjects.*;
 

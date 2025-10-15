@@ -21,7 +21,7 @@ public class OrderQueryMapper implements ResultMapper<OrderQueryResult, Order> {
                 .totalAmount(order.getTotalAmount() != null ? order.getTotalAmount() : null)
                 .deliveryMethod(order.getDeliveryMethod() != null ? order.getDeliveryMethod() : null)
                 .totalItems(order.getTotalItemsCount())
-                .createdAt(order.getCreatedAt() != null ? order.getCreatedAt() : null)
+                .createdAt(order.getOrderTimestamps().getCreatedAt() != null ? order.getOrderTimestamps().getCreatedAt() : null)
                 .build();
     }
 
