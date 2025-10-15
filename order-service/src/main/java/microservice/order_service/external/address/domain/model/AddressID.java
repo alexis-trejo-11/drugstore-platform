@@ -1,4 +1,4 @@
-package microservice.order_service.orders.domain.models.valueobjects;
+package microservice.order_service.external.address.domain.model;
 
 import java.util.UUID;
 

@@ -15,7 +15,7 @@ public record CreateOrderItemCommand(
         BigDecimal subtotal,
         Integer quantity,
         Currency currency,
-        Boolean prescriptionRequired
+        Boolean isPrescriptionRequired
 ) {
     public OrderItem toEntity() {
         return OrderItem.create(
@@ -23,7 +23,7 @@ public record CreateOrderItemCommand(
                 this.productName,
                 Money.of(this.subtotal, this.currency),
                 this.quantity,
-                this.prescriptionRequired
+                this.isPrescriptionRequired
         );
     }
 }

@@ -4,10 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import microservice.order_service.orders.application.commands.request.CreateOrderItemCommand;
 import microservice.order_service.orders.application.commands.request.CreateOrderCommand;
 import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
-import microservice.order_service.orders.domain.models.valueobjects.AddressID;
+import microservice.order_service.external.address.domain.model.AddressID;
 import microservice.order_service.orders.domain.models.valueobjects.ProductID;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;
 import org.hibernate.validator.constraints.Length;
@@ -26,8 +27,11 @@ public record CreateOrderRequest(
         @NotNull
         DeliveryMethod deliveryMethod,
 
+        @NotNull
+        String notes,
+
         @PositiveOrZero @NotNull
-        BigDecimal shippingCost,
+        BigDecimal serviceFee,
 
         @NotNull @PositiveOrZero
         BigDecimal taxAmount,
@@ -35,12 +39,10 @@ public record CreateOrderRequest(
         @NotNull @NotBlank @Length(min = 3, max = 3)
         String currency,
 
-        @NotNull
-        String notes,
-
         @NotNull @Size(min = 1, max = 50)
         List<OrderItemRequest> items
 ) {
+    @Builder
     public record OrderItemRequest(
             @NotNull @NotBlank
             String productID,
@@ -60,8 +62,17 @@ public record CreateOrderRequest(
 
     public CreateOrderCommand toCommand() {
         Currency currencyObj = Currency.getInstance(currency);
-        return CreateOrderCommand.builder()
+        List<CreateOrderItemCommand> itemCommands = items.stream()
+                .map(item -> CreateOrderItemCommand.builder()
+                        .productID(new ProductID(item.productID()))
+                        .productName(item.productName())
+                        .subtotal(item.subtotal())
+                        .quantity(item.quantity())
+                        .isPrescriptionRequired(item.isPrescriptionRequired())
+                        .build())
+                .toList();
 
+        return CreateOrderCommand.builder()
                 .userID(userID != null ? new UserID(userID) : null)
                 .addressID(addressID != null ? new AddressID(addressID) : null)
                 .deliveryMethod(deliveryMethod)
@@ -69,14 +80,7 @@ public record CreateOrderRequest(
                 .taxAmount(taxAmount)
                 .currency(currencyObj)
                 .notes(notes)
-                .items(items != null ? items.stream().map(item -> new CreateOrderItemCommand(
-                       item.productID !=  null ? new ProductID(item.productID) : null,
-                        item.productName != null ? item.productName : null,
-                        item.subtotal != null ? item.subtotal : BigDecimal.ZERO,
-                        item.quantity,
-                        currencyObj,
-                        item.isPrescriptionRequired
-                )).toList() : List.of())
+                .items(itemCommands)
                 .build();
     }
 }

@@ -2,7 +2,6 @@ package microservice.order_service.external.address.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
-import microservice.order_service.orders.domain.models.valueobjects.AddressID;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;
 
 import java.util.Objects;

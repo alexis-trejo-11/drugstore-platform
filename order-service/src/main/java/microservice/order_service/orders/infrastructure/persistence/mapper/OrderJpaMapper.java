@@ -2,9 +2,8 @@ package microservice.order_service.orders.infrastructure.persistence.mapper;
 
 import libs_kernel.mapper.ModelMapper;
 import lombok.RequiredArgsConstructor;
-import microservice.order_service.external.address.domain.model.DeliveryAddress;
+import microservice.order_service.external.address.domain.model.AddressID;
 import microservice.order_service.external.address.infrastructure.persistence.Model.DeliveryAddressModel;
-import microservice.order_service.external.users.domain.entity.User;
 import microservice.order_service.external.users.infrastructure.persistence.models.UserModel;
 import microservice.order_service.orders.domain.models.Order;
 

@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 @Builder
 public record OrderQueryResult(
     OrderID id,
-    UserID userID,
-    Money totalAmount,
     OrderStatus status,
     DeliveryMethod deliveryMethod,
+    Money totalAmount,
     Integer totalItems,
+    UserID userID,
     LocalDateTime createdAt
 ) {}

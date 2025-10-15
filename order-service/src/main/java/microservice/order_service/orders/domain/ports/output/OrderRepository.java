@@ -3,7 +3,7 @@ package microservice.order_service.orders.domain.ports.output;
 import microservice.order_service.orders.application.queries.request.SearchOrdersQuery;
 import microservice.order_service.orders.domain.models.Order;
 import microservice.order_service.orders.domain.models.enums.OrderStatus;
-import microservice.order_service.orders.domain.models.valueobjects.AddressID;
+import microservice.order_service.external.address.domain.model.AddressID;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;
 import microservice.order_service.orders.domain.models.valueobjects.OrderID;
 import org.springframework.data.domain.Page;

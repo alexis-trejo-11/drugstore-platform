@@ -15,30 +15,30 @@ public class OrderDetailResponseMapper implements EntityDetailMapper<OrderDetail
 
     @Override
     public OrderDetailResponse toDetail(OrderDetailResult result) {
+        if (result == null) return null;
+
         List<OrderItemResponse> items = result.items() != null ? result.items()
                 .stream()
                 .map(OrderItemResponse::from).toList() : List.of();
 
-        DeliveryAddressResponse deliveryAddress = result.deliveryAddress() != null ?
-                DeliveryAddressResponse.from(result.deliveryAddress()) : null;
+        DeliveryAddressResponse deliveryAddress = result.deliveryAddress() != null ? DeliveryAddressResponse.from(result.deliveryAddress()) : null;
+        UserResponse userResponse = result.user() != null ? UserResponse.from(result.user()) : null;
 
         return OrderDetailResponse.builder()
-                .orderId(result.id() != null ? result.id().value() : null)
+                .id(result.id() != null ? result.id().value() : null)
                 .deliveryAddress(deliveryAddress)
+                .deliveryMethod(result.deliveryMethod() != null ? result.deliveryMethod() : null)
+                .notes(result.notes())
+                .currency(result.taxAmount() != null ? result.taxAmount().currency() : null)
+                .taxAmount(result.taxAmount() != null ? result.taxAmount().amount() : null)
                 .items(items)
+                .userResponse(userResponse)
                 .paymentID(result.paymentID() != null ? result.paymentID().value() : null)
-                .userResponse(result.user() != null ? UserResponse.from(result.user()) : null)
-
-                .shippingCost(result.shippingCost() != null ? result.shippingCost().toFormattedString() : null)
-                .deliveryAttempt(result.deliveryAttempt())
-                .status(result.status() != null ? result.status().name() : null)
-                .totalAmount(result.totalAmount().toFormattedString())
-                .deliveryMethod(result.deliveryMethod() != null ? result.deliveryMethod().name() : null)
-                .daysSinceReadyForPickup(result.daysSinceReadyForPickup())
+                .status(result.status() != null ? result.status() : null)
+                .totalAmount(result.totalAmount().amount())
 
                 .createdAt(result.createdAt())
                 .updatedAt(result.updatedAt())
-                .estimatedDeliveryDate(result.estimatedDeliveryDate())
                 .build();
 
     }

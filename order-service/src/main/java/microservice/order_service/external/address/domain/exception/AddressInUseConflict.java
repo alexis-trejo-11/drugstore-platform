@@ -1,8 +1,7 @@
 package microservice.order_service.external.address.domain.exception;
 
 import libs_kernel.exceptions.ConflictException;
-import microservice.order_service.orders.domain.models.valueobjects.AddressID;
-import microservice.order_service.orders.domain.models.valueobjects.OrderID;
+import microservice.order_service.external.address.domain.model.AddressID;
 
 public class AddressInUseConflict extends ConflictException {
     public AddressInUseConflict(AddressID addressID) {
