@@ -12,9 +12,11 @@ import microservice.order_service.orders.application.exceptions.UserAddressNotFo
 import microservice.order_service.orders.domain.models.Order;
 import microservice.order_service.orders.domain.models.OrderFactory;
 import microservice.order_service.orders.domain.models.OrderItem;
+import microservice.order_service.orders.domain.models.valueobjects.Money;
 import microservice.order_service.orders.domain.ports.output.OrderRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -24,24 +26,28 @@ public class OrderCommandHandlerImpl {
     private final OrderRepository orderRepository;
     private final UserService userService;
 
-    public CreateOrderCommandResponse handle(CreateOrderCommand command) {
-        User user = userService.getUserByID(command.userID());
-
-        DeliveryAddress deliveryAddress = null;
+    public CreateOrderCommandResponse handle(CreateDeliveryOrderCommand command) {
         if (command.deliveryMethod().requiresAddress()) {
-            deliveryAddress = user.findAddressByID(command.addressID())
-                    .orElseThrow(() -> new UserAddressNotFound(command.addressID()));
+            if (command.addressID() == null) {
+                throw new IllegalArgumentException("Address ID is required for delivery methods that require an address.");
+            }
         }
 
-        Order order = OrderFactory.createOrder(
-                command.userID(),
+        User user = userService.getUserByID(command.userID());
+        DeliveryAddress deliveryAddress = user.findAddressByID(command.addressID())
+                    .orElseThrow(() -> new UserAddressNotFound(command.addressID()));
+
+        //TODO: Calculate shipping cost and tax amount based on address and items
+        Money shippingCost = Money.zero(Order.DEFAULT_CURRENCY);
+        Money taxAmount = Money.zero(Order.DEFAULT_CURRENCY);
+
+        Order order = OrderFactory.createDeliveryOrder(
                 command.deliveryMethod(),
                 command.notes(),
-                command.moneyShippingCost(),
-                command.moneyTaxAmount(),
-                command.currency(),
-                deliveryAddress != null ? deliveryAddress.getId() : null
-
+                shippingCost,
+                taxAmount,
+                command.userID(),
+                deliveryAddress.getId()
         );
 
         List<OrderItem> items = command.items().stream()
@@ -75,11 +81,12 @@ public class OrderCommandHandlerImpl {
         Order order = orderRepository.findByID(command.orderID())
                 .orElseThrow(() -> new OrderNotFoundIDException(command.orderID()));
 
-        order.updateDeliveryMethod(command.newMethod(), command.addressID());
+        // TODO: CALCULATE new shipping cost and tax amount based on new delivery method and address
+        Money newShippingCost = Money.zero(Order.DEFAULT_CURRENCY);
+        LocalDateTime newEstimatedDeliveryDate = LocalDateTime.now().plusDays(5); // Example: 5 days from now
+        order.updateDeliveryMethod(command.newMethod(), command.newAddressID(), newEstimatedDeliveryDate, newShippingCost);
         orderRepository.save(order);
     }
-
-
 
     public void handle(DeleteOrderCommand command) {
         Order order = orderRepository.findByID(command.orderID())

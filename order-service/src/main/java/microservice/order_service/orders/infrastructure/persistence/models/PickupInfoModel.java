@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import microservice.order_service.orders.domain.models.valueobjects.PickupInfo;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "pickup_info")
-public class PickupInfo {
+public class PickupInfoModel {
     @Id
     @Column(name = "id", length = 36)
     private String id;
@@ -37,6 +38,10 @@ public class PickupInfo {
     @Column(name = "available_until")
     private LocalDateTime availableUntil;
 
+    @OneToOne
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
+    private OrderModel order;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -52,5 +57,31 @@ public class PickupInfo {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public static PickupInfoModel from(PickupInfo pickupInfo) {
+        if (pickupInfo == null) return null;
+
+        return PickupInfoModel.builder()
+                .id(pickupInfo.getId())
+                .storeID(pickupInfo.getStoreID())
+                .storeName(pickupInfo.getStoreName())
+                .storeAddress(pickupInfo.getStoreAddress())
+                .availableUntil(pickupInfo.getReadyForPickupAt())
+                .pickedUpAt(pickupInfo.getPickedUpAt())
+                .pickupCode(pickupInfo.getPickupCode())
+                .build();
+    }
+
+    public PickupInfo toDomain() {
+        return PickupInfo.builder()
+                .id(this.id)
+                .storeID(this.storeID)
+                .storeName(this.storeName)
+                .storeAddress(this.storeAddress)
+                .readyForPickupAt(this.availableUntil)
+                .pickedUpAt(this.pickedUpAt)
+                .pickupCode(this.pickupCode)
+                .build();
     }
 }

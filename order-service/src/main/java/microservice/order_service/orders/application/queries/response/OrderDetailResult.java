@@ -44,7 +44,7 @@ public record OrderDetailResult(
                 .deliveryMethod(order.getDeliveryMethod())
                 .status(order.getStatus())
                 .notes(order.getNotes() != null ? order.getNotes() : "")
-                .taxAmount(order.getTaxAmount() != null ? order.getTaxAmount() : Money.zero())
+                .taxAmount(order.getTaxFee() != null ? order.getTaxFee() : Money.zero())
                 .totalAmount(order.getTotalAmount() != null ? order.getTotalAmount() : Money.zero())
 
                 .deliveryInfo(order.getDeliveryInfo() != null ? DeliveryInfoQueryResult.from(order.getDeliveryInfo()) : null)
@@ -71,7 +71,7 @@ public record OrderDetailResult(
                 .deliveryMethod(order.getDeliveryMethod())
                 .status(order.getStatus())
                 .notes(order.getNotes() != null ? order.getNotes() : "")
-                .taxAmount(order.getTaxAmount() != null ? order.getTaxAmount() : Money.zero())
+                .taxAmount(order.getTaxFee() != null ? order.getTaxFee() : Money.zero())
                 .totalAmount(order.getTotalAmount() != null ? order.getTotalAmount() : Money.zero())
 
                 .deliveryInfo(order.getDeliveryInfo() != null ? DeliveryInfoQueryResult.from(order.getDeliveryInfo()) : null)

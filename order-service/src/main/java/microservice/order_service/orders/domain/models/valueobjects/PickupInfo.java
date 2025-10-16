@@ -1,31 +1,24 @@
 package microservice.order_service.orders.domain.models.valueobjects;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
+@Builder
+@AllArgsConstructor
 public class PickupInfo{
+    String id;
     String storeID;
     String storeName;
+    String storeAddress;
     LocalDateTime readyForPickupAt;
     LocalDateTime pickedUpAt;
     String pickupCode;
-
-    public PickupInfo(
-        String storeID,
-        String storeName,
-        LocalDateTime readyForPickupAt,
-        LocalDateTime pickedUpAt,
-        String pickupCode
-    ) {
-        this.storeID = storeID;
-        this.storeName = storeName;
-        this.readyForPickupAt = readyForPickupAt;
-        this.pickedUpAt = pickedUpAt;
-        this.pickupCode = pickupCode;
-    }
 
     public void ready() {
         this.readyForPickupAt = LocalDateTime.now();
@@ -35,8 +28,15 @@ public class PickupInfo{
         this.pickedUpAt = LocalDateTime.now();
     }
 
-    public static PickupInfo create(String storeID, String storeName, String pickupCode) {
-        return new PickupInfo(storeID, storeName, null, null, pickupCode);
+    public static PickupInfo create(String storeID, String storeName, String storeAddress ,String pickupCode) {
+        return new PickupInfo(
+                UUID.randomUUID().toString(),
+                storeID,
+                storeName,
+                storeAddress,
+                null,
+                null,
+                pickupCode);
     }
 
     public Integer getDaysSinceReadyForPickup() {

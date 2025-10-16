@@ -13,15 +13,14 @@ public class OrderFactory {
             String notes,
             Money shippingCost,
             Money taxAmount,
-            Currency currency,
             AddressID addressID
     ) {
         switch (deliveryMethod) {
             case STANDARD_DELIVERY, EXPRESS_DELIVERY -> {
-                return createDeliveryOrder(deliveryMethod, notes, shippingCost, taxAmount, userID, addressID, currency);
+                return createDeliveryOrder(deliveryMethod, notes, shippingCost, taxAmount, userID, addressID);
             }
             case STORE_PICKUP -> {
-                return createPickupOrder(notes, shippingCost, taxAmount, userID, currency);
+                return createPickupOrder(notes, shippingCost, taxAmount, userID);
             }
             default -> throw new IllegalArgumentException("Invalid delivery method");
         }
@@ -33,19 +32,17 @@ public class OrderFactory {
             Money shippingCost,
             Money taxAmount,
             UserID userID,
-            AddressID addressID,
-            Currency currency
+            AddressID addressID
     ) {
-        return Order.create(userID, deliveryMethod, addressID, notes, shippingCost, taxAmount, currency);
+        return Order.create(userID, deliveryMethod, addressID, notes, shippingCost, taxAmount);
     }
     
     public static Order createPickupOrder(
             String notes,
             Money shippingCost,
             Money taxAmount,
-            UserID userID,
-            Currency currency
+            UserID userID
     ) {
-        return Order.create(userID, DeliveryMethod.STORE_PICKUP, null, notes, shippingCost, taxAmount, currency);
+        return Order.create(userID, DeliveryMethod.STORE_PICKUP, null, notes, shippingCost, taxAmount);
     }
 }

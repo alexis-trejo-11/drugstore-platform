@@ -24,6 +24,10 @@ public record Money(BigDecimal amount, Currency currency) {
         return new Money(amount, currency);
     }
 
+    public static Money of(BigDecimal amount, microservice.order_service.orders.domain.models.enums.Currency currency) {
+        return new Money(amount, Currency.getInstance(currency.getCode()));
+    }
+
     public static Money of(double amount, Currency currency) {
         return new Money(BigDecimal.valueOf(amount), currency);
     }
