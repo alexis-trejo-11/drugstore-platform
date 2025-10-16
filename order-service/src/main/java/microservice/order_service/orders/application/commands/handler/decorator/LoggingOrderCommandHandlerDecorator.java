@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.order_service.orders.application.commands.handler.OrderCommandHandler;
 import microservice.order_service.orders.application.commands.handler.OrderCommandHandlerImpl;
-import microservice.order_service.orders.application.commands.request.CreateOrderCommand;
+import microservice.order_service.orders.application.commands.request.CreateDeliveryOrderCommand;
 import microservice.order_service.orders.application.commands.request.DeleteOrderCommand;
 import microservice.order_service.orders.application.commands.request.UpdateOrderAddressCommand;
 import microservice.order_service.orders.application.commands.request.UpdateOrderDeliverMethodCommand;
@@ -20,7 +20,7 @@ public class LoggingOrderCommandHandlerDecorator implements OrderCommandHandler 
     private final OrderCommandHandlerImpl delegate;
 
     @Override
-    public CreateOrderCommandResponse handle(CreateOrderCommand command) {
+    public CreateOrderCommandResponse handle(CreateDeliveryOrderCommand command) {
         log.info("Creating order: userId={}, deliveryMethod={}, itemCount={}",
                 command.userID(), command.deliveryMethod(), command.items().size());
 

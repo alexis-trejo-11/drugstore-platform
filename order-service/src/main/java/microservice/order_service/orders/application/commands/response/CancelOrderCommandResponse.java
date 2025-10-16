@@ -33,7 +33,7 @@ public record CancelOrderCommandResponse(
                 order.getId(),
                 order.getStatus().toString(),
                 cancellationReason,
-                order.getUpdatedAt()
+                order.getOrderTimestamps() != null ? order.getOrderTimestamps().getUpdatedAt() : null
         );
     }
 }

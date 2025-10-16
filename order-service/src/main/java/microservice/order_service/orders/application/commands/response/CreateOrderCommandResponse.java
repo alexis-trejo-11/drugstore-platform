@@ -19,7 +19,7 @@ public class CreateOrderCommandResponse {
         return new CreateOrderCommandResponse(
                 order.getId(),
                 order.getStatus().name(),
-                order.getCreatedAt()
+                order.getOrderTimestamps() != null ? order.getOrderTimestamps().getCreatedAt() : null
         );
     }
 }

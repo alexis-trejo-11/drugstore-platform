@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import microservice.order_service.external.address.domain.model.AddressID;
+import microservice.order_service.orders.application.exceptions.OrderValidationException;
 import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
 import microservice.order_service.orders.domain.models.enums.OrderStatus;
 import microservice.order_service.orders.application.exceptions.CurrencyMismatchException;
@@ -23,15 +24,19 @@ public class Order {
     private DeliveryMethod deliveryMethod;
     private OrderStatus status;
     private String notes;
-    private Money taxAmount;
+    private Money taxFee;
+
     private PickupInfo pickupInfo;
     private DeliveryInfo deliveryInfo;
-    private UserID userID;
-    private AddressID addressID;
-    private PaymentID paymentID;
-    private OrderTimestamps orderTimestamps;
     private List<OrderItem> items;
+
+    private UserID userID;
+    private PaymentID paymentID;
+
+    private OrderTimestamps orderTimestamps;
+
     private Currency orderCurrency;
+    public final static Currency DEFAULT_CURRENCY = Currency.getInstance("USD");
 
     public static Order create(
             UserID userID,
@@ -39,21 +44,19 @@ public class Order {
             AddressID addressID,
             String notes,
             Money shippingCost,
-            Money taxAmount,
-            Currency orderCurrency
+            Money taxAmount
     ) {
-        validateCreateParameters(userID, deliveryMethod, addressID, shippingCost, taxAmount, orderCurrency);
-        Currency validatedCurrency = validateAndGetCurrency(shippingCost, taxAmount, orderCurrency);
+        validateCreateParameters(userID, deliveryMethod, addressID, shippingCost, taxAmount);
+        Currency validatedCurrency = validateAndGetCurrency(shippingCost, taxAmount, DEFAULT_CURRENCY);
 
         Order order = new Order();
         order.id = OrderID.generate();
         order.userID = userID;
         order.deliveryMethod = deliveryMethod;
-        order.addressID = addressID;
         order.status = OrderStatus.PENDING;
         order.notes = notes;
         order.orderCurrency = validatedCurrency;
-        order.taxAmount = taxAmount;
+        order.taxFee = taxAmount;
         order.items = new ArrayList<>();
         order.orderTimestamps = OrderTimestamps.create();
 
@@ -83,8 +86,7 @@ public class Order {
             DeliveryMethod deliveryMethod,
             AddressID deliveryAddressID,
             Money shippingCost,
-            Money taxAmount,
-            Currency orderCurrency) {
+            Money taxAmount) {
 
         if (userID == null) {
             throw new InvalidOrderDataException("User ID cannot be null");
@@ -96,10 +98,6 @@ public class Order {
 
         if (deliveryMethod.requiresAddress() && deliveryAddressID == null) {
             throw new MissingDeliveryAddressException();
-        }
-
-        if (orderCurrency == null && shippingCost == null && taxAmount == null) {
-            throw new InvalidOrderDataException("At least one currency reference must be provided");
         }
     }
 
@@ -113,22 +111,36 @@ public class Order {
 
     public void updateDeliveryAddress(AddressID addressID) {
         if (deliveryMethod != DeliveryMethod.STANDARD_DELIVERY && deliveryMethod != DeliveryMethod.EXPRESS_DELIVERY) {
-            throw new IllegalStateException("Cannot update address for non-delivery orders");
+            throw new OrderValidationException("Cannot update address for non-delivery orders");
         }
 
         if (status != OrderStatus.PENDING && status != OrderStatus.CONFIRMED) {
-            throw new IllegalStateException("Can only update address for PENDING or CONFIRMED orders");
+            throw new OrderValidationException("Can only update address for PENDING or CONFIRMED orders");
         }
 
         if (addressID == null) {
-            throw new IllegalArgumentException("New address ID cannot be null");
+            throw new OrderValidationException("New address ID cannot be null");
         }
 
-        this.addressID = addressID;
+        if (this.deliveryInfo == null) {
+            throw new OrderValidationException("Delivery info must be set to update address");
+
+        }
+
+        if (addressID.equals(this.deliveryInfo.getAddressID())) {
+            throw new OrderValidationException("New address must be different from current address");
+        }
+
+        this.deliveryInfo.setAddressID(addressID);
         this.orderTimestamps.orderUpdated();
     }
 
-    public void updateDeliveryMethod(DeliveryMethod newMethod, AddressID newAddressID) {
+    public void updateDeliveryMethod(
+            DeliveryMethod newMethod,
+            AddressID newAddressID,
+            LocalDateTime estimatedDeliveryDate,
+            Money shippingCost
+    ) {
         if (!canModifyDeliveryMethod()) {
             throw new InvalidOrderStateTransitionException(status, status);
         }
@@ -146,8 +158,11 @@ public class Order {
             throw new MissingDeliveryAddressException();
         }
 
-        this.deliveryMethod = newMethod;
-        this.addressID = newAddressID;
+        this.deliveryInfo = DeliveryInfo.create(
+                estimatedDeliveryDate,
+                shippingCost != null ? shippingCost : Money.zero(orderCurrency)
+        );
+
         this.orderTimestamps.orderUpdated();
     }
 
@@ -262,29 +277,29 @@ public class Order {
         return Collections.unmodifiableList(items);
     }
 
+    public AddressID getAddressID() {
+        if (deliveryInfo == null) return null;
+        return deliveryInfo.getAddressID();
+    }
     public int getTotalItemsCount() {
         return items.stream().mapToInt(OrderItem::getQuantity).sum();
     }
-
     public boolean hasItems() {
         return !items.isEmpty();
     }
-
     public boolean isDelivery() {
         return deliveryMethod == DeliveryMethod.STANDARD_DELIVERY;
     }
-
     public boolean isPickup() {
         return deliveryMethod == DeliveryMethod.STORE_PICKUP;
     }
-
     public boolean canBeCancelled() {
         return !status.isTerminal();
     }
-
     public boolean canBeReturned() {
         return status == OrderStatus.DELIVERED || status == OrderStatus.PICKED_UP;
     }
+
 
     public boolean canModifyDeliveryMethod() {
         return status == OrderStatus.PENDING || status == OrderStatus.CONFIRMED;
@@ -328,7 +343,7 @@ public class Order {
 
         return itemsTotal
                 .add(deliveryInfo != null ? deliveryInfo.getShippingCost() : Money.zero(orderCurrency))
-                .add(taxAmount != null ? taxAmount : Money.zero(orderCurrency));
+                .add(taxFee != null ? taxFee : Money.zero(orderCurrency));
     }
 
     public Money getTotalAmount() {

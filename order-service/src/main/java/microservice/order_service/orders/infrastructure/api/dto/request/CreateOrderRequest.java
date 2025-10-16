@@ -6,7 +6,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import microservice.order_service.orders.application.commands.request.CreateOrderItemCommand;
-import microservice.order_service.orders.application.commands.request.CreateOrderCommand;
+import microservice.order_service.orders.application.commands.request.CreateDeliveryOrderCommand;
 import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
 import microservice.order_service.external.address.domain.model.AddressID;
 import microservice.order_service.orders.domain.models.valueobjects.ProductID;
@@ -29,12 +29,6 @@ public record CreateOrderRequest(
 
         @NotNull
         String notes,
-
-        @PositiveOrZero @NotNull
-        BigDecimal serviceFee,
-
-        @NotNull @PositiveOrZero
-        BigDecimal taxAmount,
 
         @NotNull @NotBlank @Length(min = 3, max = 3)
         String currency,
@@ -60,7 +54,7 @@ public record CreateOrderRequest(
             Boolean isPrescriptionRequired
     ) {}
 
-    public CreateOrderCommand toCommand() {
+    public CreateDeliveryOrderCommand toCommand() {
         Currency currencyObj = Currency.getInstance(currency);
         List<CreateOrderItemCommand> itemCommands = items.stream()
                 .map(item -> CreateOrderItemCommand.builder()
@@ -72,13 +66,10 @@ public record CreateOrderRequest(
                         .build())
                 .toList();
 
-        return CreateOrderCommand.builder()
+        return CreateDeliveryOrderCommand.builder()
                 .userID(userID != null ? new UserID(userID) : null)
                 .addressID(addressID != null ? new AddressID(addressID) : null)
                 .deliveryMethod(deliveryMethod)
-                .shippingCost(shippingCost)
-                .taxAmount(taxAmount)
-                .currency(currencyObj)
                 .notes(notes)
                 .items(itemCommands)
                 .build();

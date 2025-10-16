@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import microservice.order_service.external.address.infrastructure.persistence.Model.DeliveryAddressModel;
-import microservice.order_service.external.users.domain.entity.User;
 import microservice.order_service.external.users.infrastructure.persistence.models.UserModel;
 import microservice.order_service.orders.domain.models.enums.Currency;
 import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
@@ -45,6 +43,7 @@ public class OrderModel {
     private BigDecimal serviceFee;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "currency", length = 3, nullable = false)
     private Currency currency;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -55,7 +54,7 @@ public class OrderModel {
     private DeliveryInfoModel deliveryInfo;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private PickupInfo pickupInfo;
+    private PickupInfoModel pickupInfo;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItemModel> items;
@@ -66,10 +65,10 @@ public class OrderModel {
     @Column(name = "payment_id", length = 36)
     private String paymentID;
 
-    @Column(name = "estimated_delivery_date", length = 16)
+    @Column(name = "delivery_info_id", length = 16)
     private String deliveryInfoID;
 
-    @Column(name = "pickup_info_id", length = 36)
+    @Column(name = "pick_up_info_id", length = 36)
     private String pickupInfoID;
 
     @Column(name = "created_at", nullable = false)

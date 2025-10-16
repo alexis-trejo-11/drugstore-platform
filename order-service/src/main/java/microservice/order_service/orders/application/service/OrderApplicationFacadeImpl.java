@@ -6,14 +6,12 @@ import microservice.order_service.orders.application.commands.request.DeleteOrde
 import microservice.order_service.orders.application.commands.request.UpdateOrderAddressCommand;
 import microservice.order_service.orders.application.commands.request.UpdateOrderDeliverMethodCommand;
 import microservice.order_service.orders.application.commands.request.status.*;
-import microservice.order_service.orders.application.exceptions.OrderNotFoundException;
 import microservice.order_service.orders.application.queries.handler.OrderQueryHandler;
-import microservice.order_service.orders.application.commands.request.CreateOrderCommand;
+import microservice.order_service.orders.application.commands.request.CreateDeliveryOrderCommand;
 import microservice.order_service.orders.application.commands.response.CancelOrderCommandResponse;
 import microservice.order_service.orders.application.commands.response.CreateOrderCommandResponse;
 import microservice.order_service.orders.application.commands.response.UpdateOrderStatusCommandResult;
 import microservice.order_service.orders.application.commands.handler.OrderCommandHandler;
-import microservice.order_service.orders.application.exceptions.OrderNotFoundIDException;
 import microservice.order_service.orders.application.queries.request.*;
 import microservice.order_service.orders.application.queries.response.OrderDetailResult;
 import microservice.order_service.orders.application.queries.response.OrderQueryResult;
@@ -30,7 +28,7 @@ public class OrderApplicationFacadeImpl implements OrderApplicationFacade {
 
     // Commands
     @Override
-    public CreateOrderCommandResponse createOrder(CreateOrderCommand command) {
+    public CreateOrderCommandResponse createOrder(CreateDeliveryOrderCommand command) {
         return commandHandler.handle(command);
     }
 
