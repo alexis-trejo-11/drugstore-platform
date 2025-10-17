@@ -1,4 +1,4 @@
-package microservice.store_service.application.handler;
+package microservice.store_service.application.handler.command;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,23 +19,19 @@ public class UpdateStoreCommandHandler {
     @Transactional
     public StoreOperationResult handle(UpdateStoreInfoCommand command) {
         log.info("Handling UpdateStoreInfoCommand: {}", command);
+
         Store existingStore = storeRepository.findByID(command.id())
                 .orElseThrow(() -> new StoreNotFoundException("id", command.id().toString()));
 
+        log.info("Found existing store: {}. Proceeding with update.", existingStore.getId());
         try {
-            existingStore.updateInformation(
-                    command.name(),
-                    command.infoCommand().toContactInfo(),
-                    command.addressCommand().toAddress()
-            );
+            log.info("Updating store: {}", existingStore.getId());
+            existingStore.updateInformation(command.name(), command.infoCommand().toContactInfo());
 
-            log.info("Validating store business rules before update");
-            existingStore.validatePersist();
-
-            log.info("Updating store: {}", existingStore);
+            log.info("Persisting updated store: {}", existingStore.getId());
             storeRepository.save(existingStore);
 
-            log.info("Store updated with ID: {}", existingStore.getId());
+            log.info("Store updated: {}", existingStore.getId());
             return StoreOperationResult.updateResult(existingStore.getId());
         } catch (Exception e) {
             log.error("Error occurred while updating store: {}", e.getMessage(), e);
