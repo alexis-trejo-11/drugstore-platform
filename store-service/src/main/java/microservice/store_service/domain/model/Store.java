@@ -1,97 +1,131 @@
 package microservice.store_service.domain.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import microservice.store_service.domain.exception.StoreBusinessRuleException;
-import microservice.store_service.domain.exception.StoreConflictException;
 import microservice.store_service.domain.model.enums.StoreStatus;
 import microservice.store_service.domain.model.valueobjects.*;
+import microservice.store_service.domain.model.valueobjects.location.Address;
+import microservice.store_service.domain.model.valueobjects.ContactInfo;
+import microservice.store_service.domain.model.valueobjects.location.Geolocation;
+import microservice.store_service.domain.model.valueobjects.schedule.StoreSchedule;
 
-@Builder
-@AllArgsConstructor
+import java.util.Objects;
+
+
 @Getter
 public class Store {
-    private StoreID id;
-    private String code;
-    private String name;
-    private boolean is24Hours;
-
+    private final StoreID id;
+    private final StoreCode code;
+    private StoreName name;
     private StoreStatus status;
     private ContactInfo contactInfo;
     private Address address;
     private Geolocation geolocation;
-    private ServiceSchedule serviceSchedule;
+    private StoreSchedule serviceSchedule;
+
     private StoreTimeStamps timeStamps;
 
+    private Store(StoreID id, StoreCode code, StoreName name, StoreStatus status,
+                  ContactInfo contactInfo, Address address,
+                  Geolocation geolocation, StoreSchedule serviceSchedule) {
+        this.id = Objects.requireNonNull(id, "Store ID cannot be null");
+        this.code = Objects.requireNonNull(code, "Store code cannot be null");
+        this.name = Objects.requireNonNull(name, "Store name cannot be null");
+        this.status = Objects.requireNonNull(status, "Store status cannot be null");
+        this.contactInfo = Objects.requireNonNull(contactInfo, "Contact info cannot be null");
+        this.address = Objects.requireNonNull(address, "Address cannot be null");
+        this.geolocation = Objects.requireNonNull(geolocation, "Geolocation cannot be null");
+        this.serviceSchedule = Objects.requireNonNull(serviceSchedule, "Schedule cannot be null");
+        this.timeStamps = StoreTimeStamps.now();
+    }
+
+    public static Store create(
+            StoreCode code,
+            StoreName name,
+            ContactInfo contactInfo,
+            Address address,
+            Geolocation geolocation,
+            StoreSchedule serviceSchedule) {
+
+        StoreID id = StoreID.generate();
+        return new Store(
+                id, code, name, StoreStatus.INACTIVE,
+                contactInfo, address, geolocation, serviceSchedule
+        );
+    }
+
+    public static Store reconstruct(
+            StoreID id,
+            StoreCode code,
+            StoreName name,
+            StoreStatus status,
+            ContactInfo contactInfo,
+            Address address,
+            Geolocation geolocation,
+            StoreSchedule serviceSchedule,
+            StoreTimeStamps timeStamps) {
+        Store store = new Store(id, code, name, status, contactInfo, address, geolocation, serviceSchedule);
+        store.setTimeStamps(timeStamps);
+        return store;
+    }
+
+    private void setTimeStamps(StoreTimeStamps timeStamps) {
+        this.timeStamps = timeStamps;
+    }
+
     public void activate() {
+        if (status == StoreStatus.ACTIVE) {
+            throw new StoreBusinessRuleException("Store is already active");
+        }
         this.status = StoreStatus.ACTIVE;
-        this.timeStamps.updateTimestamp();
+        this.timeStamps.markAsUpdated();
     }
 
     public void deactivate() {
+        if (status == StoreStatus.INACTIVE) {
+            throw new StoreBusinessRuleException("Store is already inactive");
+        }
         this.status = StoreStatus.INACTIVE;
-        this.timeStamps.updateTimestamp();
+        this.timeStamps.markAsUpdated();
     }
 
-    public void updateInformation(String name, ContactInfo contactInfo, Address address) {
-        this.name = name;
-        this.address = address;
-        this.contactInfo = contactInfo;
-        this.timeStamps.updateTimestamp();
+    public void temporarilyClose() {
+        this.status = StoreStatus.TEMPORARILY_CLOSED;
+        this.timeStamps.markAsUpdated();
     }
 
-    public void updateLocation(Geolocation geolocation) {
-        geolocation.validate();
-        this.geolocation = geolocation;
-        this.timeStamps.updateTimestamp();
+    public void putUnderMaintenance() {
+        this.status = StoreStatus.UNDER_MAINTENANCE;
+        this.timeStamps.markAsUpdated();
     }
 
-    public void updateSchedule(boolean is24Hours, ServiceSchedule serviceSchedule) {
-        this.is24Hours = is24Hours;
-        if (is24Hours) {
-            this.serviceSchedule = ServiceSchedule.get24HoursSchedule();
-        } else {
-            serviceSchedule.validate();
-            this.serviceSchedule = serviceSchedule;
-        }
-
-        this.timeStamps.updateTimestamp();
+    public void updateInformation(StoreName name, ContactInfo contactInfo) {
+        this.name = Objects.requireNonNull(name);
+        this.contactInfo = Objects.requireNonNull(contactInfo);
+        this.timeStamps.markAsUpdated();
     }
 
-    public void validatePersist() {
-        validateRequiredProperties();
-        geolocation.validate();
-        address.validate();
-        serviceSchedule.validateScheduleWithinDefaultHours(is24Hours);
+    public void relocate(Geolocation newGeolocation, Address newAddress) {
+        this.geolocation = Objects.requireNonNull(newGeolocation);
+        this.address = Objects.requireNonNull(newAddress);
+        this.timeStamps.markAsUpdated();
     }
 
-    public void validateRequiredProperties() {
-        if (this.code == null || this.code.isBlank()) {
-            throw new StoreBusinessRuleException("Store code is required.");
-        }
-        if (this.name == null || this.name.isBlank()) {
-            throw new StoreBusinessRuleException("Store name is required.");
-        }
-        if (this.contactInfo == null) {
-            throw new StoreBusinessRuleException("Contact information is required.");
-        }
-        if (this.status == null) {
-            throw new StoreBusinessRuleException("Store status is required.");
-        }
-        if (this.geolocation == null) {
-            throw new StoreBusinessRuleException("Store geolocation is required.");
-        }
-        if (this.address == null) {
-            throw new StoreBusinessRuleException("Store address is required.");
-        }
+    public void updateSchedule(StoreSchedule newSchedule) {
+        this.serviceSchedule = Objects.requireNonNull(newSchedule);
+        this.timeStamps.markAsUpdated();
     }
 
-    public void assignID() {
-        if (this.id != null) {
-            throw new  StoreConflictException("Store ID is already assigned.");
-        }
+    public void convertTo24Hours() {
+        this.serviceSchedule = StoreSchedule.create24HoursStore();
+        this.timeStamps.markAsUpdated();
+    }
 
-        this.id = StoreID.generate();
+    public boolean isOpen() {
+        return status == StoreStatus.ACTIVE && serviceSchedule.isOpenNow();
+    }
+
+    public boolean isOperational() {
+        return status == StoreStatus.ACTIVE || status == StoreStatus.TEMPORARILY_CLOSED;
     }
 }

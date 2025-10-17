@@ -1,6 +1,7 @@
 package microservice.store_service.application.command;
 
 import lombok.Builder;
+import microservice.store_service.application.command.address.AddressCommand;
 import microservice.store_service.domain.model.valueobjects.StoreID;
 
 @Builder

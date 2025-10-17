@@ -1,4 +1,4 @@
-package microservice.store_service.domain.model.valueobjects;
+package microservice.store_service.domain.model.valueobjects.location;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
