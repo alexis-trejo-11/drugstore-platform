@@ -8,6 +8,6 @@ include'order-service'
 include 'libs:shared-kernel'
 include 'config-server'
 include 'admin-service'
-
+include 'store-service'
 
 project(':libs:shared-kernel').projectDir = new File(settingsDir, 'libs/shared-kernel')

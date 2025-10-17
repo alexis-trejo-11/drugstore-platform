@@ -30,6 +30,7 @@
         <processorPath useClasspath="false">
           <entry name="$PROJECT_DIR$/../../../.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.32/17d46b3e205515e1e8efd3ee4d57ce8018914163/lombok-1.18.32.jar" />
         </processorPath>
+        <module name="com.alexisTrejo.drugstore.backend.store-service.main" />
         <module name="com.alexisTrejo.drugstore.backend.order-service.main" />
       </profile>
     </annotationProcessing>
@@ -61,6 +62,9 @@
       <module name="com.alexisTrejo.drugstore.backend.product-service" options="-parameters" />
       <module name="com.alexisTrejo.drugstore.backend.product-service.main" options="-parameters" />
       <module name="com.alexisTrejo.drugstore.backend.product-service.test" options="-parameters" />
+      <module name="com.alexisTrejo.drugstore.backend.store-service" options="-parameters" />
+      <module name="com.alexisTrejo.drugstore.backend.store-service.main" options="-parameters" />
+      <module name="com.alexisTrejo.drugstore.backend.store-service.test" options="-parameters" />
     </option>
   </component>
 </project>
