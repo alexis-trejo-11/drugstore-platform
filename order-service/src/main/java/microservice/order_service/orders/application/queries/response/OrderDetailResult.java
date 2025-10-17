@@ -26,13 +26,12 @@ public record OrderDetailResult(
     PickupInfoQueryResult pickupInfo,
     List<OrderItemQueryResult> items,
     User user,
-    DeliveryAddress deliveryAddress,
     PaymentID paymentID,
 
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {
-    public static OrderDetailResult from(Order order, User user, DeliveryAddress address) {
+    public static OrderDetailResult from(Order order, User user) {
         if  (order == null) return null;
 
         var resultItems = order.getItems().stream()
@@ -43,36 +42,9 @@ public record OrderDetailResult(
                 .id(order.getId())
                 .deliveryMethod(order.getDeliveryMethod())
                 .status(order.getStatus())
-                .notes(order.getNotes() != null ? order.getNotes() : "")
-                .taxAmount(order.getTaxFee() != null ? order.getTaxFee() : Money.zero())
-                .totalAmount(order.getTotalAmount() != null ? order.getTotalAmount() : Money.zero())
-
-                .deliveryInfo(order.getDeliveryInfo() != null ? DeliveryInfoQueryResult.from(order.getDeliveryInfo()) : null)
-                .pickupInfo(order.getPickupInfo() != null ? PickupInfoQueryResult.from(order.getPickupInfo()) : null)
-                .user(user)
-                .items(resultItems)
-                .deliveryAddress(address)
-                .paymentID(order.getPaymentID())
-
-                .createdAt(order.getOrderTimestamps().getCreatedAt())
-                .updatedAt(order.getOrderTimestamps().getUpdatedAt())
-                .build();
-    }
-
-    public static OrderDetailResult from(Order order, User user) {
-        if (order == null) return null;
-
-        var resultItems = order.getItems().stream()
-                .map(OrderItemQueryResult::from)
-                .toList();
-
-        return OrderDetailResult.builder()
-                .id(order.getId())
-                .deliveryMethod(order.getDeliveryMethod())
-                .status(order.getStatus())
-                .notes(order.getNotes() != null ? order.getNotes() : "")
-                .taxAmount(order.getTaxFee() != null ? order.getTaxFee() : Money.zero())
-                .totalAmount(order.getTotalAmount() != null ? order.getTotalAmount() : Money.zero())
+                .notes(order.getNotes())
+                .taxAmount(order.getTaxFee())
+                .totalAmount(order.getTotalAmount())
 
                 .deliveryInfo(order.getDeliveryInfo() != null ? DeliveryInfoQueryResult.from(order.getDeliveryInfo()) : null)
                 .pickupInfo(order.getPickupInfo() != null ? PickupInfoQueryResult.from(order.getPickupInfo()) : null)

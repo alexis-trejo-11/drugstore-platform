@@ -66,6 +66,10 @@ public record Money(BigDecimal amount, Currency currency) {
         return amount.compareTo(BigDecimal.ZERO) == 0;
     }
 
+    public boolean isNegative() {
+        return amount.compareTo(BigDecimal.ZERO) < 0;
+    }
+
     public boolean isGreaterThan(Money other) {
         if (!this.currency.equals(other.currency)) {
             throw new IllegalArgumentException("Cannot compare money with different currencies");
@@ -83,13 +87,9 @@ public record Money(BigDecimal amount, Currency currency) {
             return String.format("%.2f", amount);
         }
         if (amount == null) {
-            return String.format("%s 0.00", currency.getSymbol());
+            return String.format("%s0.00", currency.getSymbol());
         }
-        return String.format("%s %.2f", currency.getSymbol(), amount);
-    }
-
-    public static Money zero() {
-        return new Money(BigDecimal.ZERO, Currency.getInstance("MXN"));
+        return String.format("%s%.2f", currency.getSymbol(), amount);
     }
 
     public static Money zero(Currency currency) {

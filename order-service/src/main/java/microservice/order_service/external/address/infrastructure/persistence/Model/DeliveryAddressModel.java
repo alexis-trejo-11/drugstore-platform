@@ -2,9 +2,13 @@ package microservice.order_service.external.address.infrastructure.persistence.M
 
 import jakarta.persistence.*;
 import lombok.*;
+import microservice.order_service.external.address.domain.model.AddressID;
 import microservice.order_service.external.address.domain.model.BuildingType;
 
+import microservice.order_service.external.address.domain.model.DeliveryAddress;
+import microservice.order_service.external.users.domain.entity.User;
 import microservice.order_service.external.users.infrastructure.persistence.models.UserModel;
+import microservice.order_service.orders.domain.models.valueobjects.UserID;
 
 import java.util.Objects;
 
@@ -27,7 +31,6 @@ public class DeliveryAddressModel {
     @Column(name = "user_id", nullable = false, length = 36, insertable = false, updatable = false)
     private String userID;
 
-
     @Column(name = "country", nullable = false, length = 50)
     private String country;
 
@@ -46,8 +49,9 @@ public class DeliveryAddressModel {
     @Column(name = "street", nullable = false, length = 255)
     private String street;
 
-    @Column(name = "building_type", length = 50)
-    private String buildingType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "building_type")
+    private BuildingType buildingType;
 
     @Column(name = "inner_number")
     private String innerNumber;
@@ -77,6 +81,24 @@ public class DeliveryAddressModel {
 
     public DeliveryAddressModel(String id) {
         this.id = id;
+    }
+
+    public DeliveryAddress toDomain() {
+        return DeliveryAddress.builder()
+                .id(new AddressID(this.id))
+                .userID(new UserID(this.userID))
+                .country(this.country)
+                .city(this.city)
+                .state(this.state)
+                .zipCode(this.zipCode)
+                .neighborhood(this.neighborhood)
+                .street(this.street)
+                .buildingType(this.buildingType)
+                .innerNumber(this.innerNumber)
+                .outerNumber(this.outerNumber)
+                .additionalInfo(this.additionalInfo)
+                .isDefault(this.isDefault)
+                .build();
     }
 
     @Override

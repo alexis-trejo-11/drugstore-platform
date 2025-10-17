@@ -34,6 +34,8 @@ public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
                 .user(order.getUserID() != null ? new UserModel(order.getUserID().value()) : null)
                 .paymentID(order.getPaymentID() != null ? order.getPaymentID().value() : null)
                 .taxFee(order.getTaxFee() != null ? order.getTaxFee().amount() : null)
+                .serviceFee(order.getServiceFee() != null ? order.getServiceFee().amount() : null)
+                .currency(order.getOrderCurrency() != null ? microservice.order_service.orders.domain.models.enums.Currency.fromCode(order.getOrderCurrency().getCurrencyCode()) : null)
                 .deliveryInfo(DeliveryInfoModel.from(order.getDeliveryInfo()))
                 .pickupInfo(PickupInfoModel.from(order.getPickupInfo()))
                 .build();
@@ -42,8 +44,6 @@ public class OrderJpaMapper implements ModelMapper<Order, OrderModel> {
     @Override
     public Order toDomain(OrderModel model) {
         if (model == null) return null;
-        System.out.println("Mapping OrderModel to Order domain: " + model.getCurrency());
-
         return Order.builder()
                 .id(model.getId() != null ? OrderID.of(model.getId()) : null)
                 .deliveryMethod(model.getDeliveryMethod())

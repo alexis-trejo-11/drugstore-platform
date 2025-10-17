@@ -2,12 +2,9 @@ package microservice.order_service.orders.application.service;
 
 import lombok.RequiredArgsConstructor;
 import microservice.order_service.orders.application.commands.handler.OrderStatusCommandHandler;
-import microservice.order_service.orders.application.commands.request.DeleteOrderCommand;
-import microservice.order_service.orders.application.commands.request.UpdateOrderAddressCommand;
-import microservice.order_service.orders.application.commands.request.UpdateOrderDeliverMethodCommand;
+import microservice.order_service.orders.application.commands.request.*;
 import microservice.order_service.orders.application.commands.request.status.*;
 import microservice.order_service.orders.application.queries.handler.OrderQueryHandler;
-import microservice.order_service.orders.application.commands.request.CreateDeliveryOrderCommand;
 import microservice.order_service.orders.application.commands.response.CancelOrderCommandResponse;
 import microservice.order_service.orders.application.commands.response.CreateOrderCommandResponse;
 import microservice.order_service.orders.application.commands.response.UpdateOrderStatusCommandResult;
@@ -28,7 +25,12 @@ public class OrderApplicationFacadeImpl implements OrderApplicationFacade {
 
     // Commands
     @Override
-    public CreateOrderCommandResponse createOrder(CreateDeliveryOrderCommand command) {
+    public CreateOrderCommandResponse createDeliveryOrder(CreateDeliveryOrderCommand command) {
+        return commandHandler.handle(command);
+    }
+
+    @Override
+    public CreateOrderCommandResponse createPickupOrder(CreatePickupOrderCommand command) {
         return commandHandler.handle(command);
     }
 

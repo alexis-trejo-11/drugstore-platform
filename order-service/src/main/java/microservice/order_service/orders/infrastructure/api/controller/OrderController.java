@@ -307,8 +307,14 @@ public class OrderController {
     @PostMapping(consumes = "application/json")
     public ResponseWrapper<CreateOrderCommandResponse> createOrder(
             @Valid @org.springframework.web.bind.annotation.RequestBody CreateOrderRequest request) {
-        var command = request.toCommand();
-        var result = orderService.createOrder(command);
+        if (request.deliveryMethod() != null) {
+            var command = request.toDeliveryOrderCommand();
+            var result = orderService.createDeliveryOrder(command);
+            return ResponseWrapper.created(result, "Order");
+        }
+
+        var command = request.toPickupOrderCommand();
+        var result = orderService.createPickupOrder(command);
         return ResponseWrapper.created(result, "Order");
     }
 

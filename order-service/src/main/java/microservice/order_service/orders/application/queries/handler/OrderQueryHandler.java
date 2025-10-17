@@ -2,6 +2,7 @@ package microservice.order_service.orders.application.queries.handler;
 
 import libs_kernel.mapper.ResultMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import microservice.order_service.external.address.domain.ports.output.AddressRepository;
 import microservice.order_service.external.users.application.service.UserService;
 import microservice.order_service.orders.application.exceptions.OrderNotFoundIDException;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class OrderQueryHandler {
     private final OrderRepository orderRepository;
     private final ResultMapper<OrderQueryResult, Order> orderQueryMapper;
@@ -38,14 +40,7 @@ public class OrderQueryHandler {
                 .orElseThrow(() -> new OrderNotFoundIDException(query.orderID()));
 
         var user = userService.getUserByID(order.getUserID());
-        if (order.getAddressID() == null) {
-            return OrderDetailResult.from(order, user);
-        }
-
-        var address = addressRepository.findByID(order.getAddressID())
-                .orElseThrow(() -> new OrderNotFoundIDException(query.orderID()));
-
-        return OrderDetailResult.from(order, user, address);
+        return OrderDetailResult.from(order, user);
     }
 
     @Transactional(readOnly = true)
@@ -54,14 +49,7 @@ public class OrderQueryHandler {
                 .orElseThrow(() -> new OrderNotFoundIDException(query.orderID()));
 
         var user = userService.getUserByID(order.getUserID());
-        if (order.getAddressID() == null) {
-            return OrderDetailResult.from(order, user);
-        }
-
-        var address = addressRepository.findByID(order.getAddressID())
-                .orElseThrow(() -> new OrderNotFoundIDException(query.orderID()));
-
-        return OrderDetailResult.from(order, user, address);
+        return OrderDetailResult.from(order, user);
     }
 
     @Transactional(readOnly = true)
