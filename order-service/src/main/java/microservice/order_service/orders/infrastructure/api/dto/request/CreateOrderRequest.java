@@ -2,18 +2,17 @@ package microservice.order_service.orders.infrastructure.api.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
-import microservice.order_service.orders.application.commands.request.CreateOrderItemCommand;
-import microservice.order_service.orders.application.commands.request.CreateDeliveryOrderCommand;
-import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
 import microservice.order_service.external.address.domain.model.AddressID;
+import microservice.order_service.orders.application.commands.request.CreateDeliveryOrderCommand;
+import microservice.order_service.orders.application.commands.request.CreateOrderItemCommand;
+import microservice.order_service.orders.application.commands.request.CreatePickupOrderCommand;
+import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
+import microservice.order_service.orders.domain.models.valueobjects.Money;
 import microservice.order_service.orders.domain.models.valueobjects.ProductID;
 import microservice.order_service.orders.domain.models.valueobjects.UserID;
 import org.hibernate.validator.constraints.Length;
 
-import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.List;
 
@@ -21,57 +20,88 @@ public record CreateOrderRequest(
         @NotNull @NotBlank
         String userID,
 
-        @NotNull @NotBlank
-        String addressID,
-
         @NotNull
         DeliveryMethod deliveryMethod,
 
         @NotNull
         String notes,
 
-        @NotNull @NotBlank @Length(min = 3, max = 3)
-        String currency,
+        @NotNull
+        microservice.order_service.orders.domain.models.enums.Currency currency,
 
         @NotNull @Size(min = 1, max = 50)
-        List<OrderItemRequest> items
+        List<OrderItemRequest> items,
+
+        DeliveryInfoCreateRequest deliveryInfo,
+        PickupInfoCreateRequest pickupInfo
 ) {
-    @Builder
-    public record OrderItemRequest(
-            @NotNull @NotBlank
-            String productID,
 
-            @NotNull @NotBlank @Length(min = 3, max = 100)
-            String productName,
-
-            @PositiveOrZero @NotNull
-            BigDecimal subtotal,
-
-            @PositiveOrZero
-            int quantity,
-
-            @NotNull
-            Boolean isPrescriptionRequired
+    public record DeliveryInfoCreateRequest(
+            @NotNull @NotBlank @Length(max = 36)
+            String addressID
     ) {}
 
-    public CreateDeliveryOrderCommand toCommand() {
-        Currency currencyObj = Currency.getInstance(currency);
+    public record PickupInfoCreateRequest(
+            @NotNull @NotBlank @Length(max = 36)
+            String storeID,
+
+            @NotNull @NotBlank @Length(max = 100)
+            String storeName,
+
+            @NotNull @NotBlank @Length(max = 100)
+            String storeAddress
+    ) {}
+
+    public CreateDeliveryOrderCommand toDeliveryOrderCommand() {
+        if (deliveryInfo == null) {
+            throw new IllegalArgumentException("Delivery info must be provided for delivery orders.");
+        }
+
+        Currency currencyObj = Currency.getInstance(currency.getCode());
         List<CreateOrderItemCommand> itemCommands = items.stream()
                 .map(item -> CreateOrderItemCommand.builder()
                         .productID(new ProductID(item.productID()))
                         .productName(item.productName())
-                        .subtotal(item.subtotal())
+                        .subtotal(Money.of(item.subtotal(), currencyObj))
                         .quantity(item.quantity())
                         .isPrescriptionRequired(item.isPrescriptionRequired())
                         .build())
                 .toList();
 
-        return CreateDeliveryOrderCommand.builder()
-                .userID(userID != null ? new UserID(userID) : null)
-                .addressID(addressID != null ? new AddressID(addressID) : null)
-                .deliveryMethod(deliveryMethod)
-                .notes(notes)
-                .items(itemCommands)
-                .build();
+        return new CreateDeliveryOrderCommand(
+                new UserID(userID),
+                deliveryMethod,
+                notes,
+                itemCommands,
+                new AddressID(deliveryInfo.addressID())
+        );
+    }
+
+    public CreatePickupOrderCommand toPickupOrderCommand() {
+        if (pickupInfo == null) {
+            throw new IllegalArgumentException("Pickup info must be provided for pickup orders.");
+        }
+
+        Currency currencyObj = Currency.getInstance(currency.getCode());
+        List<CreateOrderItemCommand> itemCommands = items.stream()
+                .map(item -> CreateOrderItemCommand.builder()
+                        .productID(new ProductID(item.productID()))
+                        .productName(item.productName())
+                        .subtotal(Money.of(item.subtotal(), currencyObj))
+                        .quantity(item.quantity())
+                        .isPrescriptionRequired(item.isPrescriptionRequired())
+                        .build())
+                .toList();
+
+        return new CreatePickupOrderCommand(
+                new UserID(userID),
+                deliveryMethod,
+                notes,
+                itemCommands,
+                pickupInfo.storeID(),
+                pickupInfo.storeName(),
+                pickupInfo.storeAddress()
+        );
     }
 }
+

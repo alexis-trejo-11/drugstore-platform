@@ -73,9 +73,8 @@ public record UserResponse(
 ) {
 
     public static UserResponse from(User user) {
-        if (user == null) {
-            return null;
-        }
+        if (user == null) return null;
+
         return UserResponse.builder()
                 .id(user.getId() != null ? user.getId().value() : null)
                 .name(user.getName())

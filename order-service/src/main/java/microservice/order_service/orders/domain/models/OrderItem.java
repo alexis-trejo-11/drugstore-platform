@@ -3,6 +3,7 @@ package microservice.order_service.orders.domain.models;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import microservice.order_service.orders.domain.models.valueobjects.Money;
 import microservice.order_service.orders.domain.models.valueobjects.OrderID;
 import microservice.order_service.orders.domain.models.valueobjects.ProductID;
@@ -11,6 +12,7 @@ import java.util.Objects;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class OrderItem {
     private Long id;

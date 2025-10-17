@@ -11,13 +11,13 @@ VALUES
 -- Insert demo data into addresses table (updated schema)
 INSERT INTO addresses (id, country, city, state, neighborhood, zip_code, street, building_type, inner_number, outer_number, additional_info, user_id, is_default, created_at, updated_at)
 VALUES
-('a1111111-1111-1111-1111-111111111111', 'USA', 'Springfield', 'Illinois', 'Downtown', '62701', '123 Main St', 'House', NULL, '123', 'Near the park', '11111111-1111-1111-1111-111111111111', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('a2222222-2222-2222-2222-222222222222', 'USA', 'Metropolis', 'New York', 'Midtown', '10001', '456 Oak Ave', 'Apartment', '2B', '456', 'Apt 2B', '22222222-2222-2222-2222-222222222222', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('a3333333-3333-3333-3333-333333333333', 'USA', 'Gotham', 'New Jersey', 'Financial District', '07001', '789 Pine Rd', 'Office', '300', '789', 'Suite 300', '33333333-3333-3333-3333-333333333333', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('a4444444-4444-4444-4444-444444444444', 'USA', 'Star City', 'California', 'Industrial Zone', '90001', '101 Maple Dr', 'Office', NULL, '101', 'Office', '44444444-4444-4444-4444-444444444444', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('a5555555-5555-5555-5555-555555555555', 'USA', 'Central City', 'Kansas', 'Logistics Park', '66002', '202 Birch Blvd', 'Warehouse', NULL, '202', 'Warehouse', '55555555-5555-5555-5555-555555555555', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('a6666666-6666-6666-6666-666666666666', 'USA', 'Smallville', 'Kansas', 'Rural Area', '66003', '77 Elm St', 'House', NULL, '77', 'Farmhouse', '11111111-1111-1111-1111-111111111111', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('a7777777-7777-7777-7777-777777777777', 'USA', 'Coast City', 'California', 'Harbor', '90002', '88 Cedar Ave', 'Apartment', 'PH', '88', 'Penthouse', '22222222-2222-2222-2222-222222222222', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+('a1111111-1111-1111-1111-111111111111', 'USA', 'Springfield', 'Illinois', 'Downtown', '62701', '123 Main St', 'HOUSE', NULL, '123', 'Near the park', '11111111-1111-1111-1111-111111111111', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('a2222222-2222-2222-2222-222222222222', 'USA', 'Metropolis', 'New York', 'Midtown', '10001', '456 Oak Ave', 'APARTMENT', '2B', '456', 'Apt 2B', '22222222-2222-2222-2222-222222222222', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('a3333333-3333-3333-3333-333333333333', 'USA', 'Gotham', 'New Jersey', 'Financial District', '07001', '789 Pine Rd', 'OFFICE', '300', '789', 'Suite 300', '33333333-3333-3333-3333-333333333333', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('a4444444-4444-4444-4444-444444444444', 'USA', 'Star City', 'California', 'Industrial Zone', '90001', '101 Maple Dr', 'OFFICE', NULL, '101', 'Office', '44444444-4444-4444-4444-444444444444', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('a5555555-5555-5555-5555-555555555555', 'USA', 'Central City', 'Kansas', 'Logistics Park', '66002', '202 Birch Blvd', 'WAREHOUSE', NULL, '202', 'Warehouse', '55555555-5555-5555-5555-555555555555', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('a6666666-6666-6666-6666-666666666666', 'USA', 'Smallville', 'Kansas', 'Rural Area', '66003', '77 Elm St', 'HOUSE', NULL, '77', 'Farmhouse', '11111111-1111-1111-1111-111111111111', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('a7777777-7777-7777-7777-777777777777', 'USA', 'Coast City', 'California', 'Harbor', '90002', '88 Cedar Ave', 'APARTMENT', 'PH', '88', 'Penthouse', '22222222-2222-2222-2222-222222222222', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Insert demo data into orders SIN delivery_info_id ni pick_up_info_id
 INSERT INTO orders (id, user_id, address_id, currency, delivery_method, status, service_fee, tax_fee, payment_id, delivery_info_id, pick_up_info_id, notes, created_at, updated_at)

@@ -1,14 +1,17 @@
 package microservice.order_service.orders.domain.models.valueobjects;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import microservice.order_service.external.address.domain.model.AddressID;
+import microservice.order_service.external.address.domain.model.DeliveryAddress;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Builder
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class DeliveryInfo {
     private String id;
     private String trackingNumber;
@@ -18,19 +21,7 @@ public class DeliveryInfo {
     private LocalDateTime actualDeliveryDate;
     private String receiverName;
     private Money deliveryFee;
-    private AddressID addressID;
-
-
-    public DeliveryInfo(String id, String trackingNumber, Integer deliveryAttempt, LocalDateTime estimatedDeliveryDate, LocalDateTime actualDeliveryDate, Money shippingCost) {
-        if (deliveryAttempt != null && deliveryAttempt < 0) {
-            throw new IllegalArgumentException("Delivery attempt cannot be negative");
-        }
-        this.trackingNumber = trackingNumber;
-        this.deliveryAttempt = deliveryAttempt;
-        this.estimatedDeliveryDate = estimatedDeliveryDate;
-        this.actualDeliveryDate = actualDeliveryDate;
-        this.shippingCost = shippingCost;
-    }
+    private DeliveryAddress address;
 
     public void incrementDeliveryAttempt() {
         if (this.deliveryAttempt == null) {
@@ -40,8 +31,15 @@ public class DeliveryInfo {
         }
     }
 
-    public static DeliveryInfo create(LocalDateTime estimatedDeliveryDate, Money shippingCost) {
-        return new DeliveryInfo(UUID.randomUUID().toString(), null,0, estimatedDeliveryDate, null, shippingCost);
+    public static DeliveryInfo create(LocalDateTime estimatedDeliveryDate, Money shippingCost, Money deliveryFee, DeliveryAddress deliveryAddress) {
+        return DeliveryInfo.builder()
+                .id(UUID.randomUUID().toString())
+                .estimatedDeliveryDate(estimatedDeliveryDate)
+                .shippingCost(shippingCost)
+                .deliveryFee(deliveryFee)
+                .address(deliveryAddress)
+                .deliveryAttempt(0)
+                .build();
     }
 
     public void ship(String trackingNumber) {

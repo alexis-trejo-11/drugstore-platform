@@ -13,6 +13,7 @@ public record PickupInfoResponse(
         String pickupCode
 ) {
     public static PickupInfoResponse from(PickupInfoQueryResult response) {
+        if (response == null) return null;
         return new PickupInfoResponse(
                 response.storeID(),
                 response.storeName(),

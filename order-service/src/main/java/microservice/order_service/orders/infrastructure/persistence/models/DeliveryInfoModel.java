@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import microservice.order_service.external.address.domain.model.AddressID;
+import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.address.infrastructure.persistence.Model.DeliveryAddressModel;
 import microservice.order_service.orders.domain.models.enums.Currency;
 import microservice.order_service.orders.domain.models.valueobjects.DeliveryInfo;
@@ -19,6 +22,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Slf4j
 public class DeliveryInfoModel {
     @Id
     @Column(name = "id", length = 36)
@@ -74,7 +78,6 @@ public class DeliveryInfoModel {
 
     public static DeliveryInfoModel from(DeliveryInfo deliveryInfo) {
         if (deliveryInfo == null) return null;
-
         return DeliveryInfoModel.builder()
                 .id(deliveryInfo.getId())
                 .actualDeliveryDate(deliveryInfo.getActualDeliveryDate())
@@ -84,19 +87,21 @@ public class DeliveryInfoModel {
                 .receiverName(deliveryInfo.getReceiverName())
                 .deliveryFee(deliveryInfo.getDeliveryFee() != null ? deliveryInfo.getDeliveryFee().amount() : null)
                 .currency(deliveryInfo.getDeliveryFee() != null ? Currency.fromCode(deliveryInfo.getDeliveryFee().currency().getCurrencyCode()) : null)
-                .deliveryAddress(new DeliveryAddressModel(deliveryInfo.getAddressID().value()))
+                .deliveryAddress(new DeliveryAddressModel(deliveryInfo.getAddress() != null ? deliveryInfo.getAddress().getId().value() : null))
                 .build();
     }
 
     public DeliveryInfo toDomain() {
-        return new DeliveryInfo(
-                this.id,
-                this.trackingNumber,
-                this.deliveryAttempt,
-                this.estimatedDeliveryDate,
-                this.actualDeliveryDate,
-                this.deliveryFee != null ? Money.of(this.deliveryFee, this.currency != null ? java.util.Currency.getInstance(this.currency.getCode()) : null) : null
-        );
+        return DeliveryInfo.builder()
+                .id(this.id)
+                .trackingNumber(this.trackingNumber)
+                .deliveryAttempt(this.deliveryAttempt)
+                .estimatedDeliveryDate(this.estimatedDeliveryDate)
+                .actualDeliveryDate(this.actualDeliveryDate)
+                .receiverName(this.receiverName)
+                .deliveryFee(this.deliveryFee != null && this.currency != null ? Money.of(this.deliveryFee, this.currency) : null)
+                .address(this.deliveryAddress.toDomain())
+                .build();
     }
 }
 

@@ -12,16 +12,15 @@ import java.util.Currency;
 public record CreateOrderItemCommand(
         ProductID productID,
         String productName,
-        BigDecimal subtotal,
+        Money subtotal,
         Integer quantity,
-        Currency currency,
         Boolean isPrescriptionRequired
 ) {
     public OrderItem toEntity() {
         return OrderItem.create(
                 this.productID,
                 this.productName,
-                Money.of(this.subtotal, this.currency),
+                subtotal,
                 this.quantity,
                 this.isPrescriptionRequired
         );

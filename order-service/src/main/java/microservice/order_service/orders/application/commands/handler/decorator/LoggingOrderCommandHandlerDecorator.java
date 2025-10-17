@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.order_service.orders.application.commands.handler.OrderCommandHandler;
 import microservice.order_service.orders.application.commands.handler.OrderCommandHandlerImpl;
-import microservice.order_service.orders.application.commands.request.CreateDeliveryOrderCommand;
-import microservice.order_service.orders.application.commands.request.DeleteOrderCommand;
-import microservice.order_service.orders.application.commands.request.UpdateOrderAddressCommand;
-import microservice.order_service.orders.application.commands.request.UpdateOrderDeliverMethodCommand;
+import microservice.order_service.orders.application.commands.request.*;
 import microservice.order_service.orders.application.commands.response.CreateOrderCommandResponse;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -22,7 +19,7 @@ public class LoggingOrderCommandHandlerDecorator implements OrderCommandHandler 
     @Override
     public CreateOrderCommandResponse handle(CreateDeliveryOrderCommand command) {
         log.info("Creating order: userId={}, deliveryMethod={}, itemCount={}",
-                command.userID(), command.deliveryMethod(), command.items().size());
+                command.getUserID(), command.getDeliveryMethod(), command.getItems().size());
 
         long startTime = System.currentTimeMillis();
 
@@ -37,7 +34,30 @@ public class LoggingOrderCommandHandlerDecorator implements OrderCommandHandler 
 
         } catch (Exception ex) {
             log.error("Order creation failed: userId={}, error={}",
-                    command.userID(), ex.getMessage(), ex);
+                    command.getUserID(), ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+
+    @Override
+    public CreateOrderCommandResponse handle(CreatePickupOrderCommand command) {
+        log.info("Creating pickup order: userId={}, deliveryMethod={}, itemCount={}",
+                command.getUserID(), command.getDeliveryMethod(), command.getItems().size());
+
+        long startTime = System.currentTimeMillis();
+
+        try {
+            CreateOrderCommandResponse response = delegate.handle(command);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Pickup order created successfully: orderId={}, duration={}ms",
+                    response.getOrderId(), duration);
+
+            return response;
+
+        } catch (Exception ex) {
+            log.error("Pickup Order creation failed: userId={}, error={}",
+                    command.getUserID(), ex.getMessage(), ex);
             throw ex;
         }
     }

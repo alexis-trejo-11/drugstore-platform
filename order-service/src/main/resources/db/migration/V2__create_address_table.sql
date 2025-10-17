@@ -18,8 +18,8 @@ CREATE TABLE addresses (
     -- Foreign key
     CONSTRAINT fk_address_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     -- Constraints
-    CONSTRAINT check_address_country CHECK (country IN ('USA', 'Canada', 'Mexico')),
-    CONSTRAINT check_building_type CHECK (building_type IN ('Apartment', 'House', 'Office', 'Condominium', 'Warehouse', 'Commercial', 'Other'))
+    CONSTRAINT check_address_country CHECK (country IN ('USA', 'CANADA', 'MEXICO')),
+    CONSTRAINT check_building_type CHECK (building_type IN ('APARTMENT', 'HOUSE', 'OFFICE', 'CONDOMINIUM', 'WAREHOUSE', 'COMMERCIAL', 'OTHER'))
 );
 
 -- Indexes for new table and foreign key

@@ -1,6 +1,8 @@
 package microservice.order_service.orders.infrastructure.api.dto.response;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import microservice.order_service.external.address.infrastructure.api.dto.DeliveryAddressResponse;
 import microservice.order_service.external.users.infrastructure.api.dto.UserResponse;
@@ -13,19 +15,18 @@ import java.util.Currency;
 import java.util.List;
 
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record OrderDetailResponse(
         String id,
         DeliveryMethod deliveryMethod,
         OrderStatus status,
         String notes,
-        BigDecimal taxAmount,
-        BigDecimal totalAmount,
-        Currency currency,
+        String taxAmount,
+        String totalAmount,
 
         DeliveryInfoResponse deliveryInfo,
         PickupInfoResponse pickupInfo,
         List<OrderItemResponse> items,
-        DeliveryAddressResponse deliveryAddress,
         UserResponse userResponse,
         String paymentID,
 

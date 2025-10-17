@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import microservice.order_service.external.address.domain.model.AddressID;
+import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.orders.application.exceptions.OrderValidationException;
 import microservice.order_service.orders.domain.models.enums.DeliveryMethod;
 import microservice.order_service.orders.domain.models.enums.OrderStatus;
@@ -25,29 +26,21 @@ public class Order {
     private OrderStatus status;
     private String notes;
     private Money taxFee;
+    private Money serviceFee;
 
     private PickupInfo pickupInfo;
     private DeliveryInfo deliveryInfo;
     private List<OrderItem> items;
-
     private UserID userID;
     private PaymentID paymentID;
 
     private OrderTimestamps orderTimestamps;
-
     private Currency orderCurrency;
-    public final static Currency DEFAULT_CURRENCY = Currency.getInstance("USD");
+    public final static Currency DEFAULT_CURRENCY = Currency.getInstance("MXN");
 
-    public static Order create(
-            UserID userID,
-            DeliveryMethod deliveryMethod,
-            AddressID addressID,
-            String notes,
-            Money shippingCost,
-            Money taxAmount
-    ) {
-        validateCreateParameters(userID, deliveryMethod, addressID, shippingCost, taxAmount);
-        Currency validatedCurrency = validateAndGetCurrency(shippingCost, taxAmount, DEFAULT_CURRENCY);
+    public static Order create(UserID userID, DeliveryMethod deliveryMethod,  String notes, Money serviceFee, Money taxAmount, List<OrderItem> items) {
+        validateCreateParameters(userID, deliveryMethod, serviceFee, taxAmount, items);
+        Currency validatedCurrency = validateAndGetCurrency(serviceFee, taxAmount, DEFAULT_CURRENCY);
 
         Order order = new Order();
         order.id = OrderID.generate();
@@ -57,21 +50,24 @@ public class Order {
         order.notes = notes;
         order.orderCurrency = validatedCurrency;
         order.taxFee = taxAmount;
+        order.serviceFee = serviceFee;
         order.items = new ArrayList<>();
         order.orderTimestamps = OrderTimestamps.create();
+        order.items = new ArrayList<>(items);
+        order.assignItems(items);
 
         return order;
     }
 
-    private static Currency validateAndGetCurrency(Money shippingCost, Money taxAmount, Currency defaultCurrency) {
+    private static Currency validateAndGetCurrency(Money serviceFee, Money taxAmount, Currency defaultCurrency) {
         Currency currency = defaultCurrency;
-        if (shippingCost != null) {
-            currency = shippingCost.currency();
+        if (serviceFee != null) {
+            currency = serviceFee.currency();
         } else if (taxAmount != null) {
             currency = taxAmount.currency();
         }
 
-        if (shippingCost != null && !shippingCost.currency().equals(currency)) {
+        if (serviceFee != null && !serviceFee.currency().equals(currency)) {
             throw new CurrencyMismatchException("Shipping cost currency mismatch");
         }
         if (taxAmount != null && !taxAmount.currency().equals(currency)) {
@@ -81,24 +77,48 @@ public class Order {
         return currency;
     }
 
-    private static void validateCreateParameters(
-            UserID userID,
-            DeliveryMethod deliveryMethod,
-            AddressID deliveryAddressID,
-            Money shippingCost,
-            Money taxAmount) {
-
+    private static void validateCreateParameters(UserID userID, DeliveryMethod deliveryMethod, Money serviceFee, Money taxAmount, List<OrderItem> items) {
         if (userID == null) {
             throw new InvalidOrderDataException("User ID cannot be null");
+        }
+
+        if (serviceFee == null || serviceFee.isNegative()) {
+            throw new InvalidOrderDataException("Service fee cannot be null or negative");
+        }
+
+        if (taxAmount == null || taxAmount.isNegative()) {
+            throw new InvalidOrderDataException("Tax amount cannot be null or negative");
         }
 
         if (deliveryMethod == null) {
             throw new InvalidOrderDataException("Delivery method cannot be null");
         }
 
-        if (deliveryMethod.requiresAddress() && deliveryAddressID == null) {
-            throw new MissingDeliveryAddressException();
+        if (items == null || items.isEmpty()) {
+            throw new EmptyOrderException();
         }
+    }
+
+    public void assignPickupInfo(PickupInfo pickupInfo) {
+        if (this.deliveryMethod != DeliveryMethod.STORE_PICKUP) {
+            throw new InvalidOrderDataException("Cannot assign pickup info to a non-pickup order");
+        }
+        if (pickupInfo == null) {
+            throw new InvalidOrderDataException("Pickup info cannot be null");
+        }
+        this.pickupInfo = pickupInfo;
+        this.orderTimestamps.orderUpdated();
+    }
+
+    public void assignDeliveryInfo(DeliveryInfo deliveryInfo) {
+        if (this.deliveryMethod == DeliveryMethod.STORE_PICKUP) {
+            throw new InvalidOrderDataException("Cannot assign delivery info to a pickup order");
+        }
+        if (deliveryInfo == null) {
+            throw new InvalidOrderDataException("Delivery info cannot be null");
+        }
+        this.deliveryInfo = deliveryInfo;
+        this.orderTimestamps.orderUpdated();
     }
 
     public void setEstimatedDeliveryDate(LocalDateTime estimatedDate) {
@@ -109,7 +129,7 @@ public class Order {
         orderTimestamps.orderUpdated();
     }
 
-    public void updateDeliveryAddress(AddressID addressID) {
+    public void updateDeliveryAddress(DeliveryAddress deliveryAddress) {
         if (deliveryMethod != DeliveryMethod.STANDARD_DELIVERY && deliveryMethod != DeliveryMethod.EXPRESS_DELIVERY) {
             throw new OrderValidationException("Cannot update address for non-delivery orders");
         }
@@ -118,8 +138,8 @@ public class Order {
             throw new OrderValidationException("Can only update address for PENDING or CONFIRMED orders");
         }
 
-        if (addressID == null) {
-            throw new OrderValidationException("New address ID cannot be null");
+        if (deliveryAddress == null) {
+            throw new OrderValidationException("Address cannot be null");
         }
 
         if (this.deliveryInfo == null) {
@@ -127,20 +147,15 @@ public class Order {
 
         }
 
-        if (addressID.equals(this.deliveryInfo.getAddressID())) {
+        if (deliveryAddress.getId().equals(this.deliveryInfo.getAddress().getId())) {
             throw new OrderValidationException("New address must be different from current address");
         }
 
-        this.deliveryInfo.setAddressID(addressID);
+        this.deliveryInfo.setAddress(deliveryAddress);
         this.orderTimestamps.orderUpdated();
     }
 
-    public void updateDeliveryMethod(
-            DeliveryMethod newMethod,
-            AddressID newAddressID,
-            LocalDateTime estimatedDeliveryDate,
-            Money shippingCost
-    ) {
+    public void changeDeliveryMethod(DeliveryMethod newMethod, DeliveryInfo newDeliveryInfo) {
         if (!canModifyDeliveryMethod()) {
             throw new InvalidOrderStateTransitionException(status, status);
         }
@@ -153,16 +168,28 @@ public class Order {
             throw new DeliveryMethodMismatchException("New delivery method must be different from current method");
         }
 
-        // If changing to a delivery method, ensure address is provided
-        if (newMethod.requiresAddress() && newAddressID == null) {
-            throw new MissingDeliveryAddressException();
+        this.deliveryInfo = newDeliveryInfo;
+        this.deliveryMethod = newMethod;
+        this.pickupInfo = null;
+        this.orderTimestamps.orderUpdated();
+    }
+
+    public void changeDeliveryMethod(DeliveryMethod newMethod, PickupInfo pickupInfo) {
+        if (!canModifyDeliveryMethod()) {
+            throw new InvalidOrderStateTransitionException(status, status);
         }
 
-        this.deliveryInfo = DeliveryInfo.create(
-                estimatedDeliveryDate,
-                shippingCost != null ? shippingCost : Money.zero(orderCurrency)
-        );
+        if (newMethod == null) {
+            throw new InvalidOrderDataException("New delivery method cannot be null");
+        }
 
+        if (newMethod == this.deliveryMethod) {
+            throw new DeliveryMethodMismatchException("New delivery method must be different from current method");
+        }
+
+        this.pickupInfo = pickupInfo;
+        this.deliveryMethod = newMethod;
+        this.deliveryInfo = null;
         this.orderTimestamps.orderUpdated();
     }
 
@@ -279,8 +306,9 @@ public class Order {
 
     public AddressID getAddressID() {
         if (deliveryInfo == null) return null;
-        return deliveryInfo.getAddressID();
+        return deliveryInfo.getAddress().getId();
     }
+
     public int getTotalItemsCount() {
         return items.stream().mapToInt(OrderItem::getQuantity).sum();
     }
@@ -305,6 +333,13 @@ public class Order {
         return status == OrderStatus.PENDING || status == OrderStatus.CONFIRMED;
     }
 
+    public void assignItems(List<OrderItem> items) {
+        validateNoDuplicateProducts(items);
+        for (OrderItem item : items) {
+            item.assignOrder(this.id);
+        }
+    }
+
     private void validateNoDuplicateProducts(List<OrderItem> items) {
         Set<ProductID> productIds = new HashSet<>();
         for (OrderItem item : items) {
@@ -312,18 +347,6 @@ public class Order {
                 throw new DuplicateProductInOrderException(item.getProductID());
             }
         }
-    }
-
-    public void assignItems(List<OrderItem> items) {
-        if (items == null || items.isEmpty()) throw new EmptyOrderException();
-
-        validateNoDuplicateProducts(items);
-
-        for (OrderItem item : items) {
-            item.assignOrder(this.id);
-        }
-
-        this.orderTimestamps.orderUpdated();
     }
 
     public Optional<OrderItem> findItem(ProductID productID) {
@@ -342,14 +365,29 @@ public class Order {
                 .reduce(Money.zero(orderCurrency), Money::add);
 
         return itemsTotal
-                .add(deliveryInfo != null ? deliveryInfo.getShippingCost() : Money.zero(orderCurrency))
-                .add(taxFee != null ? taxFee : Money.zero(orderCurrency));
+                .add(getSafeShippingCost())
+                .add(getSafeTaxFee());
+    }
+
+    private Money getSafeShippingCost() {
+        if (deliveryInfo == null || deliveryInfo.getShippingCost() == null) {
+            return Money.zero(orderCurrency);
+        }
+        return deliveryInfo.getShippingCost();
+    }
+
+    private Money getSafeTaxFee() {
+        if (taxFee == null) {
+            return Money.zero(orderCurrency);
+        }
+        return taxFee;
     }
 
     public Money getTotalAmount() {
         if (!hasItems()) {
             return Money.zero(orderCurrency);
         }
+
         return calculateTotalAmount();
     }
 
