@@ -1,4 +1,4 @@
-package microservice.store_service.domain.model;
+package microservice.store_service.domain.model.enums;
 
 public enum StoreStatus {
     ACTIVE,

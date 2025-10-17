@@ -1,4 +1,4 @@
-package microservice.store_service.domain.model;
+package microservice.store_service.domain.model.valueobjects;
 
 import java.util.UUID;
 

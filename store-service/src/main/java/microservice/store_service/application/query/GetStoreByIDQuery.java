@@ -1,0 +1,8 @@
+package microservice.store_service.application.query;
+
+import lombok.Builder;
+import microservice.store_service.domain.model.valueobjects.StoreID;
+import org.codehaus.commons.nullanalysis.NotNull;
+
+@Builder
+public record GetStoreByIDQuery(@NotNull StoreID id) {}
