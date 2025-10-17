@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- APPENDER 1: LOGSTASH TCP (Direct send to ELK) -->
+    <springProfile name="logstash">
+        <appender name="LOGSTASH_TCP" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+            <destination>localhost:5044</destination>
+
+            <!-- Automatic reconnection -->
+            <reconnectionDelay>10 second</reconnectionDelay>
+
+            <!-- Queue to avoid losing logs if Logstash is down -->
+            <ringBufferSize>8192</ringBufferSize>
+
+            <!-- JSON Encoder -->
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>{"app_name":"order-service","environment":"${SPRING_PROFILES_ACTIVE:-dev}"}</customFields>
+                <includeMdcKeyName>traceId</includeMdcKeyName>
+                <includeMdcKeyName>spanId</includeMdcKeyName>
+                <includeMdcKeyName>userId</includeMdcKeyName>
+            </encoder>
+
+            <!-- Only application logs, exclude audit -->
+            <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+                <evaluator>
+                    <expression>
+                        logger.startsWith("microservice.order_service") &amp;&amp;
+                        !message.contains("AUDIT_EVENT")
+                    </expression>
+                </evaluator>
+                <onMatch>ACCEPT</onMatch>
+                <onMismatch>DENY</onMismatch>
+            </filter>
+        </appender>
+
+        <!-- ASYNC WRAPPER -->
+        <appender name="ASYNC_LOGSTASH" class="ch.qos.logback.classic.AsyncAppender">
+            <appender-ref ref="LOGSTASH_TCP"/>
+            <queueSize>512</queueSize>
+            <discardingThreshold>0</discardingThreshold>
+            <neverBlock>true</neverBlock>
+        </appender>
+    </springProfile>
+
+    <!-- APPENDER 2: FILE BACKUP (In case Logstash fails or no Logstash) -->
+    <appender name="ELK_APPLICATION_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/application-elk.json</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/application-elk.%d{yyyy-MM-dd}.json</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"app_name":"order-service"}</customFields>
+        </encoder>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator>
+                <expression>
+                    logger.startsWith("microservice.order_service") &amp;&amp;
+                    !message.contains("AUDIT_EVENT")
+                </expression>
+            </evaluator>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- APPENDER 3: AUDIT LOGS (Separate) -->
+    <appender name="AUDIT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/audit-events.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/audit-events.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>90</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator>
+                <expression>
+                    logger.equals("libs_kernel.log.audit_logger.AuditLogger") ||
+                    message.contains("AUDIT_EVENT")
+                </expression>
+            </evaluator>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- APPENDER 4: Console (Development) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} - %highlight(%-5level) - %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ===================================== -->
+    <!-- PROFILES: DEVELOPMENT vs PRODUCTION  -->
+    <!-- ===================================== -->
+
+    <springProfile name="dev,local">
+        <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+        <logger name="org.springframework.web" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+    </springProfile>
+
+    <springProfile name="prod,production">
+        <logger name="org.hibernate" level="WARN" additivity="false">
+            <appender-ref ref="ELK_APPLICATION_FILE"/>
+            <springProfile name="logstash">
+                <appender-ref ref="ASYNC_LOGSTASH"/>
+            </springProfile>
+        </logger>
+        <logger name="org.springframework" level="WARN" additivity="false">
+            <appender-ref ref="ELK_APPLICATION_FILE"/>
+            <springProfile name="logstash">
+                <appender-ref ref="ASYNC_LOGSTASH"/>
+            </springProfile>
+        </logger>
+    </springProfile>
+
+    <springProfile name="qa,staging">
+        <logger name="org.hibernate.SQL" level="INFO" additivity="false">
+            <appender-ref ref="ELK_APPLICATION_FILE"/>
+            <appender-ref ref="CONSOLE"/>
+            <springProfile name="logstash">
+                <appender-ref ref="ASYNC_LOGSTASH"/>
+            </springProfile>
+        </logger>
+        <logger name="org.springframework.web" level="INFO" additivity="false">
+            <appender-ref ref="ELK_APPLICATION_FILE"/>
+            <appender-ref ref="CONSOLE"/>
+            <springProfile name="logstash">
+                <appender-ref ref="ASYNC_LOGSTASH"/>
+            </springProfile>
+        </logger>
+    </springProfile>
+
+    <!-- APPLICATION LOGGER -->
+    <logger name="microservice.order_service" level="DEBUG" additivity="false">
+        <appender-ref ref="ELK_APPLICATION_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+        <springProfile name="logstash">
+            <appender-ref ref="ASYNC_LOGSTASH"/>
+        </springProfile>
+    </logger>
+
+    <!-- AUDIT LOGGER -->
+    <logger name="libs_kernel.log.audit_logger.AuditLogger" level="INFO" additivity="false">
+        <appender-ref ref="AUDIT_FILE"/>
+        <springProfile name="dev,local">
+            <appender-ref ref="CONSOLE"/>
+        </springProfile>
+    </logger>
+
+    <!-- ROOT LOGGER -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>
