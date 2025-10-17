@@ -1,4 +1,4 @@
-package microservice.store_service.application.command;
+package microservice.store_service.application.command.address;
 
 import microservice.store_service.domain.model.valueobjects.Address;
 

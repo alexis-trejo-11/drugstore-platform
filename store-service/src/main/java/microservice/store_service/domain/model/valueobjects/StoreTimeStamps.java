@@ -14,7 +14,24 @@ public class StoreTimeStamps{
     LocalDateTime updatedAt;
     LocalDateTime deletedAt;
 
-    public void updateTimestamp() {
+    public void markAsUpdated() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public static StoreTimeStamps now() {
+        LocalDateTime now = LocalDateTime.now();
+        return StoreTimeStamps.builder()
+                .createdAt(now)
+                .updatedAt(now)
+                .deletedAt(null)
+                .build();
+    }
+
+    public void markAsDeleted() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public void restore() {
+        this.deletedAt = null;
     }
 }

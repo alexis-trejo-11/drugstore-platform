@@ -1,9 +1,9 @@
-package microservice.store_service.application.command.handler;
+package microservice.store_service.application.handler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import microservice.store_service.application.command.ActivateStoreCommand;
-import microservice.store_service.application.command.result.StoreOperationResult;
+import microservice.store_service.application.command.status.ActivateStoreCommand;
+import microservice.store_service.application.handler.result.StoreOperationResult;
 import microservice.store_service.domain.exception.StoreNotFoundException;
 import microservice.store_service.domain.model.Store;
 import microservice.store_service.domain.port.StoreRepositoryPort;

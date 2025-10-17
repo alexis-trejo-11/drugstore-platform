@@ -1,11 +1,11 @@
-package microservice.store_service.application.command.handler;
+package microservice.store_service.application.handler;
 
 import jakarta.transaction.Transactional;
 import libs_kernel.mapper.CommandMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.store_service.application.command.CreateStoreCommand;
-import microservice.store_service.application.command.result.CreateStoreResult;
+import microservice.store_service.application.handler.result.CreateStoreResult;
 import microservice.store_service.domain.model.Store;
 import microservice.store_service.domain.port.StoreRepositoryPort;
 import org.springframework.stereotype.Service;
