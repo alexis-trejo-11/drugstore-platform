@@ -1,11 +1,11 @@
-package microservice.store_service.application.query.handler;
+package microservice.store_service.application.handler.query;
 
 
 
 import libs_kernel.mapper.ResultMapper;
 import lombok.RequiredArgsConstructor;
 import microservice.store_service.application.query.GetStoreByIDQuery;
-import microservice.store_service.application.query.result.StoreQueryResult;
+import microservice.store_service.application.handler.result.StoreQueryResult;
 import microservice.store_service.domain.exception.StoreNotFoundException;
 import microservice.store_service.domain.model.Store;
 import microservice.store_service.domain.port.StoreRepositoryPort;

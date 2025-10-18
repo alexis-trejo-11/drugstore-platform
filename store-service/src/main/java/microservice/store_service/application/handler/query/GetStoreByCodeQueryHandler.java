@@ -1,9 +1,9 @@
-package microservice.store_service.application.query.handler;
+package microservice.store_service.application.handler.query;
 
 import libs_kernel.mapper.ResultMapper;
 import lombok.RequiredArgsConstructor;
 import microservice.store_service.application.query.GetStoreByCodeQuery;
-import microservice.store_service.application.query.result.StoreQueryResult;
+import microservice.store_service.application.handler.result.StoreQueryResult;
 import microservice.store_service.domain.exception.StoreNotFoundException;
 import microservice.store_service.domain.model.Store;
 import microservice.store_service.domain.port.StoreRepositoryPort;
@@ -19,7 +19,7 @@ public class GetStoreByCodeQueryHandler {
     @Transactional(readOnly = true)
     public StoreQueryResult execute(GetStoreByCodeQuery query) {
         Store store = storeRepository.findByCode(query.code())
-                .orElseThrow(() -> new StoreNotFoundException("code", query.code()));
+                .orElseThrow(() -> new StoreNotFoundException("exactCode", query.code().value()));
 
         return storeToStoreQueryResultMapper.toResult(store);
     }

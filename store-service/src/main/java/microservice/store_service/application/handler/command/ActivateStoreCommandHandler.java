@@ -1,4 +1,4 @@
-package microservice.store_service.application.handler;
+package microservice.store_service.application.handler.command;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

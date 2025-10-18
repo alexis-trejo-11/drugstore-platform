@@ -1,4 +1,4 @@
-package microservice.store_service.application.handler;
+package microservice.store_service.application.handler.command;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,14 +16,14 @@ public class DeleteStoreCommandHandler {
 
     public StoreOperationResult handle(DeleteStoreCommand command) {
         log.info("Handling DeleteStoreCommand for ID: {}", command.id());
-        if (!storeRepository.existsById(command.id())) {
+        if (!storeRepository.existsByID(command.id())) {
             throw new StoreNotFoundException("id", command.id().toString());
         }
 
         log.info("Deleting store with ID: {}", command.id());
 
         try {
-            storeRepository.deleteById(command.id());
+            storeRepository.deleteByID(command.id());
             log.info("Store with ID: {} deleted successfully", command.id());
 
             return StoreOperationResult.deleteResult(command.id());

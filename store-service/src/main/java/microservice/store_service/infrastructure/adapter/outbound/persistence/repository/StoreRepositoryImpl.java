@@ -104,8 +104,8 @@ public class StoreRepositoryImpl implements StoreRepositoryPort {
             return Sort.unsorted();
         }
 
-        String field = criteria.sortBy().getField();
-        String direction = criteria.sortBy().getDirection();
+        String field = criteria.sortBy().field();
+        String direction = criteria.sortBy().direction();
 
         return "ASC".equals(direction)
                 ? Sort.by(field).ascending()

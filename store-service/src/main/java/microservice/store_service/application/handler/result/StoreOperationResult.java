@@ -1,4 +1,4 @@
-package microservice.store_service.application.command.result;
+package microservice.store_service.application.handler.result;
 
 import microservice.store_service.domain.model.valueobjects.StoreID;
 
