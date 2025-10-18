@@ -12,4 +12,8 @@ public record Geolocation(
             throw new IllegalArgumentException("Longitude must be between -180 and 180 degrees.");
         }
     }
+
+    public static Geolocation of(Double latitude, Double longitude) {
+        return new Geolocation(latitude, longitude);
+    }
 }

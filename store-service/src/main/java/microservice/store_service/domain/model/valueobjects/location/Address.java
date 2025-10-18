@@ -1,22 +1,12 @@
 package microservice.store_service.domain.model.valueobjects.location;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
+
 
 @Builder
-@AllArgsConstructor
-@Getter
-public class Address {
-    private  String country;
-    private  String state;
-    private  String city;
-    private  String zipCode;
-    private  String neighborhood;
-    private  String street;
-    private  String number;
-
-    public void validate(){
+public record Address(String country, String state, String city, String zipCode, String neighborhood, String street,
+                      String number) {
+    public void validate() {
         if (country == null || country.isBlank()) {
             throw new IllegalArgumentException("Country cannot be null or blank");
         }

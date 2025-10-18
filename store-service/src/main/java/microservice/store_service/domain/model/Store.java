@@ -29,8 +29,8 @@ public class Store {
                   ContactInfo contactInfo, Address address,
                   Geolocation geolocation, StoreSchedule serviceSchedule) {
         this.id = Objects.requireNonNull(id, "Store ID cannot be null");
-        this.code = Objects.requireNonNull(code, "Store code cannot be null");
-        this.name = Objects.requireNonNull(name, "Store name cannot be null");
+        this.code = Objects.requireNonNull(code, "Store exactCode cannot be null");
+        this.name = Objects.requireNonNull(name, "Store value cannot be null");
         this.status = Objects.requireNonNull(status, "Store status cannot be null");
         this.contactInfo = Objects.requireNonNull(contactInfo, "Contact info cannot be null");
         this.address = Objects.requireNonNull(address, "Address cannot be null");

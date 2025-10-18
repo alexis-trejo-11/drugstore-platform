@@ -1,4 +1,4 @@
-package microservice.store_service.application.handler;
+package microservice.store_service.application.handler.command;
 
 import jakarta.transaction.Transactional;
 import libs_kernel.mapper.CommandMapper;
@@ -22,11 +22,15 @@ public class CreateStoreCommandHandler {
         log.info("Handling CreateStoreCommand: {}", command);
 
         try {
-            Store store = commandMapper.toTarget(command);
-
-            log.info("Validating store business rules before persistence");
-            store.validatePersist();
-            store.assignID();
+            log.info("Creating store entity from command");
+            Store store = Store.create(
+                    command.code(),
+                    command.name(),
+                    command.infoCommand().toContactInfo(),
+                    command.addressCommand().toAddress(),
+                    command.geoCommand().toGeolocation(),
+                    command.scheduleCommand().toDomain()
+            );
 
             log.info("Persisting store: {}", store);
             Store storeCreated = storeRepository.save(store);

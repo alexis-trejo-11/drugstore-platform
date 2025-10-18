@@ -1,6 +1,6 @@
-package microservice.store_service.application.command.address;
+package microservice.store_service.application.command.valueobject;
 
-import microservice.store_service.domain.model.valueobjects.Address;
+import microservice.store_service.domain.model.valueobjects.location.Address;
 
 public record AddressCommand(
        String country,

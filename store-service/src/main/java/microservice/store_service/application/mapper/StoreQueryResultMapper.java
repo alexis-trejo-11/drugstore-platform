@@ -1,7 +1,7 @@
 package microservice.store_service.application.mapper;
 
 import libs_kernel.mapper.ResultMapper;
-import microservice.store_service.application.query.result.StoreQueryResult;
+import microservice.store_service.application.handler.result.StoreQueryResult;
 import microservice.store_service.domain.model.Store;
 import org.springframework.data.domain.Page;
 
@@ -15,7 +15,6 @@ public class StoreQueryResultMapper implements ResultMapper<StoreQueryResult, St
                 .id(entity.getId())
                 .code(entity.getCode())
                 .name(entity.getName())
-                .is24Hours(entity.is24Hours())
                 .status(entity.getStatus())
                 .address(entity.getAddress())
                 .contactInfo(entity.getContactInfo())
