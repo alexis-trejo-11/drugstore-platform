@@ -2,9 +2,10 @@ package microservice.store_service.infrastructure.adapter.inbound.rest.dto.reque
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import microservice.store_service.application.command.OrderScheduleCommand;
-import microservice.store_service.application.command.UpdateStoreScheduleCommand;
-import microservice.store_service.application.command.valueobject.TimeRangeCommand;
+import jakarta.validation.constraints.NotNull;
+import microservice.store_service.application.dto.command.OrderScheduleCommand;
+import microservice.store_service.application.dto.command.UpdateStoreScheduleCommand;
+import microservice.store_service.application.dto.command.valueobject.TimeRangeCommand;
 import microservice.store_service.domain.model.valueobjects.StoreID;
 
 import java.time.DayOfWeek;
@@ -55,7 +56,7 @@ public record ScheduleInsertRequest(
                 example = "{\"2025-12-25\": null, \"2025-12-31\": {\"start\": \"09:00:00\", \"end\": \"15:00:00\"}}",
                 nullable = true
         )
-        Map<LocalDate, TimeRangeRequest> specialHours
+        Map<@NotNull LocalDate, @Valid @NotNull TimeRangeRequest> specialHours
 
 ) {
 
@@ -88,16 +89,16 @@ public record ScheduleInsertRequest(
             return null;
         }
 
-        return specialHours.entrySet()
-                .stream()
-                .collect(
-                        java.util.stream.Collectors.toMap(
-                                Map.Entry::getKey,
-                                entry -> entry.getValue() != null
-                                        ? new TimeRangeCommand(entry.getValue().start(), entry.getValue().end())
-                                        : null
-                        )
-                );
+        Map<LocalDate, TimeRangeCommand> result = new java.util.HashMap<>();
+        for (var entry : specialHours.entrySet()) {
+            LocalDate key = entry.getKey();
+            if (key == null) {
+                continue;
+            }
+            TimeRangeRequest tr = entry.getValue();
+            result.put(key, tr != null ? new TimeRangeCommand(tr.start(), tr.end()) : null);
+        }
+        return result;
     }
 }
 

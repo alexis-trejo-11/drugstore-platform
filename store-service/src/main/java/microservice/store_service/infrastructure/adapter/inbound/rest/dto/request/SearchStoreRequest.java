@@ -2,8 +2,7 @@ package microservice.store_service.infrastructure.adapter.inbound.rest.dto.reque
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import libs_kernel.page.PageInput;
-import libs_kernel.page.PageableResponse;
-import microservice.store_service.application.query.SearchStoresQuery;
+import microservice.store_service.application.dto.query.SearchStoresQuery;
 import microservice.store_service.domain.model.enums.StoreStatus;
 import microservice.store_service.domain.specification.StoreSearchCriteria;
 

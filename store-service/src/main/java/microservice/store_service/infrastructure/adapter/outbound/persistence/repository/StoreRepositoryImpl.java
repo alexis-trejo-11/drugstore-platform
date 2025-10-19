@@ -2,6 +2,7 @@ package microservice.store_service.infrastructure.adapter.outbound.persistence.r
 
 import libs_kernel.mapper.ModelMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import microservice.store_service.domain.model.Store;
 import microservice.store_service.domain.model.valueobjects.StoreCode;
 import microservice.store_service.domain.model.valueobjects.StoreID;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class StoreRepositoryImpl implements StoreRepositoryPort {
     private final JpaStoreRepository jpaRepository;
     private final ModelMapper<Store, StoreEntity> mapper;
@@ -28,8 +30,13 @@ public class StoreRepositoryImpl implements StoreRepositoryPort {
 
     @Override
     public Store save(Store store) {
+        log.info("Saving store with ID: {}", store.getId());
         StoreEntity entity = mapper.fromDomain(store);
+
+        log.info("Converted Store to StoreEntity: {}", entity);
         StoreEntity saved = jpaRepository.save(entity);
+
+        log.info("Saved StoreEntity: {}", saved);
         return mapper.toDomain(saved);
     }
 

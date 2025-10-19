@@ -1,16 +1,15 @@
 package microservice.store_service.application;
 
-import microservice.store_service.application.command.*;
-import microservice.store_service.application.command.valueobject.*;
-import microservice.store_service.application.command.status.ActivateStoreCommand;
-import microservice.store_service.application.command.status.DeactivateStoreCommand;
-import microservice.store_service.application.handler.result.CreateStoreResult;
-import microservice.store_service.application.handler.result.StoreOperationResult;
-import microservice.store_service.application.handler.result.StoreQueryResult;
-import microservice.store_service.application.query.GetStoreByCodeQuery;
-import microservice.store_service.application.query.GetStoreByIDQuery;
-import microservice.store_service.application.query.GetStoresByStatusQuery;
-import microservice.store_service.application.query.SearchStoresQuery;
+import microservice.store_service.application.dto.command.*;
+import microservice.store_service.application.dto.command.status.ActivateStoreCommand;
+import microservice.store_service.application.dto.command.status.DeactivateStoreCommand;
+import microservice.store_service.application.dto.CreateStoreResult;
+import microservice.store_service.application.dto.StoreOperationResult;
+import microservice.store_service.application.dto.query.GetStoreByCodeQuery;
+import microservice.store_service.application.dto.query.GetStoreByIDQuery;
+import microservice.store_service.application.dto.query.GetStoresByStatusQuery;
+import microservice.store_service.application.dto.query.SearchStoresQuery;
+import microservice.store_service.domain.model.Store;
 import org.springframework.data.domain.Page;
 
 public interface StoreApplicationFacade {
@@ -27,9 +26,9 @@ public interface StoreApplicationFacade {
     StoreOperationResult setTemporaryClosure(SetTemporaryClosureCommand command);
 
     StoreOperationResult deleteStore(DeleteStoreCommand command);
-    StoreQueryResult getStoreByCode(GetStoreByCodeQuery query);
-    StoreQueryResult getStoreByID(GetStoreByIDQuery query);
-    Page<StoreQueryResult> searchStores(SearchStoresQuery query);
-    Page<StoreQueryResult> getStoresByStatus(GetStoresByStatusQuery query);
+    Store getStoreByCode(GetStoreByCodeQuery query);
+    Store getStoreByID(GetStoreByIDQuery query);
+    Page<Store> searchStores(SearchStoresQuery query);
+    Page<Store> getStoresByStatus(GetStoresByStatusQuery query);
 
 }

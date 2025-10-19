@@ -2,7 +2,7 @@ package microservice.store_service.infrastructure.adapter.inbound.rest.dto.reque
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import microservice.store_service.application.command.valueobject.GeolocationCommand;
+import microservice.store_service.application.dto.command.valueobject.GeolocationCommand;
 
 public record GeolocationRequest(
         @NotNull

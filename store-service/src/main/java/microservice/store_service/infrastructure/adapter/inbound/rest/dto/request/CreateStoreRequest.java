@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import io.swagger.v3.oas.annotations.media.Schema;
-import microservice.store_service.application.command.CreateStoreCommand;
+import microservice.store_service.application.dto.command.CreateStoreCommand;
 import microservice.store_service.domain.model.enums.StoreStatus;
 import microservice.store_service.domain.model.valueobjects.StoreCode;
 import microservice.store_service.domain.model.valueobjects.StoreName;
@@ -43,7 +43,6 @@ public record CreateStoreRequest(
 ) {
 
     public CreateStoreCommand toCommand() {
-
         return new CreateStoreCommand(
                 StoreCode.of(this.code),
                 StoreName.of(this.name),

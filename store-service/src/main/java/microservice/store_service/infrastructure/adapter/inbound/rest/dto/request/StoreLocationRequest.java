@@ -2,7 +2,7 @@ package microservice.store_service.infrastructure.adapter.inbound.rest.dto.reque
 
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import microservice.store_service.application.command.UpdateStoreLocationCommand;
+import microservice.store_service.application.dto.command.UpdateStoreLocationCommand;
 import microservice.store_service.domain.model.valueobjects.StoreID;
 
 @Schema(description = "Location information including geolocation and address")

@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import microservice.store_service.application.command.valueobject.ContactInfoCommand;
+import microservice.store_service.application.dto.command.valueobject.ContactInfoCommand;
 
 public record StoreContactInfoRequest(
         @NotNull @NotBlank
