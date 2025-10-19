@@ -40,7 +40,7 @@ public record SearchStoreRequest(
         PageInput pageInput
 ) {
     public SearchStoresQuery toQuery() {
-        var sortCriteria = StoreSearchCriteria.SortCriteria.DISTANCE_ASC; // Default sort criteria
+        var sortCriteria = StoreSearchCriteria.SortCriteria.CREATED_AT_ASC; // Default sort criteria
         return SearchStoresQuery.builder()
                 .nameLike(nameLike)
                 .phoneLike(phoneLike)
@@ -52,8 +52,8 @@ public record SearchStoreRequest(
                 .statuses(statuses)
                 .locationFilter(locationFilter)
                 .scheduleFilter(scheduleFilter)
-                .page(pageInput.page())
-                .size(pageInput.size())
+                .page(pageInput != null ? pageInput.page() : 1)
+                .size(pageInput != null ? pageInput.size() : 10)
                 .sortBy(sortCriteria)
                 .build();
     }

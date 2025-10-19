@@ -94,9 +94,9 @@ public record StoreSearchCriteria(
         NAME_ASC("name", "ASC"),
         NAME_DESC("name", "DESC"),
         CREATED_AT_ASC("createdAt", "ASC"),
-        CREATED_AT_DESC("createdAt", "DESC"),
-        DISTANCE_ASC("distance", "ASC"),
-        DISTANCE_DESC("distance", "DESC");
+        CREATED_AT_DESC("createdAt", "DESC");
+        //DISTANCE_ASC("distance", "ASC"),
+        //DISTANCE_DESC("distance", "DESC");
 
         protected final String field;
         protected final String direction;
@@ -153,7 +153,7 @@ public record StoreSearchCriteria(
                         .radiusKm(radiusKm)
                         .build())
                 .statuses(Set.of(StoreStatus.ACTIVE))
-                .sortBy(SortCriteria.DISTANCE_ASC)
+                .sortBy(SortCriteria.NAME_ASC)
                 .build();
     }
 

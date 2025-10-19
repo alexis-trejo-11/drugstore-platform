@@ -6,9 +6,11 @@ import libs_kernel.page.PageableResponse;
 import microservice.store_service.application.handler.result.StoreQueryResult;
 import microservice.store_service.infrastructure.adapter.inbound.rest.dto.response.StoreResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class StoreResponseMapper implements ResponseMapper<StoreResponse, StoreQueryResult> {
     @Override
     public StoreResponse toResponse(StoreQueryResult storeQueryResult) {

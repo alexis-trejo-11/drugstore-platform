@@ -40,8 +40,8 @@ spring:
 
   # Postgres
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
+    url: jdbc:postgresql://localhost:5432/drugstore_stores
+    username: alexistrejo
     password: alexisAdmin1475963
     driver-class-name: org.postgresql.Driver
   jpa:
@@ -98,6 +98,4 @@ springdoc:
   paths-to-match: /api/**
   cache:
     disabled: true
-
-
 # No logging configuration needed here since logback-spring.xml manages it

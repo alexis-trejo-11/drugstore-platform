@@ -42,7 +42,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/drugstore_orders
     username: alexistrejo
-    password: alexisAdmin1475963 
+    password: alexisAdmin1475963
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -98,6 +98,4 @@ springdoc:
   paths-to-match: /api/**
   cache:
     disabled: true
-
-
 # No logging configuration needed here since logback-spring.xml manages it

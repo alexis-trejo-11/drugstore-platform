@@ -5,7 +5,7 @@ import microservice.store_service.domain.model.Store;
 import microservice.store_service.domain.model.valueobjects.*;
 import microservice.store_service.domain.model.valueobjects.location.Address;
 import microservice.store_service.domain.model.valueobjects.location.Geolocation;
-import microservice.store_service.domain.model.valueobjects.schedule.StoreSchedule;
+import microservice.store_service.domain.model.schedule.StoreSchedule;
 import microservice.store_service.infrastructure.adapter.outbound.persistence.entity.AddressEmbeddable;
 import microservice.store_service.infrastructure.adapter.outbound.persistence.entity.StoreEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -165,7 +165,7 @@ public class StoreEntityMapper implements ModelMapper<Store, StoreEntity> {
         String scheduleJson = entity.getScheduleJson();
 
         if (scheduleJson == null || scheduleJson.isBlank()) {
-            return new StoreSchedule();
+            return null;
         }
 
         return scheduleJsonMapper.fromJson(scheduleJson);

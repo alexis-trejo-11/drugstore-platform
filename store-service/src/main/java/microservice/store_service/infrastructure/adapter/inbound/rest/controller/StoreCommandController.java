@@ -8,8 +8,6 @@ import microservice.store_service.application.command.DeleteStoreCommand;
 import microservice.store_service.application.command.UpdateStoreScheduleCommand;
 import microservice.store_service.application.command.status.ActivateStoreCommand;
 import microservice.store_service.application.command.status.DeactivateStoreCommand;
-import microservice.store_service.application.command.valueobject.Schedule24HoursCommand;
-import microservice.store_service.application.command.valueobject.ScheduleCommand;
 import microservice.store_service.application.command.SetTemporaryClosureCommand;
 import microservice.store_service.application.command.SetUnderMaintenanceCommand;
 import microservice.store_service.domain.model.valueobjects.StoreID;
@@ -44,13 +42,6 @@ public class StoreCommandController {
     @PatchMapping("/{id}/schedule")
     private ResponseWrapper<Void> updateStoreSchedule(@PathVariable String id, @Valid @RequestBody ScheduleInsertRequest request) {
         UpdateStoreScheduleCommand command = request.toCommand(StoreID.of(id));
-        var result = storeApplicationFacade.updateScheduleInfo(command);
-        return ResponseWrapper.success(result.message());
-    }
-
-    @PatchMapping("/{id}/schedule/24-hours")
-    private ResponseWrapper<Void> updateStoreSchedule(@PathVariable String id) {
-        var command = new Schedule24HoursCommand(StoreID.of(id));
         var result = storeApplicationFacade.updateScheduleInfo(command);
         return ResponseWrapper.success(result.message());
     }

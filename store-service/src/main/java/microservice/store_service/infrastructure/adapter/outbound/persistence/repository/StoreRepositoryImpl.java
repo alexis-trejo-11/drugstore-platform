@@ -82,7 +82,7 @@ public class StoreRepositoryImpl implements StoreRepositoryPort {
 
     @Override
     public boolean existsByID(StoreID id) {
-        return jpaRepository.existsByID(id.value());
+        return jpaRepository.existsById(id.value());
     }
 
     @Override

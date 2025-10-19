@@ -19,7 +19,6 @@ public interface StoreApplicationFacade {
     StoreOperationResult updateStoreNameAndContactInfo(UpdateStoreNameAndContactCommand command);
     StoreOperationResult updateStoreLocation(UpdateStoreLocationCommand command);
     StoreOperationResult updateScheduleInfo(UpdateStoreScheduleCommand command);
-    StoreOperationResult updateScheduleInfo(Schedule24HoursCommand command);
 
     StoreOperationResult activateStore(ActivateStoreCommand command);
     StoreOperationResult deactivateStore(DeactivateStoreCommand command);
