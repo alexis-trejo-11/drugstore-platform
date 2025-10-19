@@ -59,7 +59,7 @@ public class ScheduleJsonMapper {
 
 
     private Map<DayOfWeek, ScheduleDTO.TimeRangeDTO> mapRegularHours(StoreSchedule schedule) {
-        Map<DayOfWeek, TimeRange> regularHours = schedule.getWeeklySchedule();
+        Map<DayOfWeek, TimeRange> regularHours = schedule.getRegularHours();
 
         Map<DayOfWeek, ScheduleDTO.TimeRangeDTO> result = new EnumMap<>(DayOfWeek.class);
 

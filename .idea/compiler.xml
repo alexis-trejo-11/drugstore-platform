@@ -10,9 +10,11 @@
         <module name="com.alexisTrejo.drugstore.backend.libs.shared-kernel.main" />
         <module name="com.alexisTrejo.drugstore.backend.auth-service.test" />
         <module name="com.alexisTrejo.drugstore.backend.libs.shared-kernel.test" />
+        <module name="com.alexisTrejo.drugstore.backend.inventory-service.test" />
         <module name="com.alexisTrejo.drugstore.backend.cart-service.test" />
         <module name="com.alexisTrejo.drugstore.backend.auth-service.main" />
         <module name="com.alexisTrejo.drugstore.backend.product-service.test" />
+        <module name="com.alexisTrejo.drugstore.backend.inventory-service.main" />
         <module name="com.alexisTrejo.drugstore.backend.libs.test" />
         <module name="com.alexisTrejo.drugstore.backend.libs.main" />
       </profile>
@@ -50,6 +52,9 @@
       <module name="com.alexisTrejo.drugstore.backend.config-server" options="-parameters" />
       <module name="com.alexisTrejo.drugstore.backend.config-server.main" options="-parameters" />
       <module name="com.alexisTrejo.drugstore.backend.config-server.test" options="-parameters" />
+      <module name="com.alexisTrejo.drugstore.backend.inventory-service" options="-parameters" />
+      <module name="com.alexisTrejo.drugstore.backend.inventory-service.main" options="-parameters" />
+      <module name="com.alexisTrejo.drugstore.backend.inventory-service.test" options="-parameters" />
       <module name="com.alexisTrejo.drugstore.backend.libs" options="-parameters" />
       <module name="com.alexisTrejo.drugstore.backend.libs.main" options="-parameters" />
       <module name="com.alexisTrejo.drugstore.backend.libs.shared-kernel" options="-parameters" />

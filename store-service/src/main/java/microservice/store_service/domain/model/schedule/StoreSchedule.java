@@ -2,6 +2,7 @@ package microservice.store_service.domain.model.schedule;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import microservice.store_service.domain.exception.StoreBusinessRuleException;
 
 import java.time.DayOfWeek;
@@ -27,7 +28,8 @@ public class StoreSchedule {
             Map<LocalDate, TimeRange> specialHours,
             Set<DayOfWeek> closedDays,
             boolean is24Hours,
-            ScheduleType type) {
+            ScheduleType type
+    ) {
 
         this.regularHours = new EnumMap<>(DayOfWeek.class);
         if (regularHours != null) {
@@ -93,17 +95,10 @@ public class StoreSchedule {
             Map<DayOfWeek, TimeRange> regularHours,
             Map<LocalDate, TimeRange> specialHours,
             Set<DayOfWeek> closedDays,
-            boolean is24Hours) {
-
+            boolean is24Hours
+    ) {
         ScheduleType type = determineScheduleType(regularHours, closedDays, is24Hours);
-
-        return new StoreSchedule(
-                regularHours,
-                specialHours,
-                closedDays,
-                is24Hours,
-                type
-        );
+        return new StoreSchedule(regularHours, specialHours, closedDays, is24Hours, type);
     }
 
     public void validateForPersist() {
@@ -329,7 +324,7 @@ public class StoreSchedule {
         return closedDays.contains(date.getDayOfWeek());
     }
 
-    public Map<DayOfWeek, TimeRange> getWeeklySchedule() {
+    public Map<DayOfWeek, TimeRange> getRegularHours() {
         return Collections.unmodifiableMap(regularHours);
     }
 
@@ -372,6 +367,8 @@ public class StoreSchedule {
         }
         return ScheduleType.CUSTOM;
     }
+
+
 
     @Override
     public boolean equals(Object o) {

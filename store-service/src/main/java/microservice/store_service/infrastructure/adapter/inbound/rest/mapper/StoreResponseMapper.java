@@ -6,6 +6,8 @@ import libs_kernel.page.PageableResponse;
 import microservice.store_service.domain.model.Store;
 import microservice.store_service.infrastructure.adapter.inbound.rest.dto.response.StoreResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -36,11 +38,16 @@ public class StoreResponseMapper implements ResponseMapper<StoreResponse, Store>
     }
 
     @Override
-    public PageResponse<StoreResponse> toResponsePage(Page<Store> stores) {
+    public PageResponse<StoreResponse> toResponsePage(PageResponse<Store> stores) {
         PageableResponse<StoreResponse> pageResponse = new PageableResponse<>();
         if (stores == null) return pageResponse;
 
-        Page<StoreResponse> responsePage = stores.map(this::toResponse);
+        Page<StoreResponse> responsePage = new PageImpl<>(
+                toResponses(stores.content()),
+                PageRequest.of(stores.page(), stores.size()),
+                stores.totalElements()
+        );
+
         return pageResponse.fromPage(responsePage);
     }
 }

@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import microservice.store_service.domain.model.Store;
 import microservice.store_service.domain.model.valueobjects.StoreCode;
 import microservice.store_service.domain.model.valueobjects.StoreID;
-import microservice.store_service.domain.port.StoreRepositoryPort;
+import microservice.store_service.domain.port.output.StoreRepository;
 import microservice.store_service.domain.specification.StoreSearchCriteria;
 import microservice.store_service.infrastructure.adapter.outbound.persistence.entity.StoreEntity;
 import microservice.store_service.infrastructure.adapter.outbound.persistence.specification.StoreSpecificationBuilder;
@@ -23,20 +23,15 @@ import java.util.stream.Collectors;
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class StoreRepositoryImpl implements StoreRepositoryPort {
+public class StoreRepositoryImpl implements StoreRepository {
     private final JpaStoreRepository jpaRepository;
     private final ModelMapper<Store, StoreEntity> mapper;
     private final StoreSpecificationBuilder specificationBuilder;
 
     @Override
     public Store save(Store store) {
-        log.info("Saving store with ID: {}", store.getId());
         StoreEntity entity = mapper.fromDomain(store);
-
-        log.info("Converted Store to StoreEntity: {}", entity);
         StoreEntity saved = jpaRepository.save(entity);
-
-        log.info("Saved StoreEntity: {}", saved);
         return mapper.toDomain(saved);
     }
 

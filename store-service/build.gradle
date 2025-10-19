@@ -69,6 +69,9 @@ dependencies {
     // Logstash Encoder for Elk
     implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
     implementation 'org.codehaus.janino:janino:3.1.10'
+
+    // RabbitMQ
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
 }
 
 dependencyManagement {

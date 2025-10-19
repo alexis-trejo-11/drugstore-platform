@@ -1,5 +1,7 @@
 package microservice.store_service.application;
 
+import libs_kernel.page.PageResponse;
+import libs_kernel.page.PageableResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.store_service.application.dto.command.*;
@@ -11,16 +13,17 @@ import microservice.store_service.application.dto.query.GetStoreByCodeQuery;
 import microservice.store_service.application.dto.query.GetStoreByIDQuery;
 import microservice.store_service.application.dto.query.GetStoresByStatusQuery;
 import microservice.store_service.application.dto.query.SearchStoresQuery;
+import microservice.store_service.domain.events.StoreStatusChangedEvent;
 import microservice.store_service.domain.exception.StoreNotFoundException;
 import microservice.store_service.domain.model.Store;
+import microservice.store_service.domain.model.enums.StoreStatus;
 import microservice.store_service.domain.model.valueobjects.StoreID;
-import microservice.store_service.domain.port.StoreRepositoryPort;
+import microservice.store_service.domain.port.input.StoreApplicationService;
+import microservice.store_service.domain.port.output.StoreEventPublisher;
+import microservice.store_service.domain.port.output.StoreRepository;
 import microservice.store_service.domain.specification.StoreSearchCriteria;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +33,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class StoreApplicationServiceImpl implements StoreApplicationService {
-    private final StoreRepositoryPort storeRepository;
+    private final StoreRepository storeRepository;
+    private final StoreEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -115,11 +119,20 @@ public class StoreApplicationServiceImpl implements StoreApplicationService {
         log.info("Handling ActivateStoreCommand: {}", command);
         Store store = findStoreOrThrow(command.id());
 
+        StoreStatus previousStatus = store.getStatus();
         log.info("Activating store with ID: {}", command.id());
         store.activate();
 
         log.info("Persisting activated store with ID: {}", command.id());
         storeRepository.save(store);
+
+        StoreStatusChangedEvent event = new StoreStatusChangedEvent(
+                command.id(),
+                previousStatus,
+                store.getStatus(),
+                "Store activated"
+        );
+        eventPublisher.publishStoreStatusChanged(event);
 
         log.info("Store with ID: {} has been activated.", command.id());
         return StoreOperationResult.activateResult(command.id());
@@ -205,7 +218,7 @@ public class StoreApplicationServiceImpl implements StoreApplicationService {
 
     @Override
     @Transactional(readOnly = true)
-    //@Cacheable(value = "stores", key = "#query.id.value()")
+    @Cacheable(value = "stores", key = "#query.id.value()")
     public Store getStoreByID(GetStoreByIDQuery query) {
         return findStoreOrThrow(query.id());
     }
@@ -213,35 +226,30 @@ public class StoreApplicationServiceImpl implements StoreApplicationService {
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = "store_searches", key = "#query.toString()")
-    public Page<Store> searchStores(SearchStoresQuery query) {
+    public PageResponse<Store> searchStores(SearchStoresQuery query) {
         var criteria = query.toCriteria();
 
-        List<Store> store = storeRepository.search(criteria);
+        List<Store> storeItems = storeRepository.search(criteria);
         long totalCount = storeRepository.count(criteria);
 
-        Pageable pageable = Pageable.ofSize(criteria.size()).withPage(criteria.page());
-        return new PageImpl<>(store, pageable, totalCount);
+        return new PageableResponse<>(storeItems, query.page(), query.size(), totalCount);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = "store_status", key = "#query.status.name() + '_' + #query.page + '_' + #query.size")
-    public Page<Store> getStoresByStatus(GetStoresByStatusQuery query) {
+    public PageResponse<Store> getStoresByStatus(GetStoresByStatusQuery query) {
         StoreSearchCriteria searchCriteria = StoreSearchCriteria.findByStatus(
                 query.status(),
-                query.page(),
-                query.size(),
+                query.pagination().page(),
+                query.pagination().size(),
                 query.sortCriteria()
         );
 
-        List<Store> storePage = storeRepository.search(searchCriteria);
+        List<Store> storeItems = storeRepository.search(searchCriteria);
         long totalCount = storeRepository.count(searchCriteria);
 
-        return new PageImpl<>(
-                storePage,
-                Pageable.ofSize(query.size()).withPage(query.page()),
-                totalCount
-        );
+        return new PageableResponse<>(storeItems, query.pagination().page(), query.pagination().size(), totalCount);
     }
 
     private Store findStoreOrThrow(StoreID id) {
