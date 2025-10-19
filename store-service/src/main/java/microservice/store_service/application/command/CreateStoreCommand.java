@@ -4,7 +4,6 @@ import lombok.Builder;
 import microservice.store_service.application.command.valueobject.AddressCommand;
 import microservice.store_service.application.command.valueobject.ContactInfoCommand;
 import microservice.store_service.application.command.valueobject.GeolocationCommand;
-import microservice.store_service.application.command.valueobject.ScheduleCommand;
 import microservice.store_service.domain.model.enums.StoreStatus;
 import microservice.store_service.domain.model.valueobjects.StoreCode;
 import microservice.store_service.domain.model.valueobjects.StoreName;
@@ -16,6 +15,6 @@ public record CreateStoreCommand(
         StoreStatus status,
         AddressCommand addressCommand,
         ContactInfoCommand infoCommand,
-        ScheduleCommand scheduleCommand,
+        OrderScheduleCommand scheduleCommand,
         GeolocationCommand geoCommand
 ) {};

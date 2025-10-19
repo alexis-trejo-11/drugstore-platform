@@ -19,7 +19,7 @@ public class StoreEntity {
     @Column(name = "id", nullable = false, updatable = false, length = 36)
     private String id;
 
-    @Column(name = "exactCode", unique = true, nullable = false, length = 50)
+    @Column(name = "code", unique = true, nullable = false, length = 50)
     private String code;
 
     @Column(name = "name", nullable = false, length = 200)

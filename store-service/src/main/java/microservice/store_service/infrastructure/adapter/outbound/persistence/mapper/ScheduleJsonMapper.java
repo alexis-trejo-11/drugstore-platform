@@ -3,8 +3,8 @@ package microservice.store_service.infrastructure.adapter.outbound.persistence.m
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import microservice.store_service.domain.model.valueobjects.schedule.StoreSchedule;
-import microservice.store_service.domain.model.valueobjects.schedule.TimeRange;
+import microservice.store_service.domain.model.schedule.StoreSchedule;
+import microservice.store_service.domain.model.schedule.TimeRange;
 import microservice.store_service.infrastructure.adapter.outbound.persistence.entity.ScheduleDTO;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +46,7 @@ public class ScheduleJsonMapper {
 
     public StoreSchedule fromJson(String json) {
         if (json == null || json.isBlank()) {
-            return new StoreSchedule(); // Default schedule
+            return null;
         }
 
         try {
@@ -95,35 +95,11 @@ public class ScheduleJsonMapper {
     }
 
     private StoreSchedule reconstructSchedule(ScheduleDTO dto) {
-        if (dto.is24Hours()) {
-            return StoreSchedule.create24HoursStore();
-        }
-
-        StoreSchedule schedule = new StoreSchedule();
-
-        // Reconstruct schedule details
-        if (dto.getRegularHours() != null) {
-            dto.getRegularHours().forEach((day, timeRangeDTO) -> {
-                if (timeRangeDTO != null && timeRangeDTO.getStart() != null && timeRangeDTO.getEnd() != null) {
-                    schedule.setHours(day, timeRangeDTO.getStart(), timeRangeDTO.getEnd());
-                }
-            });
-        }
-
-        if (dto.getSpecialHours() != null) {
-            dto.getSpecialHours().forEach((date, timeRangeDTO) -> {
-                if (timeRangeDTO != null && timeRangeDTO.getStart() != null && timeRangeDTO.getEnd() != null) {
-                    schedule.setSpecialHours(date, timeRangeDTO.getStart(), timeRangeDTO.getEnd());
-                } else {
-                    schedule.closeForDate(date, "Special closure");
-                }
-            });
-        }
-
-        if (dto.getClosedDays() != null && !dto.getClosedDays().isEmpty()) {
-            dto.getClosedDays().forEach(schedule::closeDay);
-        }
-
-        return schedule;
+        return StoreSchedule.reconstruct(
+                dto.getRegularHoursAsDomain(),
+                dto.getSpecialHoursAsDomain(),
+                dto.getClosedDays(),
+                dto.is24Hours()
+        );
     }
 }

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import microservice.store_service.domain.model.schedule.TimeRange;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -44,5 +45,31 @@ public class ScheduleDTO {
         @JsonProperty("end")
         @JsonFormat(pattern = "HH:mm:ss")
         private LocalTime end;
+
+        public TimeRange toDomain() {
+            return new TimeRange(this.start, this.end);
+        }
+    }
+
+    public Map<DayOfWeek, TimeRange> getRegularHoursAsDomain() {
+        if (regularHours == null) {
+            return null;
+        }
+        return regularHours.entrySet().stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().toDomain()
+                ));
+    }
+
+    public Map<LocalDate, TimeRange> getSpecialHoursAsDomain() {
+        if (specialHours == null) {
+            return null;
+        }
+        return specialHours.entrySet().stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().toDomain()
+                ));
     }
 }

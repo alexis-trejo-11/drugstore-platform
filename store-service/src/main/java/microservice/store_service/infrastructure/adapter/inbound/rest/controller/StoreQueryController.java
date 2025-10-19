@@ -31,7 +31,7 @@ public class StoreQueryController {
         return ResponseWrapper.found(storeResponse, "Store");
     }
 
-    @GetMapping("/{code}")
+    @GetMapping("/{code}/code")
     public ResponseWrapper<StoreResponse> getStoreByCode(@PathVariable String code) {
         var query = GetStoreByCodeQuery.of(code);
         var queryResult = storeApplicationFacade.getStoreByCode(query);
@@ -41,7 +41,7 @@ public class StoreQueryController {
     }
 
     @GetMapping
-    public ResponseWrapper<PageResponse<StoreResponse>> getStoresBySpecifications(@RequestAttribute SearchStoreRequest request) {
+    public ResponseWrapper<PageResponse<StoreResponse>> getStoresBySpecifications(@ModelAttribute  SearchStoreRequest request) {
         var query = request.toQuery();
         var queryResult = storeApplicationFacade.searchStores(query);
 
@@ -51,7 +51,7 @@ public class StoreQueryController {
 
 
     @GetMapping("/status/{status}")
-    public ResponseWrapper<PageResponse<StoreResponse>> getStoresByStatus(@PathVariable StoreStatus status, @RequestAttribute PageInput pagination) {
+    public ResponseWrapper<PageResponse<StoreResponse>> getStoresByStatus(@PathVariable StoreStatus status, @ModelAttribute PageInput pagination) {
         var query = new GetStoresByStatusQuery(status, pagination.page(), pagination.size(), null);
         var queryResult = storeApplicationFacade.getStoresByStatus(query);
 

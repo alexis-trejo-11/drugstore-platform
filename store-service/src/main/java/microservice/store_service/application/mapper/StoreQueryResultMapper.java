@@ -4,9 +4,11 @@ import libs_kernel.mapper.ResultMapper;
 import microservice.store_service.application.handler.result.StoreQueryResult;
 import microservice.store_service.domain.model.Store;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class StoreQueryResultMapper implements ResultMapper<StoreQueryResult, Store> {
     @Override
     public StoreQueryResult toResult(Store entity) {

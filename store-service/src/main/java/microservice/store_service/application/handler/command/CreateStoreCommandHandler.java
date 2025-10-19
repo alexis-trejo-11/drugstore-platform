@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class CreateStoreCommandHandler {
     private final StoreRepositoryPort storeRepository;
-    private final CommandMapper<CreateStoreCommand, Store> commandMapper;
 
     @Transactional
     public CreateStoreResult handle(CreateStoreCommand command) {

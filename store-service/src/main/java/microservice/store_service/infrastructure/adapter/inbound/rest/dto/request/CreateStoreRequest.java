@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import io.swagger.v3.oas.annotations.media.Schema;
 import microservice.store_service.application.command.CreateStoreCommand;
-import microservice.store_service.application.command.valueobject.ScheduleCommand;
 import microservice.store_service.domain.model.enums.StoreStatus;
 import microservice.store_service.domain.model.valueobjects.StoreCode;
 import microservice.store_service.domain.model.valueobjects.StoreName;

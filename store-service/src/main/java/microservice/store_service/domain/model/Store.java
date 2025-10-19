@@ -7,7 +7,7 @@ import microservice.store_service.domain.model.valueobjects.*;
 import microservice.store_service.domain.model.valueobjects.location.Address;
 import microservice.store_service.domain.model.valueobjects.ContactInfo;
 import microservice.store_service.domain.model.valueobjects.location.Geolocation;
-import microservice.store_service.domain.model.valueobjects.schedule.StoreSchedule;
+import microservice.store_service.domain.model.schedule.StoreSchedule;
 
 import java.util.Objects;
 
@@ -117,7 +117,7 @@ public class Store {
     }
 
     public void convertTo24Hours() {
-        this.serviceSchedule = StoreSchedule.create24HoursStore();
+        this.serviceSchedule = StoreSchedule.create24Hours();
         this.timeStamps.markAsUpdated();
     }
 

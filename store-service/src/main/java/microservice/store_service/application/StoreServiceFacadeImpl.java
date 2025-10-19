@@ -64,11 +64,6 @@ public class StoreServiceFacadeImpl implements StoreApplicationFacade {
     }
 
     @Override
-    public StoreOperationResult updateScheduleInfo(Schedule24HoursCommand command) {
-        return null;
-    }
-
-    @Override
     public StoreOperationResult activateStore(ActivateStoreCommand command) {
         return activateStoreCommandHandler.handle(command);
     }

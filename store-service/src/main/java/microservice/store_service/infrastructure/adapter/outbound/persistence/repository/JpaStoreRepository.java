@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface JpaStoreRepository extends JpaRepository<StoreEntity, String>, JpaSpecificationExecutor<StoreEntity> {
     Optional<StoreEntity> findByCode(String code);
     boolean existsByCode(String code);
-    boolean existsByID(String id);
+    boolean existsById(String id);
 }
