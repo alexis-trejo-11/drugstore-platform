@@ -11,7 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 public class PageableResponse<T> implements PageResponse<T> {
-
     private List<T> content;
     private int page;
     private int size;
@@ -48,6 +47,18 @@ public class PageableResponse<T> implements PageResponse<T> {
                 page.hasNext(),
                 page.hasPrevious()
         );
+    }
+
+    public PageableResponse(List<T> items, int page, int size, long totalItems) {
+        this.content = items;
+        this.page = page;
+        this.size = size;
+        this.totalElements = totalItems;
+        this.totalPages = (int) Math.ceil((double) totalItems / size);
+        this.first = page == 1;
+        this.last = page >= totalPages;
+        this.hasNext = page < totalPages;
+        this.hasPrevious = page > 1;
     }
 
     public static <T> PageResponse<T> empty(PageInput pageInput) {

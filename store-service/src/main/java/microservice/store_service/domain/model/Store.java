@@ -14,6 +14,7 @@ import java.util.Objects;
 
 
 @Getter
+@NoArgsConstructor
 public class Store {
     private StoreID id;
     private StoreCode code;

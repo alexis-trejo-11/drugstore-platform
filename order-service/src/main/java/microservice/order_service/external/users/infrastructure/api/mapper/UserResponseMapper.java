@@ -5,7 +5,6 @@ import libs_kernel.page.PageResponse;
 import libs_kernel.page.PageableResponse;
 import microservice.order_service.external.users.domain.entity.User;
 import microservice.order_service.external.users.infrastructure.api.dto.UserResponse;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -34,7 +33,7 @@ public class UserResponseMapper implements ResponseMapper<UserResponse, User> {
     }
 
     @Override
-    public PageResponse<UserResponse> toResponsePage(Page<User> users) {
+    public PageResponse<UserResponse> toResponsePage(PageResponse<User> users) {
         if (users == null) return null;
         var responsePage = users.map(this::toResponse);
         return PageableResponse.from(responsePage);

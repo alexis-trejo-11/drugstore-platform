@@ -1,4 +1,4 @@
-package microservice.store_service.domain.port;
+package microservice.store_service.domain.port.output;
 
 import microservice.store_service.domain.model.Store;
 import microservice.store_service.domain.model.valueobjects.StoreCode;
@@ -8,7 +8,7 @@ import microservice.store_service.domain.specification.StoreSearchCriteria;
 import java.util.List;
 import java.util.Optional;
 
-public interface StoreRepositoryPort {
+public interface StoreRepository {
     Optional<Store> findByID(StoreID id);
     Optional<Store> findByCode(StoreCode code);
     List<Store> search(StoreSearchCriteria criteria);

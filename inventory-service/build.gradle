@@ -31,13 +31,16 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	// Security
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.security:spring-security-crypto'
+	// implementation 'org.springframework.boot:spring-boot-starter-security'
+	// implementation 'org.springframework.security:spring-security-crypto'
 
+    // Migrations
+    implementation 'org.flywaydb:flyway-core:10.17.0'
+    implementation 'org.flywaydb:flyway-database-postgresql:10.17.0'
 
-	// Cache
-	implementation 'org.springframework.boot:spring-boot-starter-cache'
-	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.6'
+    // Redis Cache
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
 
 	// Config Server
 	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
@@ -47,26 +50,20 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 	implementation 'org.postgresql:postgresql'
 
-
-	// Postgres
+	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
-	// AutoMappers
-	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-	implementation 'org.modelmapper:modelmapper:2.4.4'
-
-	// Rate Limiter
-	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-domain:7.6.0'
-	implementation 'com.github.vladimir-bukhtoyarov:bucket4j-jcache:7.6.0'
-
 	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'
 
-	// Eureka
-	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+    // Logstash Encoder for Elk
+    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+    implementation 'org.codehaus.janino:janino:3.1.10'
+
+    // RabbitMQ
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
 	// Admin Service
 	implementation 'de.codecentric:spring-boot-admin-starter-client:3.0.0'

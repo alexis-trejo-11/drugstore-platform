@@ -7,7 +7,7 @@ import microservice.store_service.application.dto.command.valueobject.Geolocatio
 import microservice.store_service.domain.model.valueobjects.StoreID;
 
 public record UpdateStoreLocationCommand(
-        @NotNull StoreID id,
-        @NotNull GeolocationCommand geolocation,
-        @NotNull AddressCommand address
+        StoreID id,
+        GeolocationCommand geolocation,
+        AddressCommand address
 ) {}

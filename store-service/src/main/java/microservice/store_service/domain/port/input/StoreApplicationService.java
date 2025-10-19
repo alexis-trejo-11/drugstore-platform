@@ -1,5 +1,6 @@
-package microservice.store_service.application;
+package microservice.store_service.domain.port.input;
 
+import libs_kernel.page.PageResponse;
 import microservice.store_service.application.dto.command.*;
 import microservice.store_service.application.dto.command.status.ActivateStoreCommand;
 import microservice.store_service.application.dto.command.status.DeactivateStoreCommand;
@@ -10,7 +11,6 @@ import microservice.store_service.application.dto.query.GetStoreByIDQuery;
 import microservice.store_service.application.dto.query.GetStoresByStatusQuery;
 import microservice.store_service.application.dto.query.SearchStoresQuery;
 import microservice.store_service.domain.model.Store;
-import org.springframework.data.domain.Page;
 
 public interface StoreApplicationService {
     CreateStoreResult createStore(CreateStoreCommand command);
@@ -28,7 +28,7 @@ public interface StoreApplicationService {
     StoreOperationResult deleteStore(DeleteStoreCommand command);
     Store getStoreByCode(GetStoreByCodeQuery query);
     Store getStoreByID(GetStoreByIDQuery query);
-    Page<Store> searchStores(SearchStoresQuery query);
-    Page<Store> getStoresByStatus(GetStoresByStatusQuery query);
+    PageResponse<Store> searchStores(SearchStoresQuery query);
+    PageResponse<Store> getStoresByStatus(GetStoresByStatusQuery query);
 
 }
