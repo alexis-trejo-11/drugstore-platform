@@ -15,15 +15,14 @@ import java.util.Objects;
 
 @Getter
 public class Store {
-    private final StoreID id;
-    private final StoreCode code;
+    private StoreID id;
+    private StoreCode code;
     private StoreName name;
     private StoreStatus status;
     private ContactInfo contactInfo;
     private Address address;
     private Geolocation geolocation;
     private StoreSchedule serviceSchedule;
-
     private StoreTimeStamps timeStamps;
 
     private Store(StoreID id, StoreCode code, StoreName name, StoreStatus status,
@@ -46,8 +45,8 @@ public class Store {
             ContactInfo contactInfo,
             Address address,
             Geolocation geolocation,
-            StoreSchedule serviceSchedule) {
-
+            StoreSchedule serviceSchedule
+    ) {
         StoreID id = StoreID.generate();
         return new Store(
                 id, code, name, StoreStatus.INACTIVE,

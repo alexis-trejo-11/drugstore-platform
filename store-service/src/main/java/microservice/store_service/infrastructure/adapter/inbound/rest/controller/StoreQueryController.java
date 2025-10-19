@@ -5,7 +5,7 @@ import libs_kernel.page.PageInput;
 import libs_kernel.page.PageResponse;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
-import microservice.store_service.application.StoreApplicationFacade;
+import microservice.store_service.application.StoreApplicationService;
 import microservice.store_service.application.dto.query.GetStoreByCodeQuery;
 import microservice.store_service.application.dto.query.GetStoreByIDQuery;
 import microservice.store_service.application.dto.query.GetStoresByStatusQuery;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("api/v2/stores")
 public class StoreQueryController {
-    private final StoreApplicationFacade storeApplicationFacade;
+    private final StoreApplicationService storeApplicationFacade;
     private final ResponseMapper<StoreResponse, Store> responseMapper;
 
     @GetMapping("/{id}")

@@ -1,5 +1,6 @@
 package microservice.store_service.domain.model.schedule;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import microservice.store_service.domain.exception.StoreBusinessRuleException;
 
@@ -16,7 +17,9 @@ public class StoreSchedule {
     private Map<DayOfWeek, TimeRange> regularHours;
     private Map<LocalDate, TimeRange> specialHours;
     private Set<DayOfWeek> closedDays;
+    @Getter
     private boolean is24Hours;
+    @Getter
     private ScheduleType type;
 
     private StoreSchedule(
@@ -283,7 +286,6 @@ public class StoreSchedule {
                 continue;
             }
 
-            // Verificar horario regular
             TimeRange regular = regularHours.get(dayOfWeek);
             if (regular != null) {
                 LocalDateTime openingTime = LocalDateTime.of(checkDate, regular.getStart());
@@ -299,7 +301,7 @@ public class StoreSchedule {
                 "No opening time found in the next 8 days");
     }
 
-    public TimeRange getTodaysHours() {
+    public TimeRange getTodayHours() {
         return getHoursForDate(LocalDate.now());
     }
 
@@ -337,14 +339,6 @@ public class StoreSchedule {
 
     public Set<DayOfWeek> getClosedDays() {
         return Collections.unmodifiableSet(closedDays);
-    }
-
-    public boolean is24Hours() {
-        return is24Hours;
-    }
-
-    public ScheduleType getType() {
-        return type;
     }
 
 

@@ -3,7 +3,7 @@ package microservice.store_service.infrastructure.adapter.inbound.rest.controlle
 import jakarta.validation.Valid;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
-import microservice.store_service.application.StoreApplicationFacade;
+import microservice.store_service.application.StoreApplicationService;
 import microservice.store_service.application.dto.command.DeleteStoreCommand;
 import microservice.store_service.application.dto.command.UpdateStoreScheduleCommand;
 import microservice.store_service.application.dto.command.status.ActivateStoreCommand;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("api/v2/stores")
 public class StoreCommandController {
-    private final StoreApplicationFacade storeApplicationFacade;
+    private final StoreApplicationService storeApplicationFacade;
 
     @PostMapping
     public ResponseEntity<ResponseWrapper<StoreID>> createStore(@Valid @RequestBody CreateStoreRequest request) {
