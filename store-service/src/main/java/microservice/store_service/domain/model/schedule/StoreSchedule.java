@@ -1,5 +1,6 @@
 package microservice.store_service.domain.model.schedule;
 
+import lombok.NoArgsConstructor;
 import microservice.store_service.domain.exception.StoreBusinessRuleException;
 
 import java.time.DayOfWeek;
@@ -10,12 +11,13 @@ import java.util.*;
 
 import static java.time.DayOfWeek.*;
 
-public final class StoreSchedule {
-    private final Map<DayOfWeek, TimeRange> regularHours;
-    private final Map<LocalDate, TimeRange> specialHours;
-    private final Set<DayOfWeek> closedDays;
-    private final boolean is24Hours;
-    private final ScheduleType type;
+@NoArgsConstructor
+public class StoreSchedule {
+    private Map<DayOfWeek, TimeRange> regularHours;
+    private Map<LocalDate, TimeRange> specialHours;
+    private Set<DayOfWeek> closedDays;
+    private boolean is24Hours;
+    private ScheduleType type;
 
     private StoreSchedule(
             Map<DayOfWeek, TimeRange> regularHours,

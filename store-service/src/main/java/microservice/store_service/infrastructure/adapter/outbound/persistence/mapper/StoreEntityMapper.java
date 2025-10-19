@@ -1,6 +1,7 @@
 package microservice.store_service.infrastructure.adapter.outbound.persistence.mapper;
 
 import libs_kernel.mapper.ModelMapper;
+import lombok.RequiredArgsConstructor;
 import microservice.store_service.domain.model.Store;
 import microservice.store_service.domain.model.valueobjects.*;
 import microservice.store_service.domain.model.valueobjects.location.Address;
@@ -16,23 +17,16 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
+@RequiredArgsConstructor
 public class StoreEntityMapper implements ModelMapper<Store, StoreEntity> {
-
     private final ScheduleJsonMapper scheduleJsonMapper;
-
-    @Autowired
-    public StoreEntityMapper(ScheduleJsonMapper scheduleJsonMapper) {
-        this.scheduleJsonMapper = scheduleJsonMapper;
-    }
 
     @Override
     public StoreEntity fromDomain(Store domain) {
         StoreEntity entity = new StoreEntity();
-
         if (domain.getId() != null) {
             entity.setId(domain.getId().value());
         }
-
         entity.setCode(domain.getCode().value());
         entity.setName(domain.getName().value());
         entity.setStatus(domain.getStatus());
@@ -50,6 +44,10 @@ public class StoreEntityMapper implements ModelMapper<Store, StoreEntity> {
         Geolocation geolocation = domain.getGeolocation();
         entity.setLatitude(geolocation.latitude());
         entity.setLongitude(geolocation.longitude());
+
+        // Schedule
+        var scheduleJson = scheduleJsonMapper.toJson(domain.getServiceSchedule());
+        entity.setScheduleJson(scheduleJson);
 
         // Timestamps
         StoreTimeStamps timestamps = domain.getTimeStamps();

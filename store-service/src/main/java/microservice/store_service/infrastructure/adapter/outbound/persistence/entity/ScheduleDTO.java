@@ -1,6 +1,7 @@
 package microservice.store_service.infrastructure.adapter.outbound.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import microservice.store_service.domain.model.schedule.TimeRange;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,25 +53,29 @@ public class ScheduleDTO {
         }
     }
 
+    @JsonIgnore
     public Map<DayOfWeek, TimeRange> getRegularHoursAsDomain() {
         if (regularHours == null) {
             return null;
         }
-        return regularHours.entrySet().stream()
-                .collect(java.util.stream.Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue().toDomain()
-                ));
+        Map<DayOfWeek, TimeRange> result = new java.util.EnumMap<>(DayOfWeek.class);
+        for (Map.Entry<DayOfWeek, TimeRangeDTO> entry : regularHours.entrySet()) {
+            TimeRangeDTO dto = entry.getValue();
+            result.put(entry.getKey(), dto != null ? dto.toDomain() : null);
+        }
+        return result;
     }
 
+    @JsonIgnore
     public Map<LocalDate, TimeRange> getSpecialHoursAsDomain() {
         if (specialHours == null) {
             return null;
         }
-        return specialHours.entrySet().stream()
-                .collect(java.util.stream.Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue().toDomain()
-                ));
+        Map<LocalDate, TimeRange> result = new HashMap<>();
+        for (Map.Entry<LocalDate, TimeRangeDTO> entry : specialHours.entrySet()) {
+            TimeRangeDTO dto = entry.getValue();
+            result.put(entry.getKey(), dto != null ? dto.toDomain() : null);
+        }
+        return result;
     }
 }

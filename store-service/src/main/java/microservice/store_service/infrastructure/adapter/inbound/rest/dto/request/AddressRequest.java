@@ -2,33 +2,35 @@ package microservice.store_service.infrastructure.adapter.inbound.rest.dto.reque
 
 import jakarta.validation.constraints.NotBlank;
 import io.swagger.v3.oas.annotations.media.Schema;
-import microservice.store_service.application.command.valueobject.AddressCommand;
+import jakarta.validation.constraints.NotNull;
+import microservice.store_service.application.dto.command.valueobject.AddressCommand;
 
 @Schema(description = "Address Request DTO")
 public record AddressRequest(
-        @NotBlank
+        @NotBlank @NotNull
         @Schema(description = "Country", example = "Peru")
         String country,
 
-        @NotBlank
+        @NotBlank @NotNull
         @Schema(description = "State / Region", example = "Lima")
         String state,
 
-        @NotBlank
+        @NotBlank @NotNull
         @Schema(description = "City", example = "Lima")
         String city,
 
         @Schema(description = "Postal / ZIP exactCode", example = "15001")
         String zipCode,
 
+        @NotNull
         @Schema(description = "Neighborhood / District", example = "Miraflores")
         String neighborhood,
 
-        @NotBlank
+        @NotBlank @NotNull
         @Schema(description = "Street name", example = "Av. Larco")
         String street,
 
-        @NotBlank
+        @NotBlank @NotNull
         @Schema(description = "Number / building", example = "123")
         String number
 ) {

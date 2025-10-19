@@ -6,10 +6,10 @@ import libs_kernel.page.PageResponse;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import microservice.store_service.application.StoreApplicationFacade;
-import microservice.store_service.application.handler.result.StoreQueryResult;
-import microservice.store_service.application.query.GetStoreByCodeQuery;
-import microservice.store_service.application.query.GetStoreByIDQuery;
-import microservice.store_service.application.query.GetStoresByStatusQuery;
+import microservice.store_service.application.dto.query.GetStoreByCodeQuery;
+import microservice.store_service.application.dto.query.GetStoreByIDQuery;
+import microservice.store_service.application.dto.query.GetStoresByStatusQuery;
+import microservice.store_service.domain.model.Store;
 import microservice.store_service.domain.model.enums.StoreStatus;
 import microservice.store_service.infrastructure.adapter.inbound.rest.dto.request.SearchStoreRequest;
 import microservice.store_service.infrastructure.adapter.inbound.rest.dto.response.StoreResponse;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("api/v2/stores")
 public class StoreQueryController {
     private final StoreApplicationFacade storeApplicationFacade;
-    private final ResponseMapper<StoreResponse, StoreQueryResult> responseMapper;
+    private final ResponseMapper<StoreResponse, Store> responseMapper;
 
     @GetMapping("/{id}")
     public ResponseWrapper<StoreResponse> getStoreByID(@PathVariable String id) {
@@ -41,7 +41,7 @@ public class StoreQueryController {
     }
 
     @GetMapping
-    public ResponseWrapper<PageResponse<StoreResponse>> getStoresBySpecifications(@ModelAttribute  SearchStoreRequest request) {
+    public ResponseWrapper<PageResponse<StoreResponse>> getStoresBySpecifications(@ModelAttribute SearchStoreRequest request) {
         var query = request.toQuery();
         var queryResult = storeApplicationFacade.searchStores(query);
 

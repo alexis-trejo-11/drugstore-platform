@@ -1,6 +1,7 @@
 package microservice.store_service.domain.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import microservice.store_service.domain.exception.StoreBusinessRuleException;
 import microservice.store_service.domain.model.enums.StoreStatus;
 import microservice.store_service.domain.model.valueobjects.*;
