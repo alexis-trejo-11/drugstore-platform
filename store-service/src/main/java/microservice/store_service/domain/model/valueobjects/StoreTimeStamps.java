@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-@Builder
 public class StoreTimeStamps{
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
@@ -20,11 +19,7 @@ public class StoreTimeStamps{
 
     public static StoreTimeStamps now() {
         LocalDateTime now = LocalDateTime.now();
-        return StoreTimeStamps.builder()
-                .createdAt(now)
-                .updatedAt(now)
-                .deletedAt(null)
-                .build();
+        return new StoreTimeStamps(now, now, null);
     }
 
     public void markAsDeleted() {

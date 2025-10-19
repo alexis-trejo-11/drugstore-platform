@@ -12,7 +12,7 @@ import microservice.store_service.application.dto.query.SearchStoresQuery;
 import microservice.store_service.domain.model.Store;
 import org.springframework.data.domain.Page;
 
-public interface StoreApplicationFacade {
+public interface StoreApplicationService {
     CreateStoreResult createStore(CreateStoreCommand command);
 
     StoreOperationResult updateStoreNameAndContactInfo(UpdateStoreNameAndContactCommand command);

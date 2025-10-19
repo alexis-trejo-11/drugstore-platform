@@ -29,7 +29,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class StoreServiceFacadeImpl implements StoreApplicationFacade {
+public class StoreApplicationServiceImpl implements StoreApplicationService {
     private final StoreRepositoryPort storeRepository;
 
     @Override
