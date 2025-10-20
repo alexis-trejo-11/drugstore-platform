@@ -1,0 +1,7 @@
+package microservice.inventory.domain.exception;
+
+public class InvalidStockAdjustmentException extends InventoryException {
+    public InvalidStockAdjustmentException(String message) {
+        super(message);
+    }
+}
