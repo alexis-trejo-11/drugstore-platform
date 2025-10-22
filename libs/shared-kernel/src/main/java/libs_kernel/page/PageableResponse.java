@@ -61,7 +61,7 @@ public class PageableResponse<T> implements PageResponse<T> {
         this.hasPrevious = page > 1;
     }
 
-    public static <T> PageResponse<T> empty(PageInput pageInput) {
+    public static <T> PageResponse<T> empty(Pagination pageInput) {
         return new PageableResponse<>(
                 List.of(),
                 pageInput.page(),

@@ -2,18 +2,21 @@ package microservice.inventory.domain.port.output;
 
 import microservice.inventory.domain.entity.Inventory;
 import microservice.inventory.domain.entity.enums.InventoryStatus;
-import microservice.inventory.domain.entity.valueobject.id.InventoryID;
-import microservice.inventory.domain.exception.InventoryException;
+import microservice.inventory.domain.entity.valueobject.id.InventoryId;
+import microservice.inventory.domain.entity.valueobject.id.MedicineId;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface InventoryRepository {
-    Inventory save(InventoryException inventory);
+    Inventory save(Inventory inventory);
+    void bulkSave(List<Inventory> inventories);
 
-    Optional<Inventory> findByID(InventoryID id);
+    Optional<Inventory> findById(InventoryId id);
 
-    Optional<Inventory> findByMedicineID(String medicineId);
+    Optional<Inventory> findByMedicineId(MedicineId medicineId);
+
+    List<Inventory> findAll();
 
     List<Inventory> findSpec();
 
@@ -25,7 +28,7 @@ public interface InventoryRepository {
 
     List<Inventory> findByWarehouseLocation(String location);
 
-    void delete(InventoryID id);
+    void delete(InventoryId id);
 
-    boolean existsByMedicineID(String medicineId);
+    boolean existsByMedicineId(MedicineId medicineId);
 }

@@ -1,7 +1,7 @@
 package microservice.store_service.infrastructure.adapter.inbound.rest.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import libs_kernel.page.PageInput;
+import libs_kernel.page.Pagination;
 import microservice.store_service.application.dto.query.SearchStoresQuery;
 import microservice.store_service.domain.model.enums.StoreStatus;
 import microservice.store_service.domain.specification.StoreSearchCriteria;
@@ -36,7 +36,7 @@ public record SearchStoreRequest(
 
         StoreSearchCriteria.LocationFilter locationFilter,
         StoreSearchCriteria.ScheduleFilter scheduleFilter,
-        PageInput pageInput
+        Pagination pageInput
 ) {
     public SearchStoresQuery toQuery() {
         var sortCriteria = StoreSearchCriteria.SortCriteria.CREATED_AT_ASC; // Default sort criteria

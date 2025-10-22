@@ -1,9 +1,6 @@
 package microservice.inventory.domain.service;
 
 import lombok.RequiredArgsConstructor;
-import microservice.inventory.domain.entity.Inventory;
-import microservice.inventory.domain.entity.InventoryAlert;
-import microservice.inventory.domain.entity.InventoryBatch;
 import microservice.inventory.domain.entity.enums.AlertSeverity;
 import microservice.inventory.domain.entity.enums.AlertStatus;
 import microservice.inventory.domain.entity.enums.AlertType;

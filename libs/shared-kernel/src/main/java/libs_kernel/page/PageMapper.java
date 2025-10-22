@@ -13,11 +13,11 @@ import java.util.stream.Collectors;
 public class PageMapper {
 
     /**
-     * Convierte PageInput a Pageable de Spring
+     * Convierte Pagination a Pageable de Spring
      */
-    public Pageable toPageable(PageInput pageInput) {
+    public Pageable toPageable(Pagination pageInput) {
         if (pageInput == null) {
-            return PageInput.defaultPageInput().toPageable();
+            return Pagination.defaultPageInput().toPageable();
         }
         return pageInput.toPageable();
     }
@@ -26,7 +26,7 @@ public class PageMapper {
      * Convierte parámetros simples a Pageable
      */
     public Pageable toPageable(Integer page, Integer size, String sortBy, String direction) {
-        PageInput pageInput = new PageInput(
+        Pagination pageInput = new Pagination(
                 page != null ? page : 0,
                 size != null ? size : 10,
                 new SortInput(sortBy, direction));
@@ -72,7 +72,7 @@ public class PageMapper {
     /**
      * Crea una PageResponse desde una lista simple
      */
-    public <T> PageResponse<T> toPageResponse(List<T> content, PageInput pageInput, long totalElements) {
+    public <T> PageResponse<T> toPageResponse(List<T> content, Pagination pageInput, long totalElements) {
         int totalPages = (int) Math.ceil((double) totalElements / pageInput.size());
 
         return new PageableResponse<>(

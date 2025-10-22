@@ -1,6 +1,5 @@
 package microservice.inventory.domain.service;
 
-import microservice.inventory.domain.entity.Inventory;
 import microservice.inventory.domain.entity.enums.InventoryStatus;
 import org.springframework.stereotype.Service;
 
