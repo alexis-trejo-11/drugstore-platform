@@ -4,8 +4,11 @@ package microservice.inventory.domain.service;
 import lombok.RequiredArgsConstructor;
 import microservice.inventory.domain.entity.Inventory;
 import microservice.inventory.domain.entity.InventoryBatch;
-import microservice.inventory.domain.entity.enums.BatchStatus;
+import microservice.inventory.domain.entity.InventoryMovement;
+import microservice.inventory.domain.entity.enums.MovementType;
+import microservice.inventory.domain.entity.valueobject.id.UserId;
 import microservice.inventory.domain.exception.InsufficientInventoryException;
+import microservice.purchase.domain.entity.PurchaseOrderId;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,39 +18,20 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class InventoryAllocationService {
-    public void validateAvailability(Inventory inventory, Integer requestedQuantity) {
-        if (inventory.getAvailableQuantity() < requestedQuantity) {
-            throw new InsufficientInventoryException(
-                    String.format("Insufficient inventory for item %s. Requested: %d, Available: %d",
-                            inventory.getMedicineId(),
-                            requestedQuantity,
-                            inventory.getAvailableQuantity()
-                    )
-            );
-        }
-    }
 
-    public List<InventoryBatch> allocateBatches(List<InventoryBatch> batches, Integer quantity) {
-        List<InventoryBatch> availableBatches = batches.stream()
-                .filter(batch -> batch.getStatus().equals(BatchStatus.ACTIVE))
-                .filter(batch -> batch.getExpirationDate().isAfter(LocalDateTime.now()))
-                .filter(batch -> batch.getAvailableQuantity() > 0)
-                .sorted(Comparator.comparing(InventoryBatch::getExpirationDate))
+    public List<InventoryBatch> allocateBatchesForOrder(List<InventoryBatch> availableBatches, Integer quantity) {
+        List<InventoryBatch> sortedBatches = availableBatches.stream()
+                .filter(InventoryBatch::isActive)
+                .sorted((b1, b2) -> b1.getExpirationDate().compareTo(b2.getExpirationDate()))
                 .toList();
 
-        if (availableBatches.isEmpty()) {
-            throw new InsufficientInventoryException("No available batches found");
-        }
-
         int remainingQuantity = quantity;
-        List<InventoryBatch> allocatedBatches = new java.util.ArrayList<>();
-        for (var batch : availableBatches) {
+        for (InventoryBatch batch : sortedBatches) {
             if (remainingQuantity <= 0) break;
 
             int allocationQuantity = Math.min(batch.getAvailableQuantity(), remainingQuantity);
-            batch.setAvailableQuantity(batch.getAvailableQuantity() - allocationQuantity);
+            batch.allocateQuantity(allocationQuantity);
             remainingQuantity -= allocationQuantity;
-            allocatedBatches.add(batch);
         }
 
         if (remainingQuantity > 0) {
@@ -56,17 +40,56 @@ public class InventoryAllocationService {
             );
         }
 
-        return allocatedBatches;
+        return sortedBatches.stream()
+                .filter(batch -> batch.getQuantity() > batch.getAvailableQuantity())
+                .toList();
     }
 
-    public void reserveStock(Inventory inventory, Integer quantity) {
-        validateAvailability(inventory, quantity);
-        inventory.decreaseAvailableQuantity(quantity);
-        inventory.increaseReservedQuantity(quantity);
+    public InventoryMovement createReservationMovement(Inventory inventory, Integer quantity, PurchaseOrderId orderId, UserId performedBy) {
+        return InventoryMovementFactory.create(
+                inventory.getId(),
+                null,
+                MovementType.RESERVATION,
+                quantity,
+                inventory.getAvailableQuantity() + quantity,
+                inventory.getAvailableQuantity(),
+                "Stock reserved for order",
+                orderId,
+                "ORDER",
+                performedBy,
+                null
+        );
     }
 
-    public void confirmReservation(Inventory inventory, Integer quantity) {
-        inventory.decreaseReservedQuantity(quantity);
-        inventory.decreaseTotalQuantity(quantity);
+    public InventoryMovement createReleaseMovement(Inventory inventory, Integer quantity, PurchaseOrderId orderId, UserId performedBy) {
+        return InventoryMovementFactory.create(
+                inventory.getId(),
+                null,
+                MovementType.RELEASE,
+                quantity,
+                inventory.getAvailableQuantity() - quantity,
+                inventory.getAvailableQuantity(),
+                "Reservation released",
+                orderId,
+                "ORDER",
+                performedBy,
+                null
+        );
+    }
+
+    public InventoryMovement createSaleMovement(Inventory inventory, Integer quantity, PurchaseOrderId orderId, UserId performedBy) {
+        return InventoryMovementFactory.create(
+                inventory.getId(),
+                null,
+                MovementType.SALE,
+                quantity,
+                inventory.getTotalQuantity() + quantity,
+                inventory.getTotalQuantity(),
+                "Stock sold",
+                orderId,
+                "ORDER",
+                performedBy,
+                null
+        );
     }
 }

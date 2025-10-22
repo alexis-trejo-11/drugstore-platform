@@ -1,8 +1,6 @@
 package microservice.inventory.domain.service;
 
 
-import microservice.inventory.domain.entity.Inventory;
-import microservice.inventory.domain.entity.InventoryBatch;
 import microservice.inventory.domain.entity.enums.BatchStatus;
 import microservice.inventory.domain.exception.BatchExpiredException;
 import org.springframework.stereotype.Service;
@@ -38,5 +36,10 @@ public class BatchManagementService {
 
     public boolean isBatchExpired(InventoryBatch batch) {
         return batch.getExpirationDate().isBefore(LocalDateTime.now());
+    }
+
+    public void markBatchAsExpired(InventoryBatch batch) {
+        batch.setStatus(BatchStatus.EXPIRED);
+        batch.setAvailableQuantity(0);
     }
 }

@@ -3,7 +3,7 @@ package microservice.inventory.domain.port.output;
 import microservice.inventory.domain.entity.InventoryBatch;
 import microservice.inventory.domain.entity.enums.BatchStatus;
 import microservice.inventory.domain.entity.valueobject.id.BatchId;
-import microservice.inventory.domain.entity.valueobject.id.InventoryID;
+import microservice.inventory.domain.entity.valueobject.id.InventoryId;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,10 +11,11 @@ import java.util.Optional;
 
 public interface InventoryBatchRepository {
     InventoryBatch save(InventoryBatch batch);
+    void bulkSave(List<InventoryBatch> batches);
 
-    Optional<InventoryBatch> findByID(BatchId id);
+    Optional<InventoryBatch> findById(BatchId id);
 
-    List<InventoryBatch> findByInventoryId(InventoryID inventoryId);
+    List<InventoryBatch> findByInventoryId(InventoryId inventoryId);
 
     List<InventoryBatch> findByStatus(BatchStatus status);
 
@@ -24,7 +25,7 @@ public interface InventoryBatchRepository {
 
     Optional<InventoryBatch> findByBatchNumber(String batchNumber);
 
-    List<InventoryBatch> findAvailableBatchesByInventoryId(InventoryID inventoryId);
+    List<InventoryBatch> findAvailableBatchesByInventoryId(InventoryId inventoryId);
 
     void delete(BatchId id);
 }

@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import libs_kernel.mapper.ResponseMapper;
-import libs_kernel.page.PageInput;
+import libs_kernel.page.Pagination;
 import libs_kernel.page.PageResponse;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
@@ -403,11 +403,11 @@ public class StoreQueryController {
         @Parameter(
             description = "Pagination parameters (page number and size)",
             required = false,
-            schema = @Schema(implementation = PageInput.class)
+            schema = @Schema(implementation = Pagination.class)
         )
-        @ModelAttribute PageInput pagination
+        @ModelAttribute Pagination pagination
     ) {
-        pagination = pagination == null ? PageInput.defaultPageInput() : pagination;
+        pagination = pagination == null ? Pagination.defaultPageInput() : pagination;
         var query = new GetStoresByStatusQuery(status, pagination, null);
         var storesPage = storeApplicationFacade.getStoresByStatus(query);
 

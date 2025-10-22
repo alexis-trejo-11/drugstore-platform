@@ -4,11 +4,11 @@ import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-public interface EntityMapper<MODEL, DOMAIN> {
-    MODEL toModel(DOMAIN domain);
-    DOMAIN fromModel(MODEL model);
-    List<DOMAIN> fromModels(List<MODEL> modelList);
-    List<MODEL> toModels(List<DOMAIN> domainList);
-    Page<DOMAIN> fromModelPage(Page<MODEL> modelPage);
+public interface EntityMapper<Entity, DOMAIN> {
+    Entity fromDomains(DOMAIN domain);
+    DOMAIN toDomain(Entity model);
+    List<Entity> fromDomains(List<DOMAIN> domains);
+    List<DOMAIN> toDomain(List<Entity> entities);
+    Page<DOMAIN> toDomainPage(Page<Entity> modelPage);
 }
 

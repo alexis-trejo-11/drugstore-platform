@@ -1,6 +1,7 @@
 package microservice.purchase.domain.port.output;
 
 
+import microservice.purchase.domain.entity.PurchaseOrderId;
 import microservice.purchase.domain.entity.PurchaseOrder;
 import microservice.purchase.domain.entity.PurchaseOrderStatus;
 import org.springframework.data.domain.Page;
@@ -11,7 +12,7 @@ import java.util.Optional;
 public interface PurchaseOrderRepository {
     PurchaseOrder save(PurchaseOrder purchaseOrder);
 
-    Optional<PurchaseOrder> findByID(String id);
+    Optional<PurchaseOrder> findById(PurchaseOrderId id);
 
     Optional<PurchaseOrder> findByOrderNumber(String orderNumber);
 
