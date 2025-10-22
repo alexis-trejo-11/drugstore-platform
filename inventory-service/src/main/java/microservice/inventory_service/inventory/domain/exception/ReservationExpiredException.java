@@ -1,0 +1,7 @@
+package microservice.inventory_service.inventory.domain.exception;
+
+public class ReservationExpiredException extends InventoryException {
+    public ReservationExpiredException(String message) {
+        super(message);
+    }
+}
