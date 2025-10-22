@@ -59,7 +59,7 @@ public class InventoryMovementEntity {
     private String notes;
 
     @Column(name = "movement_date", nullable = false)
-    private LocalDateTime movementDate;
+    private LocalDateTime date;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

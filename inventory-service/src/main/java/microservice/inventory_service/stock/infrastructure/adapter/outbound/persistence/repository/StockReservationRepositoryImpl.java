@@ -6,11 +6,13 @@ import microservice.inventory_service.stock.domain.ReservationId;
 import microservice.inventory_service.stock.domain.StockReservation;
 import microservice.inventory_service.stock.domain.port.output.StockReservationRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class StockReservationRepositoryImpl implements StockReservationRepository {
     @Override
     public StockReservation save(StockReservation reservation) {
