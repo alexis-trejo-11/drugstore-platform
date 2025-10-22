@@ -34,7 +34,7 @@ public class InventoryMovementMapper implements EntityMapper<InventoryMovementEn
                 .referenceType(inventoryMovement.getReferenceType())
                 .performedBy(inventoryMovement.getPerformedBy() != null ? inventoryMovement.getPerformedBy().value() : null)
                 .notes(inventoryMovement.getNotes())
-                .movementDate(inventoryMovement.getMovementDate())
+                .date(inventoryMovement.getMovementDate())
                 .createdAt(inventoryMovement.getCreatedAt())
                 .build();
     }
@@ -57,7 +57,7 @@ public class InventoryMovementMapper implements EntityMapper<InventoryMovementEn
                 .referenceType(model.getReferenceType())
                 .performedBy(model.getPerformedBy() != null ? new UserId(model.getPerformedBy()) : null)
                 .notes(model.getNotes())
-                .movementDate(model.getMovementDate())
+                .movementDate(model.getDate())
                 .createdAt(model.getCreatedAt())
                 .reconstruct();
     }
