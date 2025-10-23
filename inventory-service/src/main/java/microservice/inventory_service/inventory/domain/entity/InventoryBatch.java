@@ -2,6 +2,7 @@ package microservice.inventory_service.inventory.domain.entity;
 
 import lombok.Getter;
 import microservice.inventory_service.inventory.domain.entity.enums.BatchStatus;
+import microservice.inventory_service.inventory.domain.entity.valueobject.CreateBatchParams;
 import microservice.inventory_service.inventory.domain.entity.valueobject.id.BatchId;
 import microservice.inventory_service.inventory.domain.entity.valueobject.id.InventoryId;
 import microservice.inventory_service.inventory.domain.exception.BatchExpiredException;
@@ -48,6 +49,43 @@ public class InventoryBatch {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
+
+    public static InventoryBatch create(CreateBatchParams params) {
+        validateParameters(params);
+
+        return InventoryBatch.reconstructor()
+                .id(BatchId.generate())
+                .inventoryId(params.inventoryId())
+                .batchNumber(params.batchNumber())
+                .lotNumber(params.lotNumber())
+                .quantity(params.quantity())
+                .availableQuantity(params.quantity())
+                .costPerUnit(params.costPerUnit())
+                .manufacturingDate(params.manufacturingDate())
+                .expirationDate(params.expirationDate())
+                .supplierId(params.supplierId())
+                .supplierName(params.supplierName())
+                .status(BatchStatus.ACTIVE)
+                .storageConditions(params.storageConditions())
+                .receivedDate(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .reconstruct();
+    }
+
+    private static void validateParameters(CreateBatchParams params) {
+        if (params == null) {
+            throw new IllegalArgumentException("CreateBatchParams cannot be null");
+        }
+
+        if (params.quantity() <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive");
+        }
+        if (params.expirationDate().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Expiration date cannot be in the past");
+        }
+    }
+
 
     public void releaseQuantity(Integer quantity) {
         this.availableQuantity += quantity;

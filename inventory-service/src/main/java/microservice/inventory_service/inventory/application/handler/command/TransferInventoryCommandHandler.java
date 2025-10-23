@@ -8,7 +8,7 @@ import microservice.inventory_service.inventory.domain.entity.enums.MovementType
 import microservice.inventory_service.inventory.domain.exception.InventoryNotFoundException;
 import microservice.inventory_service.inventory.domain.port.output.InventoryMovementRepository;
 import microservice.inventory_service.inventory.domain.port.output.InventoryRepository;
-import microservice.inventory_service.inventory.factory.InventoryMovementFactory;
+import microservice.inventory_service.inventory.domain.factory.InventoryMovementFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 

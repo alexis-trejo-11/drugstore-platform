@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 public class PurchaseOrder {
@@ -28,11 +29,10 @@ public class PurchaseOrder {
     private LocalDateTime updatedAt;
 
     private PurchaseOrder(PurchaseOrderId id, String orderNumber, String supplierId, String supplierName,
-                          List<PurchaseOrderItem> items, BigDecimal totalAmount,
-                          PurchaseOrderStatus status, LocalDateTime orderDate,
-                          LocalDateTime expectedDeliveryDate, LocalDateTime actualDeliveryDate,
-                          String deliveryLocation, UserId createdBy, UserId approvedBy,
-                          LocalDateTime createdAt, LocalDateTime updatedAt) {
+                          List<PurchaseOrderItem> items, BigDecimal totalAmount, PurchaseOrderStatus status,
+                          LocalDateTime orderDate,LocalDateTime expectedDeliveryDate, LocalDateTime actualDeliveryDate,
+                          String deliveryLocation, UserId createdBy, UserId approvedBy, LocalDateTime createdAt,
+                          LocalDateTime updatedAt) {
         this.id = id;
         this.orderNumber = orderNumber;
         this.supplierId = supplierId;
@@ -118,8 +118,8 @@ public class PurchaseOrder {
         }
     }
 
-    private PurchaseOrderItem findItemById(int itemId) {
-        return this.items.stream().filter(item -> item.getId() == itemId).findFirst().orElseThrow(() -> new IllegalArgumentException("Order item not found"));
+    private PurchaseOrderItem findItemById(Long itemId) {
+        return this.items.stream().filter(item -> Objects.equals(item.getId(), itemId)).findFirst().orElseThrow(() -> new IllegalArgumentException("Order item not found"));
     }
 
     public static PurchaseOrderReconstructor reconstructor() {

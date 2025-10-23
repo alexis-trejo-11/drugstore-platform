@@ -12,7 +12,7 @@ import microservice.inventory_service.inventory.domain.exception.InventoryNotFou
 import microservice.inventory_service.inventory.domain.port.output.InventoryBatchRepository;
 import microservice.inventory_service.inventory.domain.port.output.InventoryMovementRepository;
 import microservice.inventory_service.inventory.domain.port.output.InventoryRepository;
-import microservice.inventory_service.inventory.factory.InventoryMovementFactory;
+import microservice.inventory_service.inventory.domain.factory.InventoryMovementFactory;
 import microservice.inventory_service.stock.domain.StockAdjustment;
 import microservice.inventory_service.stock.domain.entity.StockAdjustmentFactory;
 import microservice.inventory_service.stock.domain.port.output.StockAdjustmentRepository;

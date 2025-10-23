@@ -1,0 +1,16 @@
+package microservice.inventory_service.inventory.domain.entity.valueobject;
+
+import lombok.Builder;
+import microservice.inventory_service.inventory.domain.entity.valueobject.id.InventoryId;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Builder
+public record CreateBatchParams(
+        InventoryId inventoryId, String batchNumber, String lotNumber,
+        Integer quantity, BigDecimal costPerUnit,
+        LocalDateTime manufacturingDate, LocalDateTime expirationDate,
+        String supplierId, String supplierName, String storageConditions
+) {
+}

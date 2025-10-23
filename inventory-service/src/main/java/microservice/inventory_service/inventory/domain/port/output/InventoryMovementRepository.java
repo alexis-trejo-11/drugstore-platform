@@ -26,5 +26,5 @@ public interface InventoryMovementRepository {
 
     Page<InventoryMovement> findByDateRange(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
-    List<InventoryMovement> findByInventoryIdAndDateRange(InventoryId inventoryId, LocalDateTime startDate, LocalDateTime endDate);
+    Page<InventoryMovement> findByInventoryIdAndDateRange(InventoryId inventoryId, LocalDateTime startDate, LocalDateTime endDate,  Pageable pageable);
 }

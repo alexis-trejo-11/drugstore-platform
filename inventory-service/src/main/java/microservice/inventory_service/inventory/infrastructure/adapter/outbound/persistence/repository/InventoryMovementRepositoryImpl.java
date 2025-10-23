@@ -67,7 +67,7 @@ public class InventoryMovementRepositoryImpl implements InventoryMovementReposit
     }
 
     @Override
-    public List<InventoryMovement> findByInventoryIdAndDateRange(InventoryId inventoryId, LocalDateTime startDate, LocalDateTime endDate) {
+    public Page<InventoryMovement> findByInventoryIdAndDateRange(InventoryId inventoryId, LocalDateTime startDate, LocalDateTime endDate) {
         List<InventoryMovementEntity> entityPage = movementRepository.findAllByInventoryIdAndDateBetween(inventoryId.value(), startDate, endDate);
         return movementMapper.toDomains(entityPage);
     }
