@@ -21,22 +21,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class InventoryOrchestrationService {
-
     private final CreateInventoryCommandHandler createInventoryHandler;
     private final AddInventoryBatchCommandHandler addBatchHandler;
     private final AdjustInventoryCommandHandler adjustInventoryHandler;
     private final InventoryAlertDomainService alertDomainService;
     private final InventoryAlertRepository alertRepository;
 
+
     @Transactional
-    public InventoryId createInventoryWithInitialBatch(CreateInventoryCommand inventoryCommand,
-                                                       AddInventoryBatchCommand batchCommand) {
-        InventoryId inventoryId = createInventoryHandler.handle(inventoryCommand);
-
-        batchCommand.setInventoryId(inventoryId);
-        addBatchHandler.handle(batchCommand);
-
-        return inventoryId;
+    public InventoryId createInventory(CreateInventoryCommand inventoryCommand) {
+         return createInventoryHandler.handle(inventoryCommand);
     }
 
     @Transactional

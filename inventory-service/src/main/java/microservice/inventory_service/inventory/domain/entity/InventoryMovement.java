@@ -2,6 +2,7 @@ package microservice.inventory_service.inventory.domain.entity;
 
 import lombok.Getter;
 import microservice.inventory_service.inventory.domain.entity.enums.MovementType;
+import microservice.inventory_service.inventory.domain.entity.valueobject.CreateMovementParams;
 import microservice.inventory_service.inventory.domain.entity.valueobject.id.BatchId;
 import microservice.inventory_service.inventory.domain.entity.valueobject.id.InventoryId;
 import microservice.inventory_service.inventory.domain.entity.valueobject.id.MovementId;
@@ -43,6 +44,43 @@ public class InventoryMovement {
         this.createdAt = createdAt;
     }
 
+    public static InventoryMovement create(CreateMovementParams params) {
+        return InventoryMovement.reconstructor()
+                .id(MovementId.generate())
+                .inventoryId(params.inventoryId())
+                .batchId(params.batchId())
+                .movementType(params.movementType())
+                .quantity(params.quantity())
+                .previousQuantity(params.previousQuantity())
+                .newQuantity(params.newQuantity())
+                .reason(params.reason())
+                .referenceId(params.referenceId())
+                .referenceType(params.referenceType())
+                .performedBy(params.performedBy())
+                .notes(params.notes())
+                .movementDate(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .reconstruct();
+    }
+
+    public static InventoryMovement createBatchMovent(CreateMovementParams params) {
+        return InventoryMovement.reconstructor()
+                .id(MovementId.generate())
+                .referenceType("BATCH")
+                .movementType(MovementType.RECEIPT)
+                .reason("Batch received")
+                .notes("")
+                .inventoryId(params.inventoryId())
+                .batchId(params.batchId())
+                .quantity(params.quantity())
+                .previousQuantity(params.previousQuantity())
+                .newQuantity(params.newQuantity())
+                .referenceId(params.referenceId())
+                .performedBy(params.performedBy())
+                .movementDate(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .reconstruct();
+    }
 
     public static InventoryMovementReconstructor reconstructor() {
         return new InventoryMovementReconstructor();

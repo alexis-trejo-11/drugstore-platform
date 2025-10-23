@@ -1,4 +1,4 @@
-package microservice.inventory_service.inventory.factory;
+package microservice.inventory_service.inventory.domain.factory;
 
 import microservice.inventory_service.inventory.domain.entity.InventoryAlert;
 import microservice.inventory_service.inventory.domain.entity.enums.AlertSeverity;

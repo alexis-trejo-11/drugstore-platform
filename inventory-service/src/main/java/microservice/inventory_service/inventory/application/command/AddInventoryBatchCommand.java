@@ -1,6 +1,7 @@
 package microservice.inventory_service.inventory.application.command;
 
 import lombok.Builder;
+import microservice.inventory_service.inventory.domain.entity.valueobject.CreateBatchParams;
 import microservice.inventory_service.inventory.domain.entity.valueobject.id.InventoryId;
 
 import java.math.BigDecimal;
@@ -33,5 +34,20 @@ public record AddInventoryBatchCommand(
                 this.supplierName,
                 this.storageConditions
         );
+    }
+
+    public CreateBatchParams toCreateBatchParams() {
+        return CreateBatchParams.builder()
+                .inventoryId(inventoryId)
+                .batchNumber(batchNumber)
+                .lotNumber(lotNumber)
+                .quantity(quantity)
+                .costPerUnit(costPerUnit)
+                .manufacturingDate(manufacturingDate)
+                .expirationDate(expirationDate)
+                .supplierId(supplierId)
+                .supplierName(supplierName)
+                .storageConditions(storageConditions)
+                .build();
     }
 }

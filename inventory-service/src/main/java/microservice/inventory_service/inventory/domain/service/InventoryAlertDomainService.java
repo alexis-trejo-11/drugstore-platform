@@ -5,7 +5,7 @@ import microservice.inventory_service.inventory.domain.entity.InventoryAlert;
 import microservice.inventory_service.inventory.domain.entity.InventoryBatch;
 import microservice.inventory_service.inventory.domain.entity.enums.AlertSeverity;
 import microservice.inventory_service.inventory.domain.entity.enums.AlertType;
-import microservice.inventory_service.inventory.factory.InventoryAlertFactory;
+import microservice.inventory_service.inventory.domain.factory.InventoryAlertFactory;
 import org.springframework.stereotype.Service;
 
 @Service

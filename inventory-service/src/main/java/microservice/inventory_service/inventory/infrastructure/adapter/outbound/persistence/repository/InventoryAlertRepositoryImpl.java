@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public class InventoryAlerRepositoryImpl implements InventoryAlertRepository  {
+public class InventoryAlertRepositoryImpl implements InventoryAlertRepository  {
     @Override
     public InventoryAlert save(InventoryAlert alert) {
         return null;

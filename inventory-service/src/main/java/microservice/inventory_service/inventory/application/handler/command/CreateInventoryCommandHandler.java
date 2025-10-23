@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.inventory.application.command.CreateInventoryCommand;
 import microservice.inventory_service.inventory.domain.entity.Inventory;
 import microservice.inventory_service.inventory.domain.entity.valueobject.id.InventoryId;
+import microservice.inventory_service.inventory.domain.port.output.InventoryBatchRepository;
 import microservice.inventory_service.inventory.domain.port.output.InventoryRepository;
-import microservice.inventory_service.inventory.factory.InventoryFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CreateInventoryCommandHandler {
     private final InventoryRepository inventoryRepository;
+    private final InventoryBatchRepository batchRepository;
 
     @Transactional
     public InventoryId handle(CreateInventoryCommand command) {
@@ -20,16 +21,15 @@ public class CreateInventoryCommandHandler {
             throw new IllegalStateException("Inventory already exists for this medicine");
         }
 
-        Inventory inventory = InventoryFactory.create(
-                command.medicineId(),
-                command.initialQuantity(),
-                command.reorderLevel(),
-                command.reorderQuantity(),
-                command.maximumStockLevel(),
-                command.warehouseLocation()
-        );
-
+        var createParams = command.toCreateInventoryParams();
+        Inventory inventory = Inventory.create(createParams);
         Inventory savedInventory = inventoryRepository.save(inventory);
+
+        if (command.hasBatch()) {
+            var batch = savedInventory.getBatches().getFirst();
+            batchRepository.save(batch);
+        }
+
         return savedInventory.getId();
     }
 }

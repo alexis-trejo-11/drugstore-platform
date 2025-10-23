@@ -5,6 +5,7 @@ import microservice.inventory_service.purchase.domain.entity.PurchaseOrderId;
 import microservice.inventory_service.purchase.domain.entity.PurchaseOrder;
 import microservice.inventory_service.purchase.domain.entity.PurchaseOrderStatus;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -16,13 +17,11 @@ public interface PurchaseOrderRepository {
 
     Optional<PurchaseOrder> findByOrderNumber(String orderNumber);
 
-    Page<PurchaseOrder> findBySupplierId(String supplierId);
+    Page<PurchaseOrder> findBySupplierId(String supplierId, Pageable pageable);
 
-    Page<PurchaseOrder> findByStatus(PurchaseOrderStatus status);
+    Page<PurchaseOrder> findByStatus(PurchaseOrderStatus status, Pageable pageable);
 
-    Page<PurchaseOrder> findByExpectedDeliveryDateBefore(LocalDateTime date);
+    Page<PurchaseOrder> findByExpectedDeliveryDateBefore(LocalDateTime date, Pageable pageable);
 
-    Page<PurchaseOrder> findAll();
-
-    void delete(String id);
+    void delete(PurchaseOrderId id);
 }

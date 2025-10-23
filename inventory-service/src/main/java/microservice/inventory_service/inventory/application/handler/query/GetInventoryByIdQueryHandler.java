@@ -1,22 +1,21 @@
 package microservice.inventory_service.inventory.application.handler.query;
 
 import lombok.RequiredArgsConstructor;
+import microservice.inventory_service.inventory.application.query.GetInventoryByIdQuery;
 import microservice.inventory_service.inventory.domain.entity.Inventory;
+import microservice.inventory_service.inventory.domain.exception.InventoryNotFoundException;
 import microservice.inventory_service.inventory.domain.port.output.InventoryRepository;
-import microservice.inventory_service.stock.application.query.GetLowStockInventoriesQuery;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
-public class GetLowStockInventoriesQueryHandler {
+public class GetInventoryByIdQueryHandler {
     private final InventoryRepository inventoryRepository;
-    
+
     @Transactional(readOnly = true)
-    public Page<Inventory> handle(GetLowStockInventoriesQuery query) {
-        return inventoryRepository.findLowStock(query.pagination().toPageable());
+    public Inventory handle(GetInventoryByIdQuery query) {
+        return inventoryRepository.findById(query.inventoryId())
+                .orElseThrow(() -> new InventoryNotFoundException("Inventory not found for id"));
     }
 }

@@ -2,6 +2,7 @@ package microservice.inventory_service.inventory.domain.entity;
 
 import lombok.Getter;
 import microservice.inventory_service.inventory.domain.entity.enums.InventoryStatus;
+import microservice.inventory_service.inventory.domain.entity.valueobject.CreateInventoryParams;
 import microservice.inventory_service.inventory.domain.entity.valueobject.id.InventoryId;
 import microservice.inventory_service.inventory.domain.entity.valueobject.id.MedicineId;
 import microservice.inventory_service.inventory.domain.exception.InsufficientInventoryException;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 
 @Getter
 public class Inventory {
@@ -32,12 +34,7 @@ public class Inventory {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private Inventory(InventoryId id, MedicineId medicineId, Integer totalQuantity, Integer availableQuantity,
-                      Integer reservedQuantity, Integer reorderLevel, Integer reorderQuantity,
-                      Integer maximumStockLevel, String warehouseLocation, InventoryStatus status,
-                      LocalDateTime lastRestockedDate, LocalDateTime lastCountDate,
-                      List<InventoryBatch> batches, List<InventoryMovement> movements,
-                      LocalDateTime createdAt, LocalDateTime updatedAt) {
+    private Inventory(InventoryId id, MedicineId medicineId, Integer totalQuantity, Integer availableQuantity, Integer reservedQuantity, Integer reorderLevel, Integer reorderQuantity, Integer maximumStockLevel, String warehouseLocation, InventoryStatus status, LocalDateTime lastRestockedDate, LocalDateTime lastCountDate, List<InventoryBatch> batches, List<InventoryMovement> movements, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.medicineId = medicineId;
         this.totalQuantity = totalQuantity;
@@ -56,10 +53,40 @@ public class Inventory {
         this.updatedAt = updatedAt;
     }
 
-    public void receiveStock(Integer quantity) {
-        if (quantity < 0) {
-            throw new InsufficientInventoryException("Cannot receive negative stock quantity");
+    public static Inventory create(CreateInventoryParams params) {
+        params.validate();
+
+        LocalDateTime now = LocalDateTime.now();
+        if (params.initialBatch().isPresent()) {
+            return createFromInitialBatch(params, params.initialBatch().get(), now);
         }
+
+
+        return createEmptyInventory(params, now);
+    }
+
+    private static Inventory createEmptyInventory(CreateInventoryParams params, LocalDateTime now) {
+        return new Inventory(InventoryId.generate(), params.medicineId(), 0, 0, 0, params.reorderLevel(), params.reorderQuantity(), params.maximumStockLevel(), params.warehouseLocation(), determineInitialStatus(0, params.reorderLevel()), now, null, new ArrayList<>(), new ArrayList<>(), now, now);
+    }
+
+    private static Inventory createFromInitialBatch(CreateInventoryParams params, InventoryBatch initialBatch, LocalDateTime now) {
+        int initialQuantity = initialBatch.getQuantity();
+        return new Inventory(InventoryId.generate(), params.medicineId(), initialQuantity, initialQuantity, 0, params.reorderLevel(), params.reorderQuantity(), params.maximumStockLevel(), params.warehouseLocation(), determineInitialStatus(initialQuantity, params.reorderLevel()), now, null, new ArrayList<>(List.of(initialBatch)), new ArrayList<>(), now, now);
+    }
+
+
+    private static InventoryStatus determineInitialStatus(Integer quantity, Integer reorderLevel) {
+        if (quantity <= 0) {
+            return InventoryStatus.OUT_OF_STOCK;
+        } else if (quantity <= reorderLevel) {
+            return InventoryStatus.LOW_STOCK;
+        } else {
+            return InventoryStatus.ACTIVE;
+        }
+    }
+
+    public void receiveStock(Integer quantity) {
+        if (quantity < 0) throw new InsufficientInventoryException("Cannot receive negative stock quantity");
 
         this.totalQuantity += quantity;
         this.availableQuantity += quantity;
@@ -158,10 +185,7 @@ public class Inventory {
 
     private void validateSufficientStock(Integer quantity) {
         if (this.availableQuantity < quantity) {
-            throw new InsufficientInventoryException(
-                    String.format("Insufficient inventory. Available: %d, Requested: %d",
-                            this.availableQuantity, quantity)
-            );
+            throw new InsufficientInventoryException(String.format("Insufficient inventory. Available: %d, Requested: %d", this.availableQuantity, quantity));
         }
     }
 
@@ -287,9 +311,7 @@ public class Inventory {
         }
 
         public Inventory reconstruct() {
-            return new Inventory(id, medicineId, totalQuantity, availableQuantity, reservedQuantity,
-                    reorderLevel, reorderQuantity, maximumStockLevel, warehouseLocation, status,
-                    lastRestockedDate, lastCountDate, batches, movements, createdAt, updatedAt);
+            return new Inventory(id, medicineId, totalQuantity, availableQuantity, reservedQuantity, reorderLevel, reorderQuantity, maximumStockLevel, warehouseLocation, status, lastRestockedDate, lastCountDate, batches, movements, createdAt, updatedAt);
         }
     }
 }

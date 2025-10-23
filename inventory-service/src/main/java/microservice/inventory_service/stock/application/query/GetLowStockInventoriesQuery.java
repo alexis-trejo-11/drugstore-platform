@@ -1,4 +1,6 @@
 package microservice.inventory_service.stock.application.query;
 
-public record GetLowStockInventoriesQuery(Integer limit) {
+import libs_kernel.page.Pagination;
+
+public record GetLowStockInventoriesQuery(Pagination pagination) {
 }

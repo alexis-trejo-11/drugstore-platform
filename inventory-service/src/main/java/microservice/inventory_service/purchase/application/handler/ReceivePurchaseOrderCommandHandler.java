@@ -5,11 +5,11 @@ import microservice.inventory_service.inventory.domain.entity.Inventory;
 import microservice.inventory_service.inventory.domain.entity.InventoryBatch;
 import microservice.inventory_service.inventory.domain.entity.InventoryMovement;
 import microservice.inventory_service.inventory.domain.entity.enums.MovementType;
+import microservice.inventory_service.inventory.domain.entity.valueobject.CreateBatchParams;
 import microservice.inventory_service.inventory.domain.port.output.InventoryBatchRepository;
 import microservice.inventory_service.inventory.domain.port.output.InventoryMovementRepository;
 import microservice.inventory_service.inventory.domain.port.output.InventoryRepository;
-import microservice.inventory_service.inventory.factory.InventoryBatchFactory;
-import microservice.inventory_service.inventory.factory.InventoryMovementFactory;
+import microservice.inventory_service.inventory.domain.factory.InventoryMovementFactory;
 import microservice.inventory_service.purchase.application.command.ReceivePurchaseOrderCommand;
 import microservice.inventory_service.purchase.application.command.ReceivedItemCommand;
 import microservice.inventory_service.purchase.domain.entity.PurchaseOrder;
@@ -61,19 +61,17 @@ public class ReceivePurchaseOrderCommandHandler {
         Inventory inventory = inventoryRepository.findByMedicineId(orderItem.getMedicineId())
                 .orElseThrow(() -> new IllegalStateException("Inventory not found for medicine"));
 
-        InventoryBatch batch = InventoryBatchFactory.create(
-                inventory.getId(),
-                receivedItem.batchNumber(),
-                null,
-                receivedItem.receivedQuantity(),
-                orderItem.getUnitCost(),
-                null,
-                null,
-                purchaseOrder.getSupplierId(),
-                purchaseOrder.getSupplierName(),
-                null
-        );
 
+        var params = CreateBatchParams.builder()
+                .inventoryId(inventory.getId())
+                .batchNumber(receivedItem.batchNumber())
+                .quantity(receivedItem.receivedQuantity())
+                .costPerUnit(orderItem.getUnitCost())
+                .supplierId(purchaseOrder.getSupplierId())
+                .supplierName(purchaseOrder.getSupplierName())
+                .build();
+
+        InventoryBatch batch = InventoryBatch.create(params);
         batchRepository.save(batch);
 
         inventory.receiveStock(receivedItem.receivedQuantity());

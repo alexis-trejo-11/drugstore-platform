@@ -8,7 +8,7 @@ import microservice.inventory_service.inventory.domain.entity.valueobject.id.Med
 
 @Getter
 public class PurchaseOrderItem {
-    private int id;
+    private Long id;
     private MedicineId medicineId;
     private String medicineName;
     private Integer orderedQuantity;
@@ -17,7 +17,7 @@ public class PurchaseOrderItem {
     private BigDecimal totalCost;
     private String batchNumber;
 
-    private PurchaseOrderItem(int id, MedicineId medicineId, String medicineName, Integer orderedQuantity, Integer receivedQuantity, BigDecimal unitCost, BigDecimal totalCost, String batchNumber) {
+    private PurchaseOrderItem(Long id, MedicineId medicineId, String medicineName, Integer orderedQuantity, Integer receivedQuantity, BigDecimal unitCost, BigDecimal totalCost, String batchNumber) {
         this.id = id;
         this.medicineId = medicineId;
         this.medicineName = medicineName;
@@ -55,7 +55,7 @@ public class PurchaseOrderItem {
     }
 
     public static class PurchaseOrderItemReconstructor {
-        private int id;
+        private Long id;
         private MedicineId medicineId;
         private String medicineName;
         private Integer orderedQuantity;
@@ -64,7 +64,7 @@ public class PurchaseOrderItem {
         private BigDecimal totalCost;
         private String batchNumber;
 
-        public PurchaseOrderItemReconstructor id(int id) {
+        public PurchaseOrderItemReconstructor id(Long id) {
             this.id = id;
             return this;
         }

@@ -7,7 +7,7 @@ import microservice.inventory_service.inventory.domain.entity.InventoryMovement;
 import microservice.inventory_service.inventory.domain.entity.enums.MovementType;
 import microservice.inventory_service.inventory.domain.entity.valueobject.id.UserId;
 import microservice.inventory_service.inventory.domain.exception.InsufficientInventoryException;
-import microservice.inventory_service.inventory.factory.InventoryMovementFactory;
+import microservice.inventory_service.inventory.domain.factory.InventoryMovementFactory;
 import microservice.inventory_service.purchase.domain.entity.PurchaseOrderId;
 import org.springframework.stereotype.Service;
 

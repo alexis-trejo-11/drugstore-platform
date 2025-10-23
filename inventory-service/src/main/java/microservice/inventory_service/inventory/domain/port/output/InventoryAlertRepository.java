@@ -6,6 +6,7 @@ import microservice.inventory_service.inventory.domain.entity.enums.AlertStatus;
 import microservice.inventory_service.inventory.domain.entity.enums.AlertType;
 import microservice.inventory_service.inventory.domain.entity.valueobject.id.AlertId;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -18,7 +19,7 @@ public interface InventoryAlertRepository {
 
     Page<InventoryAlert> findByType(AlertType type);
 
-    Page<InventoryAlert> findByStatus(AlertStatus status);
+    Page<InventoryAlert> findByStatus(AlertStatus status, Pageable pageable);
 
     Page<InventoryAlert> findBySeverity(AlertSeverity severity);
 

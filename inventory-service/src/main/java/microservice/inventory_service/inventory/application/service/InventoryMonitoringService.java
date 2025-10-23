@@ -52,7 +52,7 @@ public class InventoryMonitoringService {
     @Scheduled(cron = "0 0 1 * * *")
     @Transactional
     public void monitorExpiringBatches() {
-        log.info("Starting expiring batches monitoring");
+        log.info("Starting expiring initialBatch monitoring");
         
         List<InventoryBatch> allBatches = batchRepository.findExpiringBefore(LocalDateTime.now().plusDays(30));
         List<InventoryBatch> expiringBatches = batchExpirationService.findExpiringSoonBatches(allBatches, 30);
@@ -62,13 +62,13 @@ public class InventoryMonitoringService {
             alertRepository.save(alert);
         }
         
-        log.info("Completed expiring batches monitoring. Found {} expiring batches", expiringBatches.size());
+        log.info("Completed expiring initialBatch monitoring. Found {} expiring initialBatch", expiringBatches.size());
     }
     
     @Scheduled(cron = "0 0 2 * * *")
     @Transactional
     public void processExpiredBatches() {
-        log.info("Starting expired batches processing");
+        log.info("Starting expired initialBatch processing");
         
         List<InventoryBatch> expiredBatches = batchRepository.findExpiredBatches();
         
@@ -82,7 +82,7 @@ public class InventoryMonitoringService {
             }
         }
         
-        log.info("Completed expired batches processing. Processed {} expired batches", expiredBatches.size());
+        log.info("Completed expired initialBatch processing. Processed {} expired initialBatch", expiredBatches.size());
     }
     
     @Scheduled(cron = "0 */15 * * * *")

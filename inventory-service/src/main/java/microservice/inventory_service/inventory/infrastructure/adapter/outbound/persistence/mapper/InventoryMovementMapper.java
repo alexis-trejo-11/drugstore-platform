@@ -17,9 +17,7 @@ import java.util.List;
 public class InventoryMovementMapper implements EntityMapper<InventoryMovementEntity, InventoryMovement> {
     @Override
     public InventoryMovementEntity fromDomain(InventoryMovement inventoryMovement) {
-        if (inventoryMovement == null) {
-            return null;
-        }
+        if (inventoryMovement == null) return null;
 
         return InventoryMovementEntity.builder()
                 .id(inventoryMovement.getId() != null ? inventoryMovement.getId().value() : null)
@@ -41,9 +39,7 @@ public class InventoryMovementMapper implements EntityMapper<InventoryMovementEn
 
     @Override
     public InventoryMovement toDomain(InventoryMovementEntity model) {
-        if (model == null) {
-            return null;
-        }
+        if (model == null) return null;
         return InventoryMovement.reconstructor()
                 .id(model.getId() != null ? new MovementId(model.getId()) : null)
                 .inventoryId(model.getInventoryId() != null ? new InventoryId(model.getInventoryId()) : null)
