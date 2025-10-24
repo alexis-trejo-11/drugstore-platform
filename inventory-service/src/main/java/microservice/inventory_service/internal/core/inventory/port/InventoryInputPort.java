@@ -1,0 +1,28 @@
+package microservice.inventory_service.internal.core.inventory.port;
+
+import microservice.inventory_service.internal.core.batch.application.query.GetExpiringBatchesQuery;
+import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
+import microservice.inventory_service.internal.core.inventory.application.cqrs.command.AdjustInventoryCommand;
+import microservice.inventory_service.internal.core.inventory.application.cqrs.command.CreateInventoryCommand;
+import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryByIdQuery;
+import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryByMedicineQuery;
+import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryMovementsQuery;
+import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
+import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.AdjustmentId;
+import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
+import microservice.inventory_service.internal.core.movement.domain.InventoryMovement;
+import microservice.inventory_service.internal.core.stock.application.query.GetLowStockInventoriesQuery;
+import org.springframework.data.domain.Page;
+
+import java.util.List;
+
+public interface InventoryInputPort {
+    InventoryId createInventory(CreateInventoryCommand inventoryCommand);
+    AdjustmentId adjustInventory(AdjustInventoryCommand command);
+    Inventory getInventoryById(GetInventoryByIdQuery query);
+    Inventory getInventoryByMedicine(GetInventoryByMedicineQuery query);
+    Page<Inventory> getLowStockInventories(GetLowStockInventoriesQuery query);
+    Page<InventoryMovement> getInventoryMovements(GetInventoryMovementsQuery query);
+    List<InventoryBatch> getExpiringInventoryBatches(GetExpiringBatchesQuery query);
+
+}

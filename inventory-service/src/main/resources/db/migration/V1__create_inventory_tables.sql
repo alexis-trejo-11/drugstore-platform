@@ -1,33 +1,3 @@
--- Create enum types first
-CREATE TYPE inventory_status AS ENUM (
-    'ACTIVE',
-    'INACTIVE',
-    'LOW_STOCK',
-    'OUT_OF_STOCK',
-    'DISCONTINUED',
-    'SUSPENDED'
-);
-
-CREATE TYPE batch_status AS ENUM (
-    'ACTIVE',
-    'EXPIRED',
-    'RECALLED',
-    'DAMAGED',
-    'DEPLETED'
-);
-
-CREATE TYPE movement_type AS ENUM (
-    'RECEIPT',
-    'SALE',
-    'RETURN',
-    'ADJUSTMENT',
-    'TRANSFER',
-    'DAMAGE',
-    'EXPIRATION',
-    'RESERVATION',
-    'RELEASE'
-);
-
 -- Create sequences for auto-increment if needed (optional)
 CREATE SEQUENCE IF NOT EXISTS batch_number_seq START 1000 INCREMENT 1;
 
@@ -42,7 +12,7 @@ CREATE TABLE inventories (
     reorder_quantity INTEGER NOT NULL DEFAULT 0,
     maximum_stock_level INTEGER,
     warehouse_location VARCHAR(255),
-    status inventory_status NOT NULL DEFAULT 'ACTIVE',
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     last_restocked_date TIMESTAMP,
     last_count_date TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -59,6 +29,9 @@ CREATE TABLE inventories (
     ),
     CONSTRAINT chk_inventories_reorder_positive CHECK (
         reorder_level >= 0 AND reorder_quantity > 0
+    ),
+    CONSTRAINT chk_inventories_status_values CHECK (
+        status IN ('ACTIVE','INACTIVE','LOW_STOCK','OUT_OF_STOCK','DISCONTINUED','SUSPENDED')
     )
 );
 
@@ -75,7 +48,7 @@ CREATE TABLE inventory_batches (
     expiration_date TIMESTAMP NOT NULL,
     supplier_id VARCHAR(36),
     supplier_name VARCHAR(255),
-    status batch_status NOT NULL DEFAULT 'ACTIVE',
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     storage_conditions TEXT,
     received_date TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -90,6 +63,9 @@ CREATE TABLE inventory_batches (
     ),
     CONSTRAINT chk_batches_dates CHECK (
         manufacturing_date IS NULL OR expiration_date > manufacturing_date
+    ),
+    CONSTRAINT chk_batches_status_values CHECK (
+        status IN ('ACTIVE','EXPIRED','RECALLED','DAMAGED','DEPLETED')
     )
 );
 
@@ -98,7 +74,7 @@ CREATE TABLE inventory_movements (
     id VARCHAR(36) NOT NULL,
     inventory_id VARCHAR(36) NOT NULL,
     batch_id VARCHAR(36),
-    movement_type movement_type NOT NULL,
+    movement_type VARCHAR(20) NOT NULL,
     quantity INTEGER NOT NULL,
     previous_quantity INTEGER,
     new_quantity INTEGER,
@@ -115,6 +91,9 @@ CREATE TABLE inventory_movements (
     CONSTRAINT chk_movements_quantity_consistency CHECK (
         (previous_quantity IS NOT NULL AND new_quantity IS NOT NULL) OR
         (previous_quantity IS NULL AND new_quantity IS NULL)
+    ),
+    CONSTRAINT chk_movements_type_values CHECK (
+        movement_type IN ('RECEIPT','SALE','RETURN','ADJUSTMENT','TRANSFER','DAMAGE','EXPIRATION','RESERVATION','RELEASE')
     )
 );
 

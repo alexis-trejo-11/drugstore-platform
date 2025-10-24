@@ -1,85 +1,57 @@
 package libs_kernel.page;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
+import org.springframework.data.domain.Page;
+
 import java.util.List;
 
-/**
- * Interface that defines the contract for paginated responses.
- * This interface provides read-only access to pagination metadata and content.
- *
- * @param <T> the type of elements in the page content
- */
-public interface PageResponse<T> {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@NoArgsConstructor
+@Data
+public class PageResponse<T> {
+    private List<T> content;
+    private PaginationMetadata paginationMetadata;
 
-    /**
-     * Gets the content of the current page.
-     *
-     * @return a list of elements in the current page
-     */
-    List<T> content();
+    @Builder
+    public PageResponse(List<T> content, int page, int size, long totalElements) {
+        this.content = content;
+        this.paginationMetadata = new PaginationMetadata(totalElements, page, size);
+    }
 
-    /**
-     * Gets the current page number (zero-based).
-     *
-     * @return the page number
-     */
-    int page();
+    public PageResponse(List<T> content, PaginationMetadata paginationMetadata) {
+        this.content = content;
+        this.paginationMetadata = paginationMetadata;
+    }
 
-    /**
-     * Gets the size of the page.
-     *
-     * @return the number of elements per page
-     */
-    int size();
+    public static <T> PageResponse<T> from(Page<T> page) {
+        return new PageResponse<>(
+                page.getContent(),
+                PaginationMetadata.from(page)
+        );
+    }
 
-    /**
-     * Gets the total number of elements across all pages.
-     *
-     * @return the total number of elements
-     */
-    long totalElements();
+    public static <T> PageResponse<T> empty() {
+        return new PageResponse<>(
+                List.of(),
+                PaginationMetadata.empty());
+    }
 
-    /**
-     * Gets the total number of pages.
-     *
-     * @return the total number of pages
-     */
-    int totalPages();
+    public PageResponse<T> fromPage(Page<T> page) {
+        return new PageResponse<T>(
+                page.getContent(),
+                PaginationMetadata.from(page)
+        );
+    }
 
-    /**
-     * Checks if this is the first page.
-     *
-     * @return true if this is the first page, false otherwise
-     */
-    boolean first();
+    @JsonProperty("content")
+    public List<T> getContent() {
+        return content;
+    }
 
-    /**
-     * Checks if this is the last page.
-     *
-     * @return true if this is the last page, false otherwise
-     */
-    boolean last();
-
-    /**
-     * Checks if there is a next page.
-     *
-     * @return true if there is a next page, false otherwise
-     */
-    boolean hasNext();
-
-    /**
-     * Checks if there is a previous page.
-     *
-     * @return true if there is a previous page, false otherwise
-     */
-    boolean hasPrevious();
-
-
-    /**
-     * Populates the PageResponse with data from a Spring Data Page object.
-     *
-     * @param page the Spring Data Page object
-     * @return the populated PageResponse
-     */
-    PageResponse<T> fromPage(org.springframework.data.domain.Page<T> page);
+    @JsonProperty("pagination_metadata")
+    public PaginationMetadata getPaginationMetadata() {
+        return paginationMetadata;
+    }
 }
-

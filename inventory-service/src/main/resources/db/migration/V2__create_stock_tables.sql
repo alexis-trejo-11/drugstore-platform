@@ -1,43 +1,3 @@
--- Create enum types for stock-related tables
-DO $$ BEGIN
-    CREATE TYPE reservation_status AS ENUM (
-        'ACTIVE',
-        'CONFIRMED',
-        'RELEASED',
-        'EXPIRED',
-        'CANCELLED'
-    );
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
-
-DO $$ BEGIN
-    CREATE TYPE adjustment_type AS ENUM (
-        'INCREASE',
-        'DECREASE'
-    );
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
-
--- Create adjustment_reason enum (you can expand this as needed)
-DO $$ BEGIN
-    CREATE TYPE adjustment_reason AS ENUM (
-        'PHYSICAL_COUNT',
-        'DAMAGED',
-        'EXPIRED',
-        'THEFT',
-        'LOST',
-        'QUALITY_CONTROL',
-        'SYSTEM_ERROR',
-        'RECEIVING_ERROR',
-        'RETURNED_GOODS',
-        'OTHER'
-    );
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
-
 -- Drop tables if they exist (for clean setup)
 DROP TABLE IF EXISTS stock_adjustments CASCADE;
 DROP TABLE IF EXISTS stock_reservations CASCADE;
@@ -48,7 +8,7 @@ CREATE TABLE stock_reservations (
     inventory_id VARCHAR(36) NOT NULL,
     order_id VARCHAR(36) NOT NULL,
     quantity INTEGER NOT NULL,
-    status reservation_status NOT NULL DEFAULT 'ACTIVE',
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     expiration_time TIMESTAMP NOT NULL,
     reason VARCHAR(500),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -56,7 +16,10 @@ CREATE TABLE stock_reservations (
 
     CONSTRAINT pk_stock_reservations PRIMARY KEY (id),
     CONSTRAINT chk_reservations_positive_quantity CHECK (quantity > 0),
-    CONSTRAINT chk_reservations_expiration_future CHECK (expiration_time > created_at)
+    CONSTRAINT chk_reservations_expiration_future CHECK (expiration_time > created_at),
+    CONSTRAINT chk_reservations_status_values CHECK (
+        status IN ('ACTIVE','CONFIRMED','RELEASED','EXPIRED','CANCELLED')
+    )
 );
 
 -- Create stock_adjustments table
@@ -64,11 +27,11 @@ CREATE TABLE stock_adjustments (
     id VARCHAR(36) NOT NULL,
     inventory_id VARCHAR(36) NOT NULL,
     batch_id VARCHAR(36),
-    adjustment_type adjustment_type NOT NULL,
+    adjustment_type VARCHAR(20) NOT NULL,
     quantity_before INTEGER NOT NULL,
     quantity_adjusted INTEGER NOT NULL,
     quantity_after INTEGER NOT NULL,
-    reason adjustment_reason NOT NULL,
+    reason VARCHAR(50) NOT NULL,
     notes TEXT,
     approved_by VARCHAR(36),
     performed_by VARCHAR(36) NOT NULL,
@@ -84,7 +47,13 @@ CREATE TABLE stock_adjustments (
         (adjustment_type = 'INCREASE' AND quantity_adjusted > 0 AND quantity_after = quantity_before + quantity_adjusted) OR
         (adjustment_type = 'DECREASE' AND quantity_adjusted > 0 AND quantity_after = quantity_before - quantity_adjusted)
     ),
-    CONSTRAINT chk_adjustments_quantity_after_non_negative CHECK (quantity_after >= 0)
+    CONSTRAINT chk_adjustments_quantity_after_non_negative CHECK (quantity_after >= 0),
+    CONSTRAINT chk_adjustment_type_values CHECK (
+        adjustment_type IN ('INCREASE','DECREASE')
+    ),
+    CONSTRAINT chk_adjustment_reason_values CHECK (
+        reason IN ('PHYSICAL_COUNT','DAMAGED','EXPIRED','THEFT','LOST','QUALITY_CONTROL','SYSTEM_ERROR','RECEIVING_ERROR','RETURNED_GOODS','OTHER')
+    )
 );
 
 -- Create indexes for stock_reservations

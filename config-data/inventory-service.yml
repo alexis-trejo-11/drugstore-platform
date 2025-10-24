@@ -40,7 +40,7 @@ spring:
 
   # Postgres
   datasource:
-    url: jdbc:postgresql://localhost:5432/drugstore_inventory
+    url: jdbc:postgresql://localhost:5432/drugstore_inventories
     username: alexistrejo
     password: alexisAdmin1475963
     driver-class-name: org.postgresql.Driver

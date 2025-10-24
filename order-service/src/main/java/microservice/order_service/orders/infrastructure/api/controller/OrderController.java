@@ -17,7 +17,6 @@ import jakarta.validation.constraints.NotNull;
 import libs_kernel.config.RateLimit;
 import libs_kernel.mapper.EntityDetailMapper;
 import libs_kernel.mapper.ResponseMapper;
-import libs_kernel.page.PageResponse;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import microservice.order_service.orders.application.commands.request.DeleteOrderCommand;

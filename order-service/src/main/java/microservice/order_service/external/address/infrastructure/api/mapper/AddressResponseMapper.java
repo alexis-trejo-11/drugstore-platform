@@ -2,7 +2,6 @@ package microservice.order_service.external.address.infrastructure.api.mapper;
 
 import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.page.PageResponse;
-import libs_kernel.page.PageableResponse;
 import microservice.order_service.external.address.domain.model.DeliveryAddress;
 import microservice.order_service.external.address.infrastructure.api.dto.DeliveryAddressResponse;
 import org.springframework.stereotype.Component;
@@ -39,6 +38,6 @@ public class AddressResponseMapper implements ResponseMapper<DeliveryAddressResp
     @Override
     public PageResponse<DeliveryAddressResponse> toResponsePage(PageResponse<DeliveryAddress> deliveryAddresses) {
         var responsePage = deliveryAddresses.map(this::toResponse);
-        return PageableResponse.from(responsePage);
+        return PageResponse.from(responsePage);
     }
 }

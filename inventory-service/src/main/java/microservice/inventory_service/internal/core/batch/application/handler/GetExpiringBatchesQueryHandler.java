@@ -1,0 +1,32 @@
+package microservice.inventory_service.internal.core.batch.application.handler;
+
+import lombok.RequiredArgsConstructor;
+import microservice.inventory_service.internal.core.batch.application.query.GetExpiringBatchesQuery;
+import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
+import microservice.inventory_service.internal.core.batch.domain.port.InventoryBatchRepository;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Component
+@RequiredArgsConstructor
+public class GetExpiringBatchesQueryHandler {
+    private final InventoryBatchRepository batchRepository;
+    
+    @Transactional(readOnly = true)
+    public List<InventoryBatch> handle(GetExpiringBatchesQuery query) {
+        LocalDateTime expirationThreshold;
+        
+        if (query.expirationDate().isPresent()) {
+            expirationThreshold = query.expirationDate().get();
+        } else if (query.daysThreshold().isPresent()) {
+            expirationThreshold = LocalDateTime.now().plusDays(query.daysThreshold().get());
+        } else {
+            expirationThreshold = LocalDateTime.now().plusDays(30);
+        }
+        
+        return batchRepository.findExpiringBefore(expirationThreshold);
+    }
+}

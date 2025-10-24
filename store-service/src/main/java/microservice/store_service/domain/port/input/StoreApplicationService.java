@@ -1,6 +1,5 @@
 package microservice.store_service.domain.port.input;
 
-import libs_kernel.page.PageResponse;
 import microservice.store_service.application.dto.command.*;
 import microservice.store_service.application.dto.command.status.ActivateStoreCommand;
 import microservice.store_service.application.dto.command.status.DeactivateStoreCommand;

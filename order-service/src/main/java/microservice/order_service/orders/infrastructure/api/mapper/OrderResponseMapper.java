@@ -2,7 +2,6 @@ package microservice.order_service.orders.infrastructure.api.mapper;
 
 import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.page.PageResponse;
-import libs_kernel.page.PageableResponse;
 import microservice.order_service.orders.application.queries.response.OrderQueryResult;
 import microservice.order_service.orders.infrastructure.api.dto.response.OrderResponse;
 import org.springframework.data.domain.Page;
@@ -37,7 +36,7 @@ public class OrderResponseMapper implements ResponseMapper<OrderResponse, OrderQ
 
     @Override
     public PageResponse<OrderResponse> toResponsePage(PageResponse<OrderQueryResult> orderQueryResults) {
-        PageResponse<OrderResponse> pageResponse = new PageableResponse<>();
+        PageResponse<OrderResponse> pageResponse = new PageResponse<>();
         if (orderQueryResults == null) return pageResponse;
 
         Page<OrderResponse> responsePage  = orderQueryResults.map(this::toResponse);
