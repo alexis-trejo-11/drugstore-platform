@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import microservice.inventory_service.external.order.application.command.ReceivePurchaseOrderCommand;
 import microservice.inventory_service.external.order.application.command.ReceivedItemCommand;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderId;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.UserId;
 
 import java.time.LocalDateTime;

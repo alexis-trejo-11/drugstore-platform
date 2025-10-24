@@ -9,8 +9,8 @@ import microservice.inventory_service.external.order.application.handler.command
 import microservice.inventory_service.external.order.application.handler.command.CreatePurchaseOrderCommandHandler;
 import microservice.inventory_service.external.order.application.handler.command.UpdatePurchaseOrderStatusCommandHandler;
 import microservice.inventory_service.external.order.domain.entity.PurchaseOrder;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderId;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderStatus;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderStatus;
 import microservice.inventory_service.external.order.domain.port.output.PurchaseOrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

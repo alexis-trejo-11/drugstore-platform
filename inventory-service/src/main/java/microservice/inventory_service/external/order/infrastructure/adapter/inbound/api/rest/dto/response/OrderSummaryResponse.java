@@ -2,7 +2,7 @@ package microservice.inventory_service.external.order.infrastructure.adapter.inb
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderStatus;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderStatus;
 
 import java.time.LocalDateTime;
 

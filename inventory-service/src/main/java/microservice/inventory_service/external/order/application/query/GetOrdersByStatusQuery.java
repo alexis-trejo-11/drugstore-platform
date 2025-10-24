@@ -1,6 +1,6 @@
 package microservice.inventory_service.external.order.application.query;
 
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderStatus;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderStatus;
 import org.springframework.data.domain.Pageable;
 
 

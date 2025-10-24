@@ -2,7 +2,7 @@ package microservice.inventory_service.internal.core.inventory.application.cqrs.
 
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
-import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
+import microservice.inventory_service.internal.core.inventory.port.InventoryRepository;
 import microservice.inventory_service.internal.core.stock.application.query.GetLowStockInventoriesQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class GetLowStockInventoriesQueryHandler {
-    private final InventoryOutputPort inventoryRepository;
+    private final InventoryRepository inventoryRepository;
     
     @Transactional(readOnly = true)
     public Page<Inventory> handle(GetLowStockInventoriesQuery query) {

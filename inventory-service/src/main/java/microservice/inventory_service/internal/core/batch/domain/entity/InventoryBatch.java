@@ -106,7 +106,6 @@ public class InventoryBatch {
         }
     }
 
-
     public void validateForUse() {
         if (this.status != BatchStatus.ACTIVE) {
             throw new InvalidBatchException("Batch is not active");

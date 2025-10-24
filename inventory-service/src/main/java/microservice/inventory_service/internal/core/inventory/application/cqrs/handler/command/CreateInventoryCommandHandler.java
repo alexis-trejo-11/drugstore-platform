@@ -5,14 +5,14 @@ import microservice.inventory_service.internal.core.inventory.application.cqrs.c
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
-import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
+import microservice.inventory_service.internal.core.inventory.port.InventoryRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
 public class CreateInventoryCommandHandler {
-    private final InventoryOutputPort inventoryRepository;
+    private final InventoryRepository inventoryRepository;
     private final InventoryBatchRepository batchRepository;
 
     @Transactional

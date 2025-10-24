@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Schema(description = "Request to create a new inventory batch for an existing inventory")
+@Schema(description = "Request to create StockMovementUseCaseImpl new inventory batch for an existing inventory")
 public record AddInventoryBatchRequest(
     @Schema(description = "Identifier of the inventory to which the batch belongs", example = "inv-12345", type = "string")
     @NotNull @NotBlank String inventoryId,

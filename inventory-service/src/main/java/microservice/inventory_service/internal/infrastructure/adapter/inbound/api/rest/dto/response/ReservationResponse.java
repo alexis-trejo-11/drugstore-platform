@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import microservice.inventory_service.internal.core.stock.domain.valueobject.ReservationStatus;
 
 import java.time.LocalDateTime;
 
@@ -18,7 +19,7 @@ public class ReservationResponse {
     private String inventoryId;
     private String orderId;
     private Integer quantity;
-    private String status;
+    private ReservationStatus status;
     private LocalDateTime expirationTime;
     private String reason;
     private Boolean isExpired;

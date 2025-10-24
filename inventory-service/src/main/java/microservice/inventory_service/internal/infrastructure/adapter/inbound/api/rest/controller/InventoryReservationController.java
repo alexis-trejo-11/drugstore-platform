@@ -31,10 +31,10 @@ public class InventoryReservationController {
     public ResponseEntity<ResponseWrapper<ReservationId>> reserveStock(
             @PathVariable String inventoryId,
             @Valid @RequestBody ReserveStockRequest request) {
+
         ReservationId reservationId = reservationUseCase.reserveStock(request.toCommand(inventoryId));
         
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ResponseWrapper.created(reservationId, "Stock Reservation"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created(reservationId, "Stock Reservation"));
     }
     
     @GetMapping("/{inventoryId}/reservations/active")

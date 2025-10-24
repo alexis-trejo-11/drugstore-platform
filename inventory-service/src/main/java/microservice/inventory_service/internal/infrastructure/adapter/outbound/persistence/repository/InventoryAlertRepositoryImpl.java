@@ -5,7 +5,7 @@ import microservice.inventory_service.internal.core.alert.domain.entity.valueobj
 import microservice.inventory_service.internal.core.alert.domain.entity.valueobject.AlertStatus;
 import microservice.inventory_service.internal.core.alert.domain.entity.valueobject.AlertType;
 import microservice.inventory_service.internal.core.alert.domain.entity.valueobject.AlertId;
-import microservice.inventory_service.internal.core.alert.domain.port.InventoryAlertOutputPort;
+import microservice.inventory_service.internal.core.alert.domain.port.InventoryAlertRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public class InventoryAlertOutputPortImpl implements InventoryAlertOutputPort {
+public class InventoryAlertRepositoryImpl implements InventoryAlertRepository {
     @Override
     public InventoryAlert save(InventoryAlert alert) {
         return null;

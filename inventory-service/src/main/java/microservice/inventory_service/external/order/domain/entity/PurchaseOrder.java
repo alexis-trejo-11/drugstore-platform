@@ -1,6 +1,8 @@
 package microservice.inventory_service.external.order.domain.entity;
 
 import lombok.Getter;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderStatus;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.UserId;
 
 import java.math.BigDecimal;
@@ -27,6 +29,38 @@ public class PurchaseOrder {
     private UserId approvedBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public static PurchaseOrder create(String supplierId, String supplierName, List<PurchaseOrderItem> items,LocalDateTime expectedDeliveryDate, String deliveryLocation, UserId createdBy) {
+        if (items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("Purchase order must have at least one item");
+        }
+
+        BigDecimal totalAmount = items.stream()
+                .map(PurchaseOrderItem::getTotalCost)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        String orderNumber = generateOrderNumber();
+
+        return PurchaseOrder.reconstructor()
+                .id(PurchaseOrderId.generate())
+                .orderNumber(orderNumber)
+                .supplierId(supplierId)
+                .supplierName(supplierName)
+                .items(items)
+                .totalAmount(totalAmount)
+                .status(PurchaseOrderStatus.DRAFT)
+                .orderDate(LocalDateTime.now())
+                .expectedDeliveryDate(expectedDeliveryDate)
+                .deliveryLocation(deliveryLocation)
+                .createdBy(createdBy)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .reconstruct();
+    }
+
+    private static String generateOrderNumber() {
+        return "PO-" + System.currentTimeMillis();
+    }
 
     private PurchaseOrder(PurchaseOrderId id, String orderNumber, String supplierId, String supplierName,
                           List<PurchaseOrderItem> items, BigDecimal totalAmount, PurchaseOrderStatus status,
@@ -118,7 +152,7 @@ public class PurchaseOrder {
         }
     }
 
-    private PurchaseOrderItem findItemById(Long itemId) {
+    private PurchaseOrderItem findItemById(String itemId) {
         return this.items.stream().filter(item -> Objects.equals(item.getId(), itemId)).findFirst().orElseThrow(() -> new IllegalArgumentException("Order item not found"));
     }
 

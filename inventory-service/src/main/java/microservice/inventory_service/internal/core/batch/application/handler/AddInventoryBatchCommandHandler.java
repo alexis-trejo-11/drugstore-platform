@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import microservice.inventory_service.internal.core.batch.application.command.AddInventoryBatchCommand;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
+import microservice.inventory_service.internal.core.inventory.port.InventoryRepository;
 import microservice.inventory_service.internal.core.movement.domain.InventoryMovement;
 import microservice.inventory_service.internal.core.batch.domain.entity.valueobject.CreateBatchParams;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.CreateMovementParams;
@@ -12,7 +13,6 @@ import microservice.inventory_service.internal.core.batch.domain.entity.valueobj
 import microservice.inventory_service.internal.core.inventory.domain.exception.InventoryNotFoundException;
 import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
 import microservice.inventory_service.internal.core.movement.domain.port.InventoryMovementRepository;
-import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,14 +20,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 public class AddInventoryBatchCommandHandler {
-    private final InventoryOutputPort inventoryRepository;
+    private final InventoryRepository alertRepository;
     private final InventoryBatchRepository batchRepository;
     private final InventoryMovementRepository movementRepository;
 
     @Transactional
     public BatchId handle(AddInventoryBatchCommand command) {
         log.info("Handling AddInventoryBatchCommand for Inventory ID: {}", command.inventoryId());
-        Inventory inventory = inventoryRepository.findById(command.inventoryId())
+        Inventory inventory = alertRepository.findById(command.inventoryId())
                 .orElseThrow(() -> new InventoryNotFoundException("Inventory not found"));
 
         log.info("Creating batch for Inventory ID: {}", command.inventoryId());
@@ -42,7 +42,7 @@ public class AddInventoryBatchCommandHandler {
         inventory.addBatch(savedBatch);
 
         log.info("Saving updated inventory for Inventory ID: {}", command.inventoryId());
-        inventoryRepository.save(inventory);
+        alertRepository.save(inventory);
 
         log.info("Recording inventory movement for Inventory ID: {}", command.inventoryId());
         var movementParams = CreateMovementParams.batchMovement(

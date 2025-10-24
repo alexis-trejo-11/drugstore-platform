@@ -6,7 +6,7 @@ import microservice.inventory_service.internal.core.inventory.domain.entity.Inve
 import microservice.inventory_service.internal.core.inventory.domain.entity.enums.InventoryStatus;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.MedicineId;
-import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
+import microservice.inventory_service.internal.core.inventory.port.InventoryRepository;
 import microservice.inventory_service.internal.infrastructure.adapter.outbound.persistence.model.InventoryEntity;
 import microservice.inventory_service.internal.infrastructure.adapter.outbound.persistence.repository.jpa.JpaInventoryRepository;
 import org.springframework.data.domain.Page;
@@ -19,7 +19,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class InventoryRepositoryImpl implements InventoryOutputPort {
+public class InventoryRepositoryImpl implements InventoryRepository {
     private final EntityMapper<InventoryEntity, Inventory> mapper;
     private final JpaInventoryRepository jpaInventoryRepository;
 

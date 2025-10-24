@@ -3,7 +3,7 @@ package microservice.inventory_service.internal.core.stock.domain.valueobject;
 import lombok.Getter;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.internal.core.inventory.domain.exception.ReservationExpiredException;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderId;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
 
 import java.time.LocalDateTime;
 

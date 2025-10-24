@@ -3,12 +3,12 @@ package microservice.inventory_service.internal.core.inventory.application.cqrs.
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.internal.core.inventory.application.cqrs.command.TransferInventoryCommand;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
+import microservice.inventory_service.internal.core.inventory.port.InventoryRepository;
 import microservice.inventory_service.internal.core.movement.domain.InventoryMovement;
+import microservice.inventory_service.internal.core.movement.domain.port.InventoryMovementRepository;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.MovementType;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.CreateMovementParams;
 import microservice.inventory_service.internal.core.inventory.domain.exception.InventoryNotFoundException;
-import microservice.inventory_service.internal.core.movement.port.InventoryMovementRepository;
-import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TransferInventoryCommandHandler {
 
-    private final InventoryOutputPort inventoryRepository;
+    private final InventoryRepository inventoryRepository;
     private final InventoryMovementRepository movementRepository;
 
     @Transactional

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.internal.core.batch.application.command.MarkBatchAsExpiredCommand;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
+import microservice.inventory_service.internal.core.inventory.port.InventoryRepository;
 import microservice.inventory_service.internal.core.movement.domain.InventoryMovement;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.MovementType;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.CreateMovementParams;
@@ -11,7 +12,6 @@ import microservice.inventory_service.internal.core.batch.domain.exception.Batch
 import microservice.inventory_service.internal.core.inventory.domain.exception.InventoryNotFoundException;
 import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
 import microservice.inventory_service.internal.core.movement.domain.port.InventoryMovementRepository;
-import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MarkBatchAsExpiredCommandHandler {
     private final InventoryBatchRepository batchRepository;
-    private final InventoryOutputPort inventoryRepository;
+    private final InventoryRepository inventoryRepository;
     private final InventoryMovementRepository movementRepository;
 
     @Transactional
