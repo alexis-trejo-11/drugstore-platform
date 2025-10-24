@@ -6,7 +6,7 @@ import microservice.inventory_service.internal.core.batch.domain.entity.Inventor
 import microservice.inventory_service.internal.core.batch.domain.entity.valueobject.BatchStatus;
 import microservice.inventory_service.internal.core.batch.domain.entity.valueobject.BatchId;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
-import microservice.inventory_service.internal.core.batch.domain.port.InventoryBatchRepository;
+import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
 import microservice.inventory_service.internal.infrastructure.adapter.outbound.persistence.model.InventoryBatchEntity;
 import microservice.inventory_service.internal.infrastructure.adapter.outbound.persistence.repository.jpa.JpaInventoryBatchRepository;
 import org.springframework.stereotype.Repository;

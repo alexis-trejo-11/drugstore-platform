@@ -5,16 +5,16 @@ import microservice.inventory_service.internal.core.inventory.application.cqrs.c
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
 import microservice.inventory_service.internal.core.movement.domain.InventoryMovement;
-import microservice.inventory_service.internal.core.movement.domain.port.InventoryMovementOutputPort;
+import microservice.inventory_service.internal.core.movement.domain.port.InventoryMovementRepository;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.MovementType;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.CreateMovementParams;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.AdjustmentId;
 import microservice.inventory_service.internal.core.inventory.domain.exception.InventoryNotFoundException;
-import microservice.inventory_service.internal.core.batch.domain.port.InventoryBatchRepository;
+import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
 import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
-import microservice.inventory_service.internal.core.stock.domain.StockAdjustment;
+import microservice.inventory_service.internal.core.stock.domain.valueobject.StockAdjustment;
 import microservice.inventory_service.internal.core.stock.domain.entity.StockAdjustmentFactory;
-import microservice.inventory_service.internal.core.stock.domain.port.output.StockAdjustmentRepository;
+import microservice.inventory_service.internal.core.stock.port.output.StockAdjustmentRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +25,7 @@ public class AdjustInventoryCommandHandler {
     private final InventoryOutputPort inventoryRepository;
     private final InventoryBatchRepository batchRepository;
     private final StockAdjustmentRepository adjustmentRepository;
-    private final InventoryMovementOutputPort movementRepository;
+    private final InventoryMovementRepository movementRepository;
 
     @Transactional
     public AdjustmentId handle(AdjustInventoryCommand command) {

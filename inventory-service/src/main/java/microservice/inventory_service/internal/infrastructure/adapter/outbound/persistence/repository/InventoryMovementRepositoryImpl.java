@@ -3,11 +3,11 @@ package microservice.inventory_service.internal.infrastructure.adapter.outbound.
 import libs_kernel.mapper.EntityMapper;
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.internal.core.movement.domain.InventoryMovement;
+import microservice.inventory_service.internal.core.movement.domain.port.InventoryMovementRepository;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.MovementType;
 import microservice.inventory_service.internal.core.batch.domain.entity.valueobject.BatchId;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.MovementId;
-import microservice.inventory_service.internal.core.movement.port.InventoryMovementRepository;
 import microservice.inventory_service.internal.infrastructure.adapter.outbound.persistence.model.InventoryMovementEntity;
 import microservice.inventory_service.internal.infrastructure.adapter.outbound.persistence.repository.jpa.JpaInventoryMovementRepository;
 import org.springframework.data.domain.Page;

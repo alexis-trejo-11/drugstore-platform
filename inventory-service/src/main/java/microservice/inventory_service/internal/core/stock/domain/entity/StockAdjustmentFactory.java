@@ -6,7 +6,7 @@ import microservice.inventory_service.internal.core.inventory.domain.entity.valu
 import microservice.inventory_service.internal.core.batch.domain.entity.valueobject.BatchId;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.UserId;
-import microservice.inventory_service.internal.core.stock.domain.StockAdjustment;
+import microservice.inventory_service.internal.core.stock.domain.valueobject.StockAdjustment;
 
 import java.time.LocalDateTime;
 
