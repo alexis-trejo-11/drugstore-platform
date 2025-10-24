@@ -4,8 +4,8 @@ import microservice.inventory_service.internal.core.inventory.domain.entity.enum
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.AdjustmentId;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.UserId;
-import microservice.inventory_service.internal.core.stock.domain.StockAdjustment;
-import microservice.inventory_service.internal.core.stock.domain.port.output.StockAdjustmentRepository;
+import microservice.inventory_service.internal.core.stock.domain.valueobject.StockAdjustment;
+import microservice.inventory_service.internal.core.stock.port.output.StockAdjustmentRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Repository;
 

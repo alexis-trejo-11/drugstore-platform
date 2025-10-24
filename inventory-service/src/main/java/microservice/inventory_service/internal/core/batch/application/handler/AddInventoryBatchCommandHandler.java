@@ -10,8 +10,8 @@ import microservice.inventory_service.internal.core.batch.domain.entity.valueobj
 import microservice.inventory_service.internal.core.movement.domain.valueobject.CreateMovementParams;
 import microservice.inventory_service.internal.core.batch.domain.entity.valueobject.BatchId;
 import microservice.inventory_service.internal.core.inventory.domain.exception.InventoryNotFoundException;
-import microservice.inventory_service.internal.core.batch.domain.port.InventoryBatchRepository;
-import microservice.inventory_service.internal.core.movement.domain.port.InventoryMovementOutputPort;
+import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
+import microservice.inventory_service.internal.core.movement.domain.port.InventoryMovementRepository;
 import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AddInventoryBatchCommandHandler {
     private final InventoryOutputPort inventoryRepository;
     private final InventoryBatchRepository batchRepository;
-    private final InventoryMovementOutputPort movementRepository;
+    private final InventoryMovementRepository movementRepository;
 
     @Transactional
     public BatchId handle(AddInventoryBatchCommand command) {

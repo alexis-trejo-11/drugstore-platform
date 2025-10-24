@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.internal.core.inventory.application.cqrs.command.CreateInventoryCommand;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
-import microservice.inventory_service.internal.core.batch.domain.port.InventoryBatchRepository;
+import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
 import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

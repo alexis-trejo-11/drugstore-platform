@@ -18,7 +18,7 @@ import microservice.inventory_service.internal.core.inventory.application.cqrs.q
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.AdjustmentId;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
-import microservice.inventory_service.internal.core.inventory.port.InventoryInputPort;
+import microservice.inventory_service.internal.core.inventory.port.Input.InventoryInputPort;
 import microservice.inventory_service.internal.core.movement.domain.InventoryMovement;
 import microservice.inventory_service.internal.core.stock.application.query.GetLowStockInventoriesQuery;
 import org.springframework.data.domain.Page;

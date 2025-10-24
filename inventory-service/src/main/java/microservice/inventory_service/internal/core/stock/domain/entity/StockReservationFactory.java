@@ -1,10 +1,10 @@
 package microservice.inventory_service.internal.core.stock.domain.entity;
 
-import microservice.inventory_service.internal.core.inventory.domain.entity.enums.ReservationStatus;
+import microservice.inventory_service.internal.core.stock.domain.valueobject.ReservationStatus;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.external.order.domain.entity.PurchaseOrderId;
-import microservice.inventory_service.internal.core.stock.domain.ReservationId;
-import microservice.inventory_service.internal.core.stock.domain.StockReservation;
+import microservice.inventory_service.internal.core.stock.domain.valueobject.ReservationId;
+import microservice.inventory_service.internal.core.stock.domain.valueobject.StockReservation;
 
 import java.time.LocalDateTime;
 

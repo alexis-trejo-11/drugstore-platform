@@ -8,7 +8,7 @@ import microservice.inventory_service.internal.core.alert.domain.entity.Inventor
 import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
 import microservice.inventory_service.internal.core.batch.domain.entity.valueobject.BatchStatus;
 import microservice.inventory_service.internal.core.alert.domain.port.InventoryAlertOutputPort;
-import microservice.inventory_service.internal.core.batch.domain.port.InventoryBatchRepository;
+import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
 import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
 import microservice.inventory_service.internal.core.batch.domain.service.BatchExpirationService;
 import microservice.inventory_service.internal.core.alert.domain.service.InventoryAlertDomainService;

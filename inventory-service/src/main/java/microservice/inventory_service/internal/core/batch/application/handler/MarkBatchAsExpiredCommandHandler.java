@@ -9,8 +9,8 @@ import microservice.inventory_service.internal.core.movement.domain.valueobject.
 import microservice.inventory_service.internal.core.movement.domain.valueobject.CreateMovementParams;
 import microservice.inventory_service.internal.core.batch.domain.exception.BatchNotFoundException;
 import microservice.inventory_service.internal.core.inventory.domain.exception.InventoryNotFoundException;
-import microservice.inventory_service.internal.core.batch.domain.port.InventoryBatchRepository;
-import microservice.inventory_service.internal.core.movement.domain.port.InventoryMovementOutputPort;
+import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
+import microservice.inventory_service.internal.core.movement.domain.port.InventoryMovementRepository;
 import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MarkBatchAsExpiredCommandHandler {
     private final InventoryBatchRepository batchRepository;
     private final InventoryOutputPort inventoryRepository;
-    private final InventoryMovementOutputPort movementRepository;
+    private final InventoryMovementRepository movementRepository;
 
     @Transactional
     public void handle(MarkBatchAsExpiredCommand command) {

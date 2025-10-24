@@ -14,8 +14,8 @@ import microservice.inventory_service.external.order.application.query.GetOrders
 import microservice.inventory_service.external.order.domain.entity.PurchaseOrder;
 import microservice.inventory_service.external.order.domain.entity.PurchaseOrderStatus;
 import microservice.inventory_service.external.order.domain.port.input.OrderQueryService;
-import microservice.inventory_service.external.order.infrastructure.adapter.inbound.api.rest.dto.OrderDetailResponse;
-import microservice.inventory_service.external.order.infrastructure.adapter.inbound.api.rest.dto.OrderSummaryResponse;
+import microservice.inventory_service.external.order.infrastructure.adapter.inbound.api.rest.dto.response.OrderDetailResponse;
+import microservice.inventory_service.external.order.infrastructure.adapter.inbound.api.rest.dto.response.OrderSummaryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 

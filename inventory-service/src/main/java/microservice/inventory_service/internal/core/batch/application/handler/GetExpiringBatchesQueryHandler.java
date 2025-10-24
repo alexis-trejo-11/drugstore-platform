@@ -3,7 +3,7 @@ package microservice.inventory_service.internal.core.batch.application.handler;
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.internal.core.batch.application.query.GetExpiringBatchesQuery;
 import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
-import microservice.inventory_service.internal.core.batch.domain.port.InventoryBatchRepository;
+import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 

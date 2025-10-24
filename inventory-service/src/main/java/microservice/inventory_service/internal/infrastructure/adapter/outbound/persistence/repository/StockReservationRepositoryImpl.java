@@ -1,10 +1,10 @@
 package microservice.inventory_service.internal.infrastructure.adapter.outbound.persistence.repository;
 
-import microservice.inventory_service.internal.core.inventory.domain.entity.enums.ReservationStatus;
+import microservice.inventory_service.internal.core.stock.domain.valueobject.ReservationStatus;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
-import microservice.inventory_service.internal.core.stock.domain.ReservationId;
-import microservice.inventory_service.internal.core.stock.domain.StockReservation;
-import microservice.inventory_service.internal.core.stock.domain.port.output.StockReservationRepository;
+import microservice.inventory_service.internal.core.stock.domain.valueobject.ReservationId;
+import microservice.inventory_service.internal.core.stock.domain.valueobject.StockReservation;
+import microservice.inventory_service.internal.core.stock.port.output.StockReservationRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Repository;
 

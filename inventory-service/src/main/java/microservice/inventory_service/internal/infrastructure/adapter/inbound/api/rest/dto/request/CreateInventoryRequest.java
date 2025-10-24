@@ -12,16 +12,21 @@ import java.util.Optional;
 public record CreateInventoryRequest(
         @Schema(description = "Unique identifier of the medicine", example = "med-98765", type = "string")
         @NotNull @NotBlank @Length(max = 50) String medicineId,
+
         @Schema(description = "Reorder threshold to trigger restock", example = "10", type = "integer")
         @NotNull @Positive Integer reorderLevel,
+
         @Schema(description = "Quantity to reorder when threshold is reached", example = "50", type = "integer")
         @NotNull @Positive Integer reorderQuantity,
+
         @Schema(description = "Maximum stock level allowed in inventory", example = "500", type = "integer")
         @NotNull @Positive Integer maximumStockLevel,
+
         @Schema(description = "Warehouse location or storage area", example = "Main Warehouse - Aisle 3", type = "string")
         @NotNull @NotBlank @Length(max = 255) String warehouseLocation,
-        @Schema(description = "Optional initial batch to create together with the inventory", implementation = CreateInventoryBatchRequest.class)
-        CreateInventoryBatchRequest initialBatch
+
+        @Schema(description = "Optional initial batch to create together with the inventory", implementation = AddInventoryBatchRequest.class)
+        AddInventoryBatchRequest initialBatch
 ) {
     public CreateInventoryCommand toCommand() {
         return CreateInventoryCommand.builder()
@@ -33,5 +38,4 @@ public record CreateInventoryRequest(
                 .batchCommand(initialBatch != null ? Optional.of(initialBatch.toCommand()) : Optional.empty())
                 .build();
     }
-
 }

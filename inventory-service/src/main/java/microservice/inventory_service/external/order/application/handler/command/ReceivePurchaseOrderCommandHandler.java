@@ -7,7 +7,7 @@ import microservice.inventory_service.internal.core.movement.domain.InventoryMov
 import microservice.inventory_service.internal.core.movement.domain.valueobject.MovementType;
 import microservice.inventory_service.internal.core.batch.domain.entity.valueobject.CreateBatchParams;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.CreateMovementParams;
-import microservice.inventory_service.internal.core.batch.domain.port.InventoryBatchRepository;
+import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
 import microservice.inventory_service.internal.core.movement.port.InventoryMovementRepository;
 import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
 import microservice.inventory_service.external.order.application.command.ReceivePurchaseOrderCommand;

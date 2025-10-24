@@ -1,8 +1,9 @@
 package microservice.inventory_service.internal.core.stock.application.command;
 
-import microservice.inventory_service.internal.core.stock.domain.ReservationId;
+import microservice.inventory_service.internal.core.stock.domain.valueobject.ReservationId;
 
 public record ReleaseReservationCommand(
-        ReservationId reservationId
+        ReservationId reservationId,
+        String reason
 ) {
 }
