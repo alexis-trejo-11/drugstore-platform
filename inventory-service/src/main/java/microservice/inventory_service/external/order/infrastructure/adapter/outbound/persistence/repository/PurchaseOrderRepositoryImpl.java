@@ -2,8 +2,8 @@ package microservice.inventory_service.external.order.infrastructure.adapter.out
 
 import libs_kernel.mapper.EntityMapper;
 import microservice.inventory_service.external.order.domain.entity.PurchaseOrder;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderId;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderStatus;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderStatus;
 import microservice.inventory_service.external.order.domain.port.output.PurchaseOrderRepository;
 import microservice.inventory_service.external.order.infrastructure.adapter.outbound.persistence.model.PurchaseOrderEntity;
 import org.springframework.data.domain.Page;

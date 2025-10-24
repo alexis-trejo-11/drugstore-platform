@@ -1,4 +1,4 @@
-package microservice.inventory_service.external.order.domain.entity;
+package microservice.inventory_service.external.order.domain.entity.valueobject;
 
 public enum PurchaseOrderStatus {
     DRAFT,

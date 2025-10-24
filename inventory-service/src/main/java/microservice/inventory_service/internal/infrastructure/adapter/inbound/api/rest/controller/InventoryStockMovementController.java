@@ -2,6 +2,7 @@ package microservice.inventory_service.internal.infrastructure.adapter.inbound.a
 
 import jakarta.validation.Valid;
 import libs_kernel.mapper.ResponseMapper;
+import libs_kernel.page.PageResponse;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryMovementsQuery;
@@ -11,6 +12,7 @@ import microservice.inventory_service.internal.core.stock.port.input.StockMoveme
 import microservice.inventory_service.internal.infrastructure.adapter.inbound.api.rest.dto.request.AdjustInventoryRequest;
 import microservice.inventory_service.internal.infrastructure.adapter.inbound.api.rest.dto.request.TransferInventoryRequest;
 import microservice.inventory_service.internal.infrastructure.adapter.inbound.api.rest.dto.response.MovementResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v2/inventories")
@@ -49,15 +49,15 @@ public class InventoryStockMovementController {
     }
     
     @GetMapping("/{inventoryId}/stocks/movements")
-    public ResponseWrapper<List<MovementResponse>> getInventoryMovements(
+    public ResponseWrapper<PageResponse<MovementResponse>> getInventoryMovements(
             @PathVariable String inventoryId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
         
         var query = GetInventoryMovementsQuery.of(inventoryId,startDate, endDate);
-        List<InventoryMovement> movements = stockMovementUseCase.getInventoryMovements(query);
+        Page<InventoryMovement> movements = stockMovementUseCase.getInventoryMovements(query);
 
-        List<MovementResponse> movementResponses = responseMapper.toResponses(movements);
+        PageResponse<MovementResponse> movementResponses = responseMapper.toResponsePage(movements);
         return ResponseWrapper.found(movementResponses, "Inventory Movements");
     }
 }

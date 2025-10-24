@@ -1,4 +1,4 @@
-package microservice.inventory_service.external.order.domain.entity;
+package microservice.inventory_service.external.order.domain.entity.valueobject;
 
 public record PurchaseOrderId(String value) {
     public static PurchaseOrderId of(String value) {

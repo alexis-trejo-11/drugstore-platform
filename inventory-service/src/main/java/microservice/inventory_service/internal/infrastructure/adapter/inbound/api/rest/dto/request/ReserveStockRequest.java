@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderId;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.internal.core.stock.application.command.ReserveStockCommand;
 

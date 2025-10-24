@@ -20,8 +20,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class PurchaseOrderItemEntity {
     @Id
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "id", length = 36)
+    private String id;
 
     @Column(name = "purchase_order_id", length = 36)
     private String purchaseOrderId;

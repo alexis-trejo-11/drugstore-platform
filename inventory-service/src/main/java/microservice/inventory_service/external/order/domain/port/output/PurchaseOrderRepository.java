@@ -1,9 +1,9 @@
 package microservice.inventory_service.external.order.domain.port.output;
 
 
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderId;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
 import microservice.inventory_service.external.order.domain.entity.PurchaseOrder;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderStatus;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -4,7 +4,7 @@ import libs_kernel.mapper.EntityMapper;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.MedicineId;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.UserId;
 import microservice.inventory_service.external.order.domain.entity.PurchaseOrder;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderId;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
 import microservice.inventory_service.external.order.domain.entity.PurchaseOrderItem;
 import microservice.inventory_service.external.order.infrastructure.adapter.outbound.persistence.model.PurchaseOrderEntity;
 import microservice.inventory_service.external.order.infrastructure.adapter.outbound.persistence.model.PurchaseOrderItemEntity;

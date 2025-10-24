@@ -4,8 +4,7 @@ import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.external.order.application.command.CreatePurchaseOrderCommand;
 import microservice.inventory_service.external.order.application.command.PurchaseOrderItemCommand;
 import microservice.inventory_service.external.order.domain.entity.*;
-import microservice.inventory_service.internal.purchase.domain.entity.*;
-import microservice.inventory_service.purchase.domain.entity.*;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
 import microservice.inventory_service.external.order.domain.port.output.PurchaseOrderRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +23,7 @@ public class CreatePurchaseOrderCommandHandler {
                 .map(this::createPurchaseOrderItem)
                 .toList();
 
-        PurchaseOrder purchaseOrder = PurchaseOrderFactory.create(
+        PurchaseOrder purchaseOrder = PurchaseOrder.create(
                 command.supplierId(),
                 command.supplierName(),
                 items,
@@ -38,7 +37,7 @@ public class CreatePurchaseOrderCommandHandler {
     }
 
     private PurchaseOrderItem createPurchaseOrderItem(PurchaseOrderItemCommand itemCommand) {
-        return PurchaseOrderItemFactory.create(
+        return PurchaseOrderItem.create(
                 itemCommand.medicineId(),
                 itemCommand.medicineName(),
                 itemCommand.quantity(),

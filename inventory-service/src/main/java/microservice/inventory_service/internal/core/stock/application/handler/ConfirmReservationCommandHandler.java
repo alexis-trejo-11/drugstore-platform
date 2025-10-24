@@ -3,12 +3,12 @@ package microservice.inventory_service.internal.core.stock.application.handler;
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
+import microservice.inventory_service.internal.core.inventory.port.InventoryRepository;
 import microservice.inventory_service.internal.core.movement.domain.InventoryMovement;
 import microservice.inventory_service.internal.core.inventory.domain.exception.InventoryNotFoundException;
 import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
-import microservice.inventory_service.internal.core.movement.port.InventoryMovementRepository;
-import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
 import microservice.inventory_service.internal.core.inventory.domain.service.InventoryAllocationService;
+import microservice.inventory_service.internal.core.movement.domain.port.InventoryMovementRepository;
 import microservice.inventory_service.internal.core.stock.application.command.ConfirmReservationCommand;
 import microservice.inventory_service.internal.core.stock.domain.valueobject.StockReservation;
 import microservice.inventory_service.internal.core.stock.port.output.StockReservationRepository;
@@ -23,7 +23,7 @@ import java.util.List;
 public class ConfirmReservationCommandHandler {
 
     private final StockReservationRepository reservationRepository;
-    private final InventoryOutputPort inventoryRepository;
+    private final InventoryRepository inventoryRepository;
     private final InventoryBatchRepository batchRepository;
     private final InventoryMovementRepository movementRepository;
     private final InventoryAllocationService allocationService;

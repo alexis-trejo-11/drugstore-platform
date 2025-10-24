@@ -2,7 +2,7 @@ package microservice.inventory_service.external.order.infrastructure.adapter.out
 
 
 import io.lettuce.core.dynamic.annotation.Param;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderStatus;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderStatus;
 import microservice.inventory_service.external.order.infrastructure.adapter.outbound.persistence.model.PurchaseOrderEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

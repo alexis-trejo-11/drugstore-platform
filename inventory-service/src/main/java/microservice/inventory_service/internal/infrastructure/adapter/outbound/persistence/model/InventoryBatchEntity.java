@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InventoryBatchEntity {
-
     @Id
     @Column(name = "id", length = 36)
     private String id;

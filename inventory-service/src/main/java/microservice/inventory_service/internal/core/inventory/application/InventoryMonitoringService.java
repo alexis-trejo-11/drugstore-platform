@@ -1,18 +1,17 @@
 package microservice.inventory_service.internal.core.inventory.application;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import microservice.inventory_service.internal.core.alert.domain.port.InventoryAlertRepository;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.alert.domain.entity.InventoryAlert;
 import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
 import microservice.inventory_service.internal.core.batch.domain.entity.valueobject.BatchStatus;
-import microservice.inventory_service.internal.core.alert.domain.port.InventoryAlertOutputPort;
 import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
-import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
 import microservice.inventory_service.internal.core.batch.domain.service.BatchExpirationService;
 import microservice.inventory_service.internal.core.alert.domain.service.InventoryAlertDomainService;
-import microservice.inventory_service.internal.core.stock.application.StockReservationOrchestrationService;
+import microservice.inventory_service.internal.core.inventory.port.InventoryRepository;
+import microservice.inventory_service.internal.core.stock.port.input.StockMovementUseCase;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,12 +24,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InventoryMonitoringService {
     
-    private final InventoryOutputPort inventoryRepository;
+    private final InventoryRepository inventoryRepository;
     private final InventoryBatchRepository batchRepository;
-    private final InventoryAlertOutputPort alertRepository;
+    private final InventoryAlertRepository alertRepository;
     private final InventoryAlertDomainService alertDomainService;
     private final BatchExpirationService batchExpirationService;
-    private final StockReservationOrchestrationService reservationOrchestrationService;
+    private final StockMovementUseCase reservationOrchestrationService;
     
     @Scheduled(cron = "0 0 */6 * * *")
     @Transactional

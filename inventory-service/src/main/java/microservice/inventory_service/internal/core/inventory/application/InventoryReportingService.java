@@ -1,15 +1,15 @@
 package microservice.inventory_service.internal.core.inventory.application;
 
 import lombok.RequiredArgsConstructor;
+import microservice.inventory_service.internal.core.inventory.application.report.BatchExpirationReport;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
+import microservice.inventory_service.internal.core.inventory.port.InventoryRepository;
 import microservice.inventory_service.internal.core.movement.domain.InventoryMovement;
 import microservice.inventory_service.internal.core.movement.domain.port.InventoryMovementRepository;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.MovementType;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
-import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
-import microservice.inventory_service.internal.core.report.domain.entity.BatchExpirationReport;
 import microservice.inventory_service.internal.core.inventory.application.report.InventoryMovementReport;
 import microservice.inventory_service.internal.core.inventory.application.report.InventoryStockReport;
 import microservice.inventory_service.internal.core.stock.domain.valueobject.StockReservation;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class InventoryReportingService {
-    private final InventoryOutputPort inventoryRepository;
+    private final InventoryRepository inventoryRepository;
     private final InventoryMovementRepository movementRepository;
     private final InventoryBatchRepository batchRepository;
     private final StockReservationRepository reservationRepository;

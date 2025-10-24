@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Optional;
 
-@Schema(description = "Request to create a new inventory for a medicine")
+@Schema(description = "Request to create StockMovementUseCaseImpl new inventory for StockMovementUseCaseImpl medicine")
 public record CreateInventoryRequest(
         @Schema(description = "Unique identifier of the medicine", example = "med-98765", type = "string")
         @NotNull @NotBlank @Length(max = 50) String medicineId,

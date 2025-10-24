@@ -5,11 +5,12 @@ import microservice.inventory_service.internal.core.inventory.application.cqrs.c
 import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryMovementsQuery;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.AdjustmentId;
 import microservice.inventory_service.internal.core.movement.domain.InventoryMovement;
+import org.springframework.data.domain.Page;
 
-import java.util.List;
 
 public interface StockMovementUseCase {
     AdjustmentId adjustInventory(AdjustInventoryCommand command);
     void transferInventory(TransferInventoryCommand command);
-    List<InventoryMovement> getInventoryMovements(GetInventoryMovementsQuery query);
+    Page<InventoryMovement> getInventoryMovements(GetInventoryMovementsQuery query);
+    void releaseExpiredReservations();
 }

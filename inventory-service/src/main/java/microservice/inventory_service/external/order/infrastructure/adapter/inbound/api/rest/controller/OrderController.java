@@ -12,7 +12,7 @@ import microservice.inventory_service.external.order.application.query.GetOrderB
 import microservice.inventory_service.external.order.application.query.GetOrderByNumberQuery;
 import microservice.inventory_service.external.order.application.query.GetOrdersByStatusQuery;
 import microservice.inventory_service.external.order.domain.entity.PurchaseOrder;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderStatus;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderStatus;
 import microservice.inventory_service.external.order.domain.port.input.OrderQueryService;
 import microservice.inventory_service.external.order.infrastructure.adapter.inbound.api.rest.dto.response.OrderDetailResponse;
 import microservice.inventory_service.external.order.infrastructure.adapter.inbound.api.rest.dto.response.OrderSummaryResponse;

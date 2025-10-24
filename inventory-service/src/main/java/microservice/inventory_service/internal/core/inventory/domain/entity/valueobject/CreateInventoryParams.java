@@ -25,13 +25,13 @@ public record CreateInventoryParams(
             throw new InventorMissingFieldException("Warehouse location cannot be null or blank to create an inventory");
         }
         if (reorderLevel == null || reorderLevel < 0) {
-            throw new InventorMissingFieldException("Reorder level must be a non-negative integer to create an inventory");
+            throw new InventorMissingFieldException("Reorder level must be StockMovementUseCaseImpl non-negative integer to create an inventory");
         }
         if (reorderQuantity == null || reorderQuantity <= 0) {
-            throw new InventorMissingFieldException("Reorder quantity must be a positive integer to create an inventory");
+            throw new InventorMissingFieldException("Reorder quantity must be StockMovementUseCaseImpl positive integer to create an inventory");
         }
         if (maximumStockLevel == null || maximumStockLevel <= 0) {
-            throw new InventorMissingFieldException("Maximum stock level must be a positive integer to create an inventory");
+            throw new InventorMissingFieldException("Maximum stock level must be StockMovementUseCaseImpl positive integer to create an inventory");
         }
 
         if (reorderLevel >= maximumStockLevel) {

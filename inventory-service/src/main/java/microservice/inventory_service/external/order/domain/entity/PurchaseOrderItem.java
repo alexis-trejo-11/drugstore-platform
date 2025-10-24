@@ -8,7 +8,7 @@ import microservice.inventory_service.internal.core.inventory.domain.entity.valu
 
 @Getter
 public class PurchaseOrderItem {
-    private Long id;
+    private String id;
     private MedicineId medicineId;
     private String medicineName;
     private Integer orderedQuantity;
@@ -17,7 +17,7 @@ public class PurchaseOrderItem {
     private BigDecimal totalCost;
     private String batchNumber;
 
-    private PurchaseOrderItem(Long id, MedicineId medicineId, String medicineName, Integer orderedQuantity, Integer receivedQuantity, BigDecimal unitCost, BigDecimal totalCost, String batchNumber) {
+    private PurchaseOrderItem(String id, MedicineId medicineId, String medicineName, Integer orderedQuantity, Integer receivedQuantity, BigDecimal unitCost, BigDecimal totalCost, String batchNumber) {
         this.id = id;
         this.medicineId = medicineId;
         this.medicineName = medicineName;
@@ -26,6 +26,27 @@ public class PurchaseOrderItem {
         this.unitCost = unitCost;
         this.totalCost = totalCost;
         this.batchNumber = batchNumber;
+    }
+
+    public static PurchaseOrderItem create(MedicineId medicineId, String medicineName,
+                                           Integer quantity, BigDecimal unitCost) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive");
+        }
+        if (unitCost.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Unit cost must be positive");
+        }
+
+        BigDecimal totalCost = unitCost.multiply(BigDecimal.valueOf(quantity));
+
+        return PurchaseOrderItem.reconstructor()
+                .medicineId(medicineId)
+                .medicineName(medicineName)
+                .orderedQuantity(quantity)
+                .receivedQuantity(0)
+                .unitCost(unitCost)
+                .totalCost(totalCost)
+                .reconstruct();
     }
 
     public void receiveQuantity(Integer quantity) {
@@ -55,7 +76,7 @@ public class PurchaseOrderItem {
     }
 
     public static class PurchaseOrderItemReconstructor {
-        private Long id;
+        private String id;
         private MedicineId medicineId;
         private String medicineName;
         private Integer orderedQuantity;
@@ -64,7 +85,7 @@ public class PurchaseOrderItem {
         private BigDecimal totalCost;
         private String batchNumber;
 
-        public PurchaseOrderItemReconstructor id(Long id) {
+        public PurchaseOrderItemReconstructor id(String id) {
             this.id = id;
             return this;
         }

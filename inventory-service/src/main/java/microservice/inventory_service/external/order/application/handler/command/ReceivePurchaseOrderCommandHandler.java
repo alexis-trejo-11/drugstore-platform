@@ -3,13 +3,13 @@ package microservice.inventory_service.external.order.application.handler.comman
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
+import microservice.inventory_service.internal.core.inventory.port.InventoryRepository;
 import microservice.inventory_service.internal.core.movement.domain.InventoryMovement;
+import microservice.inventory_service.internal.core.movement.domain.port.InventoryMovementRepository;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.MovementType;
 import microservice.inventory_service.internal.core.batch.domain.entity.valueobject.CreateBatchParams;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.CreateMovementParams;
 import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
-import microservice.inventory_service.internal.core.movement.port.InventoryMovementRepository;
-import microservice.inventory_service.internal.core.inventory.port.InventoryOutputPort;
 import microservice.inventory_service.external.order.application.command.ReceivePurchaseOrderCommand;
 import microservice.inventory_service.external.order.application.command.ReceivedItemCommand;
 import microservice.inventory_service.external.order.domain.entity.PurchaseOrder;
@@ -20,12 +20,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
 public class ReceivePurchaseOrderCommandHandler {
     private final PurchaseOrderRepository purchaseOrderRepository;
-    private final InventoryOutputPort inventoryRepository;
+    private final InventoryRepository inventoryRepository;
     private final InventoryBatchRepository batchRepository;
     private final InventoryMovementRepository movementRepository;
 
@@ -50,9 +51,9 @@ public class ReceivePurchaseOrderCommandHandler {
         purchaseOrderRepository.save(purchaseOrder);
     }
 
-    private PurchaseOrderItem findOrderItem(PurchaseOrder purchaseOrder, int itemId) {
+    private PurchaseOrderItem findOrderItem(PurchaseOrder purchaseOrder, String itemId) {
         return purchaseOrder.getItems().stream()
-                .filter(item -> item.getId() == itemId)
+                .filter(item -> Objects.equals(item.getId(), itemId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Order item not found"));
     }

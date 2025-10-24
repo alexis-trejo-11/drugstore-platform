@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
-public interface InventoryRepository {
+public interface InventoryAlertRepository {
     InventoryAlert save(InventoryAlert alert);
 
     Optional<InventoryAlert> findById(AlertId id);

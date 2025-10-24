@@ -8,7 +8,7 @@ import microservice.inventory_service.internal.core.movement.domain.valueobject.
 import microservice.inventory_service.internal.core.movement.domain.valueobject.CreateMovementParams;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.UserId;
 import microservice.inventory_service.internal.core.inventory.domain.exception.InsufficientInventoryException;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderId;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;

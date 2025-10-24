@@ -1,13 +1,15 @@
 package microservice.inventory_service.external.order.infrastructure.adapter.inbound.api.rest.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.UserId;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderStatus;
+import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Builder
 @Schema(description = "Order Detail Response DTO")
 public record OrderDetailResponse(
         @Schema(description = "Unique identifier of the purchase order", example = "po-12345", type = "string")
@@ -33,9 +35,9 @@ public record OrderDetailResponse(
         @Schema(description = "Delivery location address or identifier", example = "Main Warehouse - Dock 3", type = "string")
         String deliveryLocation,
         @Schema(description = "User who created the order (user id)", example = "user-123", type = "string", implementation = java.lang.String.class)
-        UserId createdBy,
+        String createdBy,
         @Schema(description = "User who approved the order (user id) - nullable", example = "user-456", type = "string", implementation = java.lang.String.class)
-        UserId approvedBy,
+        String approvedBy,
         @Schema(description = "Record creation timestamp (ISO 8601)", example = "2024-02-01T10:00:00", implementation = java.time.LocalDateTime.class, type = "string")
         LocalDateTime createdAt,
         @Schema(description = "Record last update timestamp (ISO 8601)", example = "2024-02-02T12:00:00", implementation = java.time.LocalDateTime.class, type = "string")
