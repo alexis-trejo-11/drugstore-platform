@@ -3,7 +3,6 @@ package microservice.order_service.orders.infrastructure.api.controller;
 
 import libs_kernel.mapper.EntityDetailMapper;
 import libs_kernel.mapper.ResponseMapper;
-import libs_kernel.page.PageResponse;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 

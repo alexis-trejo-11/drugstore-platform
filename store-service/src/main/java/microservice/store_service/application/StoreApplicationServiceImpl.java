@@ -1,7 +1,6 @@
 package microservice.store_service.application;
 
 import libs_kernel.page.PageResponse;
-import libs_kernel.page.PageableResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.store_service.application.dto.command.*;
@@ -232,7 +231,7 @@ public class StoreApplicationServiceImpl implements StoreApplicationService {
         List<Store> storeItems = storeRepository.search(criteria);
         long totalCount = storeRepository.count(criteria);
 
-        return new PageableResponse<>(storeItems, query.page(), query.size(), totalCount);
+        return new PageResponse<>(storeItems, query.page(), query.size(), totalCount);
     }
 
     @Override
@@ -249,7 +248,7 @@ public class StoreApplicationServiceImpl implements StoreApplicationService {
         List<Store> storeItems = storeRepository.search(searchCriteria);
         long totalCount = storeRepository.count(searchCriteria);
 
-        return new PageableResponse<>(storeItems, query.pagination().page(), query.pagination().size(), totalCount);
+        return new PageResponse<>(storeItems, query.pagination().page(), query.pagination().size(), totalCount);
     }
 
     private Store findStoreOrThrow(StoreID id) {
