@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import microservice.inventory_service.internal.core.inventory.domain.entity.enums.InventoryStatus;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
-import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.MedicineId;
+import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.ProductId;
 
 @Data
 @Builder
@@ -14,7 +14,7 @@ import microservice.inventory_service.internal.core.inventory.domain.entity.valu
 @AllArgsConstructor
 public class InventoryStockReport {
     private InventoryId inventoryId;
-    private MedicineId medicineId;
+    private ProductId productId;
     private Integer totalQuantity;
     private Integer availableQuantity;
     private Integer reservedQuantity;

@@ -26,8 +26,8 @@ public class InventoryEntity {
     @Column(name = "id", nullable = false, length = 36)
     private String id;
 
-    @Column(name = "medicine_id", nullable = false, unique = true, length = 36)
-    private String medicineId;
+    @Column(name = "product_id", nullable = false, unique = true, length = 36)
+    private String productId;
 
     @Column(name = "total_quantity", nullable = false)
     private Integer totalQuantity;

@@ -17,8 +17,8 @@ public class CreateInventoryCommandHandler {
 
     @Transactional
     public InventoryId handle(CreateInventoryCommand command) {
-        if (inventoryRepository.existsByMedicineId(command.medicineId())) {
-            throw new IllegalStateException("Inventory already exists for this medicine");
+        if (inventoryRepository.existsByProductId(command.productId())) {
+            throw new IllegalStateException("Inventory already exists for this product: " + command.productId());
         }
 
         var createParams = command.toCreateInventoryParams();

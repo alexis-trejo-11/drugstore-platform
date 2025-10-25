@@ -2,16 +2,16 @@ package microservice.inventory_service.internal.infrastructure.adapter.inbound.a
 
 import jakarta.validation.constraints.*;
 import microservice.inventory_service.internal.core.inventory.application.cqrs.command.CreateInventoryCommand;
-import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.MedicineId;
+import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.ProductId;
 import org.hibernate.validator.constraints.Length;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Optional;
 
-@Schema(description = "Request to create StockMovementUseCaseImpl new inventory for StockMovementUseCaseImpl medicine")
+@Schema(description = "Request to create StockMovementUseCaseImpl new inventory for StockMovementUseCaseImpl prdoduct")
 public record CreateInventoryRequest(
-        @Schema(description = "Unique identifier of the medicine", example = "med-98765", type = "string")
-        @NotNull @NotBlank @Length(max = 50) String medicineId,
+        @Schema(description = "Unique identifier of the product", example = "prod-98765", type = "string")
+        @NotNull @NotBlank @Length(max = 50) String productId,
 
         @Schema(description = "Reorder threshold to trigger restock", example = "10", type = "integer")
         @NotNull @Positive Integer reorderLevel,
@@ -30,7 +30,7 @@ public record CreateInventoryRequest(
 ) {
     public CreateInventoryCommand toCommand() {
         return CreateInventoryCommand.builder()
-                .medicineId(new MedicineId(this.medicineId))
+                .productId(new ProductId(this.productId))
                 .reorderLevel(this.reorderLevel)
                 .reorderQuantity(this.reorderQuantity)
                 .maximumStockLevel(this.maximumStockLevel)

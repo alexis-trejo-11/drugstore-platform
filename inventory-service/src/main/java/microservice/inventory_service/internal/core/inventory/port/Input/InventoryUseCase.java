@@ -5,7 +5,7 @@ import microservice.inventory_service.internal.core.batch.domain.entity.Inventor
 import microservice.inventory_service.internal.core.inventory.application.cqrs.command.AdjustInventoryCommand;
 import microservice.inventory_service.internal.core.inventory.application.cqrs.command.CreateInventoryCommand;
 import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryByIdQuery;
-import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryByMedicineQuery;
+import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryByProductQuery;
 import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryMovementsQuery;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.AdjustmentId;
@@ -21,7 +21,7 @@ public interface InventoryUseCase {
     AdjustmentId adjustInventory(AdjustInventoryCommand command);
 
     Inventory getInventoryById(GetInventoryByIdQuery query);
-    Inventory getInventoryByMedicine(GetInventoryByMedicineQuery query);
+    Inventory getInventoryByProduct(GetInventoryByProductQuery query);
     Page<Inventory> getLowStockInventories(GetLowStockInventoriesQuery query);
     Page<InventoryMovement> getInventoryMovements(GetInventoryMovementsQuery query);
     List<InventoryBatch> getExpiringInventoryBatches(GetExpiringBatchesQuery query);

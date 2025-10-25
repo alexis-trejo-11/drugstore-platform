@@ -1,6 +1,8 @@
 package microservice.inventory_service.external.order.application.handler.command;
 
 import lombok.RequiredArgsConstructor;
+import microservice.inventory_service.external.order.application.command.ReceiveOrderCommand;
+import microservice.inventory_service.external.order.domain.exception.OrderNotFoundException;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
 import microservice.inventory_service.internal.core.inventory.port.InventoryRepository;
@@ -10,12 +12,10 @@ import microservice.inventory_service.internal.core.movement.domain.valueobject.
 import microservice.inventory_service.internal.core.batch.domain.entity.valueobject.CreateBatchParams;
 import microservice.inventory_service.internal.core.movement.domain.valueobject.CreateMovementParams;
 import microservice.inventory_service.internal.core.batch.port.output.InventoryBatchRepository;
-import microservice.inventory_service.external.order.application.command.ReceivePurchaseOrderCommand;
 import microservice.inventory_service.external.order.application.command.ReceivedItemCommand;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrder;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrderItem;
-import microservice.inventory_service.external.order.domain.exception.PurchaseOrderNotFoundException;
-import microservice.inventory_service.external.order.domain.port.output.PurchaseOrderRepository;
+import microservice.inventory_service.external.order.domain.entity.Order;
+import microservice.inventory_service.external.order.domain.entity.OrderItem;
+import microservice.inventory_service.external.order.domain.port.output.OrderRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,42 +24,42 @@ import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
-public class ReceivePurchaseOrderCommandHandler {
-    private final PurchaseOrderRepository purchaseOrderRepository;
+public class ReceiveOrderCommandHandler {
+    private final OrderRepository orderRepository;
     private final InventoryRepository inventoryRepository;
     private final InventoryBatchRepository batchRepository;
     private final InventoryMovementRepository movementRepository;
 
     @Transactional
-    public void handle(ReceivePurchaseOrderCommand command) {
-        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(command.purchaseOrderId())
-                .orElseThrow(() -> new PurchaseOrderNotFoundException("Purchase order not found"));
+    public void handle(ReceiveOrderCommand command) {
+        Order Order = orderRepository.findById(command.orderId())
+                .orElseThrow(() -> new OrderNotFoundException("Order not found"));
 
-        List<PurchaseOrderItem> receivedItems = command.receivedItems().stream()
+        List<OrderItem> receivedItems = command.receivedItems().stream()
                 .map(receivedItem -> {
-                    PurchaseOrderItem orderItem = findOrderItem(purchaseOrder, receivedItem.itemId());
+                    OrderItem orderItem = findOrderItem(Order, receivedItem.itemId());
                     orderItem.receiveQuantity(receivedItem.receivedQuantity());
                     orderItem.assignBatchNumber(receivedItem.batchNumber());
 
-                    processReceivedItem(orderItem, receivedItem, purchaseOrder);
+                    processReceivedItem(orderItem, receivedItem, Order);
 
                     return orderItem;
                 })
                 .toList();
 
-        purchaseOrder.receiveItems(receivedItems, command.receivedDate());
-        purchaseOrderRepository.save(purchaseOrder);
+        Order.receiveItems(receivedItems, command.receivedDate());
+        orderRepository.save(Order);
     }
 
-    private PurchaseOrderItem findOrderItem(PurchaseOrder purchaseOrder, String itemId) {
-        return purchaseOrder.getItems().stream()
+    private OrderItem findOrderItem(Order Order, String itemId) {
+        return Order.getItems().stream()
                 .filter(item -> Objects.equals(item.getId(), itemId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Order item not found"));
     }
 
-    private void processReceivedItem(PurchaseOrderItem orderItem, ReceivedItemCommand receivedItem, PurchaseOrder purchaseOrder) {
-        Inventory inventory = inventoryRepository.findByMedicineId(orderItem.getMedicineId())
+    private void processReceivedItem(OrderItem orderItem, ReceivedItemCommand receivedItem, Order Order) {
+        Inventory inventory = inventoryRepository.findByProductId(orderItem.getProductId())
                 .orElseThrow(() -> new IllegalStateException("Inventory not found for medicine"));
 
 
@@ -68,8 +68,8 @@ public class ReceivePurchaseOrderCommandHandler {
                 .batchNumber(receivedItem.batchNumber())
                 .quantity(receivedItem.receivedQuantity())
                 .costPerUnit(orderItem.getUnitCost())
-                .supplierId(purchaseOrder.getSupplierId())
-                .supplierName(purchaseOrder.getSupplierName())
+                .supplierId(Order.getSupplierId())
+                .supplierName(Order.getSupplierName())
                 .build();
 
         InventoryBatch batch = InventoryBatch.create(params);
@@ -87,9 +87,9 @@ public class ReceivePurchaseOrderCommandHandler {
                         .quantity(receivedItem.receivedQuantity())
                         .previousQuantity(inventory.getTotalQuantity() - receivedItem.receivedQuantity())
                         .newQuantity(inventory.getTotalQuantity())
-                        .reason("Purchase order received")
-                        .referenceId(purchaseOrder.getId().value())
-                        .referenceType("PURCHASE_ORDER")
+                        .reason("Order received")
+                        .referenceId(Order.getId().value())
+                        .referenceType("ORDER")
                         .build()
         );
 

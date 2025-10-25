@@ -19,7 +19,7 @@ public class InventoryResponseMapper implements ResponseMapper<InventoryResponse
 
         return InventoryResponse.builder()
                 .id(inventory.getId() != null ? inventory.getId().value() : null)
-                .medicineId(inventory.getMedicineId() != null ? inventory.getMedicineId().value() : null)
+                .productId(inventory.getProductId() != null ? inventory.getProductId().value() : null)
                 .totalQuantity(inventory.getTotalQuantity())
                 .availableQuantity(inventory.getAvailableQuantity())
                 .reservedQuantity(inventory.getReservedQuantity())

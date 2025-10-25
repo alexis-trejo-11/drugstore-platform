@@ -5,7 +5,7 @@ import microservice.inventory_service.internal.core.batch.domain.entity.Inventor
 import microservice.inventory_service.internal.core.inventory.domain.entity.enums.InventoryStatus;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.CreateInventoryParams;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
-import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.MedicineId;
+import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.ProductId;
 import microservice.inventory_service.internal.core.inventory.domain.exception.InsufficientInventoryException;
 import microservice.inventory_service.internal.core.inventory.domain.exception.InvalidStockAdjustmentException;
 import microservice.inventory_service.internal.core.inventory.domain.exception.InventoryValidationException;
@@ -20,7 +20,7 @@ import java.util.List;
 @Getter
 public class Inventory {
     private InventoryId id;
-    private MedicineId medicineId;
+    private ProductId productId;
     private Integer totalQuantity;
     private Integer availableQuantity;
     private Integer reservedQuantity;
@@ -36,9 +36,9 @@ public class Inventory {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private Inventory(InventoryId id, MedicineId medicineId, Integer totalQuantity, Integer availableQuantity, Integer reservedQuantity, Integer reorderLevel, Integer reorderQuantity, Integer maximumStockLevel, String warehouseLocation, InventoryStatus status, LocalDateTime lastRestockedDate, LocalDateTime lastCountDate, List<InventoryBatch> batches, List<InventoryMovement> movements, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    private Inventory(InventoryId id, ProductId productId, Integer totalQuantity, Integer availableQuantity, Integer reservedQuantity, Integer reorderLevel, Integer reorderQuantity, Integer maximumStockLevel, String warehouseLocation, InventoryStatus status, LocalDateTime lastRestockedDate, LocalDateTime lastCountDate, List<InventoryBatch> batches, List<InventoryMovement> movements, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
-        this.medicineId = medicineId;
+        this.productId = productId;
         this.totalQuantity = totalQuantity;
         this.availableQuantity = availableQuantity;
         this.reservedQuantity = reservedQuantity;
@@ -68,12 +68,12 @@ public class Inventory {
     }
 
     private static Inventory createEmptyInventory(CreateInventoryParams params, LocalDateTime now) {
-        return new Inventory(InventoryId.generate(), params.medicineId(), 0, 0, 0, params.reorderLevel(), params.reorderQuantity(), params.maximumStockLevel(), params.warehouseLocation(), determineInitialStatus(0, params.reorderLevel()), now, null, new ArrayList<>(), new ArrayList<>(), now, now);
+        return new Inventory(InventoryId.generate(), params.productId(), 0, 0, 0, params.reorderLevel(), params.reorderQuantity(), params.maximumStockLevel(), params.warehouseLocation(), determineInitialStatus(0, params.reorderLevel()), now, null, new ArrayList<>(), new ArrayList<>(), now, now);
     }
 
     private static Inventory createFromInitialBatch(CreateInventoryParams params, InventoryBatch initialBatch, LocalDateTime now) {
         int initialQuantity = initialBatch.getQuantity();
-        return new Inventory(InventoryId.generate(), params.medicineId(), initialQuantity, initialQuantity, 0, params.reorderLevel(), params.reorderQuantity(), params.maximumStockLevel(), params.warehouseLocation(), determineInitialStatus(initialQuantity, params.reorderLevel()), now, null, new ArrayList<>(List.of(initialBatch)), new ArrayList<>(), now, now);
+        return new Inventory(InventoryId.generate(), params.productId(), initialQuantity, initialQuantity, 0, params.reorderLevel(), params.reorderQuantity(), params.maximumStockLevel(), params.warehouseLocation(), determineInitialStatus(initialQuantity, params.reorderLevel()), now, null, new ArrayList<>(List.of(initialBatch)), new ArrayList<>(), now, now);
     }
 
 
@@ -216,7 +216,7 @@ public class Inventory {
 
     public static class InventoryReconstructor {
         private InventoryId id;
-        private MedicineId medicineId;
+        private ProductId productId;
         private Integer totalQuantity;
         private Integer availableQuantity;
         private Integer reservedQuantity;
@@ -237,8 +237,8 @@ public class Inventory {
             return this;
         }
 
-        public InventoryReconstructor medicineId(MedicineId medicineId) {
-            this.medicineId = medicineId;
+        public InventoryReconstructor productId(ProductId productId) {
+            this.productId = productId;
             return this;
         }
 
@@ -313,7 +313,7 @@ public class Inventory {
         }
 
         public Inventory reconstruct() {
-            return new Inventory(id, medicineId, totalQuantity, availableQuantity, reservedQuantity, reorderLevel, reorderQuantity, maximumStockLevel, warehouseLocation, status, lastRestockedDate, lastCountDate, batches, movements, createdAt, updatedAt);
+            return new Inventory(id, productId, totalQuantity, availableQuantity, reservedQuantity, reorderLevel, reorderQuantity, maximumStockLevel, warehouseLocation, status, lastRestockedDate, lastCountDate, batches, movements, createdAt, updatedAt);
         }
     }
 }

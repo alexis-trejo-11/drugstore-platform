@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.inventory.domain.entity.enums.InventoryStatus;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
-import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.MedicineId;
+import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.ProductId;
 import microservice.inventory_service.internal.core.inventory.port.InventoryRepository;
 import microservice.inventory_service.internal.infrastructure.adapter.outbound.persistence.model.InventoryEntity;
 import microservice.inventory_service.internal.infrastructure.adapter.outbound.persistence.repository.jpa.JpaInventoryRepository;
@@ -42,8 +42,8 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     }
 
     @Override
-    public Optional<Inventory> findByMedicineId(MedicineId medicineId) {
-        return jpaInventoryRepository.findByMedicineId(medicineId.value()).map(mapper::toDomain);
+    public Optional<Inventory> findByProductId(ProductId productId) {
+        return jpaInventoryRepository.findByProductId(productId.value()).map(mapper::toDomain);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     }
 
     @Override
-    public boolean existsByMedicineId(MedicineId medicineId) {
-        return jpaInventoryRepository.existsByMedicineId(medicineId.value());
+    public boolean existsByProductId(ProductId productId) {
+        return jpaInventoryRepository.existsByProductId(productId.value());
     }
 }

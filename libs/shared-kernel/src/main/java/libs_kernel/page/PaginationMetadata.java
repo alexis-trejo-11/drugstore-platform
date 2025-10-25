@@ -53,7 +53,7 @@ public class PaginationMetadata {
         return new PaginationMetadata(
                 page.getTotalElements(),
                 page.getTotalPages(),
-                page.getNumber(),
+                page.getNumber() + 1, // Page 1-based index
                 page.getSize(),
                 page.isFirst(),
                 page.isLast(),

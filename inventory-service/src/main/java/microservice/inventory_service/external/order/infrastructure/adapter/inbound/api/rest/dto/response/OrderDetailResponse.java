@@ -2,8 +2,7 @@ package microservice.inventory_service.external.order.infrastructure.adapter.inb
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
-import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.UserId;
-import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderStatus;
+import microservice.inventory_service.external.order.domain.entity.valueobject.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,9 +11,9 @@ import java.util.List;
 @Builder
 @Schema(description = "Order Detail Response DTO")
 public record OrderDetailResponse(
-        @Schema(description = "Unique identifier of the purchase order", example = "po-12345", type = "string")
+        @Schema(description = "Unique identifier of the order", example = "po-12345", type = "string")
         String id,
-        @Schema(description = "Order number of the purchase order", example = "ORD-2024-0001", type = "string")
+        @Schema(description = "Order number of the order", example = "ORD-2024-0001", type = "string")
         String orderNumber,
         @Schema(description = "Unique identifier of the supplier", example = "sup-67890", type = "string")
         String supplierId,
@@ -24,8 +23,8 @@ public record OrderDetailResponse(
         List<OrderItemResponse> items,
         @Schema(description = "Total amount for the order (decimal)", example = "123.45", type = "string")
         BigDecimal totalAmount,
-        @Schema(description = "Status of the purchase order", example = "PENDING", type = "string")
-        PurchaseOrderStatus status,
+        @Schema(description = "Status of the order", example = "PENDING", type = "string")
+        OrderStatus status,
         @Schema(description = "Date when the order was placed (ISO 8601)", example = "2024-02-01T10:00:00", implementation = java.time.LocalDateTime.class, type = "string")
         LocalDateTime orderDate,
         @Schema(description = "Expected delivery date (ISO 8601)", example = "2024-02-10T15:30:00", implementation = java.time.LocalDateTime.class, type = "string")

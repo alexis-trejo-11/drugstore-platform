@@ -6,7 +6,7 @@ import microservice.inventory_service.internal.core.inventory.domain.entity.Inve
 import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
 import microservice.inventory_service.internal.core.movement.domain.InventoryMovement;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
-import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.MedicineId;
+import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.ProductId;
 import microservice.inventory_service.internal.infrastructure.adapter.outbound.persistence.model.InventoryBatchEntity;
 import microservice.inventory_service.internal.infrastructure.adapter.outbound.persistence.model.InventoryEntity;
 import microservice.inventory_service.internal.infrastructure.adapter.outbound.persistence.model.InventoryMovementEntity;
@@ -27,7 +27,7 @@ public class InventoryEntityMapper implements EntityMapper<InventoryEntity, Inve
 
         return InventoryEntity.builder()
                 .id(inventory.getId() != null ? inventory.getId().value() : null)
-                .medicineId(inventory.getMedicineId() != null ? inventory.getMedicineId().value() : null)
+                .productId(inventory.getProductId() != null ? inventory.getProductId().value() : null)
                 .totalQuantity(inventory.getTotalQuantity())
                 .availableQuantity(inventory.getAvailableQuantity())
                 .reservedQuantity(inventory.getReservedQuantity())
@@ -51,7 +51,7 @@ public class InventoryEntityMapper implements EntityMapper<InventoryEntity, Inve
 
         return Inventory.reconstructor()
                 .id(model.getId() != null ? new InventoryId(model.getId()) : null)
-                .medicineId(model.getMedicineId() != null ? new MedicineId(model.getMedicineId()) : null)
+                .productId(model.getProductId() != null ? new ProductId(model.getProductId()) : null)
                 .totalQuantity(model.getTotalQuantity())
                 .availableQuantity(model.getAvailableQuantity())
                 .reservedQuantity(model.getReservedQuantity())

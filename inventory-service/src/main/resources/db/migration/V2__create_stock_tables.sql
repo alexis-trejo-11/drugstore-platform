@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS stock_adjustments CASCADE;
 DROP TABLE IF EXISTS stock_reservations CASCADE;
 
 -- Create stock_reservations table
-CREATE TABLE stock_reservations (
+CREATE TABLE IF NOT EXISTS stock_reservations (
     id VARCHAR(36) NOT NULL,
     inventory_id VARCHAR(36) NOT NULL,
     order_id VARCHAR(36) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE stock_reservations (
 );
 
 -- Create stock_adjustments table
-CREATE TABLE stock_adjustments (
+CREATE TABLE IF NOT EXISTS stock_adjustments (
     id VARCHAR(36) NOT NULL,
     inventory_id VARCHAR(36) NOT NULL,
     batch_id VARCHAR(36),
@@ -57,48 +57,63 @@ CREATE TABLE stock_adjustments (
 );
 
 -- Create indexes for stock_reservations
-CREATE INDEX idx_reservations_inventory_id ON stock_reservations(inventory_id);
-CREATE INDEX idx_reservations_order_id ON stock_reservations(order_id);
-CREATE INDEX idx_reservations_status ON stock_reservations(status);
-CREATE INDEX idx_reservations_expiration_time ON stock_reservations(expiration_time);
-CREATE INDEX idx_reservations_created_at ON stock_reservations(created_at);
-CREATE INDEX idx_reservations_status_expiration ON stock_reservations(status, expiration_time)
+CREATE INDEX IF NOT EXISTS idx_reservations_inventory_id ON stock_reservations(inventory_id);
+CREATE INDEX IF NOT EXISTS idx_reservations_order_id ON stock_reservations(order_id);
+CREATE INDEX IF NOT EXISTS idx_reservations_status ON stock_reservations(status);
+CREATE INDEX IF NOT EXISTS idx_reservations_expiration_time ON stock_reservations(expiration_time);
+CREATE INDEX IF NOT EXISTS idx_reservations_created_at ON stock_reservations(created_at);
+CREATE INDEX IF NOT EXISTS idx_reservations_status_expiration ON stock_reservations(status, expiration_time)
     WHERE status IN ('ACTIVE', 'CONFIRMED');
 
 -- Create unique index for active reservations per order and inventory
-CREATE UNIQUE INDEX idx_reservations_active_unique
+CREATE UNIQUE INDEX IF NOT EXISTS idx_reservations_active_unique
 ON stock_reservations(inventory_id, order_id)
 WHERE status IN ('ACTIVE', 'CONFIRMED');
 
 -- Create indexes for stock_adjustments
-CREATE INDEX idx_adjustments_inventory_id ON stock_adjustments(inventory_id);
-CREATE INDEX idx_adjustments_batch_id ON stock_adjustments(batch_id);
-CREATE INDEX idx_adjustments_adjustment_type ON stock_adjustments(adjustment_type);
-CREATE INDEX idx_adjustments_reason ON stock_adjustments(reason);
-CREATE INDEX idx_adjustments_adjustment_date ON stock_adjustments(adjustment_date);
-CREATE INDEX idx_adjustments_created_at ON stock_adjustments(created_at);
-CREATE INDEX idx_adjustments_performed_by ON stock_adjustments(performed_by);
-CREATE INDEX idx_adjustments_approved_by ON stock_adjustments(approved_by);
+CREATE INDEX IF NOT EXISTS idx_adjustments_inventory_id ON stock_adjustments(inventory_id);
+CREATE INDEX IF NOT EXISTS idx_adjustments_batch_id ON stock_adjustments(batch_id);
+CREATE INDEX IF NOT EXISTS idx_adjustments_adjustment_type ON stock_adjustments(adjustment_type);
+CREATE INDEX IF NOT EXISTS idx_adjustments_reason ON stock_adjustments(reason);
+CREATE INDEX IF NOT EXISTS idx_adjustments_adjustment_date ON stock_adjustments(adjustment_date);
+CREATE INDEX IF NOT EXISTS idx_adjustments_created_at ON stock_adjustments(created_at);
+CREATE INDEX IF NOT EXISTS idx_adjustments_performed_by ON stock_adjustments(performed_by);
+CREATE INDEX IF NOT EXISTS idx_adjustments_approved_by ON stock_adjustments(approved_by);
 
 -- Create composite index for common query patterns
-CREATE INDEX idx_adjustments_inventory_date ON stock_adjustments(inventory_id, adjustment_date);
-CREATE INDEX idx_adjustments_type_reason ON stock_adjustments(adjustment_type, reason);
+CREATE INDEX IF NOT EXISTS idx_adjustments_inventory_date ON stock_adjustments(inventory_id, adjustment_date);
+CREATE INDEX IF NOT EXISTS idx_adjustments_type_reason ON stock_adjustments(adjustment_type, reason);
 
--- Add foreign key constraints
-ALTER TABLE stock_reservations
-ADD CONSTRAINT fk_reservations_inventory_id
-FOREIGN KEY (inventory_id) REFERENCES inventories(id)
-ON DELETE CASCADE;
+-- Add foreign key constraints (use safe DO blocks to avoid errors if re-run)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_reservations_inventory_id') THEN
+        ALTER TABLE stock_reservations
+        ADD CONSTRAINT fk_reservations_inventory_id
+        FOREIGN KEY (inventory_id) REFERENCES inventories(id)
+        ON DELETE CASCADE;
+    END IF;
+END$$;
 
-ALTER TABLE stock_adjustments
-ADD CONSTRAINT fk_adjustments_inventory_id
-FOREIGN KEY (inventory_id) REFERENCES inventories(id)
-ON DELETE CASCADE;
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_adjustments_inventory_id') THEN
+        ALTER TABLE stock_adjustments
+        ADD CONSTRAINT fk_adjustments_inventory_id
+        FOREIGN KEY (inventory_id) REFERENCES inventories(id)
+        ON DELETE CASCADE;
+    END IF;
+END$$;
 
-ALTER TABLE stock_adjustments
-ADD CONSTRAINT fk_adjustments_batch_id
-FOREIGN KEY (batch_id) REFERENCES inventory_batches(id)
-ON DELETE SET NULL;
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_adjustments_batch_id') THEN
+        ALTER TABLE stock_adjustments
+        ADD CONSTRAINT fk_adjustments_batch_id
+        FOREIGN KEY (batch_id) REFERENCES inventory_batches(id)
+        ON DELETE SET NULL;
+    END IF;
+END$$;
 
 -- Create trigger function for updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -110,6 +125,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for stock_reservations updated_at
+DROP TRIGGER IF EXISTS update_stock_reservations_updated_at ON stock_reservations;
 CREATE TRIGGER update_stock_reservations_updated_at
     BEFORE UPDATE ON stock_reservations
     FOR EACH ROW
@@ -119,20 +135,26 @@ CREATE TRIGGER update_stock_reservations_updated_at
 CREATE OR REPLACE FUNCTION expire_old_reservations()
 RETURNS TRIGGER AS $$
 BEGIN
+    -- Avoid recursion: if we're already in a trigger invocation, do nothing
+    IF pg_trigger_depth() > 1 THEN
+        RETURN NULL;
+    END IF;
+
     -- Update reservations that have expired
     UPDATE stock_reservations
     SET status = 'EXPIRED', updated_at = CURRENT_TIMESTAMP
     WHERE status IN ('ACTIVE', 'CONFIRMED')
     AND expiration_time <= CURRENT_TIMESTAMP;
 
-    RETURN NEW;
+    RETURN NULL; -- for statement-level triggers RETURN NULL is appropriate
 END;
 $$ LANGUAGE plpgsql;
 
--- Create trigger to check for expired reservations (runs on insert/update)
+-- Create trigger to check for expired reservations (statement-level to reduce recursion/cost)
+DROP TRIGGER IF EXISTS check_reservation_expiration ON stock_reservations;
 CREATE TRIGGER check_reservation_expiration
     AFTER INSERT OR UPDATE ON stock_reservations
-    FOR EACH ROW
+    FOR EACH STATEMENT
     EXECUTE FUNCTION expire_old_reservations();
 
 -- Create function to validate reservation status transitions
@@ -157,6 +179,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for reservation status validation
+DROP TRIGGER IF EXISTS validate_reservation_status_trigger ON stock_reservations;
 CREATE TRIGGER validate_reservation_status_trigger
     BEFORE UPDATE ON stock_reservations
     FOR EACH ROW
@@ -187,6 +210,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for adjustment quantity validation
+DROP TRIGGER IF EXISTS validate_adjustment_quantities_trigger ON stock_adjustments;
 CREATE TRIGGER validate_adjustment_quantities_trigger
     BEFORE INSERT OR UPDATE ON stock_adjustments
     FOR EACH ROW
@@ -228,11 +252,12 @@ FROM stock_adjustments
 WHERE adjustment_date >= CURRENT_DATE - INTERVAL '30 days'
 ORDER BY adjustment_date DESC;
 
--- Verify table creation
-SELECT
-    table_name,
-    table_type
-FROM information_schema.tables
-WHERE table_schema = 'public'
-AND table_name IN ('stock_reservations', 'stock_adjustments')
-ORDER BY table_name;
+-- Verify table creation (selects are harmless in migrations, but optional)
+--
+-- SELECT
+--    table_name,
+--    table_type
+-- FROM information_schema.tables
+-- WHERE table_schema = 'public'
+-- AND table_name IN ('stock_reservations', 'stock_adjustments')
+-- ORDER BY table_name;

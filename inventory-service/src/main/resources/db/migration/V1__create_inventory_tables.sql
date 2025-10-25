@@ -2,9 +2,9 @@
 CREATE SEQUENCE IF NOT EXISTS batch_number_seq START 1000 INCREMENT 1;
 
 -- Create inventories table
-CREATE TABLE inventories (
+CREATE TABLE IF NOT EXISTS inventories (
     id VARCHAR(36) NOT NULL,
-    medicine_id VARCHAR(36) NOT NULL,
+    product_id VARCHAR(36) NOT NULL,
     total_quantity INTEGER NOT NULL DEFAULT 0,
     available_quantity INTEGER NOT NULL DEFAULT 0,
     reserved_quantity INTEGER NOT NULL DEFAULT 0,
@@ -36,7 +36,7 @@ CREATE TABLE inventories (
 );
 
 -- Create inventory_batches table
-CREATE TABLE inventory_batches (
+CREATE TABLE IF NOT EXISTS inventory_batches (
     id VARCHAR(36) NOT NULL,
     inventory_id VARCHAR(36) NOT NULL,
     batch_number VARCHAR(100) NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE inventory_batches (
 );
 
 -- Create inventory_movements table
-CREATE TABLE inventory_movements (
+CREATE TABLE IF NOT EXISTS inventory_movements (
     id VARCHAR(36) NOT NULL,
     inventory_id VARCHAR(36) NOT NULL,
     batch_id VARCHAR(36),
@@ -99,44 +99,45 @@ CREATE TABLE inventory_movements (
 
 -- Create indexes for better performance
 -- Inventories table indexes
-CREATE UNIQUE INDEX idx_inventories_medicine_id ON inventories(medicine_id);
-CREATE INDEX idx_inventories_status ON inventories(status);
-CREATE INDEX idx_inventories_warehouse_location ON inventories(warehouse_location);
-CREATE INDEX idx_inventories_created_at ON inventories(created_at);
-CREATE INDEX idx_inventories_reorder_level ON inventories(reorder_level) WHERE status = 'ACTIVE';
+CREATE UNIQUE INDEX IF NOT EXISTS idx_inventories_product_id ON inventories(product_id);
+CREATE INDEX IF NOT EXISTS idx_inventories_status ON inventories(status);
+CREATE INDEX IF NOT EXISTS idx_inventories_warehouse_location ON inventories(warehouse_location);
+CREATE INDEX IF NOT EXISTS idx_inventories_created_at ON inventories(created_at);
+-- Partial index for active reorder level
+CREATE INDEX IF NOT EXISTS idx_inventories_reorder_level ON inventories(reorder_level) WHERE status = 'ACTIVE';
 
 -- Inventory batches table indexes
-CREATE UNIQUE INDEX idx_batches_batch_number ON inventory_batches(batch_number);
-CREATE INDEX idx_batches_inventory_id ON inventory_batches(inventory_id);
-CREATE INDEX idx_batches_status ON inventory_batches(status);
-CREATE INDEX idx_batches_expiration_date ON inventory_batches(expiration_date);
-CREATE INDEX idx_batches_supplier_id ON inventory_batches(supplier_id);
-CREATE INDEX idx_batches_created_at ON inventory_batches(created_at);
-CREATE INDEX idx_batches_lot_number ON inventory_batches(lot_number);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_batches_batch_number ON inventory_batches(batch_number);
+CREATE INDEX IF NOT EXISTS idx_batches_inventory_id ON inventory_batches(inventory_id);
+CREATE INDEX IF NOT EXISTS idx_batches_status ON inventory_batches(status);
+CREATE INDEX IF NOT EXISTS idx_batches_expiration_date ON inventory_batches(expiration_date);
+CREATE INDEX IF NOT EXISTS idx_batches_supplier_id ON inventory_batches(supplier_id);
+CREATE INDEX IF NOT EXISTS idx_batches_created_at ON inventory_batches(created_at);
+CREATE INDEX IF NOT EXISTS idx_batches_lot_number ON inventory_batches(lot_number);
 
 -- Inventory movements table indexes
-CREATE INDEX idx_movements_inventory_id ON inventory_movements(inventory_id);
-CREATE INDEX idx_movements_batch_id ON inventory_movements(batch_id);
-CREATE INDEX idx_movements_movement_type ON inventory_movements(movement_type);
-CREATE INDEX idx_movements_reference_id ON inventory_movements(reference_id);
-CREATE INDEX idx_movements_performed_by ON inventory_movements(performed_by);
-CREATE INDEX idx_movements_movement_date ON inventory_movements(movement_date);
-CREATE INDEX idx_movements_created_at ON inventory_movements(created_at);
-CREATE INDEX idx_movements_reference_type ON inventory_movements(reference_type);
+CREATE INDEX IF NOT EXISTS idx_movements_inventory_id ON inventory_movements(inventory_id);
+CREATE INDEX IF NOT EXISTS idx_movements_batch_id ON inventory_movements(batch_id);
+CREATE INDEX IF NOT EXISTS idx_movements_movement_type ON inventory_movements(movement_type);
+CREATE INDEX IF NOT EXISTS idx_movements_reference_id ON inventory_movements(reference_id);
+CREATE INDEX IF NOT EXISTS idx_movements_performed_by ON inventory_movements(performed_by);
+CREATE INDEX IF NOT EXISTS idx_movements_movement_date ON inventory_movements(movement_date);
+CREATE INDEX IF NOT EXISTS idx_movements_created_at ON inventory_movements(created_at);
+CREATE INDEX IF NOT EXISTS idx_movements_reference_type ON inventory_movements(reference_type);
 
 -- Create foreign key constraints
-ALTER TABLE inventory_batches
-ADD CONSTRAINT fk_batches_inventory_id
+ALTER TABLE IF EXISTS inventory_batches
+ADD CONSTRAINT IF NOT EXISTS fk_batches_inventory_id
 FOREIGN KEY (inventory_id) REFERENCES inventories(id)
 ON DELETE CASCADE;
 
-ALTER TABLE inventory_movements
-ADD CONSTRAINT fk_movements_inventory_id
+ALTER TABLE IF EXISTS inventory_movements
+ADD CONSTRAINT IF NOT EXISTS fk_movements_inventory_id
 FOREIGN KEY (inventory_id) REFERENCES inventories(id)
 ON DELETE CASCADE;
 
-ALTER TABLE inventory_movements
-ADD CONSTRAINT fk_movements_batch_id
+ALTER TABLE IF EXISTS inventory_movements
+ADD CONSTRAINT IF NOT EXISTS fk_movements_batch_id
 FOREIGN KEY (batch_id) REFERENCES inventory_batches(id)
 ON DELETE SET NULL;
 
@@ -149,12 +150,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create triggers for updated_at
+-- Create triggers for updated_at (drop existing first to avoid errors on re-run)
+DROP TRIGGER IF EXISTS update_inventories_updated_at ON inventories;
 CREATE TRIGGER update_inventories_updated_at
     BEFORE UPDATE ON inventories
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_inventory_batches_updated_at ON inventory_batches;
 CREATE TRIGGER update_inventory_batches_updated_at
     BEFORE UPDATE ON inventory_batches
     FOR EACH ROW
@@ -184,6 +187,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for inventory quantity validation
+DROP TRIGGER IF EXISTS validate_inventory_quantities_trigger ON inventories;
 CREATE TRIGGER validate_inventory_quantities_trigger
     BEFORE INSERT OR UPDATE ON inventories
     FOR EACH ROW
@@ -208,6 +212,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for batch quantity validation
+DROP TRIGGER IF EXISTS validate_batch_quantities_trigger ON inventory_batches;
 CREATE TRIGGER validate_batch_quantities_trigger
     BEFORE INSERT OR UPDATE ON inventory_batches
     FOR EACH ROW
@@ -231,6 +236,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for automatic inventory status updates
+DROP TRIGGER IF EXISTS update_inventory_status_trigger ON inventories;
 CREATE TRIGGER update_inventory_status_trigger
     BEFORE INSERT OR UPDATE OF available_quantity, reorder_level ON inventories
     FOR EACH ROW
@@ -250,12 +256,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for automatic batch status updates
+DROP TRIGGER IF EXISTS update_batch_status_trigger ON inventory_batches;
 CREATE TRIGGER update_batch_status_trigger
     BEFORE INSERT OR UPDATE OF expiration_date ON inventory_batches
     FOR EACH ROW
     EXECUTE FUNCTION update_batch_status();
 
 -- Create comments for documentation
-COMMENT ON TABLE inventories IS 'Stores inventory information for medicines';
+COMMENT ON TABLE inventories IS 'Stores inventory information for products';
 COMMENT ON TABLE inventory_batches IS 'Stores batch/lot information for inventory items';
 COMMENT ON TABLE inventory_movements IS 'Audit trail for all inventory movements and transactions';

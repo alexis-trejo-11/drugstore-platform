@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
+import microservice.inventory_service.external.order.domain.entity.valueobject.OrderId;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.internal.core.stock.application.command.ReserveStockCommand;
 
@@ -31,7 +31,7 @@ public class ReserveStockRequest {
     public ReserveStockCommand toCommand(String inventoryId) {
         return ReserveStockCommand.builder()
             .inventoryId(InventoryId.of(inventoryId))
-            .orderId(PurchaseOrderId.of(orderId))
+            .orderId(OrderId.of(orderId))
             .quantity(quantity)
             .reservationDurationMinutes(reservationDurationMinutes)
             .reason(reason)

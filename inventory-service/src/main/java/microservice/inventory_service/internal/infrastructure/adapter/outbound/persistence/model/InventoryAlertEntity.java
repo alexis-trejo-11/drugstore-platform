@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-// MONGO?
 public class InventoryAlertEntity {
 
     @Id
