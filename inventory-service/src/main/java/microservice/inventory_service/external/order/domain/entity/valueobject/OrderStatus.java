@@ -1,6 +1,6 @@
 package microservice.inventory_service.external.order.domain.entity.valueobject;
 
-public enum PurchaseOrderStatus {
+public enum OrderStatus {
     DRAFT,
     PENDING_APPROVAL,
     APPROVED,

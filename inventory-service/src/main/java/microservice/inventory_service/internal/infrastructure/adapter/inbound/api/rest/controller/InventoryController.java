@@ -8,7 +8,7 @@ import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.internal.core.inventory.application.InventoryService;
 import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryByIdQuery;
-import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryByMedicineQuery;
+import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryByProductQuery;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.internal.infrastructure.adapter.inbound.api.rest.dto.request.CreateInventoryRequest;
@@ -35,10 +35,10 @@ public class InventoryController {
         return ResponseWrapper.found(inventoryResponse, "Inventory");
     }
 
-    @GetMapping("/medicine/{medicineId}")
-    public ResponseWrapper<InventoryResponse> getInventoryByMedicineId(@PathVariable String medicineId) {
-        var query = GetInventoryByMedicineQuery.of(medicineId);
-        var inventory = inventoryService.getInventoryByMedicine(query);
+    @GetMapping("/product/{productId}")
+    public ResponseWrapper<InventoryResponse> getInventoryByProductId(@PathVariable String productId) {
+        var query = GetInventoryByProductQuery.of(productId);
+        var inventory = inventoryService.getInventoryByProduct(query);
 
         var inventoryResponse = responseMapper.toResponse(inventory);
         return ResponseWrapper.found(inventoryResponse, "Inventory");

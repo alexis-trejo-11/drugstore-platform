@@ -3,7 +3,7 @@ package microservice.inventory_service.internal.core.stock.domain.valueobject;
 import lombok.Getter;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.internal.core.inventory.domain.exception.ReservationExpiredException;
-import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
+import microservice.inventory_service.external.order.domain.entity.valueobject.OrderId;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class StockReservation {
     private ReservationId id;
     private InventoryId inventoryId;
-    private PurchaseOrderId orderId;
+    private OrderId orderId;
     private Integer quantity;
     private ReservationStatus status;
     private LocalDateTime expirationTime;
@@ -19,7 +19,7 @@ public class StockReservation {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private StockReservation(ReservationId id, InventoryId inventoryId, PurchaseOrderId orderId, Integer quantity,
+    private StockReservation(ReservationId id, InventoryId inventoryId, OrderId orderId, Integer quantity,
                              ReservationStatus status, LocalDateTime expirationTime, String reason,
                              LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
@@ -81,7 +81,7 @@ public class StockReservation {
     public static class StockReservationReconstructor {
         private ReservationId id;
         private InventoryId inventoryId;
-        private PurchaseOrderId orderId;
+        private OrderId orderId;
         private Integer quantity;
         private ReservationStatus status;
         private LocalDateTime expirationTime;
@@ -99,7 +99,7 @@ public class StockReservation {
             return this;
         }
 
-        public StockReservationReconstructor orderId(PurchaseOrderId orderId) {
+        public StockReservationReconstructor orderId(OrderId orderId) {
             this.orderId = orderId;
             return this;
         }

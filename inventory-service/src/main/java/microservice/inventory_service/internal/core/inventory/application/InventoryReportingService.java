@@ -50,7 +50,7 @@ public class InventoryReportingService {
         
         return InventoryStockReport.builder()
             .inventoryId(inventoryId)
-            .medicineId(inventory.getMedicineId())
+            .productId(inventory.getProductId())
             .totalQuantity(inventory.getTotalQuantity())
             .availableQuantity(inventory.getAvailableQuantity())
             .reservedQuantity(inventory.getReservedQuantity())

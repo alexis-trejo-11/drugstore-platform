@@ -8,7 +8,7 @@ import microservice.inventory_service.internal.core.movement.domain.valueobject.
 import microservice.inventory_service.internal.core.movement.domain.valueobject.CreateMovementParams;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.UserId;
 import microservice.inventory_service.internal.core.inventory.domain.exception.InsufficientInventoryException;
-import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
+import microservice.inventory_service.external.order.domain.entity.valueobject.OrderId;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -45,7 +45,7 @@ public class InventoryAllocationService {
     }
 
     // TODO: PREV AND NEW QUANTITY IS RIGHT?
-    public InventoryMovement createReservationMovement(Inventory inventory, Integer quantity, PurchaseOrderId orderId, UserId performedBy) {
+    public InventoryMovement createReservationMovement(Inventory inventory, Integer quantity, OrderId orderId, UserId performedBy) {
         var params = CreateMovementParams.builder()
                 .inventoryId(inventory.getId())
                 .movementType(MovementType.RESERVATION)
@@ -61,7 +61,7 @@ public class InventoryAllocationService {
         return InventoryMovement.create(params);
     }
 
-    public InventoryMovement createReleaseMovement(Inventory inventory, Integer quantity, PurchaseOrderId orderId, UserId performedBy) {
+    public InventoryMovement createReleaseMovement(Inventory inventory, Integer quantity, OrderId orderId, UserId performedBy) {
         var params = CreateMovementParams.builder()
                 .inventoryId(inventory.getId())
                 .movementType(MovementType.RELEASE)
@@ -77,7 +77,7 @@ public class InventoryAllocationService {
         return InventoryMovement.create(params);
     }
 
-    public InventoryMovement createSaleMovement(Inventory inventory, Integer quantity, PurchaseOrderId orderId, UserId performedBy) {
+    public InventoryMovement createSaleMovement(Inventory inventory, Integer quantity, OrderId orderId, UserId performedBy) {
         var params = CreateMovementParams.builder()
                 .inventoryId(inventory.getId())
                 .movementType(MovementType.SALE)

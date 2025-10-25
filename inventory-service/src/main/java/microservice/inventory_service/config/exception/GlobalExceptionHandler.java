@@ -40,8 +40,8 @@ public class GlobalExceptionHandler extends CustomGlobalExceptionHandler  {
 
     private HttpStatus determineHttpStatus(InventoryException ex) {
         return switch (ex.getErrorCode()) {
-            case "INVENTORY_NOT_FOUND" -> HttpStatus.NOT_FOUND;
-            case "MEDICINE_CONFLICT_ERROR" -> HttpStatus.CONFLICT;
+            case "INVENTORY_NOT_FOUND", "ORDER_NOT_FOUND" -> HttpStatus.NOT_FOUND;
+            case "PRODUCT_CONFLICT_ERROR" -> HttpStatus.CONFLICT;
             default -> HttpStatus.UNPROCESSABLE_ENTITY;
         };
     }
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler extends CustomGlobalExceptionHandler  {
 
     private boolean shouldLogAsError(InventoryException ex) {
         return switch (ex.getErrorCode()) {
-            case "MEDICINE_CONFLICT_ERROR" -> true;
+            case "PRODUCT_CONFLICT_ERROR" -> true;
             default -> false; // Most are validation errors (WARN)
         };
     }

@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface JpaInventoryRepository extends JpaRepository<InventoryEntity, String> {
-    Optional<InventoryEntity> findByMedicineId(String medicineId);
+    Optional<InventoryEntity> findByProductId(String productId);
 
-    boolean existsByMedicineId(String medicineId);
+    boolean existsByProductId(String productId);
 
     Page<InventoryEntity> findByStatus(InventoryStatus status, Pageable pageable);
     List<InventoryEntity> findByStatus(InventoryStatus status);

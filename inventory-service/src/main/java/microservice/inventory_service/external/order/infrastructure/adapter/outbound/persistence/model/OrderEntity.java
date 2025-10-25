@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.persistence.*;
-import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderStatus;
+import microservice.inventory_service.external.order.domain.entity.valueobject.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,13 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "purchase_orders")
+@Table(name = "orders")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PurchaseOrderEntity {
+public class OrderEntity {
     @Id
     @Column(name = "id")
     private String id;
@@ -36,16 +36,19 @@ public class PurchaseOrderEntity {
     private String supplierName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @JoinColumn(name = "purchase_order_id")
+    @JoinColumn(name = "order_id")
     @Builder.Default
-    private List<PurchaseOrderItemEntity> items = new ArrayList<>();
+    private List<OrderItemEntity> items = new ArrayList<>();
 
     @Column(name = "total_amount", precision = 12, scale = 2, nullable = false)
     private BigDecimal totalAmount;
 
+    @Column(name = "currency", nullable = false, length = 3)
+    private String currency;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private PurchaseOrderStatus status;
+    private OrderStatus status;
 
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;

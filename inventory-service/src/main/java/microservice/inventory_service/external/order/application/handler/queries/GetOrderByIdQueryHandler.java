@@ -2,17 +2,17 @@ package microservice.inventory_service.external.order.application.handler.querie
 
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.external.order.application.query.GetOrderByIdQuery;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrder;
-import microservice.inventory_service.external.order.domain.exception.PurchaseOrderNotFoundException;
-import microservice.inventory_service.external.order.domain.port.output.PurchaseOrderRepository;
+import microservice.inventory_service.external.order.domain.entity.Order;
+import microservice.inventory_service.external.order.domain.exception.OrderNotFoundException;
+import microservice.inventory_service.external.order.domain.port.output.OrderRepository;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
 public class GetOrderByIdQueryHandler {
-    private final PurchaseOrderRepository purchaseRepository;
+    private final OrderRepository orderRepository;
 
-    public PurchaseOrder handle(GetOrderByIdQuery query) {
-        return purchaseRepository.findById(query.purchaseOrderId()).orElseThrow(() -> new PurchaseOrderNotFoundException("Purchase order not found"));
+    public Order handle(GetOrderByIdQuery query) {
+        return orderRepository.findById(query.orderId()).orElseThrow(() -> new OrderNotFoundException("Order not found"));
     }
 }

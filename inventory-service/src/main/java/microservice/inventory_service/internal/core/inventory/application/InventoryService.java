@@ -9,11 +9,11 @@ import microservice.inventory_service.internal.core.inventory.application.cqrs.h
 import microservice.inventory_service.internal.core.inventory.application.cqrs.handler.command.CreateInventoryCommandHandler;
 import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
 import microservice.inventory_service.internal.core.inventory.application.cqrs.handler.query.GetInventoryByIdQueryHandler;
-import microservice.inventory_service.internal.core.inventory.application.cqrs.handler.query.GetInventoryByMedicineQueryHandler;
+import microservice.inventory_service.internal.core.inventory.application.cqrs.handler.query.GetInventoryByProductQueryHandler;
 import microservice.inventory_service.internal.core.inventory.application.cqrs.handler.query.GetInventoryMovementsQueryHandler;
 import microservice.inventory_service.internal.core.inventory.application.cqrs.handler.query.GetLowStockInventoriesQueryHandler;
 import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryByIdQuery;
-import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryByMedicineQuery;
+import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryByProductQuery;
 import microservice.inventory_service.internal.core.inventory.application.cqrs.query.GetInventoryMovementsQuery;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.AdjustmentId;
@@ -34,7 +34,7 @@ public class InventoryService implements InventoryUseCase {
     private final AdjustInventoryCommandHandler adjustInventoryHandler;
     // Handlers for Queries
     private final GetExpiringBatchesQueryHandler getExpiringBatchesQueryHandler;
-    private final GetInventoryByMedicineQueryHandler getInventoryByMedicineQueryHandler;
+    private final GetInventoryByProductQueryHandler getInventoryByProductQueryHandler;
     private final GetInventoryMovementsQueryHandler getInventoryMovementsQueryHandler;
     private final GetLowStockInventoriesQueryHandler getLowStockInventoriesQueryHandler;
     private final GetInventoryByIdQueryHandler getInventoryByIdQueryHandler;
@@ -56,8 +56,8 @@ public class InventoryService implements InventoryUseCase {
     }
 
     @Override
-    public Inventory getInventoryByMedicine(GetInventoryByMedicineQuery query) {
-        return getInventoryByMedicineQueryHandler.handle(query);
+    public Inventory getInventoryByProduct(GetInventoryByProductQuery query) {
+        return getInventoryByProductQueryHandler.handle(query);
     }
 
     @Override

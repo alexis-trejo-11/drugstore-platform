@@ -18,19 +18,19 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PurchaseOrderItemEntity {
+public class OrderItemEntity {
     @Id
     @Column(name = "id", length = 36)
     private String id;
 
-    @Column(name = "purchase_order_id", length = 36)
-    private String purchaseOrderId;
+    @Column(name = "order_id", length = 36)
+    private String orderId;
 
-    @Column(name = "medicine_id", nullable = false, length = 36)
-    private String medicineId;
+    @Column(name = "product_id", nullable = false, length = 36)
+    private String productId;
 
-    @Column(name = "medicine_name", nullable = false)
-    private String medicineName;
+    @Column(name = "product_name", nullable = false)
+    private String productName;
 
     @Column(name = "ordered_quantity", nullable = false)
     private Integer orderedQuantity;

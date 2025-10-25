@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Builder
 public record CreateInventoryParams(
-        MedicineId medicineId,
+        ProductId productId,
         String warehouseLocation,
         Integer reorderLevel,
         Integer reorderQuantity,
@@ -18,8 +18,8 @@ public record CreateInventoryParams(
 ) {
 
     public void validate() {
-        if (medicineId == null) {
-            throw new InventorMissingFieldException("Medicine ID cannot be null");
+        if (productId == null) {
+            throw new InventorMissingFieldException("Product Id cannot be null");
         }
         if (warehouseLocation == null || warehouseLocation.isBlank()) {
             throw new InventorMissingFieldException("Warehouse location cannot be null or blank to create an inventory");

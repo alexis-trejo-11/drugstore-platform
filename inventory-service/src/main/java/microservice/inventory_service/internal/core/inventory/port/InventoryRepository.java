@@ -3,7 +3,7 @@ package microservice.inventory_service.internal.core.inventory.port;
 import microservice.inventory_service.internal.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.internal.core.inventory.domain.entity.enums.InventoryStatus;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.InventoryId;
-import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.MedicineId;
+import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.ProductId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,7 +16,7 @@ public interface InventoryRepository {
 
     Optional<Inventory> findById(InventoryId id);
 
-    Optional<Inventory> findByMedicineId(MedicineId medicineId);
+    Optional<Inventory> findByProductId(ProductId productId);
 
     List<Inventory> findAll();
 
@@ -34,5 +34,5 @@ public interface InventoryRepository {
 
     void delete(InventoryId id);
 
-    boolean existsByMedicineId(MedicineId medicineId);
+    boolean existsByProductId(ProductId productId);
 }

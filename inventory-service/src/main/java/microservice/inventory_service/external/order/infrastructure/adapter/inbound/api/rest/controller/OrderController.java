@@ -7,16 +7,18 @@ import libs_kernel.page.PageRequest;
 import libs_kernel.page.PageResponse;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import microservice.inventory_service.external.order.application.query.GetOrderByExpectedDateBeforeQuery;
 import microservice.inventory_service.external.order.application.query.GetOrderByIdQuery;
 import microservice.inventory_service.external.order.application.query.GetOrderByNumberQuery;
 import microservice.inventory_service.external.order.application.query.GetOrdersByStatusQuery;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrder;
-import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderStatus;
-import microservice.inventory_service.external.order.domain.port.input.OrderQueryService;
+import microservice.inventory_service.external.order.domain.entity.Order;
+import microservice.inventory_service.external.order.domain.entity.valueobject.OrderStatus;
+import microservice.inventory_service.external.order.domain.port.input.OrderUseCase;
 import microservice.inventory_service.external.order.infrastructure.adapter.inbound.api.rest.dto.response.OrderDetailResponse;
 import microservice.inventory_service.external.order.infrastructure.adapter.inbound.api.rest.dto.response.OrderSummaryResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -24,15 +26,22 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/api/v2/orders")
 @RequiredArgsConstructor
+@Slf4j
 public class OrderController {
-    private final OrderQueryService orderQueryService;
-    private final EntityDetailMapper<PurchaseOrder, OrderDetailResponse> detailMapper;
-    private final ResponseMapper<OrderSummaryResponse, PurchaseOrder> responseMapper;
+    private final OrderUseCase orderUsecase;
+    private final EntityDetailMapper<Order, OrderDetailResponse> detailMapper;
+    private final ResponseMapper<OrderSummaryResponse, Order> responseMapper;
+
+    @PostMapping
+    public ResponseWrapper<String> createOrder() {
+        orderUsecase.insertOrder(null);
+        return ResponseWrapper.created("Order created successfully");
+    }
 
     @GetMapping("/{id}")
     public ResponseWrapper<OrderDetailResponse> getOrderById(@PathVariable String id) {
         var query = GetOrderByIdQuery.of(id);
-        PurchaseOrder order = orderQueryService.getOrderById(query);
+        Order order = orderUsecase.getOrderById(query);
 
         OrderDetailResponse orderResponse = detailMapper.toDetail(order);
         return ResponseWrapper.found(orderResponse, "Order");
@@ -41,27 +50,29 @@ public class OrderController {
     @GetMapping("order_number/{orderNumber}")
     public ResponseWrapper<OrderDetailResponse> getOrderByNumber(@PathVariable String orderNumber) {
         var query = new GetOrderByNumberQuery(orderNumber);
-        PurchaseOrder order = orderQueryService.getOrderByNumber(query);
+        Order order = orderUsecase.getOrderByNumber(query);
 
         OrderDetailResponse orderResponse = detailMapper.toDetail(order);
         return ResponseWrapper.found(orderResponse, "Order");
     }
 
     @GetMapping("status/{status}")
-    public ResponseWrapper<PageResponse<OrderSummaryResponse>> getOrdersByStatus(@PathVariable PurchaseOrderStatus status,
+    public ResponseWrapper<PageResponse<OrderSummaryResponse>> getOrdersByStatus(@PathVariable OrderStatus status,
                                                                                  @Valid @ModelAttribute PageRequest pageRequest) {
         var query = new GetOrdersByStatusQuery(status, pageRequest.toPageable());
-        Page<PurchaseOrder> orderPage = orderQueryService.getOrdersByStatus(query);
+        Page<Order> orderPage = orderUsecase.getOrdersByStatus(query);
 
         var orderResponsePage = responseMapper.toResponsePage(orderPage);
         return ResponseWrapper.found(orderResponsePage, "Order");
     }
 
     @GetMapping("expected_date/before/{date}")
-    public  ResponseWrapper<PageResponse<OrderSummaryResponse>> getOrdersByExpectedDateBefore(@PathVariable LocalDateTime date,
-                                                                                              @Valid @ModelAttribute PageRequest pageRequest) {
+    public ResponseWrapper<PageResponse<OrderSummaryResponse>> getOrdersByExpectedDateBefore(
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date,
+            @Valid @ModelAttribute PageRequest pageRequest) {
+        log.info("Fetching pagination info: page {}, size {}", pageRequest.getPage(), pageRequest.getSize());
         var query = new GetOrderByExpectedDateBeforeQuery(date, pageRequest.toPageable());
-        Page<PurchaseOrder> orderPage = orderQueryService.getOrdersByExpectedDateBefore(query);
+        Page<Order> orderPage = orderUsecase.getOrdersByExpectedDateBefore(query);
 
         var orderResponsePage = responseMapper.toResponsePage(orderPage);
         return ResponseWrapper.found(orderResponsePage, "Order");

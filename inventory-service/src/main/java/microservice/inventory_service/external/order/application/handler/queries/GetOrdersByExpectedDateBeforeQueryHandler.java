@@ -2,17 +2,17 @@ package microservice.inventory_service.external.order.application.handler.querie
 
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.external.order.application.query.GetOrderByExpectedDateBeforeQuery;
-import microservice.inventory_service.external.order.domain.entity.PurchaseOrder;
-import microservice.inventory_service.external.order.domain.port.output.PurchaseOrderRepository;
+import microservice.inventory_service.external.order.domain.entity.Order;
+import microservice.inventory_service.external.order.domain.port.output.OrderRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
 public class GetOrdersByExpectedDateBeforeQueryHandler {
-    private final PurchaseOrderRepository purchaseRepository;
+    private final OrderRepository orderRepository;
 
-    public Page<PurchaseOrder> handle(GetOrderByExpectedDateBeforeQuery query) {
-        return purchaseRepository.findByExpectedDeliveryDateBefore(query.date(), query.pageable());
+    public Page<Order> handle(GetOrderByExpectedDateBeforeQuery query) {
+        return orderRepository.findByExpectedDeliveryDateBefore(query.date(), query.pageable());
     }
 }

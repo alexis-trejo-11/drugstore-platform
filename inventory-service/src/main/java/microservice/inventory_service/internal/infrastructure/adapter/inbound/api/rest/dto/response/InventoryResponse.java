@@ -14,8 +14,8 @@ public class InventoryResponse {
     @Schema(description = "Unique identifier of the inventory", example = "inv-12345")
     private String id;
 
-    @Schema(description = "Unique identifier of the medicine", example = "med-67890")
-    private String medicineId;
+    @Schema(description = "Unique identifier of the product", example = "med-67890")
+    private String productId;
 
     @Schema(description = "Total quantity of the inventory", example = "100")
     private Integer totalQuantity;

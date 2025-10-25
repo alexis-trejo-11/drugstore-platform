@@ -6,9 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import microservice.inventory_service.external.order.application.command.ReceivePurchaseOrderCommand;
+import microservice.inventory_service.external.order.application.command.ReceiveOrderCommand;
 import microservice.inventory_service.external.order.application.command.ReceivedItemCommand;
-import microservice.inventory_service.external.order.domain.entity.valueobject.PurchaseOrderId;
+import microservice.inventory_service.external.order.domain.entity.valueobject.OrderId;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.UserId;
 
 import java.time.LocalDateTime;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReceivePurchaseOrderRequest {
+public class ReceiveOrderRequest {
     
     @NotEmpty(message = "Received items list cannot be empty")
     @Valid
@@ -31,13 +31,13 @@ public class ReceivePurchaseOrderRequest {
     @NotBlank(message = "Received by is required")
     private String receivedBy;
     
-    public ReceivePurchaseOrderCommand toCommand(String purchaseOrderId) {
+    public ReceiveOrderCommand toCommand(String orderId) {
         List<ReceivedItemCommand> itemCommands = receivedItems.stream()
             .map(ReceivedItemRequest::toCommand)
             .collect(Collectors.toList());
         
-        return ReceivePurchaseOrderCommand.builder()
-            .purchaseOrderId(PurchaseOrderId.of(purchaseOrderId))
+        return ReceiveOrderCommand.builder()
+            .orderId(OrderId.of(orderId))
             .receivedItems(itemCommands)
             .receivedDate(receivedDate)
             .receivedBy(UserId.of(receivedBy))

@@ -5,13 +5,13 @@ import microservice.inventory_service.internal.core.batch.application.command.Ad
 import microservice.inventory_service.internal.core.batch.domain.entity.InventoryBatch;
 import microservice.inventory_service.internal.core.batch.domain.entity.valueobject.CreateBatchParams;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.CreateInventoryParams;
-import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.MedicineId;
+import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.ProductId;
 
 import java.util.Optional;
 
 @Builder
 public record CreateInventoryCommand(
-        MedicineId medicineId,
+        ProductId productId,
         Integer reorderLevel,
         Integer reorderQuantity,
         Integer maximumStockLevel,
@@ -35,7 +35,7 @@ public record CreateInventoryCommand(
         ));
 
         return CreateInventoryParams.builder()
-                .medicineId(this.medicineId)
+                .productId(this.productId)
                 .warehouseLocation(this.warehouseLocation)
                 .reorderLevel(this.reorderLevel)
                 .reorderQuantity(this.reorderQuantity)
