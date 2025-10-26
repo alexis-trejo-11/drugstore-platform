@@ -5,6 +5,7 @@ import microservice.inventory_service.external.order.domain.entity.valueobject.O
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.UserId;
 
 import java.time.LocalDateTime;
+import java.util.Currency;
 import java.util.List;
 
 @Builder
@@ -15,6 +16,7 @@ public record InsertOrderCommand(
         List<OrderItemCommand> items,
         LocalDateTime expectedDeliveryDate,
         String deliveryLocation,
+        Currency currency,
         UserId createdBy,
         boolean isUpdate
 ) {

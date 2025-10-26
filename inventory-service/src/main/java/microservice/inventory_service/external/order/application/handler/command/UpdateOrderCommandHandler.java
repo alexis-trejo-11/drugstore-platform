@@ -23,23 +23,25 @@ public class UpdateOrderCommandHandler {
         }
 
         List<OrderItem> items = command.items().stream()
-                .map(itemCommand -> OrderItem.builder()
-                        .productId(itemCommand.productId())
-                        .productName(itemCommand.productName())
-                        .orderedQuantity(itemCommand.quantity())
-                        .unitCost(itemCommand.unitCost())
-                        .build())
+                .map(itemCommand -> OrderItem.create(
+                        itemCommand.id(),
+                        itemCommand.productId(),
+                        itemCommand.productName(),
+                        itemCommand.quantity(),
+                        itemCommand.unitCost()
+                ))
                 .toList();
 
-        Order order = Order.builder()
-                .id(command.orderId())
-                .supplierId(command.supplierId())
-                .supplierName(command.supplierName())
-                .items(items)
-                .expectedDeliveryDate(command.expectedDeliveryDate())
-                .deliveryLocation(command.deliveryLocation())
-                .createdBy(command.createdBy())
-                .build();
+        Order order = Order.create(
+                command.orderId(),
+                command.supplierId(),
+                command.supplierName(),
+                items,
+                command.expectedDeliveryDate(),
+                command.deliveryLocation(),
+                command.createdBy(),
+                command.currency()
+        );
 
         orderRepository.save(order);
     }

@@ -1,5 +1,6 @@
 package microservice.inventory_service.external.order.infrastructure.adapter.inbound.api.rest.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,31 +14,34 @@ import microservice.inventory_service.internal.core.inventory.domain.entity.valu
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Currency;
 import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateOrderRequest {
-    @NotNull
+public class InsertOrderRequest {
+    @NotBlank
     private String orderId;
 
     @NotBlank
-    @NotNull
     private String supplierId;
 
     @NotBlank
-    @NotNull
     private String supplierName;
 
     @NotEmpty(message = "Items list cannot be empty")
     @NotNull
+    @Valid
     private List<OrderItemRequest> items;
 
-    @NotNull(message = "Expected delivery date is required")
-    @Future(message = "Expected delivery date must be in the future")
+    @NotNull
+    @Future
     private LocalDateTime expectedDeliveryDate;
+
+    @NotBlank(message = "Currency code is required")
+    private String currencyCode;
 
     @NotBlank(message = "Delivery location is required")
     private String deliveryLocation;
@@ -51,10 +55,11 @@ public class CreateOrderRequest {
                 .toList();
 
         return InsertOrderCommand.builder()
-                .orderId(orderId != null ? OrderId.of(orderId) : null)
+                .orderId(OrderId.of(orderId))
                 .supplierId(supplierId)
                 .supplierName(supplierName)
                 .items(itemCommands)
+                .currency(Currency.getInstance(currencyCode))
                 .expectedDeliveryDate(expectedDeliveryDate)
                 .deliveryLocation(deliveryLocation)
                 .createdBy(UserId.of(createdBy))
@@ -62,18 +67,19 @@ public class CreateOrderRequest {
                 .build();
     }
 
-    public InsertOrderCommand toUpdateCommand() {
+    public InsertOrderCommand toUpdateCommand(OrderId orderIdObj) {
         List<OrderItemCommand> itemCommands = items.stream()
                 .map(OrderItemRequest::toCommand)
                 .toList();
 
         return InsertOrderCommand.builder()
-                .orderId(OrderId.of(orderId))
+                .orderId(orderIdObj)
                 .supplierId(supplierId)
                 .supplierName(supplierName)
                 .items(itemCommands)
                 .expectedDeliveryDate(expectedDeliveryDate)
                 .deliveryLocation(deliveryLocation)
+                .currency(Currency.getInstance(currencyCode))
                 .createdBy(UserId.of(createdBy))
                 .isUpdate(true)
                 .build();
@@ -84,16 +90,15 @@ public class CreateOrderRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class OrderItemRequest {
+        @NotBlank
+        private String itemId;
 
         @NotBlank
-        @NotNull
         private String productId;
 
         @NotBlank
-        @NotNull
         private String productName;
 
-        @NotNull
         @NotNull
         @Min(value = 1, message = "Quantity must be positive")
         private Integer quantity;
@@ -104,6 +109,7 @@ public class CreateOrderRequest {
 
         public OrderItemCommand toCommand() {
             return OrderItemCommand.builder()
+                    .id(itemId)
                     .productId(ProductId.of(productId))
                     .productName(productName)
                     .quantity(quantity)

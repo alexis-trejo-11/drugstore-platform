@@ -18,27 +18,30 @@ public class CreateOrderCommandHandler {
     @Transactional
     public OrderId handle(InsertOrderCommand command) {
         if (command.isUpdate()) {
-             if (!orderRepository.existsById(command.orderId())) {
-                 throw new IllegalArgumentException("Order with ID " + command.orderId() + " does not exist.");
-             }
+            if (!orderRepository.existsById(command.orderId())) {
+                throw new IllegalArgumentException("Order with ID " + command.orderId() + " does not exist.");
+            }
         }
 
         List<OrderItem> items = command.items().stream()
-                .map(itemCommand -> OrderItem.builder()
-                        .productId(itemCommand.productId())
-                        .productName(itemCommand.productName())
-                        .orderedQuantity(itemCommand.quantity())
-                        .unitCost(itemCommand.unitCost())
-                        .build())
+                .map(itemCommand -> OrderItem.create(
+                        itemCommand.id(),
+                        itemCommand.productId(),
+                        itemCommand.productName(),
+                        itemCommand.quantity(),
+                        itemCommand.unitCost()
+                ))
                 .toList();
 
         Order order = Order.create(
+                command.orderId(),
                 command.supplierId(),
                 command.supplierName(),
                 items,
                 command.expectedDeliveryDate(),
                 command.deliveryLocation(),
-                command.createdBy()
+                command.createdBy(),
+                command.currency()
         );
 
         Order savedOrder = orderRepository.save(order);

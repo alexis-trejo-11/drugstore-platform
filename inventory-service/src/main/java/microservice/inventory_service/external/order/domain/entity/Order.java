@@ -8,6 +8,7 @@ import microservice.inventory_service.internal.core.inventory.domain.entity.valu
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,6 +29,7 @@ public class Order {
     private String deliveryLocation;
     private UserId createdBy;
     private UserId approvedBy;
+    private Currency currency;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<OrderItem> items;
@@ -36,14 +38,54 @@ public class Order {
         return Collections.unmodifiableList(items);
     }
 
-    public static Order create(String supplierId,
-                               String supplierName,
-                               List<OrderItem> items,
-                               LocalDateTime expectedDeliveryDate,
-                               String deliveryLocation,
-                               UserId createdBy) {
+    public static Order create(
+            OrderId id,
+            String supplierId,
+            String supplierName,
+            List<OrderItem> items,
+            LocalDateTime expectedDeliveryDate,
+            String deliveryLocation,
+            UserId createdBy,
+            Currency currency
+            ) {
 
+        if (items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("Order must contain at least one item");
+        }
 
+        if (currency == null) {
+            throw new IllegalArgumentException("Currency must be specified");
+        }
+
+        if (expectedDeliveryDate.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Expected delivery date cannot be in the past");
+        }
+
+        if (id == null) {
+            throw new IllegalArgumentException("Order ID is required of external entities");
+        }
+
+        BigDecimal totalAmount = getBigDecimal(items);
+
+        Order order = new Order();
+        order.id = id;
+        order.orderNumber = id.value();
+        order.supplierId = supplierId;
+        order.supplierName = supplierName;
+        order.items = items;
+        order.expectedDeliveryDate = expectedDeliveryDate;
+        order.deliveryLocation = deliveryLocation;
+        order.createdBy = createdBy;
+        order.currency = currency;
+        order.status = OrderStatus.PENDING_APPROVAL;
+        order.orderDate = LocalDateTime.now();
+        order.createdAt = LocalDateTime.now();
+        order.updatedAt = LocalDateTime.now();
+        order.totalAmount = totalAmount;
+        return order;
+    }
+
+    private static BigDecimal getBigDecimal(List<OrderItem> items) {
         BigDecimal totalAmount = BigDecimal.ZERO;
         if (items != null) {
             for (OrderItem item : items) {
@@ -55,20 +97,7 @@ public class Order {
                 totalAmount = totalAmount.add(itemTotal);
             }
         }
-
-        Order order = new Order();
-        order.supplierId = supplierId;
-        order.supplierName = supplierName;
-        order.items = items;
-        order.expectedDeliveryDate = expectedDeliveryDate;
-        order.deliveryLocation = deliveryLocation;
-        order.createdBy = createdBy;
-        order.status = OrderStatus.PENDING_APPROVAL;
-        order.orderDate = LocalDateTime.now();
-        order.createdAt = LocalDateTime.now();
-        order.updatedAt = LocalDateTime.now();
-        order.totalAmount = totalAmount;
-        return order;
+        return totalAmount;
     }
 
     public void approve(UserId approvedBy) {

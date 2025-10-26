@@ -13,8 +13,10 @@ import microservice.inventory_service.external.order.application.query.GetOrderB
 import microservice.inventory_service.external.order.application.query.GetOrderByNumberQuery;
 import microservice.inventory_service.external.order.application.query.GetOrdersByStatusQuery;
 import microservice.inventory_service.external.order.domain.entity.Order;
+import microservice.inventory_service.external.order.domain.entity.valueobject.OrderId;
 import microservice.inventory_service.external.order.domain.entity.valueobject.OrderStatus;
 import microservice.inventory_service.external.order.domain.port.input.OrderUseCase;
+import microservice.inventory_service.external.order.infrastructure.adapter.inbound.api.rest.dto.request.InsertOrderRequest;
 import microservice.inventory_service.external.order.infrastructure.adapter.inbound.api.rest.dto.response.OrderDetailResponse;
 import microservice.inventory_service.external.order.infrastructure.adapter.inbound.api.rest.dto.response.OrderSummaryResponse;
 import org.springframework.data.domain.Page;
@@ -33,9 +35,17 @@ public class OrderController {
     private final ResponseMapper<OrderSummaryResponse, Order> responseMapper;
 
     @PostMapping
-    public ResponseWrapper<String> createOrder() {
-        orderUsecase.insertOrder(null);
-        return ResponseWrapper.created("Order created successfully");
+    public ResponseWrapper<OrderId> createOrder (@Valid @RequestBody InsertOrderRequest request) {
+        var command = request.toCreateCommand();
+        var orderId = orderUsecase.insertOrder(command);
+        return ResponseWrapper.created(orderId, "Order");
+    }
+
+    @PutMapping("/{id}")
+    public ResponseWrapper<OrderId> updateOrder(@Valid @RequestBody InsertOrderRequest request, @PathVariable String id) {
+        var command = request.toUpdateCommand(OrderId.of(id));
+        var orderId = orderUsecase.insertOrder(command);
+        return ResponseWrapper.created(orderId, "Order");
     }
 
     @GetMapping("/{id}")
