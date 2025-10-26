@@ -11,6 +11,7 @@ import microservice.inventory_service.external.order.infrastructure.adapter.outb
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import java.util.Currency;
 import java.util.List;
 
 @Component
@@ -31,6 +32,7 @@ public class OrderEntityMapper implements EntityMapper<OrderEntity, Order> {
                 .totalAmount(Order.getTotalAmount())
                 .status(Order.getStatus())
                 .orderDate(Order.getOrderDate())
+                .currency(Order.getCurrency() == null ? null : Order.getCurrency().getCurrencyCode())
                 .expectedDeliveryDate(Order.getExpectedDeliveryDate())
                 .actualDeliveryDate(Order.getActualDeliveryDate())
                 .deliveryLocation(Order.getDeliveryLocation())
@@ -54,6 +56,7 @@ public class OrderEntityMapper implements EntityMapper<OrderEntity, Order> {
                 .supplierName(model.getSupplierName())
                 .totalAmount(model.getTotalAmount())
                 .status(model.getStatus())
+                .currency(model.getCurrency() == null ? null : Currency.getInstance(model.getCurrency()))
                 .orderDate(model.getOrderDate())
                 .expectedDeliveryDate(model.getExpectedDeliveryDate())
                 .actualDeliveryDate(model.getActualDeliveryDate())
@@ -112,16 +115,17 @@ public class OrderEntityMapper implements EntityMapper<OrderEntity, Order> {
     }
 
     private List<OrderItem> mapItemsToDomain(List<OrderItemEntity> itemEntities) {
-        if (itemEntities == null) {
+        if (itemEntities == null || itemEntities.isEmpty()) {
             return List.of();
         }
+
         return itemEntities.stream()
                 .map(entity -> OrderItem.builder()
                         .id(entity.getId())
                         .productId(entity.getProductId() == null ? null : new ProductId(entity.getProductId()))
                         .productName(entity.getProductName())
                         .orderedQuantity(entity.getOrderedQuantity())
-                        .receivedQuantity(entity.getReceivedQuantity())
+                        .receivedQuantity(entity.getReceivedQuantity() )
                         .unitCost(entity.getUnitCost())
                         .totalCost(entity.getTotalCost())
                         .batchNumber(entity.getBatchNumber())

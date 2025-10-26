@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import microservice.inventory_service.internal.core.inventory.domain.entity.valueobject.ProductId;
 
 import java.math.BigDecimal;
-import java.util.Currency;
 
 
 @Data
@@ -22,11 +21,10 @@ public class OrderItem {
     private Integer receivedQuantity;
     private BigDecimal unitCost;
     private BigDecimal totalCost;
-    private Currency currency;
     private String batchNumber;
 
 
-    public static OrderItem create(ProductId productId, String productName,
+    public static OrderItem create(String itemId ,ProductId productId, String productName,
                                    Integer quantity, BigDecimal unitCost) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be positive");
@@ -38,14 +36,13 @@ public class OrderItem {
         BigDecimal totalCost = unitCost.multiply(BigDecimal.valueOf(quantity));
 
         return new OrderItem(
-                null,
+                itemId,
                 productId,
                 productName,
                 quantity,
                 0,
                 unitCost,
                 totalCost,
-                Currency.getInstance("USD"),
                 null
         );
     }
