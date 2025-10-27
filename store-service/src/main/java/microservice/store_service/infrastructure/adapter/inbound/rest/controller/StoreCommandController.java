@@ -402,7 +402,7 @@ public class StoreCommandController {
             **Requires JWT authentication with ADMIN role.**
             
             Use this for temporary closures due to unforeseen circumstances (emergencies, weather, etc.).
-            The store will not accept new orders until reactivated.
+            The store will not accept new purchaseOrders until reactivated.
             """,
         tags = {"Store Command Operations"}
     )
@@ -573,7 +573,7 @@ public class StoreCommandController {
             ⚠️ **Warning:** This is a destructive operation and cannot be undone.
             Consider deactivating the store instead if you might need to restore it later.
             
-            The store must not have any active orders or pending operations before deletion.
+            The store must not have any active purchaseOrders or pending operations before deletion.
             """,
         tags = {"Store Command Operations"}
     )
@@ -612,7 +612,7 @@ public class StoreCommandController {
                       "timestamp": "2025-10-19T14:25:30",
                       "errorDetails": {
                         "errorCode": "CANNOT_DELETE_STORE",
-                        "message": "Store has active orders and cannot be deleted"
+                        "message": "Store has active purchaseOrders and cannot be deleted"
                       }
                     }
                     """

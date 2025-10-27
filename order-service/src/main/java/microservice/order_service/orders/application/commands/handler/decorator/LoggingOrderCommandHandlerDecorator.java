@@ -27,7 +27,7 @@ public class LoggingOrderCommandHandlerDecorator implements OrderCommandHandler 
             CreateOrderCommandResponse response = delegate.handle(command);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Order created successfully: orderId={}, duration={}ms",
+            log.info("Order created successfully: purchaseOrderId={}, duration={}ms",
                     response.getOrderId(), duration);
 
             return response;
@@ -50,7 +50,7 @@ public class LoggingOrderCommandHandlerDecorator implements OrderCommandHandler 
             CreateOrderCommandResponse response = delegate.handle(command);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Pickup order created successfully: orderId={}, duration={}ms",
+            log.info("Pickup order created successfully: purchaseOrderId={}, duration={}ms",
                     response.getOrderId(), duration);
 
             return response;
@@ -64,15 +64,15 @@ public class LoggingOrderCommandHandlerDecorator implements OrderCommandHandler 
 
     @Override
     public void handle(UpdateOrderAddressCommand command) {
-        log.info("Updating order address: orderId={}, newAddressId={}",
+        log.info("Updating order address: purchaseOrderId={}, newAddressId={}",
                 command.orderID(), command.addressID());
 
         try {
             delegate.handle(command);
-            log.info("Order address updated: orderId={}", command.orderID());
+            log.info("Order address updated: purchaseOrderId={}", command.orderID());
 
         } catch (Exception ex) {
-            log.warn("Update address failed: orderId={}, error={}",
+            log.warn("Update address failed: purchaseOrderId={}, error={}",
                     command.orderID(), ex.getMessage());
             throw ex;
         }
@@ -80,15 +80,15 @@ public class LoggingOrderCommandHandlerDecorator implements OrderCommandHandler 
 
     @Override
     public void handle(UpdateOrderDeliverMethodCommand command) {
-        log.info("Updating delivery method: orderId={}, newMethod={}",
+        log.info("Updating delivery method: purchaseOrderId={}, newMethod={}",
                 command.orderID(), command.newMethod());
 
         try {
             delegate.handle(command);
-            log.info("Delivery method updated: orderId={}", command.orderID());
+            log.info("Delivery method updated: purchaseOrderId={}", command.orderID());
 
         } catch (Exception ex) {
-            log.warn("Update delivery method failed: orderId={}, error={}",
+            log.warn("Update delivery method failed: purchaseOrderId={}, error={}",
                     command.orderID(), ex.getMessage());
             throw ex;
         }
@@ -96,15 +96,15 @@ public class LoggingOrderCommandHandlerDecorator implements OrderCommandHandler 
 
     @Override
     public void handle(DeleteOrderCommand command) {
-        log.info("Deleting order: orderId={}, hardDelete={}",
+        log.info("Deleting order: purchaseOrderId={}, hardDelete={}",
                 command.orderID(), command.isHardDelete());
 
         try {
             delegate.handle(command);
-            log.info("Order deleted: orderId={}", command.orderID());
+            log.info("Order deleted: purchaseOrderId={}", command.orderID());
 
         } catch (Exception ex) {
-            log.warn("Delete order failed: orderId={}, error={}",
+            log.warn("Delete order failed: purchaseOrderId={}, error={}",
                     command.orderID(), ex.getMessage());
             throw ex;
         }

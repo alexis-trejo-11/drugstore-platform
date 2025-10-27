@@ -4,7 +4,7 @@ import libs_kernel.config.CustomGlobalExceptionHandler;
 import libs_kernel.response.ErrorDetails;
 import libs_kernel.response.ResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
-import microservice.inventory_service.internal.core.inventory.domain.exception.base.InventoryException;
+import microservice.inventory_service.internal.inventory.core.inventory.domain.exception.base.InventoryException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,12 +18,12 @@ public class GlobalExceptionHandler extends CustomGlobalExceptionHandler  {
     public ResponseEntity<ResponseWrapper<?>> handleOrderDomainException(InventoryException ex, WebRequest request) {
         HttpStatus status = determineHttpStatus(ex);
         if (shouldLogAsError(ex)) {
-            log.error("Order domain exception occurred: errorCode={}, context={}",
+            log.error("PurchaseOrder domain exception occurred: errorCode={}, context={}",
                     ex.getErrorCode(),
                     ex.getLoggingContext(),
                     ex);
         } else {
-            log.warn("Order domain validation failed: errorCode={}, context={}",
+            log.warn("PurchaseOrder domain validation failed: errorCode={}, context={}",
                     ex.getErrorCode(),
                     ex.getLoggingContext());
         }

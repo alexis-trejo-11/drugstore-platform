@@ -1,4 +1,4 @@
-package microservice.order_service.orders.infrastructure.api.controller;
+package microservice.order_service.purchaseOrders.infrastructure.api.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,18 +19,18 @@ import libs_kernel.mapper.EntityDetailMapper;
 import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
-import microservice.order_service.orders.application.commands.request.DeleteOrderCommand;
-import microservice.order_service.orders.application.commands.response.CreateOrderCommandResponse;
-import microservice.order_service.orders.application.queries.request.GetOrderByIDQuery;
-import microservice.order_service.orders.application.queries.request.GetOrderDetailByIDQuery;
-import microservice.order_service.orders.application.queries.request.SearchOrdersQuery;
-import microservice.order_service.orders.application.queries.response.OrderDetailResult;
-import microservice.order_service.orders.application.queries.response.OrderQueryResult;
-import microservice.order_service.orders.domain.ports.input.OrderApplicationFacade;
-import microservice.order_service.orders.infrastructure.api.dto.request.CreateOrderRequest;
-import microservice.order_service.orders.infrastructure.api.dto.request.OrderSearchRequest;
-import microservice.order_service.orders.infrastructure.api.dto.response.OrderDetailResponse;
-import microservice.order_service.orders.infrastructure.api.dto.response.OrderResponse;
+import microservice.order_service.purchaseOrders.application.commands.request.DeleteOrderCommand;
+import microservice.order_service.purchaseOrders.application.commands.response.CreateOrderCommandResponse;
+import microservice.order_service.purchaseOrders.application.queries.request.GetOrderByIDQuery;
+import microservice.order_service.purchaseOrders.application.queries.request.GetOrderDetailByIDQuery;
+import microservice.order_service.purchaseOrders.application.queries.request.SearchOrdersQuery;
+import microservice.order_service.purchaseOrders.application.queries.response.OrderDetailResult;
+import microservice.order_service.purchaseOrders.application.queries.response.OrderQueryResult;
+import microservice.order_service.purchaseOrders.domain.ports.input.OrderApplicationFacade;
+import microservice.order_service.purchaseOrders.infrastructure.api.dto.request.CreateOrderRequest;
+import microservice.order_service.purchaseOrders.infrastructure.api.dto.request.OrderSearchRequest;
+import microservice.order_service.purchaseOrders.infrastructure.api.dto.response.OrderDetailResponse;
+import microservice.order_service.purchaseOrders.infrastructure.api.dto.response.OrderResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,12 +38,12 @@ import java.util.concurrent.TimeUnit;
 
 @Tag(
         name = "Orders",
-        description = "Endpoints for complete order lifecycle management: search, detail retrieval, creation, and logical/physical deletion."
+        description = "Endpoints for complete purchaseOrder lifecycle management: search, detail retrieval, creation, and logical/physical deletion."
 )
 @SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/v2/orders", produces = "application/json")
+@RequestMapping(value = "/api/v2/purchaseOrders", produces = "application/json")
 public class OrderController {
 
     private final OrderApplicationFacade orderService;
@@ -51,8 +51,8 @@ public class OrderController {
     private final EntityDetailMapper<OrderDetailResult, OrderDetailResponse> detailMapper;
 
     @Operation(
-            summary = "Search orders (paginated and filtered)",
-            description = "Performs a paginated search of orders applying dynamic filters.\n"
+            summary = "Search purchaseOrders (paginated and filtered)",
+            description = "Performs a paginated search of purchaseOrders applying dynamic filters.\n"
                     + "Typical parameters supported in OrderSearchRequest: status, deliveryMethod, dateFrom, dateTo, userId, page, size, sort.\n"
                     + "Returns a standard ResponseWrapper container with pagination metadata.",
             security = {@SecurityRequirement(name = "bearerAuth")}
@@ -63,7 +63,7 @@ public class OrderController {
                             schema = @Schema(implementation = PageResponse.class),
                             examples = @ExampleObject(
                                     name = "SearchOrdersSuccess",
-                                    summary = "Example of orders page",
+                                    summary = "Example of purchaseOrders page",
                                     value = """
                                             {
                                               "success": true,
@@ -126,17 +126,17 @@ public class OrderController {
     }
 
     @Operation(
-            summary = "Get order summary by ID",
-            description = "Retrieves a summarized representation of the order.\nIncludes basic status and cost fields.",
+            summary = "Get purchaseOrder summary by ID",
+            description = "Retrieves a summarized representation of the purchaseOrder.\nIncludes basic status and cost fields.",
             security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @Parameters({
             @Parameter(name = "id", in = ParameterIn.PATH, required = true,
-                    description = "Order UUID identifier",
+                    description = "PurchaseOrder UUID identifier",
                     example = "c1d2e3f4-1111-2222-3333-abcdefabcdef")
     })
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Order found",
+            @ApiResponse(responseCode = "200", description = "PurchaseOrder found",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = OrderResponse.class),
                             examples = @ExampleObject(
@@ -145,7 +145,7 @@ public class OrderController {
                                             {
                                               "success": true,
                                               "code": 302,
-                                              "message": "Order",
+                                              "message": "PurchaseOrder",
                                               "data": {
                                                 "id": "c1d2e3f4-1111-2222-3333-abcdefabcdef",
                                                 "status": "CONFIRMED",
@@ -159,7 +159,7 @@ public class OrderController {
                                             }
                                             """
                             ))),
-            @ApiResponse(responseCode = "404", description = "Order not found",
+            @ApiResponse(responseCode = "404", description = "PurchaseOrder not found",
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(
                                     name = "OrderNotFound",
@@ -167,7 +167,7 @@ public class OrderController {
                                             {
                                               "success": false,
                                               "code": 404,
-                                              "message": "Order not found",
+                                              "message": "PurchaseOrder not found",
                                             }
                                             """
                             ))),
@@ -179,21 +179,21 @@ public class OrderController {
         var query = GetOrderByIDQuery.of(id);
         var queryResult = orderService.getOrderByID(query);
         var orderResponse = mapper.toResponse(queryResult);
-        return ResponseWrapper.found(orderResponse, "Order");
+        return ResponseWrapper.found(orderResponse, "PurchaseOrder");
     }
 
     @Operation(
-            summary = "Get full order detail",
+            summary = "Get full purchaseOrder detail",
             description = "Returns extended information: items, address, tracking, detailed costs, and timestamps.",
             security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @Parameters({
             @Parameter(name = "id", in = ParameterIn.PATH, required = true,
-                    description = "Order UUID identifier",
+                    description = "PurchaseOrder UUID identifier",
                     example = "c1d2e3f4-1111-2222-3333-abcdefabcdef")
     })
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Order detail found",
+            @ApiResponse(responseCode = "200", description = "PurchaseOrder detail found",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = OrderDetailResponse.class),
                             examples = @ExampleObject(
@@ -202,7 +202,7 @@ public class OrderController {
                                             {
                                               "success": true,
                                               "code": 302,
-                                              "message": "Order Detail",
+                                              "message": "PurchaseOrder Detail",
                                               "data": {
                                                 "id": "c1d2e3f4-1111-2222-3333-abcdefabcdef",
                                                 "status": "SHIPPED",
@@ -244,17 +244,17 @@ public class OrderController {
         var query = GetOrderDetailByIDQuery.of(id);
         var queryResult = orderService.getOrderByID(query);
         var orderResponse = detailMapper.toDetail(queryResult);
-        return ResponseWrapper.found(orderResponse, "Order Detail");
+        return ResponseWrapper.found(orderResponse, "PurchaseOrder Detail");
     }
 
     @Operation(
-            summary = "Create a new order",
-            description = "Registers a new order with its items and shipping data. Validates content and returns the created identifier.",
+            summary = "Create a new purchaseOrder",
+            description = "Registers a new purchaseOrder with its items and shipping data. Validates content and returns the created identifier.",
             security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @RequestBody(
             required = true,
-            description = "Order creation payload",
+            description = "PurchaseOrder creation payload",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = CreateOrderRequest.class),
                     examples = @ExampleObject(
@@ -280,7 +280,7 @@ public class OrderController {
                     ))
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Order created",
+            @ApiResponse(responseCode = "201", description = "PurchaseOrder created",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CreateOrderCommandResponse.class),
                             examples = @ExampleObject(
@@ -289,9 +289,9 @@ public class OrderController {
                                             {
                                               "success": true,
                                               "code": 201,
-                                              "message": "Order",
+                                              "message": "PurchaseOrder",
                                               "data": {
-                                                "orderId": "c1d2e3f4-1111-2222-3333-abcdefabcdef",
+                                                "purchaseOrderId": "c1d2e3f4-1111-2222-3333-abcdefabcdef",
                                                 "status": "PENDING"
                                               },
                                               "errors": null
@@ -309,22 +309,22 @@ public class OrderController {
         if (request.deliveryMethod() != null) {
             var command = request.toDeliveryOrderCommand();
             var result = orderService.createDeliveryOrder(command);
-            return ResponseWrapper.created(result, "Order");
+            return ResponseWrapper.created(result, "PurchaseOrder");
         }
 
         var command = request.toPickupOrderCommand();
         var result = orderService.createPickupOrder(command);
-        return ResponseWrapper.created(result, "Order");
+        return ResponseWrapper.created(result, "PurchaseOrder");
     }
 
     @Operation(
-            summary = "Delete an order",
-            description = "Deletes an order by ID. Supports logical (soft delete) by default or physical using isHard=true.\nSoft delete usually sets deletedAt; hard delete removes the record.",
+            summary = "Delete an purchaseOrder",
+            description = "Deletes an purchaseOrder by ID. Supports logical (soft delete) by default or physical using isHard=true.\nSoft delete usually sets deletedAt; hard delete removes the record.",
             security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @Parameters({
             @Parameter(name = "id", in = ParameterIn.PATH, required = true,
-                    description = "Order UUID identifier to delete",
+                    description = "PurchaseOrder UUID identifier to delete",
                     example = "c1d2e3f4-1111-2222-3333-abcdefabcdef"),
             @Parameter(name = "isHard", in = ParameterIn.QUERY, required = false,
                     description = "true for physical deletion; false (default) for logical deletion",
@@ -339,13 +339,13 @@ public class OrderController {
                                             {
                                               "success": true,
                                               "code": 200,
-                                              "message": "Order Successfully Deleted",
+                                              "message": "PurchaseOrder Successfully Deleted",
                                               "data": null,
                                               "errors": null
                                             }
                                             """
                             ))),
-            @ApiResponse(responseCode = "404", description = "Order not found"),
+            @ApiResponse(responseCode = "404", description = "PurchaseOrder not found"),
             @ApiResponse(responseCode = "400", description = "Invalid ID"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
@@ -357,6 +357,6 @@ public class OrderController {
                 : DeleteOrderCommand.softDelete(id);
 
         orderService.deleteOrder(command);
-        return ResponseWrapper.success("Order Successfully Deleted");
+        return ResponseWrapper.success("PurchaseOrder Successfully Deleted");
     }
 }

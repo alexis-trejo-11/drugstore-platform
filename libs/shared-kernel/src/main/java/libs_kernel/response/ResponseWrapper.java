@@ -314,7 +314,7 @@ public class ResponseWrapper<T> {
      * @return A success ResponseWrapper with deletion confirmation and formatted message
      * @example
      * <pre>
-     * orderService.delete(orderId);
+     * orderService.delete(purchaseOrderId);
      * return ResponseWrapper.deleted(null, "Order");
      * // Message: "Order deleted successfully"
      * </pre>

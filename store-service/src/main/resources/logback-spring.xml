@@ -14,7 +14,7 @@
 
             <!-- JSON Encoder -->
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <customFields>{"app_name":"order-service","environment":"${SPRING_PROFILES_ACTIVE:-dev}"}</customFields>
+                <customFields>{"app_name":"purchaseOrder-service","environment":"${SPRING_PROFILES_ACTIVE:-dev}"}</customFields>
                 <includeMdcKeyName>traceId</includeMdcKeyName>
                 <includeMdcKeyName>spanId</includeMdcKeyName>
                 <includeMdcKeyName>userId</includeMdcKeyName>
@@ -51,7 +51,7 @@
             <totalSizeCap>500MB</totalSizeCap>
         </rollingPolicy>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"app_name":"order-service"}</customFields>
+            <customFields>{"app_name":"purchaseOrder-service"}</customFields>
         </encoder>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator>

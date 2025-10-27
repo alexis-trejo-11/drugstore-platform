@@ -40,10 +40,10 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public DeliveryAddress getAddressByOrderID(OrderID orderID) {
-        log.info("Fetching address for orderId={}", orderID.value());
+        log.info("Fetching address for purchaseOrderId={}", orderID.value());
         Order order = orderRepository.findByID(orderID)
                 .orElseThrow(() -> {
-                    log.warn("Order not found for orderId={}", orderID.value());
+                    log.warn("Order not found for purchaseOrderId={}", orderID.value());
                     return new OrderNotFoundIDException(orderID);
                 });
 
@@ -54,10 +54,10 @@ public class AddressServiceImpl implements AddressService {
 
         DeliveryAddress address = addressRepository.findByID(order.getAddressID())
                 .orElseThrow(() -> {
-                    log.warn("Address for orderId={} not found (addressId={})", orderID.value(), order.getAddressID().value());
+                    log.warn("Address for purchaseOrderId={} not found (addressId={})", orderID.value(), order.getAddressID().value());
                     return new AddressNotFoundByOrderIDErr(orderID);
                 });
-        log.debug("Found address id={} for orderId={}", address.getId().value(), orderID.value());
+        log.debug("Found address id={} for purchaseOrderId={}", address.getId().value(), orderID.value());
         return address;
     }
 
