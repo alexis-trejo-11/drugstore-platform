@@ -4,7 +4,7 @@ import libs_kernel.config.CustomGlobalExceptionHandler;
 import libs_kernel.response.ErrorDetails;
 import libs_kernel.response.ResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
-import microservice.inventory_service.internal.inventory.core.inventory.domain.exception.base.InventoryException;
+import microservice.inventory_service.inventory.core.inventory.domain.exception.base.InventoryException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
