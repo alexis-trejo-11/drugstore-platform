@@ -4,11 +4,11 @@ import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-public interface DomainMapper<ENTITY, DTO> {
-    DTO toDto(ENTITY entity);
-    ENTITY fromDto(DTO dto);
-    List<DTO> toDTOs(List<ENTITY> entityList);
-    List<ENTITY> toEntities(List<DTO> dtoList);
-    Page<ENTITY> toEntityPage(Page<DTO> dtoPage);
+public interface DomainMapper<T, D> {
+    D toDto(T t);
+    T fromDto(D d);
+    List<D> toDTOs(List<T> tList);
+    List<T> toEntities(List<D> dList);
+    Page<T> toEntityPage(Page<D> dtoPage);
 }
 

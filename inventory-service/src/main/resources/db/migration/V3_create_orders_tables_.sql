@@ -25,8 +25,6 @@ CREATE TABLE IF NOT EXISTS public.purchase_order_items (
   product_name varchar(255) NOT NULL,
   ordered_quantity integer NOT NULL,
   received_quantity integer NOT NULL,
-  unit_cost numeric(10,2) NOT NULL,
-  total_cost numeric(12,2) NOT NULL,
   batch_number varchar(100)
 );
 
