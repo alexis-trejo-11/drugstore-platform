@@ -59,26 +59,15 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     }
 
     @Override
-    public List<Inventory> findByStatus(InventoryStatus status) {
-        return mapper.toDomains(jpaInventoryRepository.findByStatus(status));
+    public Page<Inventory> findByStatus(InventoryStatus status, Pageable pageable) {
+        var inventoryEntities  = jpaInventoryRepository.findByStatus(status, pageable);
+        return inventoryEntities.map(mapper::toDomain);
     }
 
     @Override
     public List<Inventory> findAllLowStock() {
         List<InventoryEntity> entities = jpaInventoryRepository.findByStatus(InventoryStatus.LOW_STOCK);
         return mapper.toDomains(entities);
-    }
-
-    @Override
-    public Page<Inventory> findLowStock(Pageable pageable) {
-        Page<InventoryEntity> entities = jpaInventoryRepository.findByStatus(InventoryStatus.LOW_STOCK, pageable);
-        return entities.map(mapper::toDomain);
-    }
-
-    @Override
-    public Page<Inventory> findOutOfStock(Pageable pageable) {
-        Page<InventoryEntity> entities = jpaInventoryRepository.findByStatus(InventoryStatus.OUT_OF_STOCK, pageable);
-        return entities.map(mapper::toDomain);
     }
 
     @Override

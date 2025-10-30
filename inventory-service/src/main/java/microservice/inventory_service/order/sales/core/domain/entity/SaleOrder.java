@@ -1,7 +1,7 @@
 package microservice.inventory_service.order.sales.core.domain.entity;
 
 import microservice.inventory_service.order.sales.core.domain.entity.valueobject.*;
-import microservice.inventory_service.order.sales.core.domain.exception.PurchaseOrderStatusValidationException;
+import microservice.inventory_service.order.sales.core.domain.exception.OrderStatusValidationException;
 import microservice.inventory_service.order.sales.core.domain.exception.PurchaseOrderValidationException;
 import microservice.inventory_service.shared.domain.order.BaseOrderDomain;
 import microservice.inventory_service.shared.domain.order.OrderStatus;
@@ -73,7 +73,7 @@ public class SaleOrder extends BaseOrderDomain<SaleOrderId> {
 
     public SaleOrder updateOrderDetails(String notes, DeliveryMethod deliveryMethod, String deliveryInfoId, String pickupInfoId, List<SalesOrderItem> items) {
         if (this.status != OrderStatus.PENDING_APPROVAL) {
-            throw new PurchaseOrderStatusValidationException(this.status, OrderStatus.PENDING_APPROVAL, "update order details");
+            throw new OrderStatusValidationException("Only orders pending approval can be updated.");
         }
         if (items == null || items.isEmpty())
             throw new PurchaseOrderValidationException("Sales order must contain at least one item.");
@@ -89,7 +89,7 @@ public class SaleOrder extends BaseOrderDomain<SaleOrderId> {
 
     public void confirmPayment(String paymentId) {
         if (this.status != OrderStatus.PENDING_APPROVAL) {
-            throw new PurchaseOrderStatusValidationException(this.status, OrderStatus.PENDING_APPROVAL, "confirm payment");
+            throw new OrderStatusValidationException("Only orders pending approval can confirm payment.");
         }
 
         if (this.paymentId != null) {
@@ -102,7 +102,7 @@ public class SaleOrder extends BaseOrderDomain<SaleOrderId> {
 
     public void fulfillOrder() {
         if (this.getStatus() != OrderStatus.APPROVED) {
-            throw new PurchaseOrderStatusValidationException(this.status, OrderStatus.APPROVED, "fulfill order");
+            throw new OrderStatusValidationException("Only approved orders can be fulfilled.");
         }
 
         this.status = OrderStatus.FULFILLED;
@@ -110,7 +110,7 @@ public class SaleOrder extends BaseOrderDomain<SaleOrderId> {
 
     public void cancelOrder(String reason) {
         if (this.status == OrderStatus.CANCELLED) {
-            throw new PurchaseOrderStatusValidationException(this.status, OrderStatus.CANCELLED, "cancel order");
+            throw new OrderStatusValidationException("Order is already cancelled.");
         }
 
         this.status = OrderStatus.CANCELLED;
@@ -120,7 +120,7 @@ public class SaleOrder extends BaseOrderDomain<SaleOrderId> {
 
     public void readyToDelivery() {
         if (this.status != OrderStatus.APPROVED) {
-            throw new PurchaseOrderStatusValidationException(this.status, OrderStatus.APPROVED, "mark order as ready for delivery");
+            throw new OrderStatusValidationException("Only approved orders can be marked as ready for delivery.");
         }
 
         this.status = OrderStatus.READY_FOR_LEAVE;
@@ -129,19 +129,15 @@ public class SaleOrder extends BaseOrderDomain<SaleOrderId> {
     public DeliveryMethod getDeliveryMethod() {
         return deliveryMethod;
     }
-
     public String getCustomerUserId() {
         return customerUserId;
     }
-
     public String getDeliveryInfoId() {
         return deliveryInfoId;
     }
-
     public String getPickupInfoId() {
         return pickupInfoId;
     }
-
     public List<SalesOrderItem> getItems() {
         return items;
     }

@@ -33,11 +33,6 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Optional<PurchaseOrder> findByOrderNumber(String orderNumber) {
-        return jpaRepository.findByOrderNumber(orderNumber).map(mapper::toDomain);
-    }
-
-    @Override
     public Page<PurchaseOrder> findBySupplierId(String supplierId, Pageable pageable) {
         return jpaRepository.findBySupplierId(supplierId, pageable)
                 .map(mapper::toDomain);

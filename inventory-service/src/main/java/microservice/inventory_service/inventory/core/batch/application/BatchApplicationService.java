@@ -1,7 +1,7 @@
 package microservice.inventory_service.inventory.core.batch.application;
 
 import lombok.RequiredArgsConstructor;
-import microservice.inventory_service.inventory.core.batch.application.command.AddInventoryBatchCommand;
+import microservice.inventory_service.inventory.core.batch.application.command.RegisterInventoryBatchCommand;
 import microservice.inventory_service.inventory.core.batch.application.command.MarkBatchAsExpiredCommand;
 import microservice.inventory_service.inventory.core.batch.application.handler.AddInventoryBatchCommandHandler;
 import microservice.inventory_service.inventory.core.batch.application.handler.GetExpiringBatchesQueryHandler;
@@ -31,7 +31,7 @@ public class BatchApplicationService implements BatchUseCase {
 
     @Override
     @Transactional
-    public BatchId addBatch(AddInventoryBatchCommand command) {
+    public BatchId addBatch(RegisterInventoryBatchCommand command) {
         return addBatchHandler.handle(command);
     }
 

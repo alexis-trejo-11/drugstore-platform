@@ -11,8 +11,6 @@ import java.time.LocalDateTime;
 public record OrderSummaryResponse(
         @Schema(description = "Unique identifier of the order", example = "po-12345", type = "string")
         String id,
-        @Schema(description = "PurchaseOrder number of the order", example = "ORD-2024-0001", type = "string")
-        String orderNumber,
         @Schema(description = "Unique identifier of the supplier", example = "sup-67890", type = "string")
         String supplierId,
         @Schema(description = "Status of the order", example = "PENDING", type = "string")

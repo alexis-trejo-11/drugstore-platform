@@ -63,19 +63,13 @@ public class InventoryBatchRepositoryImpl implements InventoryBatchRepository {
 
     @Override
     public List<InventoryBatch> findExpiredBatches() {
-        List<InventoryBatchEntity> batches = jpaRepository.findExpiredBatches();
+        List<InventoryBatchEntity> batches = jpaRepository.findByStatus(BatchStatus.EXPIRED);
         return entityMapper.toDomains(batches);
     }
 
     @Override
-    public Optional<InventoryBatch> findByBatchNumber(String batchNumber) {
-        Optional<InventoryBatchEntity> entityOpt = jpaRepository.findByBatchNumber(batchNumber);
-        return entityOpt.map(entityMapper::toDomain);
-    }
-
-    @Override
     public List<InventoryBatch> findAvailableBatchesByInventoryId(InventoryId inventoryId) {
-        List<InventoryBatchEntity> batches = jpaRepository.findActiveByInventoryId(inventoryId.value());
+        List<InventoryBatchEntity> batches = jpaRepository.findByInventoryIdAndStatus(inventoryId.value(), BatchStatus.ACTIVE);
         return entityMapper.toDomains(batches);
     }
 

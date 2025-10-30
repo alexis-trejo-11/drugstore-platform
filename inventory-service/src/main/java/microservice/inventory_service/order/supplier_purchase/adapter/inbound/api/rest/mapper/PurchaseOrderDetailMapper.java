@@ -15,7 +15,6 @@ public class PurchaseOrderDetailMapper implements EntityDetailMapper<PurchaseOrd
         }
         return PurchaseOrderResponse.builder()
                 .id(entity.getId().value())
-                .orderNumber(entity.getOrderNumber())
                 .supplierId(entity.getSupplierId())
                 .supplierName(entity.getSupplierName())
                 .status(entity.getStatus())

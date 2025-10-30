@@ -1,24 +1,20 @@
 package microservice.inventory_service.order.supplier_purchase.domain.entity;
 
-import lombok.*;
-import lombok.extern.slf4j.Slf4j;
-import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.PurchaseOrderId;
-import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.OrderStatus;
+import lombok.Getter;
+import microservice.inventory_service.order.sales.core.domain.exception.OrderStatusValidationException;
+import microservice.inventory_service.order.sales.core.domain.exception.PurchaseOrderValidationException;
+import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.*;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.UserId;
-import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.ReceivedItem;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Slf4j
-public class PurchaseOrder {
-    private PurchaseOrderId id;
-    private String orderNumber;
+import microservice.inventory_service.shared.domain.order.BaseDomainEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Getter
+public class PurchaseOrder extends BaseDomainEntity<PurchaseOrderId> {
     private String supplierId;
     private String supplierName;
     private OrderStatus status;
@@ -28,114 +24,114 @@ public class PurchaseOrder {
     private String deliveryLocation;
     private UserId createdBy;
     private UserId approvedBy;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private LocalDateTime deletedAt;
     private List<PurchaseOrderItem> items;
+    private static final Logger log = LoggerFactory.getLogger(PurchaseOrder.class);
 
-    public List<PurchaseOrderItem> getItems() {
-        return Collections.unmodifiableList(items);
+    private PurchaseOrder(PurchaseOrderId id, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt, Integer version) {
+        super(id, createdAt, updatedAt, deletedAt, version);
+    }
+    private PurchaseOrder(PurchaseOrderId id) {
+        super(id);
     }
 
-    public static PurchaseOrder create(
-            PurchaseOrderId id,
-            String supplierId,
-            String supplierName,
-            List<PurchaseOrderItem> items,
-            LocalDateTime expectedDeliveryDate,
-            String deliveryLocation,
-            UserId createdBy
-    ) {
+    public static PurchaseOrder reconstruct(ReconstructPurchaseOrderParams params) {
+        if (params == null) return null;
 
-        if (items == null || items.isEmpty()) {
-            throw new IllegalArgumentException("PurchaseOrder must contain at least one item");
-        }
+        PurchaseOrder purchaseOrder = new PurchaseOrder(params.id(), params.createdAt(), params.updatedAt(), params.deletedAt(), params.version());
+        purchaseOrder.supplierId = params.supplierId();
+        purchaseOrder.supplierName = params.supplierName();
+        purchaseOrder.status = params.status();
+        purchaseOrder.orderDate = params.orderDate();
+        purchaseOrder.expectedDeliveryDate = params.expectedDeliveryDate();
+        purchaseOrder.actualDeliveryDate = params.actualDeliveryDate();
+        purchaseOrder.deliveryLocation = params.deliveryLocation();
+        purchaseOrder.createdBy = params.createdBy();
+        purchaseOrder.approvedBy = params.approvedBy();
+        purchaseOrder.items = new ArrayList<>(params.items());
+        return purchaseOrder;
+    }
 
-
-        if (expectedDeliveryDate.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Expected delivery date cannot be in the past");
-        }
-
-        if (id == null) {
-            throw new IllegalArgumentException("PurchaseOrder ID is required of external entities");
-        }
-
-        PurchaseOrder purchaseOrder = new PurchaseOrder();
-        purchaseOrder.id = id;
-        purchaseOrder.orderNumber = id.value();
-        purchaseOrder.supplierId = supplierId;
-        purchaseOrder.supplierName = supplierName;
-        purchaseOrder.items = items;
-        purchaseOrder.expectedDeliveryDate = expectedDeliveryDate;
-        purchaseOrder.deliveryLocation = deliveryLocation;
-        purchaseOrder.createdBy = createdBy;
+    public static PurchaseOrder create(CreatePurchaseOrderParams params) {
+        PurchaseOrder purchaseOrder = new PurchaseOrder(params.id());
+        purchaseOrder.supplierId = params.supplierId();
+        purchaseOrder.supplierName = params.supplierName();
+        purchaseOrder.items = new ArrayList<>(params.items());
+        purchaseOrder.expectedDeliveryDate = params.expectedDeliveryDate();
+        purchaseOrder.deliveryLocation = params.deliveryLocation();
+        purchaseOrder.createdBy = params.createdBy();
         purchaseOrder.status = OrderStatus.PENDING_APPROVAL;
         purchaseOrder.orderDate = LocalDateTime.now();
-        purchaseOrder.createdAt = LocalDateTime.now();
-        purchaseOrder.updatedAt = LocalDateTime.now();
         return purchaseOrder;
     }
 
     public void approve(UserId approvedBy) {
+        log.info("Approving PurchaseOrder with ID: {}", this.id);
         if (this.status != OrderStatus.PENDING_APPROVAL) {
-            throw new IllegalStateException("Can only approve orders pending approval");
+            throw new OrderStatusValidationException("Can only approve orders pending approval");
         }
+
         this.status = OrderStatus.APPROVED;
         this.approvedBy = approvedBy;
         this.updatedAt = LocalDateTime.now();
+        log.info("PurchaseOrder with ID: {} approved successfully", this.id);
     }
 
     public void supplierSending() {
+        log.info("Marking PurchaseOrder with ID: {} as SENT", this.id);
         if (this.status != OrderStatus.APPROVED) {
-            throw new IllegalStateException("PurchaseOrder must be approved before sending");
+            throw new OrderStatusValidationException("PurchaseOrder must be approved before sending");
         }
+
         this.status = OrderStatus.SENT;
         this.updatedAt = LocalDateTime.now();
+        log.info("PurchaseOrder with ID: {} marked as SENT successfully", this.id);
     }
 
-    public List<PurchaseOrderItem> receiveItems(List<ReceivedItem> receivedItems, LocalDateTime deliveryDate) {
+    public void receiveItems(List<ReceivedItem> receivedItems, LocalDateTime deliveryDate) {
+        log.info("Receiving items for PurchaseOrder with ID: {}", this.id);
         if (this.status != OrderStatus.SENT && this.status != OrderStatus.PARTIALLY_RECEIVED) {
-            throw new IllegalStateException("Invalid status for receiving items");
+            throw new PurchaseOrderValidationException("Invalid status for receiving items");
         }
-
         if (deliveryDate.isBefore(this.orderDate)) {
-            throw new IllegalArgumentException("Delivery date cannot be before order date");
+            throw new PurchaseOrderValidationException("Delivery date cannot be before order date");
         }
-
         if (receivedItems == null || receivedItems.isEmpty()) {
-            throw new IllegalArgumentException("Received items cannot be null or empty");
+            throw new PurchaseOrderValidationException("Received items cannot be null or empty");
         }
 
-        List<PurchaseOrderItem> itemsReceived = new ArrayList<>();
+        log.info("Processing received items for PurchaseOrder with ID: {}", this.id);
         for (ReceivedItem receivedItem : receivedItems) {
             PurchaseOrderItem purchaseOrderItem = findItemById(receivedItem.getItemId());
             purchaseOrderItem.receiveQuantity(receivedItem.getReceivedQuantity());
             purchaseOrderItem.assignBatchNumber(receivedItem.getBatchNumber());
-
-            itemsReceived.add(purchaseOrderItem);
         }
 
         this.actualDeliveryDate = deliveryDate;
         updateStatusBasedOnReceivedItems();
         this.updatedAt = LocalDateTime.now();
-
-        return itemsReceived;
+        log.info("Items received for PurchaseOrder with ID: {} successfully", this.id);
     }
 
     public void cancel() {
+        log.info("Cancelling PurchaseOrder with ID: {}", this.id);
         if (this.status == OrderStatus.RECEIVED || this.status == OrderStatus.CANCELLED) {
-            throw new IllegalStateException("Cannot cancel order in current status");
+            throw new OrderStatusValidationException("Cannot cancel order in current status");
         }
+
         this.status = OrderStatus.CANCELLED;
         this.updatedAt = LocalDateTime.now();
+        log.info("PurchaseOrder with ID: {} cancelled successfully", this.id);
     }
 
     public void reject() {
+        log.info("Rejecting PurchaseOrder with ID: {}", this.id);
         if (this.status != OrderStatus.PENDING_APPROVAL) {
-            throw new IllegalStateException("Can only reject orders pending approval");
+            throw new OrderStatusValidationException("Can only reject orders pending approval");
         }
+
         this.status = OrderStatus.REJECTED;
         this.updatedAt = LocalDateTime.now();
+        log.info("PurchaseOrder with ID: {} rejected successfully", this.id);
     }
 
     public boolean isFullyReceived() {
@@ -156,27 +152,30 @@ public class PurchaseOrder {
 
     private PurchaseOrderItem findItemById(String itemId) {
         return this.items.stream().filter(item -> Objects.equals(item.getId(), itemId)).findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("PurchaseOrder item not found"));
+                .orElseThrow(() -> new PurchaseOrderValidationException("PurchaseOrder item not found"));
     }
 
     public void validateHardDelete() {
         if (this.status != OrderStatus.CANCELLED && this.status != OrderStatus.REJECTED) {
-            throw new IllegalStateException("Can only hard validateHardDelete orders that are cancelled or rejected");
+            throw new OrderStatusValidationException("Can only hard validateHardDelete orders that are cancelled or rejected");
         }
     }
 
     public void softDelete() {
         this.deletedAt = LocalDateTime.now();
-
+        log.info("PurchaseOrder with ID: {} soft deleted at {}", this.id, this.deletedAt);
     }
 
     public void validateUpdate() {
         log.info("Validating update for PurchaseOrder with status: {}", this.status);
-
         if (this.status != OrderStatus.DRAFT && this.status != OrderStatus.PENDING_APPROVAL) {
-            throw new IllegalStateException("Cannot update order in current status");
+            throw new OrderStatusValidationException("Only PurchaseOrders in DRAFT or PENDING_APPROVAL status can be updated.");
         }
 
         log.info("PurchaseOrder update validated successfully.");
+    }
+
+    public List<PurchaseOrderItem> getItems() {
+        return Collections.unmodifiableList(items);
     }
 }

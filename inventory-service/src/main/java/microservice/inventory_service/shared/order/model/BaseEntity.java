@@ -28,7 +28,7 @@ public abstract class BaseEntity {
 
     @Version
     @Column(name = "version")
-    protected Long version;
+    protected Integer version;
 
     @PrePersist
     protected void onCreate() {
@@ -48,5 +48,9 @@ public abstract class BaseEntity {
 
     public boolean isDeleted() {
         return deletedAt != null;
+    }
+
+    public BaseEntity(String id) {
+        this.id = id;
     }
 }

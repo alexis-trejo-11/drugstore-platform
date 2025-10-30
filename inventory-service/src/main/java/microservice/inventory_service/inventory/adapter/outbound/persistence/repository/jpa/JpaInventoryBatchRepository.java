@@ -20,9 +20,9 @@ public interface JpaInventoryBatchRepository extends JpaRepository<InventoryBatc
     @Query("SELECT b FROM InventoryBatchEntity b WHERE b.expirationDate < :date")
     List<InventoryBatchEntity> findByExpirationDateBefore(@Param("date") LocalDateTime date);
 
-    @Query("SELECT b FROM InventoryBatchEntity b WHERE b.expirationDate < CURRENT_TIMESTAMP AND b.status = microservice.inventory_service.internal.inventory.core.batch.domain.entity.valueobject.BatchStatus.EXPIRED")
-    List<InventoryBatchEntity> findExpiredBatches();
+    @Query("SELECT b FROM InventoryBatchEntity b WHERE b.expirationDate < CURRENT_TIMESTAMP AND b.status = :status")
+    List<InventoryBatchEntity> findActive(@Param("status") BatchStatus status);
 
-    @Query("SELECT b FROM InventoryBatchEntity b WHERE b.inventoryId = :inventoryId AND b.status = microservice.inventory_service.internal.inventory.core.batch.domain.entity.valueobject.BatchStatus.ACTIVE")
-    List<InventoryBatchEntity> findActiveByInventoryId(@Param("inventoryId") String inventoryId);
+    @Query("SELECT b FROM InventoryBatchEntity b WHERE b.inventoryId = :inventoryId AND b.status = :status")
+    List<InventoryBatchEntity> findByInventoryIdAndStatus(@Param("inventoryId") String inventoryId, @Param("status") BatchStatus status);
 }

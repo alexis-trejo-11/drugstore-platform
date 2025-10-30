@@ -16,8 +16,9 @@ import microservice.inventory_service.shared.order.model.BaseOrderItemEntity;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class PurchaseOrderItemEntityOrder extends BaseOrderItemEntity {
-    @Column(name = "purchase_order_id", length = 36)
-    private String orderId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "purchase_order_id", nullable = false)
+    private PurchaseOrderEntityOrder purchaseOrder;
 
     @Column(name = "ordered_quantity", nullable = false)
     private Integer orderedQuantity;

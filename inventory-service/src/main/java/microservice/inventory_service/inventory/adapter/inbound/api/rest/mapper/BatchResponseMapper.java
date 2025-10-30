@@ -17,10 +17,6 @@ public class BatchResponseMapper implements ResponseMapper<BatchResponse, Invent
     public BatchResponse toResponse(InventoryBatch inventoryBatch) {
         if (inventoryBatch == null) return null;
 
-        Long daysUntilExpiration = ChronoUnit.DAYS.between(
-                LocalDateTime.now(),
-                inventoryBatch.getExpirationDate()
-        );
         return BatchResponse.builder()
                 .id(inventoryBatch.getId().value())
                 .batchNumber(inventoryBatch.getBatchNumber())
@@ -33,7 +29,6 @@ public class BatchResponseMapper implements ResponseMapper<BatchResponse, Invent
                 .supplierName(inventoryBatch.getSupplierName())
                 .status(inventoryBatch.getStatus())
                 .storageConditions(inventoryBatch.getStorageConditions())
-                .daysUntilExpiration(daysUntilExpiration)
                 .isExpired(inventoryBatch.isExpired())
                 .isExpiringSoon(inventoryBatch.isExpiringSoon(30))
                 .receivedDate(inventoryBatch.getReceivedDate())

@@ -2,10 +2,7 @@ package microservice.inventory_service.order.supplier_purchase.adapter.inbound.a
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import io.swagger.v3.oas.annotations.media.Schema;
 import microservice.inventory_service.order.supplier_purchase.application.command.ReceiveOrderCommand;
 import microservice.inventory_service.order.supplier_purchase.application.command.ReceivedItemCommand;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.PurchaseOrderId;
@@ -15,53 +12,53 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ReceivePurchaseOrderRequest {
+@Schema(description = "Request DTO to record the receipt of a purchase order")
+public record ReceivePurchaseOrderRequest(
+    @Schema(description = "List of received items including quantity and batch info", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty
     @Valid
-    private List<ReceivedItemRequest> receivedItems;
-    
+    List<ReceivedItemRequest> receivedItems,
+
+    @Schema(description = "Date and time when items were received (ISO-8601)", example = "2025-11-01T10:00:00", format = "date-time")
     @NotNull
-    private LocalDateTime receivedDate;
-    
+    LocalDateTime receivedDate,
+
+    @Schema(description = "Identifier of the user who received the items", example = "user-42")
     @NotBlank
-    private String receivedBy;
-    
+    String receivedBy
+) {
+
     public ReceiveOrderCommand toCommand(String orderId) {
         List<ReceivedItemCommand> itemCommands = receivedItems.stream()
             .map(ReceivedItemRequest::toCommand)
             .collect(Collectors.toList());
-        
+
         return ReceiveOrderCommand.builder()
             .purchaseOrderId(PurchaseOrderId.of(orderId))
-            .receivedItems(itemCommands)
+            .receivedItemCmd(itemCommands)
             .receivedDate(receivedDate)
             .receivedBy(UserId.of(receivedBy))
             .build();
     }
-    
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ReceivedItemRequest {
-        
-        @NotBlank(message = "PurchaseOrder item ID is required")
-        private String orderItemId;
-        
-        @NotNull(message = "Received quantity is required")
-        @Min(value = 1, message = "Received quantity must be positive")
-        private Integer receivedQuantity;
-        
-        @NotBlank(message = "Batch number is required")
-        private String batchNumber;
-        
+
+    @Schema(description = "Single received item with quantity and batch number")
+    public record ReceivedItemRequest(
+        @Schema(description = "Identifier of the order item", example = "item-1")
+        @NotBlank
+        String itemId,
+
+        @Schema(description = "Quantity actually received for this item", example = "5")
+        @NotNull
+        @Min(value = 1)
+        Integer receivedQuantity,
+
+        @Schema(description = "Batch number associated with the received items", example = "BATCH-2025-001")
+        @NotBlank
+        String batchNumber
+    ) {
         public ReceivedItemCommand toCommand() {
             return ReceivedItemCommand.builder()
-                .itemId(orderItemId)
+                .itemId(itemId)
                 .receivedQuantity(receivedQuantity)
                 .batchNumber(batchNumber)
                 .build();

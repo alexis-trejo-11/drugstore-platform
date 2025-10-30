@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.OrderStatus;
 import microservice.inventory_service.shared.order.model.BaseEntity;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,17 +21,13 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class PurchaseOrderEntityOrder extends BaseEntity {
-    @Column(name = "order_number", nullable = true)
-    private String orderNumber;
-
     @Column(name = "supplier_id", nullable = false, length = 36)
     private String supplierId;
 
     @Column(name = "supplier_name", nullable = false)
     private String supplierName;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @JoinColumn(name = "purchase_order_id", referencedColumnName = "id")
+    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
     private List<PurchaseOrderItemEntityOrder> items = new ArrayList<>();
 
@@ -57,4 +52,8 @@ public class PurchaseOrderEntityOrder extends BaseEntity {
 
     @Column(name = "approved_by", length = 36)
     private String approvedBy;
+
+    public PurchaseOrderEntityOrder(String id) {
+        super(id);
+    }
 }

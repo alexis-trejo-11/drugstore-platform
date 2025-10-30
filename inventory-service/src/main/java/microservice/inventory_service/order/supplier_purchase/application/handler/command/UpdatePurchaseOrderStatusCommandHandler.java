@@ -1,41 +1,46 @@
 package microservice.inventory_service.order.supplier_purchase.application.handler.command;
 
 import lombok.RequiredArgsConstructor;
-import microservice.inventory_service.order.supplier_purchase.application.command.UpdateOrderStatusCommand;
+import lombok.extern.slf4j.Slf4j;
+import microservice.inventory_service.order.supplier_purchase.application.command.UpdatePurchaseOrderStatusCommand;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrder;
 import microservice.inventory_service.order.supplier_purchase.domain.exception.OrderNotFoundException;
 import microservice.inventory_service.order.supplier_purchase.domain.port.output.OrderRepository;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.logging.Logger;
+
 @Component
 @RequiredArgsConstructor
-public class UpdateOrderStatusCommandHandler {
+@Slf4j
+public class UpdatePurchaseOrderStatusCommandHandler {
     private final OrderRepository orderRepository;
 
     @Transactional
-    public void handle(UpdateOrderStatusCommand command) {
-        PurchaseOrder PurchaseOrder = orderRepository.findById(command.purchaseOrderId())
+    public void handle(UpdatePurchaseOrderStatusCommand command) {
+        PurchaseOrder purchaseOrder = orderRepository.findById(command.purchaseOrderId())
                 .orElseThrow(() -> new OrderNotFoundException("PurchaseOrder not found"));
 
         var newStatus = command.newStatus();
         switch (newStatus) {
             case APPROVED:
-                PurchaseOrder.approve(command.updatedBy());
+                purchaseOrder.approve(command.updatedBy());
                 break;
             case SENT:
-                PurchaseOrder.supplierSending();
+                purchaseOrder.supplierSending();
                 break;
             case CANCELLED:
-                PurchaseOrder.cancel();
+                purchaseOrder.cancel();
                 break;
             case REJECTED:
-                PurchaseOrder.reject();
+                purchaseOrder.reject();
                 break;
             default:
                 throw new IllegalArgumentException("Not supported status: " + newStatus);
         }
 
-        orderRepository.save(PurchaseOrder);
+        orderRepository.save(purchaseOrder);
     }
 }

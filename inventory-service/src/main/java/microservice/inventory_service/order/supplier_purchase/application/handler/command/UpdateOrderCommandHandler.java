@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.order.supplier_purchase.application.command.InsertOrderCommand;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrder;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrderItem;
+import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.CreatePurchaseOrderParams;
 import microservice.inventory_service.order.supplier_purchase.domain.exception.OrderNotFoundException;
 import microservice.inventory_service.order.supplier_purchase.domain.port.output.OrderRepository;
 import org.springframework.stereotype.Component;
@@ -32,13 +33,15 @@ public class UpdateOrderCommandHandler {
                 .toList();
 
         PurchaseOrder purchaseOrder = PurchaseOrder.create(
-                command.purchaseOrderId(),
-                command.supplierId(),
-                command.supplierName(),
-                items,
-                command.expectedDeliveryDate(),
-                command.deliveryLocation(),
-                command.createdBy()
+                CreatePurchaseOrderParams.builder()
+                        .supplierId(command.supplierId())
+                        .supplierName(command.supplierName())
+                        .id(command.purchaseOrderId())
+                        .items(items)
+                        .expectedDeliveryDate(command.expectedDeliveryDate())
+                        .deliveryLocation(command.deliveryLocation())
+                        .createdBy(command.createdBy()
+                        ).build()
         );
 
         orderRepository.save(purchaseOrder);

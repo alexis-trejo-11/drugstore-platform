@@ -4,21 +4,25 @@ import lombok.Getter;
 import microservice.inventory_service.inventory.core.batch.domain.entity.valueobject.BatchStatus;
 import microservice.inventory_service.inventory.core.batch.domain.entity.valueobject.CreateBatchParams;
 import microservice.inventory_service.inventory.core.batch.domain.entity.valueobject.BatchId;
+import microservice.inventory_service.inventory.core.batch.domain.entity.valueobject.UpdateBatchBasicInfoParams;
+import microservice.inventory_service.inventory.core.batch.domain.exception.InvalidBatchFieldException;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.inventory.core.batch.domain.exception.BatchExpiredException;
 import microservice.inventory_service.inventory.core.batch.domain.exception.InvalidBatchException;
+import microservice.inventory_service.shared.domain.order.BaseDomainEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 @Getter
-public class InventoryBatch {
-    private BatchId id;
-    private InventoryId inventoryId;
+public class InventoryBatch extends BaseDomainEntity<BatchId> {
+    private final InventoryId inventoryId;
     private String batchNumber;
     private String lotNumber;
-    private Integer quantity;
+    private final Integer quantity;
     private Integer availableQuantity;
     private LocalDateTime manufacturingDate;
     private LocalDateTime expirationDate;
@@ -26,12 +30,12 @@ public class InventoryBatch {
     private String supplierName;
     private BatchStatus status;
     private String storageConditions;
-    private LocalDateTime receivedDate;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private final LocalDateTime receivedDate;
+    private static final Logger log = LoggerFactory.getLogger(InventoryBatch.class);
+
 
     private InventoryBatch(BatchId id, InventoryId inventoryId, String batchNumber, String lotNumber, Integer quantity, Integer availableQuantity, LocalDateTime manufacturingDate, LocalDateTime expirationDate, String supplierId, String supplierName, BatchStatus status, String storageConditions, LocalDateTime receivedDate, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
+        super(id, createdAt, updatedAt);
         this.inventoryId = inventoryId;
         this.batchNumber = batchNumber;
         this.lotNumber = lotNumber;
@@ -44,14 +48,13 @@ public class InventoryBatch {
         this.status = status;
         this.storageConditions = storageConditions;
         this.receivedDate = receivedDate;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 
     public static InventoryBatch create(CreateBatchParams params) {
+        log.info("Creating new InventoryBatch with params: {}", params);
         validateParameters(params);
 
-        return InventoryBatch.reconstructor()
+        var batch = InventoryBatch.reconstructor()
                 .id(BatchId.generate())
                 .inventoryId(params.inventoryId())
                 .batchNumber(params.batchNumber())
@@ -68,39 +71,66 @@ public class InventoryBatch {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .reconstruct();
+
+        log.info("Created InventoryBatch: Id {}", batch.getId());
+        return batch;
+    }
+
+    public void updateBasicInfo(UpdateBatchBasicInfoParams params) {
+        log.info("Updating InventoryBatch {} with params: {}", this.id, params);
+
+        this.batchNumber = params.batchNumber() != null ? params.batchNumber() : this.batchNumber;
+        this.lotNumber = params.lotNumber() != null ? params.lotNumber() : this.lotNumber;
+        this.manufacturingDate = params.manufacturingDate() != null ? params.manufacturingDate() : this.manufacturingDate;
+        this.expirationDate = params.expirationDate() != null ? params.expirationDate() : this.expirationDate;
+        this.supplierId = params.supplierId() != null ? params.supplierId() : this.supplierId;
+        this.supplierName = params.supplierName() != null ? params.supplierName() : this.supplierName;
+        this.storageConditions = params.storageConditions() != null ? params.storageConditions() : this.storageConditions;
+        this.updatedAt = LocalDateTime.now();
+
+        log.info("Updated InventoryBatch {} successfully", this.id);
     }
 
     private static void validateParameters(CreateBatchParams params) {
         if (params == null) {
-            throw new IllegalArgumentException("CreateBatchParams cannot be null");
+            throw new InvalidBatchFieldException("CreateBatchParams cannot be null");
         }
-
         if (params.quantity() <= 0) {
-            throw new IllegalArgumentException("Quantity must be positive");
+            throw new InvalidBatchFieldException("Quantity must be positive");
         }
-        if (params.expirationDate().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Expiration date cannot be in the past");
+        if (params.expirationDate() != null && params.expirationDate().isBefore(LocalDateTime.now())) {
+            throw new InvalidBatchFieldException("Expiration date cannot be in the past");
         }
     }
 
     public void releaseQuantity(Integer quantity) {
+        log.info("Releasing quantity {} back to batch {}", quantity, this.id);
         this.availableQuantity += quantity;
         this.updatedAt = LocalDateTime.now();
+
         if (this.status == BatchStatus.DEPLETED && this.availableQuantity > 0) {
             this.status = BatchStatus.ACTIVE;
         }
+
+        log.info("Released quantity. New available quantity: {} for batch {}", this.availableQuantity, this.id);
     }
 
     public void allocateQuantity(Integer quantity) {
+        log.info("Allocating quantity {} from batch {}", quantity, this.id);
+
         validateForUse();
         if (this.availableQuantity < quantity) {
-            throw new IllegalStateException("Insufficient quantity in batch");
+            throw new InvalidBatchException("Insufficient quantity in batch");
         }
+
         this.availableQuantity -= quantity;
         this.updatedAt = LocalDateTime.now();
+
         if (this.availableQuantity <= 0) {
             this.status = BatchStatus.DEPLETED;
         }
+
+        log.info("Allocated quantity. New available quantity: {} for batch {}", this.availableQuantity, this.id);
     }
 
     public void validateForUse() {
@@ -135,11 +165,18 @@ public class InventoryBatch {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public boolean isExpired() {
-        return this.expirationDate.isBefore(LocalDateTime.now());
+    public Boolean isExpired() {
+        if (this.expirationDate == null) {
+            return false;
+        }
+        return LocalDateTime.now().isAfter(this.expirationDate);
     }
 
-    public boolean isExpiringSoon(Integer warningDays) {
+    public Boolean isExpiringSoon(Integer warningDays) {
+        if (this.expirationDate == null) {
+            return false;
+        }
+
         long daysUntilExpiration = ChronoUnit.DAYS.between(LocalDateTime.now(), this.expirationDate);
         return daysUntilExpiration <= warningDays && daysUntilExpiration > 0;
     }

@@ -42,7 +42,7 @@ public class SalesOrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PatchMapping("/{id}/pay")
+    @PatchMapping("/{id}/confirm")
     public ResponseWrapper<Void> confirmSaleOrder(@PathVariable String id, @RequestParam String paymentId) {
         var command = ConfirmSaleOrderCommand.of(id, paymentId);
         salesOrderUseCase.confirmPayment(command);

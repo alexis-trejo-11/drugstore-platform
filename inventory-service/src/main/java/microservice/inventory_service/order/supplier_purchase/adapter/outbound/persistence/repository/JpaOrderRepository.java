@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface JpaOrderRepository extends JpaRepository<PurchaseOrderEntityOrder, String> {
-    Optional<PurchaseOrderEntityOrder> findByOrderNumber(String orderNumber);
 
     Page<PurchaseOrderEntityOrder> findBySupplierId(String supplierId, Pageable pageable);
 
