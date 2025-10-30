@@ -41,7 +41,7 @@ spring:
           min-idle: 0
           max-wait: 1000ms
 
-  # CACHE CONFIG - SEPARADA
+  # CACHE CONFIG
   cache:
     type: redis
     redis:
@@ -51,9 +51,9 @@ spring:
 
   # POSTGRES CONFIG
   datasource:
-    url: jdbc:postgresql://localhost:5432/drugstore_inventories
-    username: alexistrejo
-    password: alexisAdmin1475963
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${INVENTORY_DB:drugstore_inventories}
+    username: ${POSTGRES_USER:alexistrejo}
+    password: ${POSTGRES_PASSWORD:alexisAdmin1475963}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -101,7 +101,7 @@ management:
         include: health,info,metrics,env,prometheus
       cors:
         allowed-origins: "*"
-        allowed-methods: GET,OPTIONS"
+        allowed-methods: GET,OPTIONS
   endpoint:
     health:
       show-details: always
