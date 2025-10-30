@@ -40,9 +40,9 @@ spring:
 
   # Postgres
   datasource:
-    url: jdbc:postgresql://localhost:5432/drugstore_stores
-    username: alexistrejo
-    password: alexisAdmin1475963
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${STORE_DB:drugstore_stores}
+    username: ${POSTGRES_USER:alexistrejo}
+    password: ${POSTGRES_PASSWORD:alexisAdmin1475963}
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
