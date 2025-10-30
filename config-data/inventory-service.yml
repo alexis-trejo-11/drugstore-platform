@@ -1,20 +1,81 @@
+app:
+  rate-limit:
+    global:
+      enabled: true
+      max-requests: 1000
+      duration-hours: 1
+    default:
+      max-requests: 100
+      duration-seconds: 60
+    endpoints:
+      auth:
+        max-requests: 10
+        duration-seconds: 60
+      orders:
+        max-requests: 50
+        duration-seconds: 30
+      health:
+        max-requests: 5
+        duration-seconds: 10
+
 server:
   port: 8083
 
 spring:
   application:
     name: order-service
-
   profiles:
     active: dev
-  boot:
-    admin:
-      client:
-        url: http://localhost:8080
-        instance:
-          service-url: http://localhost:8080
-          name: order-service
 
+  # REDIS CONFIGURATION
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+      password: ${SPRING_REDIS_PASSWORD:redispass}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: 1000ms
+
+  # CACHE CONFIG - SEPARADA
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000  # 1 hora para cache general
+      cache-null-values: false
+      enable-statistics: true
+
+  # POSTGRES CONFIG
+  datasource:
+    url: jdbc:postgresql://localhost:5432/drugstore_inventories
+    username: alexistrejo
+    password: alexisAdmin1475963
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+
+  # DEVTOOLS
   devtools:
     restart:
       enabled: true
@@ -24,29 +85,7 @@ spring:
     livereload:
       enabled: true
 
-  cache:
-    type: redis
-    data:
-      redis:
-        host: ${SPRING_REDIS_HOST:localhost}
-        port: ${SPRING_REDIS_PORT:6379}
-        password: ${SPRING_REDIS_PASSWORD:redispass}
-        lettuce:
-          pool:
-            max-active: 8
-            max-idle: 8
-            min-idle: 0
-        timeout: 2000ms
-
-  # Postgres
-  datasource:
-    url: jdbc:postgresql://localhost:5432/drugstore_inventories
-    username: alexistrejo
-    password: alexisAdmin1475963
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-
+  # FLYWAY
   flyway:
     enabled: false
     locations: classpath:db/migration
@@ -54,48 +93,57 @@ spring:
     schemas: public
     clean-disabled: false
 
+# MANAGEMENT ENDPOINTS
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,info,metrics,env,prometheus
       cors:
         allowed-origins: "*"
-        allowed-methods: "*"
+        allowed-methods: GET,OPTIONS"
   endpoint:
     health:
       show-details: always
       show-components: always
+      probes:
+        enabled: true
     info:
       enabled: true
     metrics:
       enabled: true
     env:
       enabled: true
-    loggers:
-      enabled: true
   info:
     env:
       enabled: true
   health:
+    redis:
+      enabled: true
     db:
       enabled: true
     diskspace:
       enabled: true
-    mail:
-      enabled: true
 
+# SPRINGDOC OPENAPI
 springdoc:
   api-docs:
     path: /api-docs
+    enabled: true
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
     tags-sorter: alpha
     operations-sorter: alpha
     doc-expansion: none
+    display-request-duration: true
   packages-to-scan: microservice.order_service
   paths-to-match: /api/**
   cache:
     disabled: true
-# No logging configuration needed here since logback-spring.xml manages it
+
+# LOGGING FOR RATE LIMITING
+logging:
+  level:
+    microservice.inventory_service.config.rate_limiter: DEBUG
+    org.springframework.web.filter: DEBUG

@@ -1,7 +1,7 @@
 package microservice.inventory_service.inventory.core.inventory.application.cqrs.command;
 
 import lombok.Builder;
-import microservice.inventory_service.inventory.core.batch.application.command.AddInventoryBatchCommand;
+import microservice.inventory_service.inventory.core.batch.application.command.RegisterInventoryBatchCommand;
 import microservice.inventory_service.inventory.core.batch.domain.entity.InventoryBatch;
 import microservice.inventory_service.inventory.core.batch.domain.entity.valueobject.CreateBatchParams;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.CreateInventoryParams;
@@ -16,7 +16,7 @@ public record CreateInventoryCommand(
         Integer reorderQuantity,
         Integer maximumStockLevel,
         String warehouseLocation,
-        Optional<AddInventoryBatchCommand> batchCommand
+        Optional<RegisterInventoryBatchCommand> batchCommand
 ) {
 
     public CreateInventoryParams toCreateInventoryParams() {

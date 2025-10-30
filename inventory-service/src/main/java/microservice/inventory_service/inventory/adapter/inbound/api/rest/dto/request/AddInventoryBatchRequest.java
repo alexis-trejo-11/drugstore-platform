@@ -1,11 +1,10 @@
 package microservice.inventory_service.inventory.adapter.inbound.api.rest.dto.request;
 
 import jakarta.validation.constraints.*;
-import microservice.inventory_service.inventory.core.batch.application.command.AddInventoryBatchCommand;
+import microservice.inventory_service.inventory.core.batch.application.command.RegisterInventoryBatchCommand;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.InventoryId;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Schema(description = "Request to create StockMovementUseCaseImpl new inventory batch for an existing inventory")
@@ -37,8 +36,8 @@ public record AddInventoryBatchRequest(
     @Schema(description = "Storage instructions or conditions for the batch", example = "Store between 2-8°C", type = "string")
     @NotBlank String storageConditions
 ){
-    public AddInventoryBatchCommand toCommand() {
-        return AddInventoryBatchCommand.builder()
+    public RegisterInventoryBatchCommand toCommand() {
+        return RegisterInventoryBatchCommand.builder()
                 .inventoryId(new InventoryId(this.inventoryId))
                 .batchNumber(this.batchNumber)
                 .lotNumber(this.lotNumber)
@@ -51,8 +50,8 @@ public record AddInventoryBatchRequest(
                 .build();
     }
 
-    public AddInventoryBatchCommand toCommand(String inventoryId) {
-        return AddInventoryBatchCommand.builder()
+    public RegisterInventoryBatchCommand toCommand(String inventoryId) {
+        return RegisterInventoryBatchCommand.builder()
                 .inventoryId(new InventoryId(inventoryId))
                 .batchNumber(this.batchNumber)
                 .lotNumber(this.lotNumber)

@@ -22,13 +22,9 @@ public interface InventoryRepository {
 
     List<Inventory> findSpec();
 
-    List<Inventory> findByStatus(InventoryStatus status);
-
-    Page<Inventory> findLowStock(Pageable pageable);
+    Page<Inventory> findByStatus(InventoryStatus status, Pageable pageable);
 
     List<Inventory> findAllLowStock();
-
-    Page<Inventory> findOutOfStock(Pageable pageable);
 
     Page<Inventory> findByWarehouseLocation(String location, Pageable pageable);
 

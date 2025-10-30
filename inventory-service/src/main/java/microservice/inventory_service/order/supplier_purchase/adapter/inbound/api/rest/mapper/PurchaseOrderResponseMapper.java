@@ -19,7 +19,6 @@ public class PurchaseOrderResponseMapper implements ResponseMapper<OrderSummaryR
 
         return OrderSummaryResponse.builder()
                 .id(PurchaseOrder.getId().value())
-                .orderNumber(PurchaseOrder.getOrderNumber())
                 .supplierId(PurchaseOrder.getSupplierId())
                 .status(PurchaseOrder.getStatus())
                 .orderDate(PurchaseOrder.getOrderDate())

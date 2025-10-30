@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import microservice.inventory_service.order.supplier_purchase.application.command.InsertOrderCommand;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrder;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrderItem;
+import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.CreatePurchaseOrderParams;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.PurchaseOrderId;
 import microservice.inventory_service.order.supplier_purchase.domain.port.output.OrderRepository;
 import org.springframework.stereotype.Component;
@@ -49,13 +50,15 @@ public class CreatePurchaseOrderCommandHandler {
 
         log.info("Creating PurchaseOrder entity for PurchaseOrderId: {}", command.purchaseOrderId());
         return PurchaseOrder.create(
-                command.purchaseOrderId(),
-                command.supplierId(),
-                command.supplierName(),
-                items,
-                command.expectedDeliveryDate(),
-                command.deliveryLocation(),
-                command.createdBy()
+                CreatePurchaseOrderParams.builder()
+                .id(command.purchaseOrderId())
+                .supplierId(command.supplierId())
+                .supplierName(command.supplierName())
+                .items(items)
+                .expectedDeliveryDate(command.expectedDeliveryDate())
+                .deliveryLocation(command.deliveryLocation())
+                .createdBy(command.createdBy())
+                .build()
         );
     }
 

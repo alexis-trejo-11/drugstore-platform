@@ -24,9 +24,6 @@ public interface InventoryBatchRepository {
 
     List<InventoryBatch> findExpiredBatches();
 
-    Optional<InventoryBatch> findByBatchNumberAndProductId(String batchNumber, ProductId productId);
-
-
     List<InventoryBatch> findAvailableBatchesByInventoryId(InventoryId inventoryId);
 
     void delete(BatchId id);

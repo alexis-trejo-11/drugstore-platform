@@ -2,6 +2,7 @@ package microservice.inventory_service.inventory.core.inventory.application.cqrs
 
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.Inventory;
+import microservice.inventory_service.inventory.core.inventory.domain.entity.enums.InventoryStatus;
 import microservice.inventory_service.inventory.core.inventory.port.InventoryRepository;
 import microservice.inventory_service.inventory.core.stock.application.query.GetLowStockInventoriesQuery;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ public class GetLowStockInventoriesQueryHandler {
     
     @Transactional(readOnly = true)
     public Page<Inventory> handle(GetLowStockInventoriesQuery query) {
-        return inventoryRepository.findLowStock(query.pagination());
+        var inventories = inventoryRepository.findByStatus(InventoryStatus.LOW_STOCK, query.pagination());
+        return inventories;
     }
 }

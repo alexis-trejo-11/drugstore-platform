@@ -18,10 +18,6 @@ public record PurchaseOrderItemResponse(
         Integer orderedQuantity,
         @Schema(description = "Quantity actually received for this item (nullable)", example = "10", type = "integer")
         Integer receivedQuantity,
-        @Schema(description = "Unit cost for the item (decimal)", example = "1.25", type = "string")
-        BigDecimal unitCost,
-        @Schema(description = "Total cost for this item (unitCost * quantity)", example = "12.50", type = "string")
-        BigDecimal totalCost,
         @Schema(description = "Batch number associated with the received item (nullable)", example = "BATCH-2024-001", type = "string")
         String batchNumber
 ) {

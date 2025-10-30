@@ -2,7 +2,7 @@ package microservice.inventory_service.inventory.core.batch.application.handler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import microservice.inventory_service.inventory.core.batch.application.command.AddInventoryBatchCommand;
+import microservice.inventory_service.inventory.core.batch.application.command.RegisterInventoryBatchCommand;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.inventory.core.batch.domain.entity.InventoryBatch;
 import microservice.inventory_service.inventory.core.inventory.port.InventoryRepository;
@@ -25,8 +25,8 @@ public class AddInventoryBatchCommandHandler {
     private final InventoryMovementRepository movementRepository;
 
     @Transactional
-    public BatchId handle(AddInventoryBatchCommand command) {
-        log.info("Handling AddInventoryBatchCommand for Inventory ID: {}", command.inventoryId());
+    public BatchId handle(RegisterInventoryBatchCommand command) {
+        log.info("Handling RegisterInventoryBatchCommand for Inventory ID: {}", command.inventoryId());
         Inventory inventory = alertRepository.findById(command.inventoryId())
                 .orElseThrow(() -> new InventoryNotFoundException("Inventory not found"));
 
@@ -59,7 +59,7 @@ public class AddInventoryBatchCommandHandler {
         log.info("Saving inventory movement for Inventory ID: {}", command.inventoryId());
         movementRepository.save(movement);
 
-        log.info("AddInventoryBatchCommand handled successfully for Inventory ID: {}", command.inventoryId());
+        log.info("RegisterInventoryBatchCommand handled successfully for Inventory ID: {}", command.inventoryId());
         return savedBatch.getId();
     }
 }

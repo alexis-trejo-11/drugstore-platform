@@ -1,20 +1,19 @@
 -- Purschase Orders
 CREATE TABLE IF NOT EXISTS public.purchase_order (
   id varchar(36) PRIMARY KEY,
-  order_number varchar(100) NOT NULL UNIQUE,
   supplier_id varchar(36) NOT NULL,
   supplier_name varchar(255) NOT NULL,
-  total_amount numeric(12,2) NOT NULL,
-  currency char(3) NOT NULL,
   status varchar(50) NOT NULL,
-  order_date timestamp without time zone NOT NULL,
-  expected_delivery_date timestamp without time zone,
-  actual_delivery_date timestamp without time zone,
+  order_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+  expected_delivery_date TIMESTAMP WITHOUT TIME ZONE,
+  actual_delivery_date TIMESTAMP WITHOUT TIME ZONE,
   delivery_location varchar(255),
   created_by varchar(36) NOT NULL,
   approved_by varchar(36),
-  created_at timestamp without time zone NOT NULL DEFAULT now(),
-  updated_at timestamp without time zone NOT NULL DEFAULT now()
+  created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+  deleted_at TIMESTAMP WITHOUT TIME ZONE,
+  version integer NOT NULL DEFAULT 1
 );
 
 -- Purchase order items
@@ -25,7 +24,11 @@ CREATE TABLE IF NOT EXISTS public.purchase_order_items (
   product_name varchar(255) NOT NULL,
   ordered_quantity integer NOT NULL,
   received_quantity integer NOT NULL,
-  batch_number varchar(100)
+  batch_number varchar(100),
+  created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+  deleted_at TIMESTAMP WITHOUT TIME ZONE,
+  version integer NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS sale_orders (
@@ -37,8 +40,10 @@ CREATE TABLE IF NOT EXISTS sale_orders (
   payment_id varchar(36),
   delivery_info_id varchar(36),
   pickup_info_id varchar(36),
-  created_at timestamp WITHOUT time zone NOT NULL DEFAULT now(),
-  updated_at timestamp WITHOUT time zone
+  created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+  deleted_at TIMESTAMP WITHOUT TIME ZONE,
+  version integer NOT NULL DEFAULT 1
 );
 
 ALTER TABLE sale_orders

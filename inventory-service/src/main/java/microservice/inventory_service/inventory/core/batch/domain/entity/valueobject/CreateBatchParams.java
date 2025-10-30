@@ -14,3 +14,5 @@ public record CreateBatchParams(
         String supplierId, String supplierName, String storageConditions
 ) {
 }
+
+

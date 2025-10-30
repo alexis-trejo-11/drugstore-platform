@@ -21,8 +21,8 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class InventoryMovementRepositoryImpl implements InventoryMovementRepository {
-    private JpaInventoryMovementRepository movementRepository;
-    private EntityMapper<InventoryMovementEntity, InventoryMovement> movementMapper;
+    private final JpaInventoryMovementRepository movementRepository;
+    private final EntityMapper<InventoryMovementEntity, InventoryMovement> movementMapper;
 
     @Override
     public InventoryMovement save(InventoryMovement movement) {

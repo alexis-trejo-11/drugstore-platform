@@ -8,12 +8,22 @@ public abstract class BaseDomainEntity<T> {
     protected final LocalDateTime createdAt;
     protected LocalDateTime updatedAt;
     protected LocalDateTime deletedAt;
+    protected Integer version;
 
     protected BaseDomainEntity(T id, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.deletedAt = null;
+        this.version = 1;
+    }
+
+    public BaseDomainEntity(T id, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt, Integer version) {
+        this.id = id;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.deletedAt = deletedAt;
+        this.version = version;
     }
 
     protected BaseDomainEntity(T id) {
@@ -24,20 +34,18 @@ public abstract class BaseDomainEntity<T> {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public LocalDateTime getDeletedAt() { return deletedAt; }
+    public Integer getVersion() { return version; }
     
     public void markAsUpdated() {
         this.updatedAt = LocalDateTime.now();
     }
-    
     public void markAsDeleted() {
         this.deletedAt = LocalDateTime.now();
     }
-    
     public boolean isDeleted() {
         return deletedAt != null;
     }
 
-    // Equals y HashCode basados en ID
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -45,6 +45,14 @@ public class InventoryResponseMapper implements ResponseMapper<InventoryResponse
 
     @Override
     public PageResponse<InventoryResponse> toResponsePage(Page<Inventory> dtoPage) {
-        return PageResponse.empty();
+        if (dtoPage == null) {
+            return null;
+        }
+        if (!dtoPage.hasContent()) {
+            return PageResponse.empty();
+        }
+
+        Page<InventoryResponse> responsePage = dtoPage.map(this::toResponse);
+        return PageResponse.from(responsePage);
     }
 }

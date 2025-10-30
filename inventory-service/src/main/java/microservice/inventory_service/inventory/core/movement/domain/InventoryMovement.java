@@ -7,28 +7,30 @@ import microservice.inventory_service.inventory.core.batch.domain.entity.valueob
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.inventory.core.movement.domain.valueobject.MovementId;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.UserId;
+import microservice.inventory_service.shared.domain.order.BaseDomainEntity;
 
 import java.time.LocalDateTime;
 
 @Getter
-public class InventoryMovement {
-    private MovementId id;
-    private InventoryId inventoryId;
-    private BatchId batchId;
-    private MovementType movementType;
-    private Integer quantity;
-    private Integer previousQuantity;
-    private Integer newQuantity;
-    private String reason;
-    private String referenceId;
-    private String referenceType;
-    private UserId performedBy;
-    private String notes;
-    private LocalDateTime movementDate;
-    private LocalDateTime createdAt;
+public class InventoryMovement extends BaseDomainEntity<MovementId> {
+    private final InventoryId inventoryId;
+    private final BatchId batchId;
+    private final MovementType movementType;
+    private final Integer quantity;
+    private final Integer previousQuantity;
+    private final Integer newQuantity;
+    private final String reason;
+    private final String referenceId;
+    private final String referenceType;
+    private final UserId performedBy;
+    private final String notes;
+    private final LocalDateTime movementDate;
 
-    private InventoryMovement(MovementId id, InventoryId inventoryId, BatchId batchId, MovementType movementType, Integer quantity, Integer previousQuantity, Integer newQuantity, String reason, String referenceId, String referenceType, UserId performedBy, String notes, LocalDateTime movementDate, LocalDateTime createdAt) {
-        this.id = id;
+    private InventoryMovement(MovementId id, InventoryId inventoryId, BatchId batchId, MovementType movementType, Integer quantity,
+                              Integer previousQuantity, Integer newQuantity, String reason, String referenceId, String referenceType,
+                              UserId performedBy, String notes, LocalDateTime movementDate, LocalDateTime createdAt,
+                              LocalDateTime updatedAt, LocalDateTime deletedAt, Integer version) {
+        super(id, createdAt, updatedAt, deletedAt, version);
         this.inventoryId = inventoryId;
         this.batchId = batchId;
         this.movementType = movementType;
@@ -41,7 +43,6 @@ public class InventoryMovement {
         this.performedBy = performedBy;
         this.notes = notes;
         this.movementDate = movementDate;
-        this.createdAt = createdAt;
     }
 
     public static InventoryMovement create(CreateMovementParams params) {
@@ -101,6 +102,9 @@ public class InventoryMovement {
         private String notes;
         private LocalDateTime movementDate;
         private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+        private LocalDateTime deletedAt;
+        private Integer version;
 
         public InventoryMovementReconstructor id(MovementId id) {
             this.id = id;
@@ -172,8 +176,20 @@ public class InventoryMovement {
             return this;
         }
 
+        public InventoryMovementReconstructor updatedAt(LocalDateTime updatedAt) {
+            return this;
+        }
+
+        public InventoryMovementReconstructor deletedAt(LocalDateTime deletedAt) {
+            return this;
+        }
+
+        public InventoryMovementReconstructor version(Integer version) {
+            return this;
+        }
+
         public InventoryMovement reconstruct() {
-            return new InventoryMovement(id, inventoryId, batchId, movementType, quantity, previousQuantity, newQuantity, reason, referenceId, referenceType, performedBy, notes, movementDate, createdAt);
+            return new InventoryMovement(id, inventoryId, batchId, movementType, quantity, previousQuantity, newQuantity, reason, referenceId, referenceType, performedBy, notes, movementDate, createdAt, updatedAt, deletedAt, version);
         }
     }
 }

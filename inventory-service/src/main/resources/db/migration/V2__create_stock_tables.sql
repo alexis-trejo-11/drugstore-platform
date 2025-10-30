@@ -11,8 +11,10 @@ CREATE TABLE IF NOT EXISTS stock_reservations (
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     expiration_time TIMESTAMP NOT NULL,
     reason VARCHAR(500),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+    deleted_at TIMESTAMP WITHOUT TIME ZONE,
+    version integer NOT NULL DEFAULT 1,
 
     CONSTRAINT pk_stock_reservations PRIMARY KEY (id),
     CONSTRAINT chk_reservations_positive_quantity CHECK (quantity > 0),
@@ -36,7 +38,10 @@ CREATE TABLE IF NOT EXISTS stock_adjustments (
     approved_by VARCHAR(36),
     performed_by VARCHAR(36) NOT NULL,
     adjustment_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+    deleted_at TIMESTAMP WITHOUT TIME ZONE,
+    version integer NOT NULL DEFAULT 1,
 
     CONSTRAINT pk_stock_adjustments PRIMARY KEY (id),
     CONSTRAINT chk_adjustments_positive_quantities CHECK (

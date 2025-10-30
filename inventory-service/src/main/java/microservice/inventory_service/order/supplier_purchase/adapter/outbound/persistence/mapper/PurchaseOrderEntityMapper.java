@@ -8,6 +8,7 @@ import microservice.inventory_service.inventory.core.inventory.domain.entity.val
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.UserId;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.PurchaseOrderId;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrderItem;
+import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.ReconstructPurchaseOrderParams;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -16,19 +17,16 @@ import java.util.List;
 
 @Component
 public class PurchaseOrderEntityMapper implements EntityMapper<PurchaseOrderEntityOrder, PurchaseOrder> {
-
     @Override
     public PurchaseOrderEntityOrder fromDomain(PurchaseOrder purchaseOrder) {
         if (purchaseOrder == null) {
             return null;
         }
 
-        return PurchaseOrderEntityOrder.builder()
+        var entity = PurchaseOrderEntityOrder.builder()
                 .id(purchaseOrder.getId() == null ? null : purchaseOrder.getId().value())
-                .orderNumber(purchaseOrder.getOrderNumber())
                 .supplierId(purchaseOrder.getSupplierId())
                 .supplierName(purchaseOrder.getSupplierName())
-                .items(mapItems(purchaseOrder.getItems(), purchaseOrder.getId()))
                 .status(purchaseOrder.getStatus())
                 .orderDate(purchaseOrder.getOrderDate())
                 .expectedDeliveryDate(purchaseOrder.getExpectedDeliveryDate())
@@ -38,8 +36,14 @@ public class PurchaseOrderEntityMapper implements EntityMapper<PurchaseOrderEnti
                 .approvedBy(purchaseOrder.getApprovedBy() == null ? null : purchaseOrder.getApprovedBy().value())
                 .createdAt(purchaseOrder.getCreatedAt())
                 .updatedAt(purchaseOrder.getUpdatedAt())
+                .deletedAt(purchaseOrder.getDeletedAt())
+                .version(purchaseOrder.getVersion())
                 .build();
-    }
+
+        List<PurchaseOrderItemEntityOrder> itemEntities = mapItems(purchaseOrder.getItems(), entity);
+        entity.setItems(itemEntities);
+
+        return entity;    }
 
     @Override
     public PurchaseOrder toDomain(PurchaseOrderEntityOrder model) {
@@ -47,22 +51,25 @@ public class PurchaseOrderEntityMapper implements EntityMapper<PurchaseOrderEnti
             return null;
         }
 
-        return PurchaseOrder.builder()
-                .id(model.getId() == null ? null : new PurchaseOrderId(model.getId()))
-                .orderNumber(model.getOrderNumber())
-                .supplierId(model.getSupplierId())
-                .supplierName(model.getSupplierName())
-                .status(model.getStatus())
-                .orderDate(model.getOrderDate())
-                .expectedDeliveryDate(model.getExpectedDeliveryDate())
-                .actualDeliveryDate(model.getActualDeliveryDate())
-                .deliveryLocation(model.getDeliveryLocation())
-                .items(mapItemsToDomain(model.getItems()))
-                .createdBy(model.getCreatedBy() == null ? null : new UserId(model.getCreatedBy()))
-                .approvedBy(model.getApprovedBy() == null ? null : new UserId(model.getApprovedBy()))
-                .createdAt(model.getCreatedAt())
-                .updatedAt(model.getUpdatedAt())
-                .build();
+        return PurchaseOrder.reconstruct(
+                ReconstructPurchaseOrderParams.builder()
+                        .id(model.getId() == null ? null : new PurchaseOrderId(model.getId()))
+                        .supplierId(model.getSupplierId())
+                        .supplierName(model.getSupplierName())
+                        .status(model.getStatus())
+                        .orderDate(model.getOrderDate())
+                        .expectedDeliveryDate(model.getExpectedDeliveryDate())
+                        .actualDeliveryDate(model.getActualDeliveryDate())
+                        .deliveryLocation(model.getDeliveryLocation())
+                        .items(model.getItems() != null ? mapItemsToDomain((model.getItems())) : null)
+                        .createdBy(model.getCreatedBy() == null ? null : new UserId(model.getCreatedBy()))
+                        .approvedBy(model.getApprovedBy() == null ? null : new UserId(model.getApprovedBy()))
+                        .createdAt(model.getCreatedAt())
+                        .updatedAt(model.getUpdatedAt())
+                        .deletedAt(model.getDeletedAt())
+                        .version(model.getVersion())
+                        .build()
+                );
     }
 
     @Override
@@ -90,7 +97,7 @@ public class PurchaseOrderEntityMapper implements EntityMapper<PurchaseOrderEnti
         return modelPage.map(this::toDomain);
     }
 
-    private List<PurchaseOrderItemEntityOrder> mapItems(List<PurchaseOrderItem> items, PurchaseOrderId purchaseOrderId) {
+    private List<PurchaseOrderItemEntityOrder> mapItems(List<PurchaseOrderItem> items, PurchaseOrderEntityOrder order) {
         if (items == null) {
             return List.of();
         }
@@ -99,12 +106,13 @@ public class PurchaseOrderEntityMapper implements EntityMapper<PurchaseOrderEnti
         for (var item : items) {
             var itemEntity = PurchaseOrderItemEntityOrder.builder()
                     .id(item.getId())
-                    .orderId(purchaseOrderId == null ? null : purchaseOrderId.value())
                     .productId(item.getProductId() == null ? null : item.getProductId().value())
                     .productName(item.getProductName())
+                    .purchaseOrder(order)
                     .orderedQuantity(item.getOrderedQuantity())
                     .receivedQuantity(item.getReceivedQuantity())
                     .batchNumber(item.getBatchNumber())
+                    .version(item.getVersion())
                     .build();
             entityOrders.add(itemEntity);
         }
@@ -122,6 +130,10 @@ public class PurchaseOrderEntityMapper implements EntityMapper<PurchaseOrderEnti
                         .orderedQuantity(entity.getOrderedQuantity())
                         .receivedQuantity(entity.getReceivedQuantity())
                         .batchNumber(entity.getBatchNumber())
+                        .createdAt(entity.getCreatedAt())
+                        .updatedAt(entity.getUpdatedAt())
+                        .deletedAt(entity.getDeletedAt())
+                        .version(entity.getVersion())
                         .build())
                 .toList();
     }

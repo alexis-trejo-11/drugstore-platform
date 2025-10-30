@@ -14,8 +14,6 @@ public interface OrderRepository {
 
     Optional<PurchaseOrder> findById(PurchaseOrderId id);
 
-    Optional<PurchaseOrder> findByOrderNumber(String orderNumber);
-
     Page<PurchaseOrder> findBySupplierId(String supplierId, Pageable pageable);
 
     Page<PurchaseOrder> findByStatus(OrderStatus status, Pageable pageable);

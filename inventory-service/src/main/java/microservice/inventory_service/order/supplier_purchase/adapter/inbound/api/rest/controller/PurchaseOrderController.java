@@ -9,7 +9,7 @@ import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.inventory_service.order.supplier_purchase.adapter.inbound.api.rest.dto.request.ReceivePurchaseOrderRequest;
-import microservice.inventory_service.order.supplier_purchase.application.command.UpdateOrderStatusCommand;
+import microservice.inventory_service.order.supplier_purchase.application.command.UpdatePurchaseOrderStatusCommand;
 import microservice.inventory_service.order.supplier_purchase.application.query.*;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrder;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.PurchaseOrderId;
@@ -25,15 +25,14 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/api/v2/orders/purchase")
 @RequiredArgsConstructor
-@Slf4j
+@RequestMapping("/api/v2/orders/purchase")
 public class PurchaseOrderController {
     private final PurchaseOrderUseCase purchaseOrderUsecase;
     private final EntityDetailMapper<PurchaseOrder, PurchaseOrderResponse> detailMapper;
     private final ResponseMapper<OrderSummaryResponse, PurchaseOrder> responseMapper;
 
-    @PostMapping
+    @PostMapping("/request")
     public ResponseWrapper<PurchaseOrderId> requestOrder(@Valid @RequestBody InsertPurchaseOrderRequest request) {
         var command = request.toCreateCommand();
         var orderId = purchaseOrderUsecase.insertOrder(command);
@@ -42,13 +41,13 @@ public class PurchaseOrderController {
 
     @PatchMapping("/{id}/status")
     public ResponseWrapper<Void> updateOrderStatus(@PathVariable String id, @RequestParam OrderStatus status) {
-        var command = new UpdateOrderStatusCommand(PurchaseOrderId.of(id), status, null);
-        purchaseOrderUsecase.updateOrderStatus(command);
+        var command = new UpdatePurchaseOrderStatusCommand(PurchaseOrderId.of(id), status, null);
+        purchaseOrderUsecase.updatePurchaseOrderStatus(command);
         return ResponseWrapper.updated(null, "PurchaseOrder");
     }
 
     @PutMapping("{id}/receive")
-    public ResponseWrapper<PurchaseOrderId> receiveOrder(@PathVariable String id, @RequestBody ReceivePurchaseOrderRequest request) {
+    public ResponseWrapper<PurchaseOrderId> receiveOrder(@PathVariable String id, @Valid  @RequestBody ReceivePurchaseOrderRequest request) {
         var command = request.toCommand(id);
         purchaseOrderUsecase.receiveOrder(command);
         return ResponseWrapper.success(null, "PurchaseOrder successfully received items");
@@ -70,17 +69,11 @@ public class PurchaseOrderController {
         return ResponseWrapper.found(orderResponse, "PurchaseOrder");
     }
 
-    @GetMapping("order_number/{orderNumber}")
-    public ResponseWrapper<PurchaseOrderResponse> getOrderByNumber(@PathVariable String orderNumber) {
-        var query = new GetOrderByNumberQuery(orderNumber);
-        PurchaseOrder purchaseOrder = purchaseOrderUsecase.getOrderByNumber(query);
-
-        PurchaseOrderResponse orderResponse = detailMapper.toDetail(purchaseOrder);
-        return ResponseWrapper.found(orderResponse, "PurchaseOrder");
-    }
-
     @GetMapping("supplier/{supplierId}")
-    public ResponseWrapper<PageResponse<OrderSummaryResponse>> getOrdersBySupplierId(@PathVariable String supplierId, @Valid @ModelAttribute PageRequest pageRequest) {
+    public ResponseWrapper<PageResponse<OrderSummaryResponse>> getOrdersBySupplierId(
+            @PathVariable String supplierId,
+            @Valid @ModelAttribute PageRequest pageRequest) {
+
         GetOrdersBySupplierIdQuery query = new GetOrdersBySupplierIdQuery(supplierId, pageRequest.toPageable());
         var purchaseOrderPage = purchaseOrderUsecase.getOrdersBySupplierId(query);
 
@@ -89,7 +82,10 @@ public class PurchaseOrderController {
     }
 
     @GetMapping("status/{status}")
-    public ResponseWrapper<PageResponse<OrderSummaryResponse>> getOrdersByStatus(@PathVariable OrderStatus status, @Valid @ModelAttribute PageRequest pageRequest) {
+    public ResponseWrapper<PageResponse<OrderSummaryResponse>> getOrdersByStatus(
+            @Valid @ModelAttribute PageRequest pageRequest,
+            @PathVariable OrderStatus status) {
+
         var query = new GetOrdersByStatusQuery(status, pageRequest.toPageable());
         Page<PurchaseOrder> orderPage = purchaseOrderUsecase.getOrdersByStatus(query);
 

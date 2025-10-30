@@ -2,49 +2,49 @@ package microservice.inventory_service.order.supplier_purchase.adapter.inbound.a
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import io.swagger.v3.oas.annotations.media.Schema;
 import microservice.inventory_service.order.supplier_purchase.application.command.InsertOrderCommand;
 import microservice.inventory_service.order.supplier_purchase.application.command.OrderItemCommand;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.PurchaseOrderId;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.ProductId;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.UserId;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Currency;
 import java.util.List;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class InsertPurchaseOrderRequest {
-    @NotBlank
-    private String purchaseOrderId;
+@Schema(description = "Request DTO to create or update a purchase order")
+public record InsertPurchaseOrderRequest(
+        @Schema(description = "Unique identifier of the purchase order", example = "po-12345")
+        @NotBlank
+        String purchaseOrderId,
 
-    @NotBlank
-    private String supplierId;
+        @Schema(description = "Unique identifier of the supplier", example = "sup-987")
+        @NotBlank
+        String supplierId,
 
-    @NotBlank
-    private String supplierName;
+        @Schema(description = "Human-readable supplier name", example = "Acme Pharma Ltd.")
+        @NotBlank
+        String supplierName,
 
-    @NotEmpty(message = "Items list cannot be empty")
-    @NotNull
-    @Valid
-    private List<OrderItemRequest> items;
+        @Schema(description = "List of items included in the purchase order", required = true)
+        @NotNull
+        @NotEmpty(message = "Items list cannot be empty")
+        @Valid
+        List<OrderItemRequest> items,
 
-    @NotNull
-    @Future
-    private LocalDateTime expectedDeliveryDate;
+        @Schema(description = "Expected delivery date and time (ISO-8601)", example = "2025-11-01T10:00:00")
+        @NotNull
+        @Future
+        LocalDateTime expectedDeliveryDate,
 
-    @NotBlank(message = "Delivery location is required")
-    private String deliveryLocation;
+        @Schema(description = "Delivery location or address where the order should be delivered", example = "Warehouse A, 123 Main St")
+        @NotBlank(message = "Delivery location is required")
+        String deliveryLocation,
 
-    @NotBlank(message = "Created by is required")
-    private String createdBy;
+        @Schema(description = "Identifier of the user who created the purchase order", example = "user-42")
+        @NotBlank(message = "Created by is required")
+        String createdBy
+) {
 
     public InsertOrderCommand toCreateCommand() {
         List<OrderItemCommand> itemCommands = items.stream()
@@ -80,28 +80,25 @@ public class InsertPurchaseOrderRequest {
                 .build();
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class OrderItemRequest {
-        @NotBlank
-        private String itemId;
+    @Schema(description = "Single item within a purchase order")
+    public static record OrderItemRequest(
+            @Schema(description = "Identifier of the order item", example = "item-1")
+            @NotBlank
+            String itemId,
 
-        @NotBlank
-        private String productId;
+            @Schema(description = "Unique identifier of the product", example = "prod-98765")
+            @NotBlank
+            String productId,
 
-        @NotBlank
-        private String productName;
+            @Schema(description = "Human-readable name of the product", example = "Aspirin 500mg")
+            @NotBlank
+            String productName,
 
-        @NotNull
-        @Min(value = 1, message = "Quantity must be positive")
-        private Integer quantity;
-
-        @NotNull(message = "Unit cost is required")
-        @DecimalMin(value = "0.01", message = "Unit cost must be positive")
-        private BigDecimal unitCost;
-
+            @Schema(description = "Quantity ordered for this item", example = "10")
+            @NotNull
+            @Min(value = 1, message = "Quantity must be positive")
+            Integer quantity
+    ) {
         public OrderItemCommand toCommand() {
             return OrderItemCommand.builder()
                     .id(itemId)

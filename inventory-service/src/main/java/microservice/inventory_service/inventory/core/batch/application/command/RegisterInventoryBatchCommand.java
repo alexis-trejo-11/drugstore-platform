@@ -4,12 +4,10 @@ import lombok.Builder;
 import microservice.inventory_service.inventory.core.batch.domain.entity.valueobject.CreateBatchParams;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.InventoryId;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-
 @Builder
-public record AddInventoryBatchCommand(
+public record RegisterInventoryBatchCommand(
         InventoryId inventoryId,
         String batchNumber,
         String lotNumber,
@@ -20,8 +18,8 @@ public record AddInventoryBatchCommand(
         String supplierName,
         String storageConditions
 ) {
-    public AddInventoryBatchCommand setInventoryId(InventoryId inventoryId) {
-        return new AddInventoryBatchCommand(
+    public RegisterInventoryBatchCommand setInventoryId(InventoryId inventoryId) {
+        return new RegisterInventoryBatchCommand(
                 inventoryId,
                 this.batchNumber,
                 this.lotNumber,
