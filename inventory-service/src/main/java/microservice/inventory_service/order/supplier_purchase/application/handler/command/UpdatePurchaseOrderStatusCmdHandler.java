@@ -5,18 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import microservice.inventory_service.order.supplier_purchase.application.command.UpdatePurchaseOrderStatusCommand;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrder;
 import microservice.inventory_service.order.supplier_purchase.domain.exception.OrderNotFoundException;
-import microservice.inventory_service.order.supplier_purchase.domain.port.output.OrderRepository;
-import org.slf4j.LoggerFactory;
+import microservice.inventory_service.order.supplier_purchase.domain.port.output.PurchaseOrderRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.logging.Logger;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class UpdatePurchaseOrderStatusCommandHandler {
-    private final OrderRepository orderRepository;
+public class UpdatePurchaseOrderStatusCmdHandler {
+    private final PurchaseOrderRepository orderRepository;
 
     @Transactional
     public void handle(UpdatePurchaseOrderStatusCommand command) {

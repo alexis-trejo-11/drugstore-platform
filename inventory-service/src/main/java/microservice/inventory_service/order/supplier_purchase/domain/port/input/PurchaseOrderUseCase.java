@@ -1,6 +1,6 @@
 package microservice.inventory_service.order.supplier_purchase.domain.port.input;
 
-import microservice.inventory_service.order.supplier_purchase.application.command.InsertOrderCommand;
+import microservice.inventory_service.order.supplier_purchase.application.command.InitOrderCommand;
 import microservice.inventory_service.order.supplier_purchase.application.command.ReceiveOrderCommand;
 import microservice.inventory_service.order.supplier_purchase.application.command.UpdatePurchaseOrderStatusCommand;
 import microservice.inventory_service.order.supplier_purchase.application.query.*;
@@ -14,8 +14,8 @@ public interface PurchaseOrderUseCase {
     Page<PurchaseOrder> getOrdersByStatus(GetOrdersByStatusQuery query);
     Page<PurchaseOrder> getOrdersBySupplierId(GetOrdersBySupplierIdQuery query);
 
-
-    PurchaseOrderId insertOrder(InsertOrderCommand command);
+    PurchaseOrderId initOrder(InitOrderCommand command);
+    void fullFillOrder(ReceiveOrderCommand command);
     void updatePurchaseOrderStatus(UpdatePurchaseOrderStatusCommand command);
     void receiveOrder(ReceiveOrderCommand command);
 

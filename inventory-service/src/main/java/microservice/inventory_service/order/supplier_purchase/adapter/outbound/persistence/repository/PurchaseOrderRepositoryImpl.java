@@ -6,7 +6,7 @@ import microservice.inventory_service.order.supplier_purchase.adapter.outbound.p
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrder;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.PurchaseOrderId;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.OrderStatus;
-import microservice.inventory_service.order.supplier_purchase.domain.port.output.OrderRepository;
+import microservice.inventory_service.order.supplier_purchase.domain.port.output.PurchaseOrderRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class OrderRepositoryImpl implements OrderRepository {
+public class PurchaseOrderRepositoryImpl implements PurchaseOrderRepository {
     private final EntityMapper<PurchaseOrderEntityOrder, PurchaseOrder> mapper;
     private final JpaOrderRepository jpaRepository;
 

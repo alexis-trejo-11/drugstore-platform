@@ -5,11 +5,10 @@ import microservice.inventory_service.order.supplier_purchase.domain.entity.valu
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.UserId;
 
 import java.time.LocalDateTime;
-import java.util.Currency;
 import java.util.List;
 
 @Builder
-public record InsertOrderCommand(
+public record InitOrderCommand(
         PurchaseOrderId purchaseOrderId,
         String supplierId,
         String supplierName,

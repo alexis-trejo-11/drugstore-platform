@@ -1,7 +1,7 @@
 package microservice.store_service.config;
 
 import libs_kernel.config.CustomGlobalExceptionHandler;
-import libs_kernel.response.ErrorDetails;
+import libs_kernel.response.Error;
 import libs_kernel.response.ResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
 import microservice.store_service.domain.exception.StoreDomainException;
@@ -29,12 +29,12 @@ public class GlobalExceptionHandler extends CustomGlobalExceptionHandler  {
                     ex.getLoggingContext());
         }
 
-        ErrorDetails errorDetails = new ErrorDetails();
-        errorDetails.setErrorCode(ex.getErrorCode());
-        errorDetails.setErrorMessage(ex.getMessage());
-        errorDetails.setErrorType(ex.getClass().getSimpleName());
+        Error error = new Error();
+        error.setErrorCode(ex.getErrorCode());
+        error.setErrorMessage(ex.getMessage());
+        error.setErrorType(ex.getClass().getSimpleName());
 
-        var response = ResponseWrapper.error("Domain Exception Occurred", errorDetails);
+        var response = ResponseWrapper.error("Domain Exception Occurred", error);
         return new ResponseEntity<>(response, status);
     }
 

@@ -2,12 +2,12 @@ package microservice.inventory_service.order.supplier_purchase.application.handl
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import microservice.inventory_service.order.supplier_purchase.application.command.InsertOrderCommand;
+import microservice.inventory_service.order.supplier_purchase.application.command.InitOrderCommand;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrder;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrderItem;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.CreatePurchaseOrderParams;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.PurchaseOrderId;
-import microservice.inventory_service.order.supplier_purchase.domain.port.output.OrderRepository;
+import microservice.inventory_service.order.supplier_purchase.domain.port.output.PurchaseOrderRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,11 +16,11 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class CreatePurchaseOrderCommandHandler {
-    private final OrderRepository orderRepository;
+public class CreatePurchaseOrderCmdHandler {
+    private final PurchaseOrderRepository orderRepository;
 
     @Transactional
-    public PurchaseOrderId handle(InsertOrderCommand command) {
+    public PurchaseOrderId handle(InitOrderCommand command) {
         log.info("Handling CreatePurchaseOrderCommand for PurchaseOrderId: {}", command.purchaseOrderId());
         PurchaseOrder purchaseOrder = commandToDomain(command);
 
@@ -37,7 +37,7 @@ public class CreatePurchaseOrderCommandHandler {
         return savedPurchaseOrder.getId();
     }
 
-    private PurchaseOrder commandToDomain(InsertOrderCommand command) {
+    private PurchaseOrder commandToDomain(InitOrderCommand command) {
         log.info("Creating PurchaseOrderItems for PurchaseOrderId: {}", command.purchaseOrderId());
         List<PurchaseOrderItem> items = command.items().stream()
                 .map(itemCommand -> PurchaseOrderItem.create(
@@ -62,7 +62,7 @@ public class CreatePurchaseOrderCommandHandler {
         );
     }
 
-    private void validateUpdate(InsertOrderCommand command) {
+    private void validateUpdate(InitOrderCommand command) {
         log.info("Update operation detected for PurchaseOrderId: {}", command.purchaseOrderId());
         var existingOrder = orderRepository.findById(command.purchaseOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("PurchaseOrder with ID " + command.purchaseOrderId() + " does not exist."));

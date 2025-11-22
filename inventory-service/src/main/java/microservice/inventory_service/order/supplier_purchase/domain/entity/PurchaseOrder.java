@@ -175,6 +175,27 @@ public class PurchaseOrder extends BaseDomainEntity<PurchaseOrderId> {
         log.info("PurchaseOrder update validated successfully.");
     }
 
+    public void fulfillOrder(List<ReceivedItem> receivedItems) {
+        log.info("Fulfilling PurchaseOrder with ID: {}", this.id);
+        if (!needsToBeFulfilled()) {
+            throw new OrderStatusValidationException("PurchaseOrder does not need to be fulfilled in its current status");
+        }
+
+        for (ReceivedItem receivedItem : receivedItems) {
+            PurchaseOrderItem purchaseOrderItem = findItemById(receivedItem.getItemId());
+            purchaseOrderItem.receiveQuantity(receivedItem.getReceivedQuantity());
+            purchaseOrderItem.assignBatchNumber(receivedItem.getBatchNumber());
+        }
+
+        updateStatusBasedOnReceivedItems();
+        this.updatedAt = LocalDateTime.now();
+        log.info("PurchaseOrder with ID: {} fulfilled successfully", this.id);
+    }
+
+    public boolean needsToBeFulfilled() {
+        return this.status == OrderStatus.APPROVED || this.status == OrderStatus.PARTIALLY_RECEIVED;
+    }
+
     public List<PurchaseOrderItem> getItems() {
         return Collections.unmodifiableList(items);
     }

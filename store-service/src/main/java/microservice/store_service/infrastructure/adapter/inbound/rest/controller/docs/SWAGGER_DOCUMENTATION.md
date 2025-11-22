@@ -122,7 +122,7 @@ All endpoints return responses in a standardized format:
   "isSuccess": false,
   "message": "Error description",
   "timestamp": "2025-10-19T14:25:30",
-  "errorDetails": {
+  "error": {
     "errorCode": "ERROR_CODE",
     "message": "Detailed error message",
     "validationErrors": {

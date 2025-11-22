@@ -1,6 +1,5 @@
 package libs_kernel.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,7 +23,7 @@ import java.util.Map;
  *   "message": "Descriptive message",
  *   "data": { ... },
  *   "timestamp": "2025-10-08T10:30:00",
- *   "errorDetails": { ... } // Only present in error responses
+ *   "error": { ... } // Only present in error responses
  * }
  * </pre>
  *
@@ -37,7 +36,7 @@ import java.util.Map;
  * ResponseWrapper&lt;Product&gt; response = ResponseWrapper.created(product, "Product");
  *
  * // Error response
- * ResponseWrapper&lt;Void&gt; response = ResponseWrapper.badRequest(errorDetails);
+ * ResponseWrapper&lt;Void&gt; response = ResponseWrapper.badRequest(error);
  * </pre>
  *
  * @param <T> The type of data contained in the response
@@ -50,16 +49,6 @@ import java.util.Map;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseWrapper<T> {
-
-    /**
-     * Indicates whether the operation was successful.
-     * <p>
-     * {@code true} for successful operations (2xx status codes),
-     * {@code false} for errors (4xx, 5xx status codes).
-     * </p>
-     */
-    private boolean isSuccess;
-
     /**
      * Human-readable message describing the response.
      * <p>
@@ -92,7 +81,7 @@ public class ResponseWrapper<T> {
      * Contains validation errors, stack traces, or other error-specific information.
      * </p>
      */
-    public ErrorDetails errorDetails;
+    public Error error;
 
     /**
      * Creates a successful response with data and a custom message.
@@ -109,7 +98,6 @@ public class ResponseWrapper<T> {
      */
     public static <T> ResponseWrapper<T> success(T data, String message) {
         var response = new ResponseWrapper<T>();
-        response.setSuccess(true);
         response.setMessage(message);
         response.setData(data);
         response.setTimestamp(LocalDateTime.now());
@@ -171,7 +159,6 @@ public class ResponseWrapper<T> {
     public static  <T> ResponseWrapper<T> found(T data, String entity, Map<String, ?> metadata) {
         String message = String.format("%s found successfully", entity);
         var response = new ResponseWrapper<T>();
-        response.setSuccess(true);
         response.setMessage(message);
         response.setData(data);
         response.setTimestamp(LocalDateTime.now());
@@ -198,7 +185,6 @@ public class ResponseWrapper<T> {
     public static <T> ResponseWrapper<T> found(T data, String entity) {
         String message = String.format("%s found successfully", entity);
         var response = new ResponseWrapper<T>();
-        response.setSuccess(true);
         response.setMessage(message);
         response.setData(data);
         response.setTimestamp(LocalDateTime.now());
@@ -226,7 +212,6 @@ public class ResponseWrapper<T> {
     public static <T> ResponseWrapper<T> created(T data, String entity) {
         String message = String.format("%s created successfully", entity);
         var response = new ResponseWrapper<T>();
-        response.setSuccess(true);
         response.setMessage(message);
         response.setData(data);
         response.setTimestamp(LocalDateTime.now());
@@ -274,7 +259,6 @@ public class ResponseWrapper<T> {
     public static <T> ResponseWrapper<T> updated(T data, String entity) {
         String message = String.format("%s updated successfully", entity);
         var response = new ResponseWrapper<T>();
-        response.setSuccess(true);
         response.setMessage(message);
         response.setData(data);
         response.setTimestamp(LocalDateTime.now());
@@ -322,7 +306,6 @@ public class ResponseWrapper<T> {
     public static <T> ResponseWrapper<T> deleted(T data, String entity) {
         String message = String.format("%s deleted successfully", entity);
         var response = new ResponseWrapper<T>();
-        response.setSuccess(true);
         response.setMessage(message);
         response.setData(data);
         response.setTimestamp(LocalDateTime.now());
@@ -360,17 +343,16 @@ public class ResponseWrapper<T> {
      * is set to {@code true} but should be {@code false} for error responses.
      * </p>
      *
-     * @param errorDetails Additional error information and context
+     * @param error Additional error information and context
      * @return An error ResponseWrapper with not found message
      * @example
      * <pre>
-     * ErrorDetails details = new ErrorDetails("USER_NOT_FOUND", "No user with id: 123");
+     * Error details = new Error("USER_NOT_FOUND", "No user with id: 123");
      * return ResponseWrapper.notFound(details);
      * </pre>
      */
-    public ResponseWrapper<Void> notFound(ErrorDetails errorDetails) {
+    public ResponseWrapper<Void> notFound(Error error) {
         var response = new ResponseWrapper<Void>();
-        response.setSuccess(true);
         response.setMessage("Entity not found");
         response.setTimestamp(LocalDateTime.now());
         return response;
@@ -383,20 +365,19 @@ public class ResponseWrapper<T> {
      * Typically corresponds to HTTP 401 Unauthorized status.
      * </p>
      *
-     * @param errorDetails Additional error information and context
+     * @param error Additional error information and context
      * @return An error ResponseWrapper with unauthorized message
      * @example
      * <pre>
-     * ErrorDetails details = new ErrorDetails("AUTH_REQUIRED", "Valid token required");
+     * Error details = new Error("AUTH_REQUIRED", "Valid token required");
      * return ResponseWrapper.unauthorized(details);
      * </pre>
      */
-    public ResponseWrapper<Void> unauthorized(ErrorDetails errorDetails) {
+    public ResponseWrapper<Void> unauthorized(Error error) {
         var response = new ResponseWrapper<Void>();
-        response.setSuccess(false);
         response.setMessage("Unauthorized access");
         response.setTimestamp(LocalDateTime.now());
-        response.setErrorDetails(errorDetails);
+        response.setError(error);
         return response;
     }
 
@@ -407,21 +388,20 @@ public class ResponseWrapper<T> {
      * Typically corresponds to HTTP 403 Forbidden status.
      * </p>
      *
-     * @param errorDetails Additional error information and context
+     * @param error Additional error information and context
      * @return An error ResponseWrapper with forbidden message
      * @example
      * <pre>
-     * ErrorDetails details = new ErrorDetails("INSUFFICIENT_PERMISSIONS",
+     * Error details = new Error("INSUFFICIENT_PERMISSIONS",
      *     "Admin role required for this action");
      * return ResponseWrapper.forbidden(details);
      * </pre>
      */
-    public ResponseWrapper<Void> forbidden(ErrorDetails errorDetails) {
+    public ResponseWrapper<Void> forbidden(Error error) {
         var response = new ResponseWrapper<Void>();
-        response.setSuccess(false);
         response.setMessage("Forbidden access");
         response.setTimestamp(LocalDateTime.now());
-        response.setErrorDetails(errorDetails);
+        response.setError(error);
         return response;
     }
 
@@ -433,21 +413,20 @@ public class ResponseWrapper<T> {
      * Typically corresponds to HTTP 409 Conflict status.
      * </p>
      *
-     * @param errorDetails Additional error information and context
+     * @param error Additional error information and context
      * @return An error ResponseWrapper with conflict message
      * @example
      * <pre>
-     * ErrorDetails details = new ErrorDetails("DUPLICATE_EMAIL",
+     * Error details = new Error("DUPLICATE_EMAIL",
      *     "User with this email already exists");
      * return ResponseWrapper.conflict(details);
      * </pre>
      */
-    public ResponseWrapper<Void> conflict(ErrorDetails errorDetails) {
+    public ResponseWrapper<Void> conflict(Error error) {
         var response = new ResponseWrapper<Void>();
-        response.setSuccess(false);
         response.setMessage("Conflict occurred");
         response.setTimestamp(LocalDateTime.now());
-        response.setErrorDetails(errorDetails);
+        response.setError(error);
         return response;
     }
 
@@ -459,21 +438,20 @@ public class ResponseWrapper<T> {
      * Typically corresponds to HTTP 422 Unprocessable Entity status.
      * </p>
      *
-     * @param errorDetails Additional error information and context
+     * @param error Additional error information and context
      * @return An error ResponseWrapper with unprocessable entity message
      * @example
      * <pre>
-     * ErrorDetails details = new ErrorDetails("INVALID_BUSINESS_RULE",
+     * Error details = new Error("INVALID_BUSINESS_RULE",
      *     "Order total must be greater than shipping cost");
      * return ResponseWrapper.unprocessableEntity(details);
      * </pre>
      */
-    public ResponseWrapper<Void> unprocessableEntity(ErrorDetails errorDetails) {
+    public ResponseWrapper<Void> unprocessableEntity(Error error) {
         var response = new ResponseWrapper<Void>();
-        response.setSuccess(false);
         response.setMessage("Unprocessable entity");
         response.setTimestamp(LocalDateTime.now());
-        response.setErrorDetails(errorDetails);
+        response.setError(error);
         return response;
     }
 
@@ -485,21 +463,20 @@ public class ResponseWrapper<T> {
      * Typically corresponds to HTTP 400 Bad Request status.
      * </p>
      *
-     * @param errorDetails Additional error information including validation errors
+     * @param error Additional error information including validation errors
      * @return An error ResponseWrapper with bad request message
      * @example
      * <pre>
-     * ErrorDetails details = new ErrorDetails("VALIDATION_FAILED",
+     * Error details = new Error("VALIDATION_FAILED",
      *     Map.of("email", "Invalid email format", "age", "Must be positive"));
      * return ResponseWrapper.badRequest(details);
      * </pre>
      */
-    public static ResponseWrapper<Void> badRequest(ErrorDetails errorDetails) {
+    public static ResponseWrapper<Void> badRequest(Error error) {
         var response = new ResponseWrapper<Void>();
-        response.setSuccess(false);
         response.setMessage("Bad request");
         response.setTimestamp(LocalDateTime.now());
-        response.setErrorDetails(errorDetails);
+        response.setError(error);
         return response;
     }
 
@@ -512,20 +489,19 @@ public class ResponseWrapper<T> {
      *
      * @param <T> The type of data in the response
      * @param message Custom error message
-     * @param errorDetails Additional error information and context
+     * @param error Additional error information and context
      * @return An error ResponseWrapper with the specified message and details
      * @example
      * <pre>
-     * ErrorDetails details = new ErrorDetails("EXTERNAL_SERVICE_ERROR",
+     * Error details = new Error("EXTERNAL_SERVICE_ERROR",
      *     "Payment gateway unavailable");
      * return ResponseWrapper.error("Payment processing failed", details);
      * </pre>
      */
-    public static <T> ResponseWrapper<T> error(String message, ErrorDetails errorDetails) {
+    public static <T> ResponseWrapper<T> error(String message, Error error) {
         var response = new ResponseWrapper<T>();
-        response.setSuccess(false);
         response.setMessage(message);
-        response.setErrorDetails(errorDetails);
+        response.setError(error);
         response.setTimestamp(LocalDateTime.now());
         return response;
     }

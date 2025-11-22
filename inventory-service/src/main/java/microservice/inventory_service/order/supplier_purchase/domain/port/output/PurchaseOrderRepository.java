@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-public interface OrderRepository {
+public interface PurchaseOrderRepository {
     PurchaseOrder save(PurchaseOrder PurchaseOrder);
 
     Optional<PurchaseOrder> findById(PurchaseOrderId id);

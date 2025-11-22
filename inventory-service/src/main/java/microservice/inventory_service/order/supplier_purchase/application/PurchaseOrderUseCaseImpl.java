@@ -1,12 +1,13 @@
 package microservice.inventory_service.order.supplier_purchase.application;
 
 import lombok.RequiredArgsConstructor;
-import microservice.inventory_service.order.supplier_purchase.application.command.InsertOrderCommand;
+import microservice.inventory_service.order.supplier_purchase.application.command.InitOrderCommand;
 import microservice.inventory_service.order.supplier_purchase.application.command.ReceiveOrderCommand;
 import microservice.inventory_service.order.supplier_purchase.application.command.UpdatePurchaseOrderStatusCommand;
-import microservice.inventory_service.order.supplier_purchase.application.handler.command.CreatePurchaseOrderCommandHandler;
-import microservice.inventory_service.order.supplier_purchase.application.handler.command.ReceiveOrderCommandHandler;
-import microservice.inventory_service.order.supplier_purchase.application.handler.command.UpdatePurchaseOrderStatusCommandHandler;
+import microservice.inventory_service.order.supplier_purchase.application.handler.command.CreatePurchaseOrderCmdHandler;
+import microservice.inventory_service.order.supplier_purchase.application.handler.command.FulFillPurchaseOrderCmdHandler;
+import microservice.inventory_service.order.supplier_purchase.application.handler.command.ReceiveOrderCmdHandler;
+import microservice.inventory_service.order.supplier_purchase.application.handler.command.UpdatePurchaseOrderStatusCmdHandler;
 import microservice.inventory_service.order.supplier_purchase.application.handler.queries.*;
 import microservice.inventory_service.order.supplier_purchase.application.query.*;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrder;
@@ -19,24 +20,30 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 public class PurchaseOrderUseCaseImpl implements PurchaseOrderUseCase {
-    private final CreatePurchaseOrderCommandHandler createPOHandler;
-    private final ReceiveOrderCommandHandler receivePOHandler;
-    private final UpdatePurchaseOrderStatusCommandHandler updatePurchaseOrderStatusCommandHandler;
+    private final CreatePurchaseOrderCmdHandler createPOHandler;
+    private final ReceiveOrderCmdHandler receivePOHandler;
+    private final UpdatePurchaseOrderStatusCmdHandler updatePOStatusHandler;
+    private final FulFillPurchaseOrderCmdHandler fullFillOrderCommand;
 
-    private final GetOrdersByExpectedDateBeforeQueryHandler ordersByExpectedDateBeforeQueryHandler;
-    private final GetOrderByIdQueryHandler orderByIdQueryHandler;
-    private final GetOrdersByStatusQueryHandler ordersByStatusQueryHandler;
-    private final GetOrderBySupplierIdQueryHandler orderBySupplierIdQueryHandler;
+    private final GetOrdersByExpectedDateBeforeQueryHandler ordersByExpectedDateBeforeQuery;
+    private final GetOrderByIdQueryHandler orderByIdQuery;
+    private final GetOrdersByStatusQueryHandler ordersByStatusQuery;
+    private final GetOrderBySupplierIdQueryHandler orderBySupplierIdQuery;
 
     @Override
     @Transactional
-    public PurchaseOrderId insertOrder(InsertOrderCommand command) {
+    public PurchaseOrderId initOrder(InitOrderCommand command) {
         return createPOHandler.handle(command);
     }
 
     @Override
+    public void fullFillOrder(ReceiveOrderCommand command) {
+        fullFillOrderCommand.handle(command);
+    }
+
+    @Override
     public void updatePurchaseOrderStatus(UpdatePurchaseOrderStatusCommand command) {
-        updatePurchaseOrderStatusCommandHandler.handle(command);
+        updatePOStatusHandler.handle(command);
     }
 
     @Override
@@ -46,22 +53,22 @@ public class PurchaseOrderUseCaseImpl implements PurchaseOrderUseCase {
 
     @Override
     public PurchaseOrder getOrderById(GetOrderByIdQuery query) {
-        return orderByIdQueryHandler.handle(query);
+        return orderByIdQuery.handle(query);
     }
 
 
     @Override
     public Page<PurchaseOrder> getOrdersByExpectedDateBefore(GetOrderByExpectedDateBeforeQuery query) {
-        return ordersByExpectedDateBeforeQueryHandler.handle(query);
+        return ordersByExpectedDateBeforeQuery.handle(query);
     }
 
     @Override
     public Page<PurchaseOrder> getOrdersByStatus(GetOrdersByStatusQuery query) {
-        return ordersByStatusQueryHandler.handle(query);
+        return ordersByStatusQuery.handle(query);
     }
 
     @Override
     public Page<PurchaseOrder> getOrdersBySupplierId(GetOrdersBySupplierIdQuery query) {
-        return orderBySupplierIdQueryHandler.handle(query);
+        return orderBySupplierIdQuery.handle(query);
     }
 }

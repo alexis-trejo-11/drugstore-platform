@@ -7,7 +7,6 @@ import libs_kernel.page.PageRequest;
 import libs_kernel.page.PageResponse;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import microservice.inventory_service.order.supplier_purchase.adapter.inbound.api.rest.dto.request.ReceivePurchaseOrderRequest;
 import microservice.inventory_service.order.supplier_purchase.application.command.UpdatePurchaseOrderStatusCommand;
 import microservice.inventory_service.order.supplier_purchase.application.query.*;
@@ -32,11 +31,18 @@ public class PurchaseOrderController {
     private final EntityDetailMapper<PurchaseOrder, PurchaseOrderResponse> detailMapper;
     private final ResponseMapper<OrderSummaryResponse, PurchaseOrder> responseMapper;
 
-    @PostMapping("/request")
-    public ResponseWrapper<PurchaseOrderId> requestOrder(@Valid @RequestBody InsertPurchaseOrderRequest request) {
+    @PostMapping("/init")
+    public ResponseWrapper<PurchaseOrderId> initOrder(@Valid @RequestBody InsertPurchaseOrderRequest request) {
         var command = request.toCreateCommand();
-        var orderId = purchaseOrderUsecase.insertOrder(command);
+        var orderId = purchaseOrderUsecase.initOrder(command);
         return ResponseWrapper.created(orderId, "PurchaseOrder");
+    }
+
+    @PostMapping("{id}/fullfill")
+    public ResponseWrapper<PurchaseOrderId> fullFillOrder(@PathVariable String id, @Valid @RequestBody ReceivePurchaseOrderRequest request) {
+        var command = request.toCommand(id);
+        purchaseOrderUsecase.fullFillOrder(command);
+        return ResponseWrapper.success("PurchaseOrder successfully fulfilled items");
     }
 
     @PatchMapping("/{id}/status")
@@ -56,7 +62,7 @@ public class PurchaseOrderController {
     @PutMapping("/{id}")
     public ResponseWrapper<Void> updateOrder(@Valid @RequestBody InsertPurchaseOrderRequest request, @PathVariable String id) {
         var command = request.toUpdateCommand(PurchaseOrderId.of(id));
-        purchaseOrderUsecase.insertOrder(command);
+        purchaseOrderUsecase.initOrder(command);
         return ResponseWrapper.updated(null, "PurchaseOrder");
     }
 
