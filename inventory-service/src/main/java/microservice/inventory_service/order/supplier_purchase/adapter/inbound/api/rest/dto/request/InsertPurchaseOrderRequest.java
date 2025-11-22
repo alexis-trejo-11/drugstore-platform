@@ -3,7 +3,7 @@ package microservice.inventory_service.order.supplier_purchase.adapter.inbound.a
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import io.swagger.v3.oas.annotations.media.Schema;
-import microservice.inventory_service.order.supplier_purchase.application.command.InsertOrderCommand;
+import microservice.inventory_service.order.supplier_purchase.application.command.InitOrderCommand;
 import microservice.inventory_service.order.supplier_purchase.application.command.OrderItemCommand;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.PurchaseOrderId;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.ProductId;
@@ -46,12 +46,12 @@ public record InsertPurchaseOrderRequest(
         String createdBy
 ) {
 
-    public InsertOrderCommand toCreateCommand() {
+    public InitOrderCommand toCreateCommand() {
         List<OrderItemCommand> itemCommands = items.stream()
                 .map(OrderItemRequest::toCommand)
                 .toList();
 
-        return InsertOrderCommand.builder()
+        return InitOrderCommand.builder()
                 .purchaseOrderId(PurchaseOrderId.of(purchaseOrderId))
                 .supplierId(supplierId)
                 .supplierName(supplierName)
@@ -63,12 +63,12 @@ public record InsertPurchaseOrderRequest(
                 .build();
     }
 
-    public InsertOrderCommand toUpdateCommand(PurchaseOrderId purchaseOrderIdObj) {
+    public InitOrderCommand toUpdateCommand(PurchaseOrderId purchaseOrderIdObj) {
         List<OrderItemCommand> itemCommands = items.stream()
                 .map(OrderItemRequest::toCommand)
                 .toList();
 
-        return InsertOrderCommand.builder()
+        return InitOrderCommand.builder()
                 .purchaseOrderId(purchaseOrderIdObj)
                 .supplierId(supplierId)
                 .supplierName(supplierName)

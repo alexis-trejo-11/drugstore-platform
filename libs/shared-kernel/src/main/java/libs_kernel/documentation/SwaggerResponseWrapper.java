@@ -1,7 +1,7 @@
 package libs_kernel.documentation;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import libs_kernel.response.ErrorDetails;
+import libs_kernel.response.Error;
 import libs_kernel.response.ResponseWrapper;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,15 +17,6 @@ import java.util.Map;
 @Schema(description = "Standard API response wrapper")
 public class SwaggerResponseWrapper<T> extends ResponseWrapper<T> {
 
-    @Schema(
-            description = "Indicates whether the operation was successful",
-            example = "true",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    @Override
-    public boolean isSuccess() {
-        return super.isSuccess();
-    }
 
     @Schema(
             description = "Human-readable message describing the response",
@@ -64,8 +55,8 @@ public class SwaggerResponseWrapper<T> extends ResponseWrapper<T> {
             nullable = true
     )
     @Override
-    public ErrorDetails getErrorDetails() {
-        return super.getErrorDetails();
+    public Error getError() {
+        return super.getError();
     }
 }
 

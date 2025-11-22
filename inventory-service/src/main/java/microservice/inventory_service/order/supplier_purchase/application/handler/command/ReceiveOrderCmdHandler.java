@@ -6,7 +6,7 @@ import microservice.inventory_service.order.supplier_purchase.application.comman
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrder;
 import microservice.inventory_service.order.supplier_purchase.domain.event.PurchaseOrderReceivedEvent;
 import microservice.inventory_service.order.supplier_purchase.domain.exception.OrderNotFoundException;
-import microservice.inventory_service.order.supplier_purchase.domain.port.output.OrderRepository;
+import microservice.inventory_service.order.supplier_purchase.domain.port.output.PurchaseOrderRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ReceiveOrderCommandHandler {
-    private final OrderRepository orderRepository;
+public class ReceiveOrderCmdHandler {
+    private final PurchaseOrderRepository orderRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional

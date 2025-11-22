@@ -11,7 +11,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ErrorDetails {
+public class Error {
     private String errorCode;
     private String errorMessage;
     private String errorType;

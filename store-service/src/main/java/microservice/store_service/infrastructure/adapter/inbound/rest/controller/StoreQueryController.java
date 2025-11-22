@@ -91,7 +91,7 @@ public class StoreQueryController {
                       "isSuccess": false,
                       "message": "Store not found",
                       "timestamp": "2025-10-19T14:25:30",
-                      "errorDetails": {
+                      "error": {
                         "errorCode": "STORE_NOT_FOUND",
                         "message": "No store found with ID: c1a2b3d4-e5f6-7890-abcd-ef1234567890"
                       }
@@ -111,7 +111,7 @@ public class StoreQueryController {
                       "isSuccess": false,
                       "message": "Unauthorized access",
                       "timestamp": "2025-10-19T14:25:30",
-                      "errorDetails": {
+                      "error": {
                         "errorCode": "UNAUTHORIZED",
                         "message": "Valid JWT token required"
                       }
@@ -131,7 +131,7 @@ public class StoreQueryController {
                       "isSuccess": false,
                       "message": "Forbidden access",
                       "timestamp": "2025-10-19T14:25:30",
-                      "errorDetails": {
+                      "error": {
                         "errorCode": "FORBIDDEN",
                         "message": "ADMIN role required to access this resource"
                       }
@@ -282,7 +282,7 @@ public class StoreQueryController {
                       "isSuccess": false,
                       "message": "Bad request",
                       "timestamp": "2025-10-19T14:25:30",
-                      "errorDetails": {
+                      "error": {
                         "errorCode": "INVALID_PARAMETERS",
                         "message": "Invalid pagination parameters"
                       }

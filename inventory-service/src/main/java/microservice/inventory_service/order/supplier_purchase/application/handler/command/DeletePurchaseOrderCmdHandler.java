@@ -4,15 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.inventory_service.order.supplier_purchase.application.command.DeletePurchaseOrderCommand;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrder;
-import microservice.inventory_service.order.supplier_purchase.domain.port.output.OrderRepository;
+import microservice.inventory_service.order.supplier_purchase.domain.port.output.PurchaseOrderRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class DeletePurchaseOrderCommandHandler {
-    private final OrderRepository orderRepository;
+public class DeletePurchaseOrderCmdHandler {
+    private final PurchaseOrderRepository orderRepository;
 
     @Transactional
     private void handle(DeletePurchaseOrderCommand command) {

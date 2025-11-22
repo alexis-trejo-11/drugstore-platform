@@ -86,7 +86,7 @@ public class StoreCommandController {
                       "isSuccess": false,
                       "message": "Bad request",
                       "timestamp": "2025-10-19T14:25:30",
-                      "errorDetails": {
+                      "error": {
                         "errorCode": "VALIDATION_FAILED",
                         "message": "Validation errors occurred",
                         "validationErrors": {
@@ -121,7 +121,7 @@ public class StoreCommandController {
                       "isSuccess": false,
                       "message": "Conflict occurred",
                       "timestamp": "2025-10-19T14:25:30",
-                      "errorDetails": {
+                      "error": {
                         "errorCode": "DUPLICATE_STORE_CODE",
                         "message": "A store with code STR-001 already exists"
                       }
@@ -610,7 +610,7 @@ public class StoreCommandController {
                       "isSuccess": false,
                       "message": "Bad request",
                       "timestamp": "2025-10-19T14:25:30",
-                      "errorDetails": {
+                      "error": {
                         "errorCode": "CANNOT_DELETE_STORE",
                         "message": "Store has active purchaseOrders and cannot be deleted"
                       }
