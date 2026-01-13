@@ -31,9 +31,9 @@ public class Inventory {
     private InventoryStatus status;
     private LocalDateTime lastRestockedDate;
     private LocalDateTime lastCountDate;
-    private List<InventoryBatch> batches;
-    private List<InventoryMovement> movements;
-    private LocalDateTime createdAt;
+    private final List<InventoryBatch> batches;
+    private final List<InventoryMovement> movements;
+    private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     private Inventory(InventoryId id, ProductId productId, Integer totalQuantity, Integer availableQuantity, Integer reservedQuantity, Integer reorderLevel, Integer reorderQuantity, Integer maximumStockLevel, String warehouseLocation, InventoryStatus status, LocalDateTime lastRestockedDate, LocalDateTime lastCountDate, List<InventoryBatch> batches, List<InventoryMovement> movements, LocalDateTime createdAt, LocalDateTime updatedAt) {
@@ -197,6 +197,10 @@ public class Inventory {
         this.lastCountDate = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         updateStatus();
+    }
+
+    public boolean hasAvailableStock(int quantity) {
+        return this.availableQuantity >= quantity;
     }
 
 

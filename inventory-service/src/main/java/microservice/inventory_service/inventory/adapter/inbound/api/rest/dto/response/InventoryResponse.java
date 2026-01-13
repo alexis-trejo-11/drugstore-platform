@@ -1,6 +1,7 @@
 package microservice.inventory_service.inventory.adapter.inbound.api.rest.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import libs_kernel.page.PageResponse;
 import lombok.Builder;
 import lombok.Getter;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.enums.InventoryStatus;
@@ -58,4 +59,7 @@ public class InventoryResponse {
 
     @Schema(description = "Timestamp when the inventory record was last updated", example = "2024-01-18T11:45:00")
     private LocalDateTime updatedAt;
+
+    @Schema(description = "Paginated list of batches associated with the inventory")
+    private PageResponse<BatchResponse> batches;
 }

@@ -13,13 +13,13 @@ import microservice.inventory_service.shared.domain.order.OrderStatus;
 @Setter
 public abstract class BaseOrderEntity extends BaseEntity {
     @Column(name = "payment_id", length = 36)
-    private String paymentId;
+    protected String paymentId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private OrderStatus status;
+    protected OrderStatus status;
 
     @Column(name = "notes", length = 500)
-    private String notes;
+    protected String notes;
 
 }

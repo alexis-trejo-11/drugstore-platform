@@ -20,6 +20,9 @@ public class SaleOrderItemEntity extends BaseOrderItemEntity {
     @JoinColumn(name = "order_id", nullable = false)
     private SaleOrderEntity saleOrder;
 
-    @Column(name = "quantity", nullable = false)
-    private Integer quantity;
+    @Column(name = "ordered_quantity", nullable = false)
+    private Integer orderedQuantity;
+
+    @Column(name = "received_quantity", nullable = false)
+    private Integer receivedQuantity;
 }

@@ -27,15 +27,15 @@ public abstract class BaseOrderDomain<T> extends BaseDomainEntity<T> {
         this.notes = notes;
     }
 
-    protected String getPaymentId() {
+    public String getPaymentId() {
         return paymentId;
     }
 
-    protected OrderStatus getStatus() {
+    public OrderStatus getStatus() {
         return status;
     }
 
-    protected String getNotes() {
+    public String getNotes() {
         return notes;
     }
 }

@@ -1,8 +1,8 @@
 package microservice.inventory_service.inventory.core.inventory.port.Input;
 
-import microservice.inventory_service.inventory.core.inventory.application.report.BatchExpirationReport;
-import microservice.inventory_service.inventory.core.inventory.application.report.InventoryMovementReport;
-import microservice.inventory_service.inventory.core.inventory.application.report.InventoryStockReport;
+import microservice.inventory_service.inventory.core.inventory.service.report.BatchExpirationReport;
+import microservice.inventory_service.inventory.core.inventory.service.report.InventoryMovementReport;
+import microservice.inventory_service.inventory.core.inventory.service.report.InventoryStockReport;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.InventoryId;
 

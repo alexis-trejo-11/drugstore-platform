@@ -67,6 +67,10 @@ public class InventoryBatchEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    public InventoryBatchEntity(String id) {
+        this.id = id;
+    }
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {

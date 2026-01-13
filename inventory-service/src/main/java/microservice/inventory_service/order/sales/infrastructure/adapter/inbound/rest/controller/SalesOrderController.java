@@ -34,7 +34,7 @@ public class SalesOrderController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseWrapper<String>> createSalesOrder(@Valid @RequestBody CreateSalesOrderRequest request) {
+    public ResponseEntity<ResponseWrapper<String>> receiveSalesOrder(@Valid @RequestBody CreateSalesOrderRequest request) {
         var command = request.toCommand();
         salesOrderUseCase.receiveSaleOrder(command);
 

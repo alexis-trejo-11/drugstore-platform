@@ -28,6 +28,10 @@ public class PageRequest {
         return new PageRequest(page, size, new SortInput(sortBy, direction));
     }
 
+    public static PageRequest defaultPageRequest() {
+        return new PageRequest(1, 10, SortInput.defaultSort());
+    }
+
     public Pageable toPageable() {
         return Pageable.ofSize(size).withPage(page - 1);
     }

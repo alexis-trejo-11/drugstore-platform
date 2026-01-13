@@ -16,13 +16,14 @@ public record CreateMovementParams(
     public static CreateMovementParams batchMovement(
             InventoryId inventoryId, BatchId batchId,
             Integer quantity, Integer previousQuantity, Integer newQuantity,
-            String referenceId
+            String referenceId, MovementType movementType
     ) {
         return CreateMovementParams.builder()
                 .inventoryId(inventoryId)
                 .batchId(batchId)
                 .batchId(batchId)
                 .quantity(quantity)
+                .movementType(movementType)
                 .previousQuantity(previousQuantity)
                 .newQuantity(newQuantity)
                 .referenceId(referenceId)

@@ -51,7 +51,7 @@ public class InventoryMovementEntity {
     @Column(name = "reference_type")
     private String referenceType;
 
-    @Column(name = "performed_by", nullable = false, length = 36)
+    @Column(name = "performed_by", length = 36)
     private String performedBy;
 
     @Column(name = "notes", columnDefinition = "TEXT")

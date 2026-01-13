@@ -115,6 +115,18 @@ public class InventoryBatch extends BaseDomainEntity<BatchId> {
         log.info("Released quantity. New available quantity: {} for batch {}", this.availableQuantity, this.id);
     }
 
+    public void returnQuantity(Integer quantity) {
+        log.info("Returning quantity {} back to batch {}", quantity, this.id);
+        this.availableQuantity += quantity;
+        this.updatedAt = LocalDateTime.now();
+
+        if (this.status == BatchStatus.DEPLETED && this.availableQuantity > 0) {
+            this.status = BatchStatus.ACTIVE;
+        }
+
+        log.info("Returned quantity. New available quantity: {} for batch {}", this.availableQuantity, this.id);
+    }
+
     public void allocateQuantity(Integer quantity) {
         log.info("Allocating quantity {} from batch {}", quantity, this.id);
 
