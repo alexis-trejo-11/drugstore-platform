@@ -5,7 +5,7 @@ import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.page.PageResponse;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
-import microservice.inventory_service.inventory.core.inventory.application.cqrs.query.GetInventoryMovementsQuery;
+import microservice.inventory_service.inventory.core.inventory.service.cqrs.query.GetInventoryMovementsQuery;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.AdjustmentId;
 import microservice.inventory_service.inventory.core.movement.domain.InventoryMovement;
 import microservice.inventory_service.inventory.core.stock.port.input.StockMovementUseCase;
@@ -27,7 +27,7 @@ public class InventoryStockMovementController {
     private final StockMovementUseCase stockMovementUseCase;
     private final ResponseMapper<MovementResponse, InventoryMovement> responseMapper;
     
-    @PostMapping("/{inventoryId}/stocks/movements/adjust")
+    @PostMapping("/{inventoryId}/stocks-movements/adjust")
     public ResponseEntity<ResponseWrapper<AdjustmentId>> adjustInventory(
             @PathVariable String inventoryId,
             @Valid @RequestBody AdjustInventoryRequest request) {

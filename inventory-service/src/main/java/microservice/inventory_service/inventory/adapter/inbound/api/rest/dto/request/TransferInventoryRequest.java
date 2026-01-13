@@ -3,7 +3,7 @@ package microservice.inventory_service.inventory.adapter.inbound.api.rest.dto.re
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import microservice.inventory_service.inventory.core.inventory.application.cqrs.command.TransferInventoryCommand;
+import microservice.inventory_service.inventory.core.inventory.service.cqrs.command.TransferInventoryCommand;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.UserId;
 

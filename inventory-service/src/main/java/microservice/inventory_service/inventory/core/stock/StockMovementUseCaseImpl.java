@@ -1,12 +1,12 @@
 package microservice.inventory_service.inventory.core.stock;
 
 import lombok.RequiredArgsConstructor;
-import microservice.inventory_service.inventory.core.inventory.application.cqrs.command.AdjustInventoryCommand;
-import microservice.inventory_service.inventory.core.inventory.application.cqrs.command.TransferInventoryCommand;
-import microservice.inventory_service.inventory.core.inventory.application.cqrs.handler.command.AdjustInventoryCommandHandler;
-import microservice.inventory_service.inventory.core.inventory.application.cqrs.handler.command.TransferInventoryCommandHandler;
-import microservice.inventory_service.inventory.core.inventory.application.cqrs.handler.query.GetInventoryMovementsQueryHandler;
-import microservice.inventory_service.inventory.core.inventory.application.cqrs.query.GetInventoryMovementsQuery;
+import microservice.inventory_service.inventory.core.inventory.service.cqrs.command.AdjustInventoryCommand;
+import microservice.inventory_service.inventory.core.inventory.service.cqrs.command.TransferInventoryCommand;
+import microservice.inventory_service.inventory.core.inventory.service.cqrs.handler.command.AdjustInventoryCommandHandler;
+import microservice.inventory_service.inventory.core.inventory.service.cqrs.handler.command.TransferInventoryCommandHandler;
+import microservice.inventory_service.inventory.core.inventory.service.cqrs.handler.query.GetInventoryMovementsQueryHandler;
+import microservice.inventory_service.inventory.core.inventory.service.cqrs.query.GetInventoryMovementsQuery;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.AdjustmentId;
 import microservice.inventory_service.inventory.core.movement.domain.InventoryMovement;
 import microservice.inventory_service.inventory.core.stock.port.input.StockMovementUseCase;

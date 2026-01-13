@@ -2,8 +2,8 @@ package microservice.inventory_service.inventory.core.inventory.port.Input;
 
 import microservice.inventory_service.inventory.core.alert.domain.entity.InventoryAlert;
 import microservice.inventory_service.inventory.core.alert.domain.entity.valueobject.AlertId;
-import microservice.inventory_service.inventory.core.inventory.application.cqrs.command.ResolveInventoryAlertCommand;
-import microservice.inventory_service.inventory.core.inventory.application.cqrs.query.GetInventoryAlertsQuery;
+import microservice.inventory_service.inventory.core.inventory.service.cqrs.command.ResolveInventoryAlertCommand;
+import microservice.inventory_service.inventory.core.inventory.service.cqrs.query.GetInventoryAlertsQuery;
 
 import java.util.List;
 

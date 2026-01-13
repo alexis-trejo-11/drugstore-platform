@@ -1,7 +1,7 @@
 package microservice.inventory_service.inventory.adapter.inbound.api.rest.dto.request;
 
 import jakarta.validation.constraints.*;
-import microservice.inventory_service.inventory.core.inventory.application.cqrs.command.CreateInventoryCommand;
+import microservice.inventory_service.inventory.core.inventory.service.cqrs.command.CreateInventoryCommand;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.ProductId;
 import org.hibernate.validator.constraints.Length;
 import io.swagger.v3.oas.annotations.media.Schema;

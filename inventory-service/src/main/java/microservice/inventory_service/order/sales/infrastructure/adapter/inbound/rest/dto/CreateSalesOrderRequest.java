@@ -1,5 +1,6 @@
 package microservice.inventory_service.order.sales.infrastructure.adapter.inbound.rest.dto;
 
+import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.ProductId;
 import microservice.inventory_service.order.sales.core.domain.entity.valueobject.DeliveryMethod;
 import microservice.inventory_service.order.sales.core.domain.entity.valueobject.SaleOrderId;
 import microservice.inventory_service.shared.domain.order.OrderStatus;
@@ -9,6 +10,7 @@ import microservice.inventory_service.order.sales.core.application.command.Recei
 import java.util.ArrayList;
 import java.util.List;
 
+
 public record CreateSalesOrderRequest(
         String id,
         DeliveryMethod deliveryMethod,
@@ -17,7 +19,8 @@ public record CreateSalesOrderRequest(
         List<CreateOrderItemRequest> items,
         String paymentId,
         String deliveryInfoId,
-        String pickupInfoId
+        String pickupInfoId,
+        String customerId
 
 ) {
     public ReceiveOrderSaleCommand toCommand() {
@@ -30,6 +33,7 @@ public record CreateSalesOrderRequest(
                 .items(itemDTOS)
                 .paymentId(paymentId)
                 .deliveryInfoId(deliveryInfoId)
+                .customerId(customerId)
                 .pickupInfoId(pickupInfoId)
                 .build();
     }
@@ -38,7 +42,7 @@ public record CreateSalesOrderRequest(
         List<AddSaleOrderItemCommand> itemCommands = new ArrayList<>();
         if (items != null) {
             for (var item : items) {
-                var itemCommand = new AddSaleOrderItemCommand(item.id(), item.productId(), item.productName(), item.quantity());
+                var itemCommand = new AddSaleOrderItemCommand(item.id(), ProductId.of(item.productId()), item.productName(), item.quantity());
                 itemCommands.add(itemCommand);
             }
         }

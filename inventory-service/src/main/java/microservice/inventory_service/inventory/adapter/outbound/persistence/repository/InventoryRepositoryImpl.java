@@ -6,6 +6,7 @@ import microservice.inventory_service.inventory.core.inventory.domain.entity.Inv
 import microservice.inventory_service.inventory.core.inventory.domain.entity.enums.InventoryStatus;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.ProductId;
+import microservice.inventory_service.inventory.core.inventory.domain.exception.InventoryNotFoundException;
 import microservice.inventory_service.inventory.core.inventory.port.InventoryRepository;
 import microservice.inventory_service.inventory.adapter.outbound.persistence.model.InventoryEntity;
 import microservice.inventory_service.inventory.adapter.outbound.persistence.repository.jpa.JpaInventoryRepository;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Repository
@@ -42,6 +45,11 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     }
 
     @Override
+    public List<Inventory> findByIdIn(List<InventoryId> ids) {
+        return List.of();
+    }
+
+    @Override
     public Optional<Inventory> findByProductId(ProductId productId) {
         return jpaInventoryRepository.findByProductId(productId.value()).map(mapper::toDomain);
     }
@@ -59,8 +67,22 @@ public class InventoryRepositoryImpl implements InventoryRepository {
     }
 
     @Override
+    public List<Inventory> findByProductIdInOrThrow(Set<ProductId> productIds) throws InventoryNotFoundException {
+        var productIdsStr = productIds.stream()
+                .map(ProductId::value)
+                .collect(Collectors.toSet());
+
+        List<InventoryEntity> entities = jpaInventoryRepository.findByProductIdIn(productIdsStr);
+        if (entities.size() != productIds.size()) {
+            throw new InventoryNotFoundException("Some inventories not found for the provided product IDs");
+        }
+
+        return mapper.toDomains(entities);
+    }
+
+    @Override
     public Page<Inventory> findByStatus(InventoryStatus status, Pageable pageable) {
-        var inventoryEntities  = jpaInventoryRepository.findByStatus(status, pageable);
+        var inventoryEntities = jpaInventoryRepository.findByStatus(status, pageable);
         return inventoryEntities.map(mapper::toDomain);
     }
 

@@ -13,6 +13,7 @@ import microservice.inventory_service.inventory.core.batch.domain.entity.valueob
 import microservice.inventory_service.inventory.core.inventory.domain.exception.InventoryNotFoundException;
 import microservice.inventory_service.inventory.core.batch.port.output.InventoryBatchRepository;
 import microservice.inventory_service.inventory.core.movement.domain.port.InventoryMovementRepository;
+import microservice.inventory_service.inventory.core.movement.domain.valueobject.MovementType;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,14 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 public class AddInventoryBatchCommandHandler {
-    private final InventoryRepository alertRepository;
+    private final InventoryRepository inventoryRepository;
     private final InventoryBatchRepository batchRepository;
     private final InventoryMovementRepository movementRepository;
 
     @Transactional
     public BatchId handle(RegisterInventoryBatchCommand command) {
         log.info("Handling RegisterInventoryBatchCommand for Inventory ID: {}", command.inventoryId());
-        Inventory inventory = alertRepository.findById(command.inventoryId())
+        Inventory inventory = inventoryRepository.findById(command.inventoryId())
                 .orElseThrow(() -> new InventoryNotFoundException("Inventory not found"));
 
         log.info("Creating batch for Inventory ID: {}", command.inventoryId());
@@ -42,16 +43,19 @@ public class AddInventoryBatchCommandHandler {
         inventory.addBatch(savedBatch);
 
         log.info("Saving updated inventory for Inventory ID: {}", command.inventoryId());
-        alertRepository.save(inventory);
+        inventoryRepository.save(inventory);
 
+        // TODO: Publish domain event for batch registration
         log.info("Recording inventory movement for Inventory ID: {}", command.inventoryId());
+        log.info("Creating inventory movement for Inventory Quantity: {}", command.quantity());
         var movementParams = CreateMovementParams.batchMovement(
                 inventory.getId(),
                 savedBatch.getId(),
                 command.quantity(),
                 inventory.getTotalQuantity() - command.quantity(),
                 inventory.getTotalQuantity(),
-                savedBatch.getId().value()
+                savedBatch.getId().value(),
+                MovementType.RECEIPT
         );
         InventoryMovement movement = InventoryMovement.create(movementParams);
         inventory.recordMovement(movement);

@@ -4,23 +4,29 @@ import microservice.inventory_service.inventory.core.inventory.domain.entity.Inv
 import microservice.inventory_service.inventory.core.inventory.domain.entity.enums.InventoryStatus;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.ProductId;
+import microservice.inventory_service.inventory.core.inventory.domain.exception.InventoryNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface InventoryRepository {
     Inventory save(Inventory inventory);
     void bulkSave(List<Inventory> inventories);
 
     Optional<Inventory> findById(InventoryId id);
+    List<Inventory> findByIdIn(List<InventoryId> ids);
 
     Optional<Inventory> findByProductId(ProductId productId);
 
     List<Inventory> findAll();
 
     List<Inventory> findSpec();
+
+    List<Inventory> findByProductIdInOrThrow(Set<ProductId> inventoryIdSet) throws InventoryNotFoundException;
+
 
     Page<Inventory> findByStatus(InventoryStatus status, Pageable pageable);
 

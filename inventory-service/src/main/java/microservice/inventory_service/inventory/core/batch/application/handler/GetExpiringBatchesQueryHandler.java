@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.inventory.core.batch.application.query.GetExpiringBatchesQuery;
 import microservice.inventory_service.inventory.core.batch.domain.entity.InventoryBatch;
 import microservice.inventory_service.inventory.core.batch.port.output.InventoryBatchRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +17,7 @@ public class GetExpiringBatchesQueryHandler {
     private final InventoryBatchRepository batchRepository;
     
     @Transactional(readOnly = true)
-    public List<InventoryBatch> handle(GetExpiringBatchesQuery query) {
+    public Page<InventoryBatch> handle(GetExpiringBatchesQuery query) {
         LocalDateTime expirationThreshold;
         
         if (query.expirationDate().isPresent()) {
@@ -27,6 +28,6 @@ public class GetExpiringBatchesQueryHandler {
             expirationThreshold = LocalDateTime.now().plusDays(30);
         }
         
-        return batchRepository.findExpiringBefore(expirationThreshold);
+        return batchRepository.findExpiringBefore(expirationThreshold, query.pageRequest().toPageable());
     }
 }

@@ -9,9 +9,6 @@ import java.time.LocalDateTime;
 
 @Schema(description = "Request to create StockMovementUseCaseImpl new inventory batch for an existing inventory")
 public record AddInventoryBatchRequest(
-    @Schema(description = "Identifier of the inventory to which the batch belongs", example = "inv-12345", type = "string")
-    @NotNull @NotBlank String inventoryId,
-
     @Schema(description = "Batch number assigned by supplier or internal system", example = "BATCH-2024-001", type = "string")
     @NotNull @NotBlank String batchNumber,
 
@@ -38,7 +35,6 @@ public record AddInventoryBatchRequest(
 ){
     public RegisterInventoryBatchCommand toCommand() {
         return RegisterInventoryBatchCommand.builder()
-                .inventoryId(new InventoryId(this.inventoryId))
                 .batchNumber(this.batchNumber)
                 .lotNumber(this.lotNumber)
                 .quantity(this.quantity)

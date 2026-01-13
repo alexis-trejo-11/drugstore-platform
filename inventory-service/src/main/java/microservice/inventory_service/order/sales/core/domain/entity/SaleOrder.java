@@ -30,17 +30,8 @@ public class SaleOrder extends BaseOrderDomain<SaleOrderId> {
         this.items = new ArrayList<>(items);
     }
 
-    public SaleOrder(SaleOrderId id, String paymentId, OrderStatus status, String notes, DeliveryMethod deliveryMethod, String customerUserId, String deliveryInfoId, String pickupInfoId, List<SalesOrderItem> items) {
-        super(id, paymentId, status, notes);
-        this.deliveryMethod = deliveryMethod;
-        this.customerUserId = customerUserId;
-        this.deliveryInfoId = deliveryInfoId;
-        this.pickupInfoId = pickupInfoId;
-        this.items = items;
-    }
-
-    public static SaleOrder reconstitute(SalesOrderFullParams params) {
-        return new SaleOrder(
+    private SaleOrder(SalesOrderFullParams params) {
+        this(
                 params.id(),
                 params.createdAt(),
                 params.updatedAt(),
@@ -55,7 +46,20 @@ public class SaleOrder extends BaseOrderDomain<SaleOrderId> {
         );
     }
 
-    public static SaleOrder createNew(CreateSalesOrderParams params) {
+    public SaleOrder(SaleOrderId id, String paymentId, OrderStatus status, String notes, DeliveryMethod deliveryMethod, String customerUserId, String deliveryInfoId, String pickupInfoId, List<SalesOrderItem> items) {
+        super(id, paymentId, status, notes);
+        this.deliveryMethod = deliveryMethod;
+        this.customerUserId = customerUserId;
+        this.deliveryInfoId = deliveryInfoId;
+        this.pickupInfoId = pickupInfoId;
+        this.items = items;
+    }
+
+    public static SaleOrder reconstruct(SalesOrderFullParams params) {
+        return new SaleOrder(params);
+    }
+
+    public static SaleOrder create(CreateSalesOrderParams params) {
         return new SaleOrder(
                 params.id(),
                 LocalDateTime.now(), // createdAt

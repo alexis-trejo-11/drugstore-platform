@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import microservice.inventory_service.inventory.core.batch.domain.entity.valueobject.BatchId;
-import microservice.inventory_service.inventory.core.inventory.application.cqrs.command.AdjustInventoryCommand;
+import microservice.inventory_service.inventory.core.inventory.service.cqrs.command.AdjustInventoryCommand;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.enums.AdjustmentReason;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.InventoryId;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.UserId;

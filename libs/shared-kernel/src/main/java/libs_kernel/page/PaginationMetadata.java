@@ -11,18 +11,14 @@ public class PaginationMetadata {
     public int totalPages;
     public int currentPage;
     public int pageSize;
-    public boolean isFirst;
-    public boolean isLast;
     public boolean hasNext;
     public boolean hasPrevious;
 
-    public PaginationMetadata(long totalElements, int totalPages, int currentPage, int pageSize, boolean isFirst, boolean isLast, boolean hasNext, boolean hasPrevious) {
+    public PaginationMetadata(long totalElements, int totalPages, int currentPage, int pageSize, boolean hasNext, boolean hasPrevious) {
         this.totalElements = totalElements;
         this.totalPages = totalPages;
         this.currentPage = currentPage;
         this.pageSize = pageSize;
-        this.isFirst = isFirst;
-        this.isLast = isLast;
         this.hasNext = hasNext;
         this.hasPrevious = hasPrevious;
     }
@@ -43,8 +39,6 @@ public class PaginationMetadata {
         this.pageSize = pageSize;
         this.totalElements = totalElements;
         this.totalPages = (int) Math.ceil((double) totalElements / pageSize);
-        this.isFirst = currentPage == 1;
-        this.isLast = pageSize >= totalPages;
         this.hasNext = pageSize < totalPages;
         this.hasPrevious = pageSize > 1;
     }
@@ -55,14 +49,12 @@ public class PaginationMetadata {
                 page.getTotalPages(),
                 page.getNumber() + 1, // Page 1-based index
                 page.getSize(),
-                page.isFirst(),
-                page.isLast(),
                 page.hasNext(),
                 page.hasPrevious()
         );
     }
 
     public static PaginationMetadata empty() {
-        return new PaginationMetadata(0, 1, 1);
+        return new PaginationMetadata(0, 1, 10);
     }
 }

@@ -4,8 +4,8 @@ import microservice.inventory_service.inventory.core.stock.application.command.C
 import microservice.inventory_service.inventory.core.stock.application.command.ReleaseReservationCommand;
 import microservice.inventory_service.inventory.core.stock.application.command.ReserveStockCommand;
 import microservice.inventory_service.inventory.core.stock.application.query.GetActiveReservationsQuery;
+import microservice.inventory_service.inventory.core.stock.domain.entity.StockReservation;
 import microservice.inventory_service.inventory.core.stock.domain.valueobject.ReservationId;
-import microservice.inventory_service.inventory.core.stock.domain.valueobject.StockReservation;
 
 import java.util.List;
 

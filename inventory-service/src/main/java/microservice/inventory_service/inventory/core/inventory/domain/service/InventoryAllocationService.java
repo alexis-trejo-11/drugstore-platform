@@ -1,6 +1,8 @@
 package microservice.inventory_service.inventory.core.inventory.domain.service;
 
 import lombok.RequiredArgsConstructor;
+import microservice.inventory_service.inventory.core.batch.domain.entity.valueobject.BatchId;
+import microservice.inventory_service.inventory.core.batch.port.output.InventoryBatchRepository;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.valueobject.PurchaseOrderId;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.inventory.core.batch.domain.entity.InventoryBatch;
@@ -17,32 +19,36 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class InventoryAllocationService {
+    private final InventoryBatchRepository inventoryBatchRepository;
 
-    public List<InventoryBatch> allocateBatchesForOrder(List<InventoryBatch> availableBatches, Integer quantity) {
-        List<InventoryBatch> sortedBatches = availableBatches.stream()
-                .filter(InventoryBatch::isActive)
-                .sorted(Comparator.comparing(InventoryBatch::getExpirationDate))
-                .toList();
+    // TODO: Decrease available quantity in the batch after assignment
+    public BatchId assingCompatibleBatch(Inventory inventory, Integer quantity) {
+        boolean activeOnly = true;
+        List<InventoryBatch> availableBatches = inventoryBatchRepository.findByInventoryId(inventory.getId(), activeOnly);
 
-        int remainingQuantity = quantity;
-        for (InventoryBatch batch : sortedBatches) {
-            if (remainingQuantity <= 0) break;
-
-            int allocationQuantity = Math.min(batch.getAvailableQuantity(), remainingQuantity);
-            batch.allocateQuantity(allocationQuantity);
-            remainingQuantity -= allocationQuantity;
-        }
-
-        if (remainingQuantity > 0) {
-            throw new InsufficientInventoryException(
-                    String.format("Could not allocate full quantity. Remaining: %d", remainingQuantity)
-            );
-        }
-
-        return sortedBatches.stream()
-                .filter(batch -> batch.getQuantity() > batch.getAvailableQuantity())
-                .toList();
+        return availableBatches.stream()
+                .filter(batch -> batch.getAvailableQuantity() >= quantity)
+                .min(Comparator.comparing(batch ->
+                        batch.getExpirationDate() != null ?
+                                batch.getExpirationDate() :
+                                batch.getReceivedDate()
+                ))
+                .map(InventoryBatch::getId)
+                .orElseThrow(() -> new InsufficientInventoryException(
+                        String.format("No batch found with sufficient quantity %d for inventory %s", quantity, inventory.getId())
+                ));
     }
+
+    public void returnBatchQuantity(BatchId batchId, Integer quantity) {
+        InventoryBatch batch = inventoryBatchRepository.findById(batchId).orElseThrow(
+                () -> new IllegalArgumentException("Batch not found: " + batchId)
+        );
+
+        batch.returnQuantity(quantity);
+        inventoryBatchRepository.save(batch);
+    }
+
+
 
     // TODO: PREV AND NEW QUANTITY IS RIGHT?
     public InventoryMovement createReservationMovement(Inventory inventory, Integer quantity, PurchaseOrderId purchaseOrderId, UserId performedBy) {

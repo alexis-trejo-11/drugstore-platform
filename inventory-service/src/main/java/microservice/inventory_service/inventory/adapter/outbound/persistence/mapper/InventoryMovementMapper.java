@@ -25,6 +25,7 @@ public class InventoryMovementMapper implements EntityMapper<InventoryMovementEn
                 .batchId(inventoryMovement.getBatchId()  != null ? inventoryMovement.getBatchId().value() : null)
                 .movementType(inventoryMovement.getMovementType())
                 .newQuantity(inventoryMovement.getNewQuantity())
+                .quantity(inventoryMovement.getQuantity())
                 .previousQuantity(inventoryMovement.getPreviousQuantity())
                 .newQuantity(inventoryMovement.getNewQuantity())
                 .reason(inventoryMovement.getReason())

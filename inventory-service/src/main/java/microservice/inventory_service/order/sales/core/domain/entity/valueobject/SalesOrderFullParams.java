@@ -1,5 +1,6 @@
 package microservice.inventory_service.order.sales.core.domain.entity.valueobject;
 
+import lombok.Builder;
 import microservice.inventory_service.order.sales.core.domain.entity.SalesOrderItem;
 import microservice.inventory_service.shared.domain.order.OrderStatus;
 
@@ -7,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+@Builder
 public record SalesOrderFullParams(
     SaleOrderId id,
     LocalDateTime createdAt,

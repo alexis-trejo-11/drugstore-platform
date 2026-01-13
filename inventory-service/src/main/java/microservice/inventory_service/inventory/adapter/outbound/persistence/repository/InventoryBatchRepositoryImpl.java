@@ -9,6 +9,8 @@ import microservice.inventory_service.inventory.core.inventory.domain.entity.val
 import microservice.inventory_service.inventory.core.batch.port.output.InventoryBatchRepository;
 import microservice.inventory_service.inventory.adapter.outbound.persistence.model.InventoryBatchEntity;
 import microservice.inventory_service.inventory.adapter.outbound.persistence.repository.jpa.JpaInventoryBatchRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -44,33 +46,44 @@ public class InventoryBatchRepositoryImpl implements InventoryBatchRepository {
     }
 
     @Override
-    public List<InventoryBatch> findByInventoryId(InventoryId inventoryId) {
-        List<InventoryBatchEntity> batches = jpaRepository.findByInventoryId(inventoryId.value());
-        return entityMapper.toDomains(batches);
+    public Page<InventoryBatch> findByInventoryId(InventoryId inventoryId, Pageable pageable, boolean activeOnly) {
+        Page<InventoryBatchEntity> batches = jpaRepository.findByInventoryIdAndStatus(inventoryId.value(), pageable, BatchStatus.ACTIVE);
+        return entityMapper.toDomainPage(batches);
     }
 
     @Override
-    public List<InventoryBatch> findByStatus(BatchStatus status) {
-        List<InventoryBatchEntity> batches = jpaRepository.findByStatus(status);
-        return entityMapper.toDomains(batches);
+    public List<InventoryBatch> findByInventoryId(InventoryId inventoryId, boolean activeOnly) {
+        List<InventoryBatchEntity> entities = jpaRepository.findByInventoryIdAndStatus(inventoryId.value(), activeOnly ? BatchStatus.ACTIVE : null);
+        return entityMapper.toDomains(entities);
+    }
+
+    @Override
+    public Page<InventoryBatch> findByStatus(BatchStatus status, Pageable pageable) {
+        Page<InventoryBatchEntity> batches = jpaRepository.findByStatus(status, pageable);
+        return entityMapper.toDomainPage(batches);
+    }
+
+    @Override
+    public Page<InventoryBatch> findExpiringBefore(LocalDateTime date, Pageable pageable) {
+        Page<InventoryBatchEntity> batches = jpaRepository.findByExpirationDateBefore(date, pageable);
+        return entityMapper.toDomainPage(batches);
     }
 
     @Override
     public List<InventoryBatch> findExpiringBefore(LocalDateTime date) {
-        List<InventoryBatchEntity> batches = jpaRepository.findByExpirationDateBefore(date);
-        return entityMapper.toDomains(batches);
+        return entityMapper.toDomains(jpaRepository.findByExpirationDateBefore(date));
+    }
+
+    @Override
+    public Page<InventoryBatch> findExpiredBatches(Pageable pageable) {
+        Page<InventoryBatchEntity> batches = jpaRepository.findByStatus(BatchStatus.EXPIRED, pageable);
+        return entityMapper.toDomainPage(batches);
     }
 
     @Override
     public List<InventoryBatch> findExpiredBatches() {
-        List<InventoryBatchEntity> batches = jpaRepository.findByStatus(BatchStatus.EXPIRED);
-        return entityMapper.toDomains(batches);
-    }
-
-    @Override
-    public List<InventoryBatch> findAvailableBatchesByInventoryId(InventoryId inventoryId) {
-        List<InventoryBatchEntity> batches = jpaRepository.findByInventoryIdAndStatus(inventoryId.value(), BatchStatus.ACTIVE);
-        return entityMapper.toDomains(batches);
+        List<InventoryBatchEntity> entities = jpaRepository.findActive(BatchStatus.EXPIRED);
+        return entityMapper.toDomains(entities);
     }
 
     @Override

@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS inventory_movements (
     reason VARCHAR(500),
     reference_id VARCHAR(36) NOT NULL,
     reference_type VARCHAR(100),
-    performed_by VARCHAR(36) NOT NULL,
+    performed_by VARCHAR(36),
     notes TEXT,
     movement_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),

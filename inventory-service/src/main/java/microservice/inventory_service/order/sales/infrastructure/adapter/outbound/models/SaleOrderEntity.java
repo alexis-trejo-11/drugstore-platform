@@ -11,7 +11,6 @@ import java.util.List;
 @Table(name = "sale_orders")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)

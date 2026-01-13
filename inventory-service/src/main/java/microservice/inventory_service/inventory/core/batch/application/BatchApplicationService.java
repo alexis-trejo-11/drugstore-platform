@@ -12,12 +12,11 @@ import microservice.inventory_service.inventory.core.batch.domain.entity.Invento
 import microservice.inventory_service.inventory.core.batch.domain.entity.valueobject.BatchId;
 import microservice.inventory_service.inventory.core.batch.port.input.BatchUseCase;
 import microservice.inventory_service.inventory.core.batch.port.output.InventoryBatchRepository;
-import microservice.inventory_service.inventory.core.inventory.application.cqrs.query.GetInventoryBatchesQuery;
+import microservice.inventory_service.inventory.core.inventory.service.cqrs.query.GetInventoryBatchesQuery;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.valueobject.UserId;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,13 +36,13 @@ public class BatchApplicationService implements BatchUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<InventoryBatch> getInventoryBatches(GetInventoryBatchesQuery query) {
+    public Page<InventoryBatch> getInventoryBatches(GetInventoryBatchesQuery query) {
         return getBatchesHandler.handle(query);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<InventoryBatch> getExpiringBatches(GetExpiringBatchesQuery query) {
+    public Page<InventoryBatch> getExpiringBatches(GetExpiringBatchesQuery query) {
         return getExpiringHandler.handle(query);
     }
 

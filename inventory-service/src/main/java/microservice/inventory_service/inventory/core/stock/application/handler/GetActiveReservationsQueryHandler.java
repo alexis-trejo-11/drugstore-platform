@@ -2,7 +2,8 @@ package microservice.inventory_service.inventory.core.stock.application.handler;
 
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.inventory.core.stock.application.query.GetActiveReservationsQuery;
-import microservice.inventory_service.inventory.core.stock.domain.valueobject.StockReservation;
+
+import microservice.inventory_service.inventory.core.stock.domain.entity.StockReservation;
 import microservice.inventory_service.inventory.core.stock.port.output.StockReservationRepository;
 import org.springframework.stereotype.Component;
 
