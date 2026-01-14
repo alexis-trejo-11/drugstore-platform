@@ -1,41 +1,17 @@
 package microservice.product_service.app.infrastructure.out.persistence;
 
-import microservice.product_service.app.domain.model.ProductCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 
-public interface ProductJpaRepository  extends JpaRepository<ProductModel, UUID> {
-    /**
-    Finds a list of products by their category.
-            * @param category The product category to search for.
-            * @return A list of ProductModel objects belonging to the specified category.
-     */
-    List<ProductModel> findByCategory(ProductCategory category);
+public interface ProductJpaRepository
+    extends JpaRepository<ProductModel, String>, JpaSpecificationExecutor<ProductModel> {
 
-    /**
-     * Finds a list of products by their manufacturer.
-     * @param manufacturer The manufacturer name to search for.
-     * @return A list of ProductModel objects from the specified manufacturer.
-     */
-    List<ProductModel> findByManufacturer(String manufacturer);
+  @Query("SELECT p FROM ProductModel p WHERE p.id = :id")
+  Optional<ProductModel> findByIdIncludeDeleted(@Param("id") String id);
 
-    /**
-     * Finds a list of products whose name contains the given string, case-insensitively.
-     * @param name The string to search for in product names.
-     * @return A list of ProductModel objects whose names contain the specified string.
-     */
-    List<ProductModel> findByNameContainingIgnoreCase(String name);
-
-    /**
-     * Finds a list of products that have expired (expiration date is before today).
-     * @param date The current date to compare against expiration dates.
-     * @return A list of expired ProductModel objects.
-     */
-    List<ProductModel> findByExpirationDateBefore(LocalDate date);
-
-
-    List<ProductModel> findByStockQuantityLessThan(int threshold);
+  boolean existsByCode(String code);
 }

@@ -14,3 +14,9 @@ spring:
     admin:
       discovery:
         enabled: true
+
+      client:
+        instance:
+          prefer-ip: true
+          service-base-url: https://localhost:8443
+          management-base-url: https://localhost:8443/actuator

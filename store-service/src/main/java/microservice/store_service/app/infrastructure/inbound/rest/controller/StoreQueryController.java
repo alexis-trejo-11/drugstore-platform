@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import libs_kernel.config.rate_limit.RateLimit;
+import libs_kernel.config.rate_limit.RateLimitProfile;
+import libs_kernel.config.rate_limit.RateLimitType;
 import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.page.PageRequest;
 import libs_kernel.page.PageResponse;
@@ -37,6 +40,7 @@ public class StoreQueryController {
     private final ResponseMapper<StoreResponse, Store> responseMapper;
 
     @GetMapping("/{id}")
+    @RateLimit(profile = RateLimitProfile.PUBLIC)
     @Operation(
         summary = "Get store by ID",
         description = "Retrieves a single store by its unique identifier. **Requires JWT authentication with ADMIN role.**",
@@ -53,7 +57,6 @@ public class StoreQueryController {
                     name = "Success Response",
                     value = """
                     {
-                      "isSuccess": true,
                       "message": "Store found successfully",
                       "data": {
                         "id": "c1a2b3d4-e5f6-7890-abcd-ef1234567890",
@@ -154,6 +157,7 @@ public class StoreQueryController {
     }
 
     @GetMapping("/{code}/code")
+    @RateLimit(profile = RateLimitProfile.PUBLIC)
     @Operation(
         summary = "Get store by code",
         description = "Retrieves a single store by its unique business code. **Requires JWT authentication with ADMIN role.**",
@@ -215,6 +219,7 @@ public class StoreQueryController {
     }
 
     @GetMapping
+    @RateLimit(profile = RateLimitProfile.PUBLIC)
     @Operation(
         summary = "Search stores by specifications",
         description = """
@@ -320,6 +325,7 @@ public class StoreQueryController {
 
 
     @GetMapping("/status/{status}")
+    @RateLimit(profile = RateLimitProfile.PUBLIC)
     @Operation(
         summary = "Get stores by status",
         description = """

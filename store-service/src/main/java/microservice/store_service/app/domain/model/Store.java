@@ -24,7 +24,6 @@ public class Store {
     private StoreTimeStamps timeStamps;
 
     private Store() {
-        // default values for frameworks and reconstruction
         this.id = null;
         this.code = StoreCode.NONE;
         this.name = StoreName.NONE;
@@ -56,7 +55,6 @@ public class Store {
         StoreValidation.requireNonNull(params.name(), "Store name");
 
         Store newStore = new Store();
-        // use generated id and final code via reflection: create a new instance with final fields set
         StoreID id = StoreID.generate();
         Store store = new Store(id, params.code(), params.name(), StoreStatus.INACTIVE,
                 params.contactInfo(), params.address(), params.geolocation(), params.serviceSchedule());

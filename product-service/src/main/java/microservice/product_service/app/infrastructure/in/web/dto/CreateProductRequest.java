@@ -2,8 +2,8 @@ package microservice.product_service.app.infrastructure.in.web.dto;
 
 import lombok.Data;
 import jakarta.validation.constraints.*;
-import microservice.product_service.app.domain.model.ProductCategory;
-import microservice.product_service.app.domain.port.in.command.CreateProductCommand;
+import microservice.product_service.app.domain.model.enums.ProductCategory;
+import microservice.product_service.app.application.port.in.command.CreateProductCommand;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

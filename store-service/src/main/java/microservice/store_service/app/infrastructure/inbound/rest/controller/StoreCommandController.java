@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import libs_kernel.config.rate_limit.RateLimit;
+import libs_kernel.config.rate_limit.RateLimitProfile;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import microservice.store_service.app.application.port.in.command.DeleteStoreCommand;
@@ -39,6 +41,7 @@ public class StoreCommandController {
     private final StoreCommandUseCases storeApplicationFacade;
 
     @PostMapping
+    @RateLimit(profile = RateLimitProfile.SENSITIVE)
     @Operation(
         summary = "Create a new store",
         description = """
@@ -226,6 +229,7 @@ public class StoreCommandController {
             content = @Content(mediaType = "application/json")
         )
     })
+    @RateLimit(profile = RateLimitProfile.STANDARD)
     private ResponseWrapper<Void> updateStoreLocation(
         @Parameter(description = "Store unique identifier", required = true, example = "c1a2b3d4-e5f6-7890-abcd-ef1234567890")
         @PathVariable String id,
@@ -259,6 +263,7 @@ public class StoreCommandController {
     }
 
     @PutMapping("/{id}/schedule")
+    @RateLimit(profile = RateLimitProfile.STANDARD)
     @Operation(
         summary = "Update store schedule",
         description = """
@@ -339,6 +344,7 @@ public class StoreCommandController {
     }
 
     @PatchMapping("/{id}/under-maintenance")
+    @RateLimit(profile = RateLimitProfile.STANDARD)
     @Operation(
         summary = "Set store under maintenance",
         description = """
@@ -449,6 +455,7 @@ public class StoreCommandController {
     }
 
     @PatchMapping("/{id}/activate")
+    @RateLimit(profile = RateLimitProfile.STANDARD)
     @Operation(
         summary = "Activate store",
         description = """
@@ -563,6 +570,7 @@ public class StoreCommandController {
     }
 
     @DeleteMapping("/{id}")
+    @RateLimit(profile = RateLimitProfile.SENSITIVE)
     @Operation(
         summary = "Delete store",
         description = """
