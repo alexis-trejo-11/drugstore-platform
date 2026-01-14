@@ -3,8 +3,8 @@ package microservice.product_service.app.infrastructure.in.web.dto;
 import lombok.Builder;
 import lombok.Data;
 import microservice.product_service.app.domain.model.Product;
-import microservice.product_service.app.domain.model.ProductCategory;
-import microservice.product_service.app.domain.model.ProductStatus;
+import microservice.product_service.app.domain.model.enums.ProductCategory;
+import microservice.product_service.app.domain.model.enums.ProductStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

@@ -9,7 +9,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(23)
 	}
 }
 
@@ -29,13 +29,21 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	// Cache
-	//implementation 'org.springframework.boot:spring-boot-starter-cache'
-	//implementation 'com.github.ben-manes.caffeine:caffeine:3.1.6'
+	// Redis Cache
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+	// Migrations
+	implementation 'org.flywaydb:flyway-core:10.17.0'
+	implementation 'org.flywaydb:flyway-database-postgresql:10.17.0'
+
+	// Common library
+	implementation project(':libs:shared-kernel')
+
 
 	// Config Server
-	//implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
-	//implementation 'org.springframework.cloud:spring-cloud-starter-config'
+	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
 	// Postgres
 	runtimeOnly 'org.postgresql:postgresql'
@@ -44,27 +52,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	// Lombok
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	testAnnotationProcessor 'org.projectlombok:lombok'
-
-	// AutoMappers
-	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-	implementation 'org.modelmapper:modelmapper:2.4.4'
-
-	// Rate Limiter
-	//implementation 'com.github.vladimir-bukhtoyarov:bucket4j-domain:7.6.0'
-	//implementation 'com.github.vladimir-bukhtoyarov:bucket4j-jcache:7.6.0'
+	compileOnly 'org.projectlombok:lombok:1.18.34'
+	annotationProcessor 'org.projectlombok:lombok:1.18.34'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
 
 	// Open Api
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'
 
-	// Eureka
-	// 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
-
 	// Admin Service
-	//implementation 'de.codecentric:spring-boot-admin-starter-client:3.0.0'
+	implementation 'de.codecentric:spring-boot-admin-starter-client:3.0.0'
 }
 
 dependencyManagement {

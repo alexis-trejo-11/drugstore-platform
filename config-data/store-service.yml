@@ -1,5 +1,11 @@
 server:
-  port: 8082
+  port: 8443
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: ${STORE_SSL_KEYSTORE_PASSWORD}
+    key-store-type: PKCS12
+    key-alias: store-service
 
 spring:
   application:
@@ -98,4 +104,24 @@ springdoc:
   paths-to-match: /api/**
   cache:
     disabled: true
+
+app:
+  rate-limit:
+    global:
+      enabled: true
+      maxRequests: 5000
+      durationHours: 1
+    profiles:
+      standard:
+        maxRequests: 100
+        durationSeconds: 60
+      sensitive:
+        maxRequests: 5
+        durationSeconds: 300
+      public:
+        maxRequests: 1000
+        durationSeconds: 60
+      admin:
+        maxRequests: 50
+        durationSeconds: 1
 # No logging configuration needed here since logback-spring.xml manages it

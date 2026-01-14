@@ -1,8 +1,7 @@
 package microservice.inventory_service.config.rate_limiter;
 
 import jakarta.servlet.http.HttpServletRequest;
-import libs_kernel.config.RateLimit;
-import libs_kernel.config.RateLimitType;
+import libs_kernel.config.rate_limit.RateLimit;
 import libs_kernel.exceptions.RateLimitExceededException;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -29,7 +28,7 @@ public class RateLimitAspect {
     @Value("${app.rate-limit.default.duration-seconds:60}")
     private int defaultDurationSeconds;
 
-    @Around("@annotation(libs_kernel.config.RateLimit)")
+    @Around("@annotation(libs_kernel.config.rate_limit.RateLimit)")
     public Object checkRateLimit(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
@@ -59,10 +58,6 @@ public class RateLimitAspect {
     }
 
     private String buildRateLimitKey(RateLimit rateLimit, ProceedingJoinPoint joinPoint) {
-        if (!rateLimit.key().isEmpty()) {
-            return rateLimit.key();
-        }
-
         HttpServletRequest request = getCurrentRequest();
         String baseKey = "";
 

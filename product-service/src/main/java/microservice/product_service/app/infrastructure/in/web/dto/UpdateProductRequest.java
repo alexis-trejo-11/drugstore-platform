@@ -8,9 +8,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.PastOrPresent;
-import microservice.product_service.app.domain.model.ProductCategory;
-import microservice.product_service.app.domain.model.ProductId;
-import microservice.product_service.app.domain.port.in.command.UpdateProductCommand;
+import microservice.product_service.app.domain.model.enums.ProductCategory;
+import microservice.product_service.app.domain.model.valueobjects.ProductID;
+import microservice.product_service.app.application.port.in.command.UpdateProductCommand;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -64,7 +64,7 @@ public class UpdateProductRequest {
     private String administration;
 
 
-    public UpdateProductCommand toCommand(ProductId productId) {
+    public UpdateProductCommand toCommand(ProductID productId) {
         return UpdateProductCommand.builder()
                 .productId(productId)
                 .name(this.getName())

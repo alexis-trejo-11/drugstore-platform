@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import libs_kernel.config.RateLimit;
+import libs_kernel.config.rate_limit.RateLimit;
 import libs_kernel.mapper.EntityDetailMapper;
 import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.response.ResponseWrapper;

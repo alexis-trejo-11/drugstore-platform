@@ -7,7 +7,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(23)
     }
 }
 
@@ -26,9 +26,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -70,8 +69,6 @@ dependencies {
     implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
     implementation 'org.codehaus.janino:janino:3.1.10'
 
-    // RabbitMQ
-    implementation 'org.springframework.boot:spring-boot-starter-amqp'
 }
 
 dependencyManagement {
@@ -91,6 +88,18 @@ bootRun {
             "-XX:TieredStopAtLevel=1",
             "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     ]
+
+    // Load .env file from config-server directory
+    def envFile = file('../config-server/.env')
+    if (envFile.exists()) {
+        envFile.readLines().each { line ->
+            if (line && !line.startsWith('#') && line.contains('=')) {
+                def (key, value) = line.split('=', 2)
+                systemProperty key.trim(), value.trim()
+                environment key.trim(), value.trim()
+            }
+        }
+    }
 }
 
 tasks.register('buildDockerImage', Exec) {
@@ -98,6 +107,3 @@ tasks.register('buildDockerImage', Exec) {
     commandLine 'docker', 'build', '-t', 'order-service:latest', '.'
 }
 
-bootRun {
-    jvmArgs = ["-XX:+TieredCompilation", "-XX:TieredStopAtLevel=1"]
-}
