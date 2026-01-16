@@ -1,8 +1,8 @@
 package microservice.product_service.app.infrastructure.in.web.exceptions;
 
+import libs_kernel.response.ResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
 import microservice.product_service.app.domain.exception.ProductNotFoundException;
-import microservice.product_service.app.shared.ResponseWrapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;

@@ -8,8 +8,8 @@ public class SearchProductsQuery {
   private String manufacturer;
   private Boolean requiresPrescription;
   private Boolean onlyAvailable;
-  private int page;
-  private int size;
+  private int page = 0;
+  private int size = 10;
 
   public SearchProductsQuery() {
   }

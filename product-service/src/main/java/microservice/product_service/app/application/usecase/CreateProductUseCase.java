@@ -1,25 +1,26 @@
 package microservice.product_service.app.application.usecase;
 
-import microservice.product_service.app.application.mapper.ProductMapper;
-import microservice.product_service.app.domain.model.Product;
-import microservice.product_service.app.application.port.in.command.CreateProductCommand;
-import microservice.product_service.app.application.port.out.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import microservice.product_service.app.application.port.in.command.CreateProductCommand;
+import microservice.product_service.app.application.port.out.ProductRepository;
+import microservice.product_service.app.domain.model.CreateProductParams;
+import microservice.product_service.app.domain.model.Product;
 
 @Service
 public class CreateProductUseCase {
   private final ProductRepository repository;
-  private final ProductMapper mapper;
 
   @Autowired
-  public CreateProductUseCase(ProductRepository repository, ProductMapper mapper) {
+  public CreateProductUseCase(ProductRepository repository) {
     this.repository = repository;
-    this.mapper = mapper;
   }
 
   public Product createProduct(CreateProductCommand command) {
-    Product newProduct = mapper.createCommandToProduct(command);
+    CreateProductParams params = command.toCreateParams();
+    Product newProduct = Product.create(params);
+
     return repository.save(newProduct);
   }
 }
