@@ -524,4 +524,9 @@ public class ResponseWrapper<T> {
     public static <T> ResponseWrapper<T> error(String message) {
         return ResponseWrapper.error(message, null);
     }
+
+    public static <T> ResponseWrapper<T> error( Map<String, String> errors) {
+        return ResponseWrapper.error(errors.toString(), null);
+    }
+
 }

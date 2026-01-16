@@ -15,6 +15,9 @@ java {
 
 repositories {
 	mavenCentral()
+  maven {
+    url 'https://projectlombok.org/edge-releases'
+  }
 }
 
 ext {
@@ -47,14 +50,15 @@ dependencies {
 
 	// Postgres
 	runtimeOnly 'org.postgresql:postgresql'
+	// In-memory DB used by tests
+	testRuntimeOnly 'com.h2database:h2'
 
 	// Validations
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	// Lombok
-	compileOnly 'org.projectlombok:lombok:1.18.34'
-	annotationProcessor 'org.projectlombok:lombok:1.18.34'
-	testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
+  compileOnly 'org.projectlombok:lombok:edge-SNAPSHOT'
+  annotationProcessor 'org.projectlombok:lombok:edge-SNAPSHOT'
 
 	// Open Api
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'

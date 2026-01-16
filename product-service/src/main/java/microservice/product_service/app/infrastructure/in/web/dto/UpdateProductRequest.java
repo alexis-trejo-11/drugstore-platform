@@ -1,88 +1,76 @@
 package microservice.product_service.app.infrastructure.in.web.dto;
 
+import java.math.BigDecimal;
+import java.util.List;
+
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.PastOrPresent;
-import microservice.product_service.app.domain.model.enums.ProductCategory;
-import microservice.product_service.app.domain.model.valueobjects.ProductID;
 import microservice.product_service.app.application.port.in.command.UpdateProductCommand;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
+import microservice.product_service.app.domain.model.enums.ProductCategory;
+import microservice.product_service.app.domain.model.enums.ProductSubcategory;
+import microservice.product_service.app.domain.model.enums.ProductType;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateProductRequest {
-    @Size(max = 255, message = "Product name must not exceed 255 characters")
-    private String name;
+  @Size(max = 255, message = "Product name must not exceed 255 characters")
+  private String name;
 
-    @Size(max = 1000, message = "Description must not exceed 1000 characters")
-    private String description;
+  @Size(max = 2000, message = "Description must not exceed 2000 characters")
+  private String description;
 
-    @Size(max = 255, message = "Active ingredient must not exceed 255 characters")
-    private String activeIngredient;
+  @Size(max = 255, message = "Active ingredient must not exceed 255 characters")
+  private String activeIngredient;
 
-    @Size(max = 255, message = "Manufacturer must not exceed 255 characters")
-    private String manufacturer;
+  @Size(max = 255, message = "Manufacturer must not exceed 255 characters")
+  private String manufacturer;
 
-    private ProductCategory category;
+  private ProductType type;
+  private ProductCategory category;
+  private ProductSubcategory subcategory;
 
-    @DecimalMin(value = "0.01", message = "Price must be positive")
-    private BigDecimal price;
+  @DecimalMin(value = "0.01", message = "Price must be positive")
+  private BigDecimal price;
 
-    @Min(value = 0, message = "Stock quantity cannot be negative")
-    private Integer stockQuantity;
+  @Size(max = 50, message = "Barcode must not exceed 50 characters")
+  private String barcode;
 
-    @Size(max = 50, message = "Barcode must not exceed 50 characters")
-    private String barcode;
+  private Boolean requiresPrescription; // Use Boolean wrapper for nullability
 
-    @Size(max = 50, message = "Batch number must not exceed 50 characters")
-    private String batchNumber;
+  private List<String> contraindications; // Can be null, or empty list
 
-    @FutureOrPresent(message = "Expiration date must be in the present or future") // Changed from Future
-    private LocalDateTime expirationDate;
+  @Size(max = 255, message = "Dosage must not exceed 255 characters")
+  private String dosage;
 
-    @PastOrPresent(message = "Manufacture date cannot be in the future")
-    private LocalDateTime manufactureDate;
+  @Size(max = 50, message = "Administration must not exceed 50 characters")
+  private String administration;
 
-    // Boolean fields are generally optional without specific annotations if not primitives
-    private Boolean requiresPrescription; // Use Boolean wrapper for nullability
+  private List<String> images;
 
-    private List<String> contraindications; // Can be null, or empty list
+  private Integer expirationMinMonths;
+  private Integer expirationMaxMonths;
 
-    @Size(max = 255, message = "Dosage must not exceed 255 characters")
-    private String dosage;
+  public UpdateProductCommand toCommand(String productId) {
+    return UpdateProductCommand.builder()
+        .productId(productId)
+        .name(this.getName())
+        .description(this.getDescription())
+        .activeIngredient(this.getActiveIngredient())
+        .manufacturer(this.getManufacturer())
+        .classification(this.getType(), this.getCategory(), this.getSubcategory())
+        .price(this.getPrice())
+        .barcode(this.getBarcode())
+        .requiresPrescription(Boolean.TRUE.equals(this.getRequiresPrescription()))
+        .contraindications(this.getContraindications())
+        .dosage(this.getDosage())
+        .administration(this.getAdministration())
+        .images(this.getImages())
+        .expirationRange(this.getExpirationMinMonths(), this.getExpirationMaxMonths())
+        .build();
+  }
 
-    @Size(max = 500, message = "Administration must not exceed 500 characters")
-    private String administration;
-
-
-    public UpdateProductCommand toCommand(ProductID productId) {
-        return UpdateProductCommand.builder()
-                .productId(productId)
-                .name(this.getName())
-                .description(this.getDescription())
-                .activeIngredient(this.getActiveIngredient())
-                .manufacturer(this.getManufacturer())
-                .category(this.getCategory())
-                .price(this.getPrice())
-                .stockQuantity(this.getStockQuantity())
-                .barcode(this.getBarcode())
-                .batchNumber(this.getBatchNumber())
-                .expirationDate(this.getExpirationDate())
-                .manufactureDate(this.getManufactureDate())
-                .requiresPrescription(this.getRequiresPrescription() != null ? this.getRequiresPrescription() : false)
-                .contraindications(this.getContraindications())
-                .dosage(this.getDosage())
-                .administration(this.getAdministration())
-                .build();
-    }
-    
 }

@@ -1,7 +1,7 @@
 package microservice.product_service.app.infrastructure.out.persistence;
 
 import microservice.product_service.app.domain.model.Product;
-import microservice.product_service.app.domain.model.valueobjects.ProductCode;
+import microservice.product_service.app.domain.model.valueobjects.SKU;
 import microservice.product_service.app.domain.model.valueobjects.ProductID;
 import microservice.product_service.app.application.port.out.ProductRepository;
 import microservice.product_service.app.domain.specification.ProductSearchCriteria;
@@ -45,14 +45,14 @@ public class ProductRepositoryImpl implements ProductRepository {
 
   @Override
   public Optional<Product> findByID(ProductID id) {
-    return jpaRepository.findById(id.value().toString())
+    return jpaRepository.findByIdAndDeletedAtIsNull(id.value().toString())
         .map(mapper::toDomain);
   }
 
   @Override
-  public Optional<Product> findByCode(ProductCode code) {
-    Specification<ProductModel> spec = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("code"),
-        code.value());
+  public Optional<Product> findBySKU(SKU sku) {
+    Specification<ProductModel> spec = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("sku"),
+        sku.value());
     return jpaRepository.findOne(spec)
         .map(mapper::toDomain);
   }
@@ -71,8 +71,8 @@ public class ProductRepositoryImpl implements ProductRepository {
   }
 
   @Override
-  public boolean existsByCode(ProductCode code) {
-    return jpaRepository.existsByCode(code.value());
+  public boolean existsBySKU(SKU sku) {
+    return jpaRepository.existsBySKU(sku.value());
   }
 
   @Override
@@ -95,6 +95,11 @@ public class ProductRepositoryImpl implements ProductRepository {
     } else {
       log.warn("Attempted to restore non-existing product with id {}", id.value());
     }
+  }
+
+  @Override
+  public boolean existsByBarCode(String barcode) {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   private PageRequest buildPageRequest(ProductSearchCriteria criteria) {

@@ -1,18 +1,36 @@
 package microservice.product_service.app.infrastructure.out.persistence;
 
-import jakarta.persistence.*;
-import microservice.product_service.app.domain.model.enums.ProductCategory;
-import microservice.product_service.app.domain.model.enums.ProductStatus;
+import java.math.BigDecimal;
+import java.sql.Types;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.SQLDelete;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import microservice.product_service.app.domain.model.enums.ProductCategory;
+import microservice.product_service.app.domain.model.enums.ProductStatus;
+import microservice.product_service.app.domain.model.enums.ProductSubcategory;
+import microservice.product_service.app.domain.model.enums.ProductType;
 
 @Entity
 @Table(name = "products", indexes = {
-    @Index(name = "idx_product_code", columnList = "code"),
+    @Index(name = "idx_product_sku", columnList = "sku"),
     @Index(name = "idx_product_name", columnList = "name"),
     @Index(name = "idx_product_category", columnList = "category"),
     @Index(name = "idx_product_status", columnList = "status"),
@@ -29,8 +47,8 @@ public class ProductModel {
   @Column(name = "id", nullable = false, updatable = false, length = 36)
   private String id;
 
-  @Column(name = "code", length = 50)
-  private String code;
+  @Column(name = "sku", length = 50)
+  private String sku;
 
   @Column(name = "name", nullable = false, length = 255)
   private String name;
@@ -38,27 +56,39 @@ public class ProductModel {
   @Column(name = "description", length = 2000)
   private String description;
 
+  @JdbcTypeCode(Types.ARRAY)
+  @Column(name = "images", columnDefinition = "text[]")
+  private String[] images;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "type", nullable = false, length = 50)
+  private ProductType type;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "category", nullable = false, length = 50)
+  private ProductCategory category;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "subcategory", length = 50)
+  private ProductSubcategory subcategory;
+
+  @Column(name = "expiration_min_months", columnDefinition = "int default 0")
+  private int expirationMinMonths;
+
+  @Column(name = "expiration_max_months", columnDefinition = "int default 0")
+  private int expirationMaxMonths;
+
   @Column(name = "active_ingredient", length = 150)
   private String activeIngredient;
 
   @Column(name = "manufacturer", length = 100)
   private String manufacturer;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "category", nullable = false, length = 50)
-  private ProductCategory category;
-
   @Column(name = "price", nullable = false, precision = 10, scale = 2)
   private BigDecimal price;
 
   @Column(name = "barcode", length = 20)
   private String barcode;
-
-  @Column(name = "expiration_date")
-  private LocalDateTime expirationDate;
-
-  @Column(name = "manufacture_date")
-  private LocalDateTime manufactureDate;
 
   @Column(name = "requires_prescription", nullable = false)
   private boolean requiresPrescription;
@@ -70,7 +100,7 @@ public class ProductModel {
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "product_contraindications", joinColumns = @JoinColumn(name = "product_id"))
   @Column(name = "contraindication", length = 500)
-  private Set<String> contraindications = new HashSet<>();
+  private List<String> contraindications = new ArrayList<>();
 
   @Column(name = "dosage", length = 100)
   private String dosage;
@@ -98,12 +128,12 @@ public class ProductModel {
     this.id = id;
   }
 
-  public String getCode() {
-    return code;
+  public String getSKU() {
+    return sku;
   }
 
-  public void setCode(String code) {
-    this.code = code;
+  public void setSKU(String sku) {
+    this.sku = sku;
   }
 
   public String getName() {
@@ -162,21 +192,7 @@ public class ProductModel {
     this.barcode = barcode;
   }
 
-  public LocalDateTime getExpirationDate() {
-    return expirationDate;
-  }
-
-  public void setExpirationDate(LocalDateTime expirationDate) {
-    this.expirationDate = expirationDate;
-  }
-
-  public LocalDateTime getManufactureDate() {
-    return manufactureDate;
-  }
-
-  public void setManufactureDate(LocalDateTime manufactureDate) {
-    this.manufactureDate = manufactureDate;
-  }
+  // No getters/setters for removed dates
 
   public boolean isRequiresPrescription() {
     return requiresPrescription;
@@ -194,11 +210,11 @@ public class ProductModel {
     this.status = status;
   }
 
-  public Set<String> getContraindications() {
+  public List<String> getContraindications() {
     return contraindications;
   }
 
-  public void setContraindications(Set<String> contraindications) {
+  public void setContraindications(List<String> contraindications) {
     this.contraindications = contraindications;
   }
 
@@ -244,6 +260,49 @@ public class ProductModel {
 
   public void markAsRestored() {
     this.deletedAt = null;
+  }
+
+  public List<String> getImages() {
+    if (images == null) {
+      return new ArrayList<>();
+    }
+    return Arrays.asList(images);
+  }
+
+  public void setImages(List<String> images) {
+    this.images = images == null ? null : images.toArray(new String[0]);
+  }
+
+  public ProductType getType() {
+    return type;
+  }
+
+  public void setType(ProductType type) {
+    this.type = type;
+  }
+
+  public ProductSubcategory getSubcategory() {
+    return subcategory;
+  }
+
+  public void setSubcategory(ProductSubcategory subcategory) {
+    this.subcategory = subcategory;
+  }
+
+  public int getExpirationMinMonths() {
+    return expirationMinMonths;
+  }
+
+  public void setExpirationMinMonths(int expirationMinMonths) {
+    this.expirationMinMonths = expirationMinMonths;
+  }
+
+  public int getExpirationMaxMonths() {
+    return expirationMaxMonths;
+  }
+
+  public void setExpirationMaxMonths(int expirationMaxMonths) {
+    this.expirationMaxMonths = expirationMaxMonths;
   }
 
   @PrePersist

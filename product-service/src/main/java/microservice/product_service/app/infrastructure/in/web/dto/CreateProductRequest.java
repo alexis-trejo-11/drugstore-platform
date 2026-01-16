@@ -1,81 +1,66 @@
 package microservice.product_service.app.infrastructure.in.web.dto;
 
-import lombok.Data;
-import jakarta.validation.constraints.*;
-import microservice.product_service.app.domain.model.enums.ProductCategory;
-import microservice.product_service.app.application.port.in.command.CreateProductCommand;
-
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
+
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+import microservice.product_service.app.application.port.in.command.CreateProductCommand;
+import microservice.product_service.app.domain.model.enums.ProductCategory;
 
 @Data
 public class CreateProductRequest {
 
-    @NotBlank(message = "Product name is required")
-    @Size(max = 255, message = "Product name must not exceed 255 characters")
-    private String name;
+  @NotBlank(message = "Product name is required")
+  @Size(max = 255, message = "Product name must not exceed 255 characters")
+  private String name;
 
-    @Size(max = 1000, message = "Description must not exceed 1000 characters")
-    private String description;
+  @Size(max = 1000, message = "Description must not exceed 1000 characters")
+  private String description;
 
-    @Size(max = 255, message = "Active ingredient must not exceed 255 characters")
-    private String activeIngredient;
+  @Size(max = 255, message = "Active ingredient must not exceed 255 characters")
+  private String activeIngredient;
 
-    @Size(max = 255, message = "Manufacturer must not exceed 255 characters")
-    private String manufacturer;
+  @Size(max = 255, message = "Manufacturer must not exceed 255 characters")
+  private String manufacturer;
 
-    @NotNull(message = "Category is required")
-    private ProductCategory category;
+  @NotNull(message = "Category is required")
+  private ProductCategory category;
 
-    @NotNull(message = "Price is required")
-    @DecimalMin(value = "0.01", message = "Price must be positive")
-    private BigDecimal price;
+  @NotNull(message = "Price is required")
+  @DecimalMin(value = "0.01", message = "Price must be positive")
+  private BigDecimal price;
 
-    @NotNull(message = "Stock quantity is required")
-    @Min(value = 0, message = "Stock quantity cannot be negative")
-    private Integer stockQuantity;
+  @Size(max = 50, message = "Barcode must not exceed 50 characters")
+  private String barcode;
 
-    @Size(max = 50, message = "Barcode must not exceed 50 characters")
-    private String barcode;
+  private boolean requiresPrescription;
 
-    @Size(max = 50, message = "Batch number must not exceed 50 characters")
-    private String batchNumber;
+  private List<String> contraindications;
 
-    @Future(message = "Expiration date must be in the future")
-    private LocalDateTime expirationDate;
+  @Size(max = 255, message = "Dosage must not exceed 255 characters")
+  private String dosage;
 
-    @PastOrPresent(message = "Manufacture date cannot be in the future")
-    private LocalDateTime manufactureDate;
+  @Size(max = 500, message = "Administration must not exceed 500 characters")
+  private String administration;
 
-    private boolean requiresPrescription;
+  public CreateProductCommand toCommand() {
+    return CreateProductCommand.builder()
+        .name(this.getName())
+        .description(this.getDescription())
+        .activeIngredient(this.getActiveIngredient())
+        .manufacturer(this.getManufacturer())
+        .category(this.getCategory())
+        .price(this.getPrice())
+        .barcode(this.getBarcode())
+        .requiresPrescription(this.isRequiresPrescription())
+        .contraindications(this.getContraindications())
+        .dosage(this.getDosage())
+        .administration(this.getAdministration())
+        .build();
+  }
 
-    private List<String> contraindications;
-
-    @Size(max = 255, message = "Dosage must not exceed 255 characters")
-    private String dosage;
-
-    @Size(max = 500, message = "Administration must not exceed 500 characters")
-    private String administration;
-    
-    
-    public CreateProductCommand toCommand() {
-        return CreateProductCommand.builder()
-                .name(this.getName())
-                .description(this.getDescription())
-                .activeIngredient(this.getActiveIngredient())
-                .manufacturer(this.getManufacturer())
-                .category(this.getCategory())
-                .price(this.getPrice())
-                .stockQuantity(this.getStockQuantity())
-                .barcode(this.getBarcode())
-                .batchNumber(this.getBatchNumber())
-                .expirationDate(this.getExpirationDate())
-                .manufactureDate(this.getManufactureDate())
-                .requiresPrescription(this.isRequiresPrescription())
-                .contraindications(this.getContraindications())
-                .dosage(this.getDosage())
-                .administration(this.getAdministration())
-                .build();
-    }
 }

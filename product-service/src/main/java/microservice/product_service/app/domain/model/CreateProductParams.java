@@ -1,31 +1,36 @@
 package microservice.product_service.app.domain.model;
 
-import lombok.Builder;
-import microservice.product_service.app.domain.model.enums.ProductCategory;
-import microservice.product_service.app.domain.model.enums.ProductStatus;
-import microservice.product_service.app.domain.model.valueobjects.*;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
+
+import lombok.Builder;
+import microservice.product_service.app.domain.model.enums.ProductStatus;
+import microservice.product_service.app.domain.model.valueobjects.ActiveIngredient;
+import microservice.product_service.app.domain.model.valueobjects.Administration;
+import microservice.product_service.app.domain.model.valueobjects.Dosage;
+import microservice.product_service.app.domain.model.valueobjects.ExpirationRange;
+import microservice.product_service.app.domain.model.valueobjects.Manufacturer;
+import microservice.product_service.app.domain.model.valueobjects.ProductClassification;
+import microservice.product_service.app.domain.model.valueobjects.ProductDescription;
+import microservice.product_service.app.domain.model.valueobjects.ProductImages;
+import microservice.product_service.app.domain.model.valueobjects.ProductName;
+import microservice.product_service.app.domain.model.valueobjects.ProductPrice;
+import microservice.product_service.app.domain.model.valueobjects.SKU;
 
 @Builder
 public record CreateProductParams(
-    ProductCode code,
+    SKU sku,
     String barcode,
     ProductName name,
     ProductDescription description,
-    ActiveIngredient activeIngredient,
     Manufacturer manufacturer,
-    ProductCategory category,
+    ProductImages images,
+    ProductClassification classification,
     ProductPrice price,
-    ProductDates dates,
+    ExpirationRange expirationRange,
+    ActiveIngredient activeIngredient,
     boolean requiresPrescription,
     ProductStatus status,
-    Set<String> contraindications,
+    List<String> contraindications,
     Dosage dosage,
-    Administration administration
-) {
+    Administration administration) {
 }
-

@@ -1,16 +1,19 @@
 -- Create products table
 CREATE TABLE products (
     id VARCHAR(36) PRIMARY KEY,
-    code VARCHAR(50),
+    sku VARCHAR(50),
     name VARCHAR(255) NOT NULL,
     description VARCHAR(2000),
+    images TEXT[],
+    type VARCHAR(50) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    subcategory VARCHAR(50),
+    expiration_min_months INT DEFAULT 0,
+    expiration_max_months INT DEFAULT 0,
     active_ingredient VARCHAR(150),
     manufacturer VARCHAR(100),
-    category VARCHAR(50) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     barcode VARCHAR(20),
-    expiration_date TIMESTAMP,
-    manufacture_date TIMESTAMP,
     requires_prescription BOOLEAN NOT NULL DEFAULT FALSE,
     status VARCHAR(50) NOT NULL,
     dosage VARCHAR(100),
@@ -52,7 +55,7 @@ CREATE TABLE product_contraindications (
 );
 
 -- Create indexes for better query performance
-CREATE INDEX idx_product_code ON products(code);
+CREATE INDEX idx_product_sku ON products(sku);
 CREATE INDEX idx_product_name ON products(name);
 CREATE INDEX idx_product_category ON products(category);
 CREATE INDEX idx_product_status ON products(status);
