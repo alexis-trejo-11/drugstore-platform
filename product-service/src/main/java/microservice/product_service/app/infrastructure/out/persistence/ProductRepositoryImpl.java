@@ -58,6 +58,12 @@ public class ProductRepositoryImpl implements ProductRepository {
   }
 
   @Override
+  public Optional<Product> findByBarCode(String barcode) {
+    return jpaRepository.findByBarcodeAndDeletedAtIsNull(barcode)
+        .map(mapper::toDomain);
+  }
+
+  @Override
   public Page<Product> search(ProductSearchCriteria criteria) {
     Specification<ProductModel> spec = specificationBuilder.build(criteria);
     Page<ProductModel> page = jpaRepository.findAll(spec, buildPageRequest(criteria));
@@ -85,16 +91,11 @@ public class ProductRepositoryImpl implements ProductRepository {
     jpaRepository.deleteById(id.value().toString());
   }
 
+
   @Override
-  public void restoreByID(ProductID id) {
-    Optional<ProductModel> optional = jpaRepository.findByIdIncludeDeleted(id.value().toString());
-    if (optional.isPresent()) {
-      ProductModel entity = optional.get();
-      entity.markAsRestored();
-      jpaRepository.save(entity);
-    } else {
-      log.warn("Attempted to restore non-existing product with id {}", id.value());
-    }
+  public Optional<Product> findDeletedByID(ProductID id) {
+    return jpaRepository.findByIdAndDeletedAtNotNull(id.value().toString())
+        .map(mapper::toDomain);
   }
 
   @Override

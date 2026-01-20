@@ -10,9 +10,15 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import microservice.product_service.app.application.port.in.command.CreateProductCommand;
 import microservice.product_service.app.domain.model.enums.ProductCategory;
+import microservice.product_service.app.domain.model.enums.ProductStatus;
+import microservice.product_service.app.domain.model.enums.ProductSubcategory;
+import microservice.product_service.app.domain.model.enums.ProductType;
 
 @Data
 public class CreateProductRequest {
+
+  @Size(max = 100, message = "SKU must not exceed 100 characters")
+  private String sku;
 
   @NotBlank(message = "Product name is required")
   @Size(max = 255, message = "Product name must not exceed 255 characters")
@@ -27,8 +33,12 @@ public class CreateProductRequest {
   @Size(max = 255, message = "Manufacturer must not exceed 255 characters")
   private String manufacturer;
 
+  private ProductType type;
+
   @NotNull(message = "Category is required")
   private ProductCategory category;
+
+  private ProductSubcategory subcategory;
 
   @NotNull(message = "Price is required")
   @DecimalMin(value = "0.01", message = "Price must be positive")
@@ -37,7 +47,15 @@ public class CreateProductRequest {
   @Size(max = 50, message = "Barcode must not exceed 50 characters")
   private String barcode;
 
+  private List<String> images;
+
+  private Integer expirationMinMonths;
+
+  private Integer expirationMaxMonths;
+
   private boolean requiresPrescription;
+
+  private ProductStatus status;
 
   private List<String> contraindications;
 
@@ -49,14 +67,21 @@ public class CreateProductRequest {
 
   public CreateProductCommand toCommand() {
     return CreateProductCommand.builder()
+        .sku(this.getSku())
         .name(this.getName())
         .description(this.getDescription())
         .activeIngredient(this.getActiveIngredient())
         .manufacturer(this.getManufacturer())
+        .type(this.getType())
         .category(this.getCategory())
+        .subcategory(this.getSubcategory())
         .price(this.getPrice())
         .barcode(this.getBarcode())
+        .images(this.getImages())
+        .expirationMinMonths(this.getExpirationMinMonths())
+        .expirationMaxMonths(this.getExpirationMaxMonths())
         .requiresPrescription(this.isRequiresPrescription())
+        .status(this.getStatus())
         .contraindications(this.getContraindications())
         .dosage(this.getDosage())
         .administration(this.getAdministration())

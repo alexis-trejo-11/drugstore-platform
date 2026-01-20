@@ -1,5 +1,7 @@
 package microservice.product_service.app.application.usecase;
 
+import microservice.product_service.app.application.port.in.query.GetProductByBarCodeQuery;
+import microservice.product_service.app.application.port.in.query.GetProductBySKUQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -16,23 +18,27 @@ import microservice.product_service.app.domain.model.valueobjects.ProductID;
 @Service
 public class JoinedProductUseCases implements ProductCommandUseCases, ProductQueryUseCases {
   private final CreateProductUseCase createProductUseCase;
-  private final GetProductUseCase getProductUseCase;
+  private final GetProductUseCases getProductUseCases;
   private final SearchProductsUseCase searchProductsUseCase;
   private final UpdateProductUseCase updateProductUseCase;
   private final DeleteProductUseCase deleteProductUseCase;
+  private final RestoreProductUseCase restoreProductUseCase;
 
   @Autowired
   public JoinedProductUseCases(
       CreateProductUseCase createProductUseCase,
-      GetProductUseCase getProductUseCase,
+      GetProductUseCases getProductUseCases,
       SearchProductsUseCase searchProductsUseCase,
       UpdateProductUseCase updateProductUseCase,
-      DeleteProductUseCase deleteProductUseCase) {
+      DeleteProductUseCase deleteProductUseCase,
+      RestoreProductUseCase restoreProductUseCase
+      ) {
     this.createProductUseCase = createProductUseCase;
-    this.getProductUseCase = getProductUseCase;
+    this.getProductUseCases = getProductUseCases;
     this.searchProductsUseCase = searchProductsUseCase;
     this.updateProductUseCase = updateProductUseCase;
     this.deleteProductUseCase = deleteProductUseCase;
+    this.restoreProductUseCase = restoreProductUseCase;
   }
 
   @Override
@@ -42,7 +48,17 @@ public class JoinedProductUseCases implements ProductCommandUseCases, ProductQue
 
   @Override
   public Product getProductByID(GetProductByIDQuery query) {
-    return getProductUseCase.getProduct(query);
+    return getProductUseCases.getProduct(query);
+  }
+
+  @Override
+  public Product getProductBySKU(GetProductBySKUQuery query) {
+    return getProductUseCases.getProduct(query);
+  }
+
+  @Override
+  public Product getProductByBarcode(GetProductByBarCodeQuery query) {
+    return getProductUseCases.getProduct(query);
   }
 
   @Override
@@ -53,6 +69,11 @@ public class JoinedProductUseCases implements ProductCommandUseCases, ProductQue
   @Override
   public void deleteProduct(ProductID productId) {
     deleteProductUseCase.deleteProduct(productId);
+  }
+
+  @Override
+  public void restoreProduct(ProductID productId){
+    restoreProductUseCase.restoreByID(productId);
   }
 
   @Override

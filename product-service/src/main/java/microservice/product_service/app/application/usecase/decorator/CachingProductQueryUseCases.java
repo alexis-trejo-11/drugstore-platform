@@ -1,5 +1,7 @@
 package microservice.product_service.app.application.usecase.decorator;
 
+import microservice.product_service.app.application.port.in.query.GetProductByBarCodeQuery;
+import microservice.product_service.app.application.port.in.query.GetProductBySKUQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.cache.Cache;
@@ -61,6 +63,19 @@ public class CachingProductQueryUseCases implements ProductQueryUseCases {
 
     Product product = delegate.getProductByID(query);
     productByIdCache.put(key, product);
+    return product;
+  }
+
+  // TODO: Implement caching for SKU and Barcode if needed
+  @Override
+  public Product getProductBySKU(GetProductBySKUQuery query) {
+    Product product = delegate.getProductBySKU(query);
+    return product;
+  }
+
+  @Override
+  public Product getProductByBarcode(GetProductByBarCodeQuery query) {
+    Product product = delegate.getProductByBarcode(query);
     return product;
   }
 

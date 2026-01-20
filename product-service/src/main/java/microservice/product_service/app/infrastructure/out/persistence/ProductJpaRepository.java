@@ -14,6 +14,9 @@ public interface ProductJpaRepository
   Optional<ProductModel> findByIdIncludeDeleted(@Param("id") String id);
 
   Optional<ProductModel> findByIdAndDeletedAtIsNull(String id);
+  Optional<ProductModel> findByIdAndDeletedAtNotNull(String id);
+
+  Optional<ProductModel> findByBarcodeAndDeletedAtIsNull(String barCode);
 
   @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM ProductModel p WHERE p.sku = :sku AND p.deletedAt IS NULL")
   boolean existsBySKU(@Param("sku") String sku);

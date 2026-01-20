@@ -46,6 +46,12 @@ public class CachingProductCommandUseCases implements ProductCommandUseCases {
     evictCachesForProduct(productId.toString());
   }
 
+  @Override
+  public void restoreProduct(ProductID productId) {
+    delegate.restoreProduct(productId);
+    evictCachesForProduct(productId.toString());
+  }
+
   private void evictCachesForProduct(String id) {
     Cache byId = cacheManager.getCache("productById");
     if (byId != null) {
