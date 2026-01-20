@@ -11,4 +11,6 @@ public interface ProductCommandUseCases {
   Product updateProduct(UpdateProductCommand command);
 
   void deleteProduct(ProductID productId);
+
+  void restoreProduct(ProductID productId);
 }

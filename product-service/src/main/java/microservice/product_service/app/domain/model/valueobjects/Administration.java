@@ -29,8 +29,8 @@ public record Administration(String value) {
 
 		String trimmed = value.trim().toUpperCase();
 
-		if (trimmed.length() > 50) {
-			throw new ProductValueObjectException("Administration", "Administration method cannot exceed 50 characters");
+		if (trimmed.length() > 100) {
+			throw new ProductValueObjectException("Administration", "Administration method cannot exceed 100 characters");
 		}
 
 		if (!VALID_ADMINISTRATION_TYPES.contains(trimmed) &&

@@ -15,6 +15,8 @@ public interface ProductRepository {
 
   Optional<Product> findBySKU(SKU sku);
 
+  Optional<Product> findByBarCode(String barcode);
+
   Page<Product> search(ProductSearchCriteria criteria);
 
   long count(ProductSearchCriteria criteria);
@@ -27,5 +29,5 @@ public interface ProductRepository {
 
   void deleteByID(ProductID id);
 
-  void restoreByID(ProductID id);
+  Optional<Product> findDeletedByID(ProductID id);
 }

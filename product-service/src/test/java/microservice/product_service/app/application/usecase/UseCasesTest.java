@@ -12,7 +12,6 @@ import microservice.product_service.app.domain.model.enums.ProductStatus;
 import microservice.product_service.app.domain.model.valueobjects.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,7 +28,7 @@ public class UseCasesTest {
 
   private ProductRepository repository;
   private CreateProductUseCase createUseCase;
-  private GetProductUseCase getUseCase;
+  private GetProductUseCases getUseCase;
   private UpdateProductUseCase updateUseCase;
   private DeleteProductUseCase deleteUseCase;
   private SearchProductsUseCase searchUseCase;
@@ -39,7 +38,7 @@ public class UseCasesTest {
   void setup() {
     repository = mock(ProductRepository.class);
     createUseCase = new CreateProductUseCase(repository);
-    getUseCase = new GetProductUseCase(repository);
+    getUseCase = new GetProductUseCases(repository);
     updateUseCase = new UpdateProductUseCase(repository);
     deleteUseCase = new DeleteProductUseCase(repository);
     searchUseCase = new SearchProductsUseCase(repository);
