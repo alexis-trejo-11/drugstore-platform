@@ -1,9 +1,9 @@
 package microservice.product_service.app.application.usecase.decorator;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import microservice.product_service.app.application.port.in.command.CreateProductCommand;
@@ -56,6 +56,17 @@ public class CachingProductCommandUseCases implements ProductCommandUseCases {
     Cache byId = cacheManager.getCache("productById");
     if (byId != null) {
       byId.evict(id);
+    }
+
+    // Clear entire SKU and barcode caches since we don't have the specific keys
+    Cache bySKU = cacheManager.getCache("productBySKU");
+    if (bySKU != null) {
+      bySKU.clear();
+    }
+
+    Cache byBarcode = cacheManager.getCache("productByBarcode");
+    if (byBarcode != null) {
+      byBarcode.clear();
     }
 
     Cache search = cacheManager.getCache("productSearch");

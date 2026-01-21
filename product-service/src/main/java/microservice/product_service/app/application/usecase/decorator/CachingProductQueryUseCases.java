@@ -1,17 +1,18 @@
 package microservice.product_service.app.application.usecase.decorator;
 
-import microservice.product_service.app.application.port.in.query.GetProductByBarCodeQuery;
-import microservice.product_service.app.application.port.in.query.GetProductBySKUQuery;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import microservice.product_service.app.application.port.in.query.GetProductByBarCodeQuery;
 import microservice.product_service.app.application.port.in.query.GetProductByIDQuery;
+import microservice.product_service.app.application.port.in.query.GetProductBySKUQuery;
 import microservice.product_service.app.application.port.in.query.SearchProductsQuery;
 import microservice.product_service.app.application.port.in.usecase.ProductQueryUseCases;
 import microservice.product_service.app.application.usecase.JoinedProductUseCases;
@@ -23,6 +24,8 @@ public class CachingProductQueryUseCases implements ProductQueryUseCases {
 
   private final JoinedProductUseCases delegate;
   private final Cache productByIdCache;
+  private final Cache productBySKUCache;
+  private final Cache productByBarcodeCache;
   private final Cache productSearchCache;
   private final ObjectMapper objectMapper;
 
@@ -31,6 +34,8 @@ public class CachingProductQueryUseCases implements ProductQueryUseCases {
       ObjectMapper objectMapper) {
     this.delegate = delegate;
     this.productByIdCache = cacheManager.getCache("productById");
+    this.productBySKUCache = cacheManager.getCache("productBySKU");
+    this.productByBarcodeCache = cacheManager.getCache("productByBarcode");
     this.productSearchCache = cacheManager.getCache("productSearch");
     this.objectMapper = objectMapper;
   }
@@ -66,16 +71,69 @@ public class CachingProductQueryUseCases implements ProductQueryUseCases {
     return product;
   }
 
-  // TODO: Implement caching for SKU and Barcode if needed
   @Override
   public Product getProductBySKU(GetProductBySKUQuery query) {
+    if (query == null) {
+      return null;
+    }
+
+    String key = query.sku().getCode();
+    if (productBySKUCache == null) {
+      return delegate.getProductBySKU(query);
+    }
+
+    Cache.ValueWrapper wrapper = productBySKUCache.get(key);
+    if (wrapper != null) {
+      Object cached = wrapper.get();
+      if (cached instanceof Product) {
+        return (Product) cached;
+      }
+      // convert from LinkedHashMap (JSON) to Product
+      try {
+        return objectMapper.convertValue(cached, Product.class);
+      } catch (IllegalArgumentException ex) {
+        // fallback to delegate if conversion fails
+        return delegate.getProductBySKU(query);
+      }
+    }
+
     Product product = delegate.getProductBySKU(query);
+    if (product != null) {
+      productBySKUCache.put(key, product);
+    }
     return product;
   }
 
   @Override
   public Product getProductByBarcode(GetProductByBarCodeQuery query) {
+    if (query == null) {
+      return null;
+    }
+
+    String key = query.barCode();
+    if (productByBarcodeCache == null) {
+      return delegate.getProductByBarcode(query);
+    }
+
+    Cache.ValueWrapper wrapper = productByBarcodeCache.get(key);
+    if (wrapper != null) {
+      Object cached = wrapper.get();
+      if (cached instanceof Product) {
+        return (Product) cached;
+      }
+      // convert from LinkedHashMap (JSON) to Product
+      try {
+        return objectMapper.convertValue(cached, Product.class);
+      } catch (IllegalArgumentException ex) {
+        // fallback to delegate if conversion fails
+        return delegate.getProductByBarcode(query);
+      }
+    }
+
     Product product = delegate.getProductByBarcode(query);
+    if (product != null) {
+      productByBarcodeCache.put(key, product);
+    }
     return product;
   }
 
