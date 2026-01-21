@@ -1,11 +1,11 @@
 package microservice.product_service.app.infrastructure.out.persistence;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.Optional;
 
 public interface ProductJpaRepository
     extends JpaRepository<ProductModel, String>, JpaSpecificationExecutor<ProductModel> {
@@ -14,7 +14,11 @@ public interface ProductJpaRepository
   Optional<ProductModel> findByIdIncludeDeleted(@Param("id") String id);
 
   Optional<ProductModel> findByIdAndDeletedAtIsNull(String id);
+
   Optional<ProductModel> findByIdAndDeletedAtNotNull(String id);
+
+  @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM ProductModel p WHERE p.barcode = :barCode AND p.deletedAt IS NULL")
+  boolean existsByBarcode(@Param("barCode") String barCode);
 
   Optional<ProductModel> findByBarcodeAndDeletedAtIsNull(String barCode);
 

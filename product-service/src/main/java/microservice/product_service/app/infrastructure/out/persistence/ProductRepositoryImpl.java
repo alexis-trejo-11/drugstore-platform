@@ -1,12 +1,7 @@
 package microservice.product_service.app.infrastructure.out.persistence;
 
-import microservice.product_service.app.domain.model.Product;
-import microservice.product_service.app.domain.model.valueobjects.SKU;
-import microservice.product_service.app.domain.model.valueobjects.ProductID;
-import microservice.product_service.app.application.port.out.ProductRepository;
-import microservice.product_service.app.domain.specification.ProductSearchCriteria;
-import microservice.product_service.app.infrastructure.out.persistence.mapper.ProductModelMapper;
-import microservice.product_service.app.infrastructure.out.persistence.specification.ProductSpecificationBuilder;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +11,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import microservice.product_service.app.application.port.out.ProductRepository;
+import microservice.product_service.app.domain.model.Product;
+import microservice.product_service.app.domain.model.valueobjects.ProductID;
+import microservice.product_service.app.domain.model.valueobjects.SKU;
+import microservice.product_service.app.domain.specification.ProductSearchCriteria;
+import microservice.product_service.app.infrastructure.out.persistence.mapper.ProductModelMapper;
+import microservice.product_service.app.infrastructure.out.persistence.specification.ProductSpecificationBuilder;
 
 @Repository
 public class ProductRepositoryImpl implements ProductRepository {
@@ -38,14 +39,18 @@ public class ProductRepositoryImpl implements ProductRepository {
 
   @Override
   public Product save(Product product) {
+    log.debug("Saving product with ID: {}", product.getId());
     ProductModel entity = mapper.fromDomain(product);
+
     ProductModel saved = jpaRepository.save(entity);
+    log.debug("Product saved with ID: {}", saved.getId());
+
     return mapper.toDomain(saved);
   }
 
   @Override
   public Optional<Product> findByID(ProductID id) {
-    return jpaRepository.findByIdAndDeletedAtIsNull(id.value().toString())
+    return jpaRepository.findByIdAndDeletedAtIsNull(id.value())
         .map(mapper::toDomain);
   }
 
@@ -83,24 +88,23 @@ public class ProductRepositoryImpl implements ProductRepository {
 
   @Override
   public boolean existsByID(ProductID id) {
-    return jpaRepository.existsById(id.value().toString());
+    return jpaRepository.existsById(id.value());
   }
 
   @Override
   public void deleteByID(ProductID id) {
-    jpaRepository.deleteById(id.value().toString());
+    jpaRepository.deleteById(id.value());
   }
-
 
   @Override
   public Optional<Product> findDeletedByID(ProductID id) {
-    return jpaRepository.findByIdAndDeletedAtNotNull(id.value().toString())
+    return jpaRepository.findByIdAndDeletedAtNotNull(id.value())
         .map(mapper::toDomain);
   }
 
   @Override
   public boolean existsByBarCode(String barcode) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return jpaRepository.existsByBarcode(barcode);
   }
 
   private PageRequest buildPageRequest(ProductSearchCriteria criteria) {

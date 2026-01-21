@@ -47,6 +47,8 @@ public class RedisCacheConfig {
 
     Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
     cacheConfigurations.put("productById", defaultConfig);
+    cacheConfigurations.put("productBySKU", defaultConfig);
+    cacheConfigurations.put("productByBarcode", defaultConfig);
     cacheConfigurations.put("productSearch", defaultConfig.entryTtl(Duration.ofMinutes(5)));
 
     return RedisCacheManager.builder(RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory))
