@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import libs_kernel.config.rate_limit.RateLimit;
+import libs_kernel.config.rate_limit.RateLimitProfile;
 import libs_kernel.page.PageResponse;
 import libs_kernel.response.ResponseWrapper;
 import microservice.product_service.app.application.port.in.command.CreateProductCommand;
@@ -85,6 +87,7 @@ public class ProductController {
 
   @GetProductByIdOperation
   @GetMapping("/{productId}")
+  @RateLimit(profile = RateLimitProfile.PUBLIC)
   public ResponseWrapper<ProductResponse> getProductByID(
       @ProductApiParameters.ProductId @PathVariable @Valid @NotBlank String productId) {
 
@@ -97,6 +100,7 @@ public class ProductController {
 
   @GetProductBySKUOperation
   @GetMapping("/sku/{sku}")
+  @RateLimit(profile = RateLimitProfile.PUBLIC)
   public ResponseWrapper<ProductResponse> getProductBySKU(
       @PathVariable @Valid @NotBlank String sku) {
     var query = GetProductBySKUQuery.from(sku);
@@ -108,6 +112,7 @@ public class ProductController {
 
   @GetProductByBarcodeOperation
   @GetMapping("/barcode/{barcode}")
+  @RateLimit(profile = RateLimitProfile.PUBLIC)
   public ResponseWrapper<ProductResponse> getProductByBarcode(
       @PathVariable @Valid @NotBlank String barcode) {
     var query = new GetProductByBarCodeQuery(barcode);
@@ -118,6 +123,7 @@ public class ProductController {
 
   @CreateProductOperation
   @PostMapping
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
   public ResponseEntity<ResponseWrapper<ProductID>> createProduct(
       @Valid @RequestBody @NotNull CreateProductRequest productRequest) {
 
@@ -130,6 +136,7 @@ public class ProductController {
 
   @UpdateProductOperation
   @PutMapping("/{productId}")
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
   public ResponseEntity<ResponseWrapper<Void>> updateProduct(
       @ProductApiParameters.ProductId @PathVariable @Valid @NotBlank String productId,
       @RequestBody @Valid UpdateProductRequest request) {
@@ -142,6 +149,7 @@ public class ProductController {
 
   @RestoreProductOperation
   @PatchMapping("/{productId}/restore")
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
   public ResponseEntity<ResponseWrapper<Void>> restoreProduct(
       @ProductApiParameters.ProductId @PathVariable @Valid @NotBlank String productId) {
 
@@ -153,6 +161,7 @@ public class ProductController {
 
   @DeleteProductOperation
   @DeleteMapping("/{productId}")
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
   public ResponseEntity<ResponseWrapper<Void>> softDeleteProduct(
       @ProductApiParameters.ProductId @PathVariable @Valid @NotBlank String productId) {
 

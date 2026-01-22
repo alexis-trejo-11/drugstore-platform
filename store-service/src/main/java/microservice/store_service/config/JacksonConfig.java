@@ -13,24 +13,24 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class JacksonConfig {
 
-    @Bean
-    @Primary
-    public ObjectMapper objectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
+  @Bean
+  @Primary
+  public ObjectMapper objectMapper() {
+    ObjectMapper mapper = new ObjectMapper();
 
-        JavaTimeModule javaTimeModule = new JavaTimeModule();
+    JavaTimeModule javaTimeModule = new JavaTimeModule();
 
-        mapper.registerModule(javaTimeModule);
+    mapper.registerModule(javaTimeModule);
 
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    mapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
 
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        mapper.configure(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS, false);
+    mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    mapper.configure(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS, false);
 
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-        return mapper;
-    }
+    return mapper;
+  }
 }

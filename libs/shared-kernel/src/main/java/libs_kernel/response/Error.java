@@ -1,19 +1,55 @@
 package libs_kernel.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.Map;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Error {
-    private String errorCode;
-    private String errorMessage;
-    private String errorType;
-    private Map<String, String> details;
+  private String errorCode;
+  private String errorMessage;
+  private String errorType;
+  private Map<String, String> details;
+
+  public Error() {
+  }
+
+  public Error(String errorCode, String errorMessage, String errorType, Map<String, String> details) {
+    this.errorCode = errorCode;
+    this.errorMessage = errorMessage;
+    this.errorType = errorType;
+    this.details = details;
+  }
+
+  public void setErrorType(String errorType) {
+    this.errorType = errorType;
+  }
+
+  public Map<String, String> getDetails() {
+    return details;
+  }
+
+  public void setDetails(Map<String, String> details) {
+    this.details = details;
+  }
+
+  public String getErrorCode() {
+    return errorCode;
+  }
+
+  public void setErrorCode(String errorCode) {
+    this.errorCode = errorCode;
+  }
+
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+
+  public void setErrorMessage(String errorMessage) {
+    this.errorMessage = errorMessage;
+  }
+
+  public String getErrorType() {
+    return errorType;
+  }
+
 }

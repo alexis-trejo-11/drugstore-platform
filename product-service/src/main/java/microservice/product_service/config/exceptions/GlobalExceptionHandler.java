@@ -1,170 +1,187 @@
-package microservice.product_service.app.infrastructure.in.web.exceptions;
+package microservice.product_service.config.exceptions;
 
+import libs_kernel.config.CustomGlobalExceptionHandler;
+import libs_kernel.response.Error;
 import libs_kernel.response.ResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
-import microservice.product_service.app.domain.exception.ProductNotFoundException;
+import microservice.product_service.app.domain.exception.*;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.FieldError;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Global Exception Handler for the Product Microservice.
- * This class intercepts various exceptions thrown by controllers and services
- * and translates them into consistent, user-friendly error responses
- * using the ResponseWrapper format.
+ * This class intercepts product-specific exceptions and translates them
+ * into consistent, user-friendly error responses using the ResponseWrapper
+ * format.
+ * <p>
+ * Extends CustomGlobalExceptionHandler to inherit common exception handling.
+ * </p>
  */
 @RestControllerAdvice
 @Slf4j
-public class GlobalExceptionHandler {
-    /**
-     * Handles validation exceptions thrown by @Valid annotations on DTOs.
-     * Extracts all validation errors and returns them in a structured map.
-     *
-     * @param ex The MethodArgumentNotValidException instance.
-     * @return A ResponseEntity containing a ResponseWrapper with validation errors.
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ResponseWrapper<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            String errorCode = "DATA_VALIDATION_FAIL";
-            errors.put(fieldName, errorMessage);
-            errors.put("error_code", errorCode);
-        });
-        log.error("Validation error: {}", errors, ex);
+@Order(0) // Higher priority than parent handler
+public class GlobalExceptionHandler extends CustomGlobalExceptionHandler {
 
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseWrapper.error(errors));
+  // ==================== PRODUCT NOT FOUND ====================
+
+  /**
+   * Handle ProductNotFoundException - when a product is not found by ID, SKU, or
+   * barcode.
+   */
+  @ExceptionHandler(ProductNotFoundException.class)
+  public ResponseEntity<ResponseWrapper<?>> handleProductNotFoundException(ProductNotFoundException ex) {
+    log.warn("Product not found: {}", ex.getMessage());
+
+    Error error = buildProductError("PRODUCT_NOT_FOUND", ex.getMessage(), ex);
+    ResponseWrapper<?> response = ResponseWrapper.error("Product Not Found", error);
+
+    return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+  }
+
+  // ==================== PRODUCT VALIDATION EXCEPTIONS ====================
+
+  /**
+   * Handle ProductValidationException - general validation errors for product
+   * data.
+   */
+  @ExceptionHandler(ProductValidationException.class)
+  public ResponseEntity<ResponseWrapper<?>> handleProductValidationException(ProductValidationException ex) {
+    log.warn("Product validation failed: {}", ex.getMessage());
+
+    Error error = buildProductError("PRODUCT_VALIDATION_ERROR", ex.getMessage(), ex);
+    ResponseWrapper<?> response = ResponseWrapper.error("Product Validation Error", error);
+
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
+  /**
+   * Handle InvalidProductDataException - when product data is structurally
+   * invalid.
+   */
+  @ExceptionHandler(InvalidProductDataException.class)
+  public ResponseEntity<ResponseWrapper<?>> handleInvalidProductDataException(InvalidProductDataException ex) {
+    log.warn("Invalid product data: {}", ex.getMessage());
+
+    Error error = buildProductError("INVALID_PRODUCT_DATA", ex.getMessage(), ex);
+    ResponseWrapper<?> response = ResponseWrapper.error("Invalid Product Data", error);
+
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
+  /**
+   * Handle ProductValueObjectException - when value object creation fails.
+   */
+  @ExceptionHandler(ProductValueObjectException.class)
+  public ResponseEntity<ResponseWrapper<?>> handleProductValueObjectException(ProductValueObjectException ex) {
+    log.warn("Product value object error [{}]: {}", ex.getValueObject(), ex.getMessage());
+
+    Error error = buildProductError("INVALID_VALUE_OBJECT", ex.getMessage(), ex);
+    if (ex.getValueObject() != null) {
+      error.setDetails(Map.of(
+          "valueObject", ex.getValueObject(),
+          "message", ex.getMessage()));
     }
 
+    ResponseWrapper<?> response = ResponseWrapper.error("Invalid Product Value", error);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
 
-    /**
-     * Handles exceptions when the request body is malformed or unreadable (e.g., invalid JSON).
-     *
-     * @param ex The HttpMessageNotReadableException instance.
-     * @return A ResponseEntity containing a ResponseWrapper with an error message.
-     */
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ResponseWrapper<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        Map<String, String> errors = new HashMap<>();
-        String errorMessage = "Malformed JSON request body or invalid data type. Please check your request syntax.";
-        String errorType = "HTTP Body";
-        String errorCode= "INVALID_REQUEST_BODY";
-        log.error("HTTP Message Not Readable: {}", ex.getMessage(), ex);
+  // ==================== PRODUCT CONFLICT EXCEPTIONS ====================
 
-        errors.put("error_message", errorMessage);
-        errors.put("error_type", errorType);
-        errors.put("error_code", errorCode);
+  /**
+   * Handle ProductConflictException - when there's a conflict (e.g., duplicate
+   * SKU/barcode).
+   */
+  @ExceptionHandler(ProductConflictException.class)
+  public ResponseEntity<ResponseWrapper<?>> handleProductConflictException(ProductConflictException ex) {
+    log.warn("Product conflict: {}", ex.getMessage());
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ResponseWrapper.error(errors));
-    }
+    Error error = buildProductError("PRODUCT_CONFLICT", ex.getMessage(), ex);
+    ResponseWrapper<?> response = ResponseWrapper.error("Product Conflict", error);
 
+    return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+  }
 
-    /**
-     * Handles exceptions when a required request parameter is missing.
-     *
-     * @param ex The MissingServletRequestParameterException instance.
-     * @return A ResponseEntity containing a ResponseWrapper with an error message.
-     */
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ResponseWrapper<String>> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
-        Map<String, String> errors = new HashMap<>();
-        String errorMessage = String.format("Required request parameter '%s' is not present.", ex.getParameterName());
-        String errorType = "HTTP URL";
-        String errorCode = "MISSING_REQUEST_PARAM";
-        log.error("HTTP Message Not Readable: {}", ex.getMessage(), ex);
+  // ==================== PRODUCT PRICE EXCEPTIONS ====================
 
-        errors.put("error_message", errorMessage);
-        errors.put("error_type", errorType);
-        errors.put("error_code", errorCode);
+  /**
+   * Handle InvalidPriceException - when product price is invalid.
+   */
+  @ExceptionHandler(InvalidPriceException.class)
+  public ResponseEntity<ResponseWrapper<?>> handleInvalidPriceException(InvalidPriceException ex) {
+    log.warn("Invalid product price: {}", ex.getMessage());
 
-        log.error("Missing request parameter: {}", ex.getMessage(), ex);
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ResponseWrapper.error(errors));
-    }
+    Error error = buildProductError("INVALID_PRICE", ex.getMessage(), ex);
+    error.setDetails(Map.of("field", "price"));
 
+    ResponseWrapper<?> response = ResponseWrapper.error("Invalid Price", error);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
 
-    /**
-     * Handles exceptions when the requested HTTP method is not supported for a given endpoint.
-     *
-     * @param ex The HttpRequestMethodNotSupportedException instance.
-     * @return A ResponseEntity containing a ResponseWrapper with an error message.
-     */
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ResponseWrapper<String>> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex) {
-            Map<String, String> errors = new HashMap<>();
-            String errorMessage = "Method Not Allowed";
-            String errorType = "HTTP Method";
-            String errorCode = "METHOD_NOT_ALLOWED";
+  // ==================== PRODUCT DATE EXCEPTIONS ====================
 
-            errors.put("error_message", errorMessage);
-            errors.put("error_type", errorType);
-            errors.put("error_code", errorCode);
+  /**
+   * Handle InvalidExpirationDateException - when expiration date is invalid.
+   */
+  @ExceptionHandler(InvalidExpirationDateException.class)
+  public ResponseEntity<ResponseWrapper<?>> handleInvalidExpirationDateException(InvalidExpirationDateException ex) {
+    log.warn("Invalid expiration date: {}", ex.getMessage());
 
-        log.error("Method not supported: {}", ex.getMessage(), ex);
-        return ResponseEntity
-                .status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(ResponseWrapper.error(errors));
-    }
+    Error error = buildProductError("INVALID_EXPIRATION_DATE", ex.getMessage(), ex);
+    error.setDetails(Map.of("field", "expirationDate"));
 
-    /**
-     * Handles the custom ProductNotFoundException.
-     * This will return an HTTP 404 Not Found status.
-     *
-     * @param ex The ProductNotFoundException instance.
-     * @return A ResponseEntity containing a ResponseWrapper with the product not found message.
-     */
-    @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ResponseWrapper<String>> handleProductNotFoundException(ProductNotFoundException ex) {
-        Map<String, String> errors = new HashMap<>();
-        String errorMessage = "Product Not Found";
-        String errorType = "App Error";
-        String errorCode = "NOT_FOUND";
+    ResponseWrapper<?> response = ResponseWrapper.error("Invalid Expiration Date", error);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
 
-        errors.put("error_message", errorMessage);
-        errors.put("error_type", errorType);
-        errors.put("error_code", errorCode);
+  /**
+   * Handle InvalidManufactureDateException - when manufacture date is invalid.
+   */
+  @ExceptionHandler(InvalidManufactureDateException.class)
+  public ResponseEntity<ResponseWrapper<?>> handleInvalidManufactureDateException(InvalidManufactureDateException ex) {
+    log.warn("Invalid manufacture date: {}", ex.getMessage());
 
-        log.warn("Product not found: {}", ex.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ResponseWrapper.error(errors));
-    }
+    Error error = buildProductError("INVALID_MANUFACTURE_DATE", ex.getMessage(), ex);
+    error.setDetails(Map.of("field", "manufactureDate"));
 
+    ResponseWrapper<?> response = ResponseWrapper.error("Invalid Manufacture Date", error);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
 
-    /**
-     * General exception handler for any other unhandled exceptions.
-     * This acts as a fallback to catch unexpected errors and prevent them from leaking
-     * sensitive information to the client.
-     *
-     * @param ex The Exception instance.
-     * @return A ResponseEntity containing a ResponseWrapper with a generic error message.
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ResponseWrapper<String>> handleAllUncaughtExceptions(Exception ex) {
-        log.error("An unexpected error occurred: {}", ex.getMessage(), ex);
-        Map<String, String> errors = new HashMap<>();
-        errors.put("error_message",  "An unexpected error occurred. Please try again later.");
-        errors.put("error_type", "Not Handled Exception");
-        errors.put("error_code", "Server_Error");
+  // ==================== PRESCRIPTION EXCEPTIONS ====================
 
+  /**
+   * Handle PrescriptionRequiredException - when prescription is required but not
+   * provided.
+   */
+  @ExceptionHandler(PrescriptionRequiredException.class)
+  public ResponseEntity<ResponseWrapper<?>> handlePrescriptionRequiredException(PrescriptionRequiredException ex) {
+    log.warn("Prescription required: {}", ex.getMessage());
 
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ResponseWrapper.error(errors));
-    }
+    Error error = buildProductError("PRESCRIPTION_REQUIRED", ex.getMessage(), ex);
+    error.setDetails(Map.of(
+        "requiresPrescription", "true",
+        "message", "This product requires a valid prescription"));
 
+    ResponseWrapper<?> response = ResponseWrapper.error("Prescription Required", error);
+    return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+  }
+
+  // ==================== HELPER METHODS ====================
+
+  /**
+   * Build a standardized Error object for product exceptions.
+   */
+  private Error buildProductError(String errorCode, String errorMessage, Exception ex) {
+    Error error = new Error();
+    error.setErrorCode(errorCode);
+    error.setErrorMessage(errorMessage);
+    error.setErrorType(ex.getClass().getSimpleName());
+    return error;
+  }
 }
