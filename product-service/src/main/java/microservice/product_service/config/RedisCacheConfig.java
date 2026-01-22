@@ -1,4 +1,4 @@
-package microservice.product_service.app.infrastructure.config;
+package microservice.product_service.config;
 
 import java.time.Duration;
 import java.util.HashMap;
