@@ -8,12 +8,12 @@ public class Error {
   private String errorCode;
   private String errorMessage;
   private String errorType;
-  private Map<String, String> details;
+  private Map<String, ?> details;
 
   public Error() {
   }
 
-  public Error(String errorCode, String errorMessage, String errorType, Map<String, String> details) {
+  public Error(String errorCode, String errorMessage, String errorType, Map<String, ?> details) {
     this.errorCode = errorCode;
     this.errorMessage = errorMessage;
     this.errorType = errorType;
@@ -24,11 +24,11 @@ public class Error {
     this.errorType = errorType;
   }
 
-  public Map<String, String> getDetails() {
+  public Map<String, ?> getDetails() {
     return details;
   }
 
-  public void setDetails(Map<String, String> details) {
+  public void setDetails(Map<String, ?> details) {
     this.details = details;
   }
 

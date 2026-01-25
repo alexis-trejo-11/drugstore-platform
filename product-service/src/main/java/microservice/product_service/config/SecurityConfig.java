@@ -1,5 +1,8 @@
 package microservice.product_service.config;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -10,9 +13,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -31,6 +31,9 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .anyRequest().permitAll())
 
+        // 4. Enforce HTTPS
+        .requiresChannel(channel -> channel
+            .anyRequest().requiresSecure())
     // 4. Placeholder for future Authentication
     // .httpBasic(Customizer.withDefaults())
     ;
@@ -46,7 +49,7 @@ public class SecurityConfig {
     // production)
     configuration.setAllowedOrigins(
         List.of("http://localhost:4200", "http://localhost:3000", "http://localhost:8000",
-            "http://localhost:80840"));
+            "https://localhost:8444"));
 
     // Define allowed methods
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

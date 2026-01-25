@@ -1,7 +1,11 @@
 server:
-  port: 8084
+  port: 8444
   ssl:
-    enabled: false
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: ${PRODUCT_SSL_KEYSTORE_PASSWORD}
+    key-store-type: PKCS12
+    key-alias: product-service
 
 spring:
   application:
@@ -43,9 +47,9 @@ spring:
 
   # Postgres
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${PRODUCTS_DB:drugstore_products}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${PRODUCT_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect

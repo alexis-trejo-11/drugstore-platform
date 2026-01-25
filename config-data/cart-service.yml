@@ -1,0 +1,110 @@
+server:
+  port: 8081
+  ssl:
+    enabled: false
+    key-store: classpath:keystore.p12
+    key-store-password: ${CART_SSL_KEYSTORE_PASSWORD}
+    key-store-type: PKCS12
+    key-alias: cart-service
+
+spring:
+  application:
+    name: cart-service
+
+  profiles:
+    active: dev
+
+  boot:
+    admin:
+      client:
+        url: http://localhost:8080
+        instance:
+          service-url: http://localhost:8084
+          name: cart-service
+
+  devtools:
+    restart:
+      enabled: true
+      exclude: static/**,public/**
+      poll-interval: 1000
+      quiet-period: 400
+    livereload:
+      enabled: true
+
+  cache:
+    type: redis
+    data:
+      redis:
+        host: ${SPRING_REDIS_HOST:localhost}
+        port: ${SPRING_REDIS_PORT:6379}
+        password: ${SPRING_REDIS_PASSWORD:redispass}
+        lettuce:
+          pool:
+            max-active: 8
+            max-idle: 8
+            min-idle: 0
+        timeout: 2000ms
+
+  # Postgres
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${CART_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  flyway:
+    enabled: false
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    schemas: public
+    clean-disabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      cors:
+        allowed-origins: "*"
+        allowed-methods: "*"
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+    info:
+      enabled: true
+    metrics:
+      enabled: true
+    env:
+      enabled: true
+    loggers:
+      enabled: true
+  info:
+    env:
+      enabled: true
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+    mail:
+      enabled: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    tags-sorter: alpha
+    operations-sorter: alpha
+    doc-expansion: none
+  packages-to-scan: microservice.cart_service
+  paths-to-match: /api/**
+  cache:
+    disabled: true
