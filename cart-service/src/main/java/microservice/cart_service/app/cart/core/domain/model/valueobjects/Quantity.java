@@ -22,6 +22,14 @@ public record Quantity(int value) {
     }
   }
 
+  public boolean isAtMinimum() {
+    return this.value == MIN_QUANTITY;
+  }
+
+  public boolean isAtMaximum() {
+    return this.value == MAX_QUANTITY;
+  }
+
   /**
    * Creates a Quantity with the specified value.
    *

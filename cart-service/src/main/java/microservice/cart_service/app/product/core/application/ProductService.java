@@ -1,45 +1,63 @@
 package microservice.cart_service.app.product.core.application;
 
-import java.util.Collections;
-import java.util.List;
-
+import microservice.cart_service.app.cart.core.domain.model.valueobjects.ProductId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import microservice.cart_service.app.cart.core.domain.exception.ProductNotFoundException;
-import microservice.cart_service.app.cart.core.domain.model.valueobjects.ProductId;
 import microservice.cart_service.app.product.core.domain.Product;
+import microservice.cart_service.app.product.core.port.in.ProductUseCases;
 import microservice.cart_service.app.product.core.port.out.ProductRepository;
 
+import java.util.List;
+import java.util.Set;
+
 @Service
-public class ProductService {
+public class ProductService implements ProductUseCases {
   private final ProductRepository productRepository;
+
+
 
   @Autowired
   public ProductService(ProductRepository productRepository) {
     this.productRepository = productRepository;
   }
 
-  public List<Product> getAllProducts() {
-    // Implementation to retrieve all products
-    return Collections.emptyList();
+  public List<ProductId> getUnavailableProductsIn(List<ProductId> productIds) {
+    // Placeholder implementation
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
-  public List<Product> findAvailableByIdIn(List<ProductId> productIds) {
-    var products = productRepository.findAvailableByIdIn(productIds);
-
-    List<String> foundProductIds = products.stream()
-        .map(product -> product.getId().toString())
-        .toList();
-
-    List<String> missingProductIds = productIds.stream()
-        .map(ProductId::toString)
-        .filter(id -> !foundProductIds.contains(id))
-        .toList();
-
-    if (!missingProductIds.isEmpty()) {
-      throw new ProductNotFoundException(String.valueOf(missingProductIds));
-    }
-    return products;
+  @Override
+  public List<ProductId> getOutOfStockProductsIn(List<ProductId> productIds) {
+    // Placeholder implementation
+    throw new UnsupportedOperationException("Not supported yet.");
   }
+
+  @Override
+  public Page<Product> getProducts(Pageable pageable) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public Product getProductById(String productId) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public void createProduct(Product product) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public void updateProduct(Product product) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public void deleteProduct(String productId) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
 }

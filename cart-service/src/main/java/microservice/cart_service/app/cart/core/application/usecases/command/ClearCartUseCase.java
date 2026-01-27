@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import microservice.cart_service.app.cart.core.application.command.ClearCartCommand;
+import microservice.cart_service.app.cart.core.domain.exception.CartNotFoundException;
 import microservice.cart_service.app.cart.core.domain.model.Cart;
 import microservice.cart_service.app.cart.core.port.out.CartRepository;
 
@@ -18,7 +19,7 @@ public class ClearCartUseCase {
 
   public void execute(ClearCartCommand command) {
     Cart cart = cartRepository.findByCustomerIdWithItems(command.customerId())
-        .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+        .orElseThrow(() -> new CartNotFoundException(command.customerId()));
 
     cart.clear();
     cartRepository.save(cart);

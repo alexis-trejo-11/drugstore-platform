@@ -1,6 +1,7 @@
 package microservice.cart_service.app.cart.core.application.usecases.command;
 
 import microservice.cart_service.app.cart.core.application.command.RemoveAfterwardsCommand;
+import microservice.cart_service.app.cart.core.domain.exception.CartNotFoundException;
 import microservice.cart_service.app.cart.core.port.out.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +17,7 @@ public class ReturnCartItemFromAfterwardsUseCase {
 
 	public void execute(RemoveAfterwardsCommand command) {
 		var cart = cartRepository.findById(command.cartId(), false, true)
-				.orElseThrow(() -> new IllegalArgumentException("Cart not found with ID: " + command.cartId()));
+				.orElseThrow(() -> new CartNotFoundException(command.cartId()));
 
 		cart.returnItemsFromAfterwards(command.productIds());
 		cartRepository.save(cart);

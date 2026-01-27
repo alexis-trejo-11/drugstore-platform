@@ -1,5 +1,6 @@
 package microservice.cart_service.app.cart.adapter.in.web.dto.input;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,9 +20,9 @@ public record BuyFromCartRequest(Set<String> productsIdsToExclude) {
   }
 
   public BuyCartCommand toCommand(String customerId) {
-    Set<ProductId> productsIdsToExcludeSet = productsIdsToExclude.stream()
+    List<ProductId> productsIdsToExcludeSet = productsIdsToExclude.stream()
         .map(ProductId::new)
-        .collect(Collectors.toSet());
+        .toList();
 
     if (customerId == null) {
       throw new IllegalArgumentException("CustomerId cannot be null");

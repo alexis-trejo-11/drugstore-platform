@@ -3,6 +3,7 @@ package microservice.cart_service.app.cart.core.application.usecases.command;
 import java.util.Optional;
 
 import jakarta.transaction.Transactional;
+import microservice.cart_service.app.cart.core.domain.exception.CartNotFoundException;
 import microservice.cart_service.app.cart.core.domain.model.CreateCartItemParams;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.Quantity;
 import microservice.cart_service.app.product.core.port.out.ProductRepository;
@@ -28,7 +29,7 @@ public class UpdateCartItemsUseCase {
   @Transactional
   public Cart execute(UpdateCartCommand command) {
     Cart cart = cartRepository.findByCustomerIdWithItems(command.customerId())
-        .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+        .orElseThrow(() -> new CartNotFoundException(command.customerId()));
 
     applyCartUpdates(command, cart);
 
