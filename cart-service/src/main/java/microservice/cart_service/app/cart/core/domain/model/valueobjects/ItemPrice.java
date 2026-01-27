@@ -15,8 +15,9 @@ public record ItemPrice(BigDecimal value) {
   public static final BigDecimal MIN_PRICE = BigDecimal.ZERO;
   public static final BigDecimal MAX_PRICE = new BigDecimal("999999.99");
   public static final int SCALE = 2;
+  public static final ItemPrice NONE = new ItemPrice(null);
 
-  public ItemPrice {
+  public void validate() {
     if (value == null) {
       throw new CartValueObjectException("ItemPrice", "Price cannot be null");
     }
@@ -39,7 +40,11 @@ public record ItemPrice(BigDecimal value) {
    * @throws CartValueObjectException if value is invalid
    */
   public static ItemPrice create(BigDecimal value) {
-    return new ItemPrice(value);
+    var price = new ItemPrice(value);
+
+    price.validate();
+
+    return price;
   }
 
   /**
@@ -114,12 +119,36 @@ public record ItemPrice(BigDecimal value) {
   }
 
   /**
+   * Subtracts another price from this one.
+   *
+   * @param other the price to subtract
+   * @return a new ItemPrice representing the difference
+   * @throws CartValueObjectException if resulting price is negative
+   */
+  public ItemPrice subtract(ItemPrice other) {
+    if (other == null) {
+      throw new CartValueObjectException("ItemPrice", "Cannot subtract a null price");
+    }
+
+    BigDecimal result = this.value.subtract(other.value).setScale(SCALE, RoundingMode.HALF_UP);
+    if (result.compareTo(MIN_PRICE) < 0) {
+      throw new CartValueObjectException("ItemPrice", "Resulting price cannot be negative");
+    }
+    return new ItemPrice(result);
+  }
+
+  /**
    * Checks if this price is zero.
    *
    * @return true if the price is zero
    */
   public boolean isZero() {
     return value.compareTo(BigDecimal.ZERO) == 0;
+  }
+
+
+  public boolean isPositive() {
+    return value.compareTo(BigDecimal.ZERO) > 0;
   }
 
   @Override
@@ -142,3 +171,4 @@ public record ItemPrice(BigDecimal value) {
     return Objects.hash(value.stripTrailingZeros());
   }
 }
+

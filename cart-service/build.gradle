@@ -38,6 +38,9 @@ dependencies {
 	implementation 'org.postgresql:postgresql'
 	runtimeOnly 'org.postgresql:postgresql'
 
+	// H2 for testing
+	testImplementation 'com.h2database:h2'
+
 	// Lombok
   	compileOnly 'org.projectlombok:lombok:edge-SNAPSHOT'
   	annotationProcessor 'org.projectlombok:lombok:edge-SNAPSHOT'

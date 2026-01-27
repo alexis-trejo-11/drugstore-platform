@@ -2,18 +2,22 @@ package microservice.cart_service.app.product.core.port.in;
 
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.ProductId;
 import microservice.cart_service.app.product.core.domain.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Set;
 
-// Use cases for product-related operations.
-//
-// Product Use Cases only has query methods cause the only way to modify products
-// is through listening events from product-service.
 public interface ProductUseCases {
-  List<Product> findAvailableByIdIn(Set<ProductId> productIds);
+	Page<Product> getProducts(Pageable pageable);
 
-  List<Product> findByIdIn(List<ProductId> productIds);
+	List<ProductId> getUnavailableProductsIn(List<ProductId> productIds);
+	List<ProductId> getOutOfStockProductsIn(List<ProductId> productIds);
 
-  // TODO: Add search
+	Product getProductById(String productId);
+
+	void createProduct(Product product);
+
+	void updateProduct(Product product);
+
+	void deleteProduct(String productId);
 }

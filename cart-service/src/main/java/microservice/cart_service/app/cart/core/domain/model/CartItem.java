@@ -51,6 +51,11 @@ public class CartItem {
     CartValidation.requireNonNull(params.productId(), "Product ID");
     CartValidation.requireNonNull(params.quantity(), "Quantity");
 
+    if (params.quantity().value() <= 0) {
+      throw new InvalidQuantityException(params.quantity().value(),
+          "Quantity must be greater than zero when creating a cart item");
+    }
+
     CartItem item = new CartItem();
     item.id = CartItemId.generate();
     item.cartId = params.cartId();
@@ -87,8 +92,6 @@ public class CartItem {
 
     return item;
   }
-
-  // ==================== BUSINESS METHODS ====================
 
   /**
    * Updates the quantity of this cart item.
@@ -175,6 +178,9 @@ public class CartItem {
    * @return the subtotal as ItemPrice
    */
   public ItemPrice calculateSubtotal() {
+    if (unitPrice == null) {
+      return ItemPrice.NONE;
+    }
     return unitPrice.multiply(quantity);
   }
 

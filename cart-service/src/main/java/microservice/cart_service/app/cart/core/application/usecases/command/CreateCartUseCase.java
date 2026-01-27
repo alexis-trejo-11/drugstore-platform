@@ -1,5 +1,6 @@
 package microservice.cart_service.app.cart.core.application.usecases.command;
 
+import microservice.cart_service.app.cart.core.domain.exception.CartConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,7 @@ public class CreateCartUseCase {
 
   public void execute(CreateCartCommand command) {
     if (cartRepository.existsByCustomerId(command.customerId())) {
-      throw new IllegalArgumentException("Cart already exists for this customer");
+      throw new CartConflictException("Cart already exists for this customer");
     }
 
     CreateCartParams params = command.toCreateCartParams();
