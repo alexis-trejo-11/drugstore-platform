@@ -1,4 +1,4 @@
-package microservice.cart_service.app.cart.adapter.in.web.dto.input;
+package microservice.cart_service.app.cart.adapter.input.web.dto.input;
 
 import org.hibernate.validator.constraints.Length;
 

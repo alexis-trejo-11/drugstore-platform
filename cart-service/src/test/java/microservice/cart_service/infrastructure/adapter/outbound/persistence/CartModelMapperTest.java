@@ -15,9 +15,9 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import microservice.cart_service.app.cart.adapter.out.persistence.mapper.CartItemModelMapper;
-import microservice.cart_service.app.cart.adapter.out.persistence.mapper.CartModelMapper;
-import microservice.cart_service.app.cart.adapter.out.persistence.models.CartModel;
+import microservice.cart_service.app.cart.adapter.output.persistence.mapper.CartItemModelMapper;
+import microservice.cart_service.app.cart.adapter.output.persistence.mapper.CartModelMapper;
+import microservice.cart_service.app.cart.adapter.output.persistence.models.CartModel;
 import microservice.cart_service.app.cart.core.domain.model.Cart;
 import microservice.cart_service.app.cart.core.domain.model.CreateCartParams;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.CustomerId;
@@ -69,7 +69,7 @@ public class CartModelMapperTest {
     when(itemMapper.toDomains(anyList())).thenReturn(Collections.emptyList());
 
     // When
-    Cart result = cartModelMapper.toDomain(model);
+    Cart result = cartModelMapper.toDomain(model, false, false);
 
     // Then
     assertThat(result).isNotNull();
@@ -83,7 +83,7 @@ public class CartModelMapperTest {
   @Test
   void toDomain_WithNullModel_ReturnsNull() {
     // When
-    Cart result = cartModelMapper.toDomain(null);
+    Cart result = cartModelMapper.toDomain(null, false, false);
 
     // Then
     assertThat(result).isNull();
@@ -120,7 +120,7 @@ public class CartModelMapperTest {
     when(itemMapper.toDomains(anyList())).thenReturn(Collections.emptyList());
 
     // When
-    List<Cart> result = cartModelMapper.toDomains(models);
+    List<Cart> result = cartModelMapper.toDomains(models, false, false);
 
     // Then
     assertThat(result).hasSize(2);
@@ -131,7 +131,7 @@ public class CartModelMapperTest {
   @Test
   void toDomains_WithNullList_ReturnsEmptyList() {
     // When
-    List<Cart> result = cartModelMapper.toDomains(null);
+    List<Cart> result = cartModelMapper.toDomains(null, false, false);
 
     // Then
     assertThat(result).isEmpty();
@@ -146,7 +146,7 @@ public class CartModelMapperTest {
 
     // When
     CartModel model = cartModelMapper.toModel(originalDomain);
-    Cart reconstructedDomain = cartModelMapper.toDomain(model);
+    Cart reconstructedDomain = cartModelMapper.toDomain(model, false, false);
 
     // Then
     assertThat(reconstructedDomain.getId().value()).isEqualTo(originalDomain.getId().value());

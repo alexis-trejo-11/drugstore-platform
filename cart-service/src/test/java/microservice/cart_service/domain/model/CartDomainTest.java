@@ -238,7 +238,7 @@ public class CartDomainTest {
     cart.addItem(item2);
 
     // When
-    ItemPrice totalPrice = cart.calculateTotalPrice();
+    ItemPrice totalPrice = cart.calculateTotal();
 
     // Then - (2 * 10.50) + (3 * 5.00) = 21.00 + 15.00 = 36.00
     assertThat(totalPrice.value()).isEqualByComparingTo(new BigDecimal("36.00"));
