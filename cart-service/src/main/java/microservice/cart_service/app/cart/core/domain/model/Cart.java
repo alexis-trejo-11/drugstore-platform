@@ -1,5 +1,6 @@
 package microservice.cart_service.app.cart.core.domain.model;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +37,7 @@ public class Cart {
   private CartId id;
   private CustomerId customerId;
   private List<CartItem> items;
-  private final List<AfterwardsItem> afterwardsItems;
+  private List<AfterwardsItem> afterwardsItems;
   private CartTimeStamps timeStamps;
   private final transient List<DomainEvent> domainEvents = new ArrayList<>();
 
@@ -81,6 +82,10 @@ public class Cart {
     cart.id = params.id();
     cart.customerId = params.customerId();
     cart.items = params.items() != null ? new ArrayList<>(params.items()) : new ArrayList<>();
+    cart.afterwardsItems = params.afterwardsItems() != null
+        ? new ArrayList<>(params.afterwardsItems())
+        : new ArrayList<>();
+    
     cart.timeStamps = params.timeStamps() != null ? params.timeStamps() : CartTimeStamps.now();
 
     log.debug("Reconstructed Cart: id={}, itemCount={}", cart.id, cart.items.size());
@@ -291,8 +296,24 @@ public class Cart {
    *
    * @return the total price as ItemPrice
    */
-  public ItemPrice calculateTotalPrice() {
-    return items.stream().map(CartItem::calculateSubtotal).reduce(ItemPrice.zero(), ItemPrice::add);
+  public ItemPrice calculateTotal() {
+    if (items.isEmpty()) {
+      return ItemPrice.zero();
+    }
+
+    return items.stream()
+        .map(CartItem::calculateTotal)
+        .reduce(ItemPrice.zero(), ItemPrice::add);
+  }
+
+  public ItemPrice calculateSubtotal() {
+    if (items.isEmpty()) {
+      return ItemPrice.zero();
+    }
+
+    return items.stream()
+        .map(CartItem::calculateSubtotal)
+        .reduce(ItemPrice.zero(), ItemPrice::add);
   }
 
   /**
@@ -464,6 +485,17 @@ public class Cart {
     }
 
     timeStamps.markAsUpdated();
+  }
+
+  public BigDecimal calculateDiscount() {
+    if (items.isEmpty()) {
+      return BigDecimal.ZERO;
+    }
+
+
+    return items.stream()
+        .map(CartItem::calculateDiscount)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
   public void clearDomainEvents() {

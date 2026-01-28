@@ -7,7 +7,7 @@ import java.util.HashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
-import microservice.cart_service.app.cart.adapter.out.persistence.models.CartModel;
+import microservice.cart_service.app.cart.adapter.output.persistence.models.CartModel;
 
 public class CartModelTest {
 

@@ -184,6 +184,19 @@ public class CartItem {
     return unitPrice.multiply(quantity);
   }
 
+  public BigDecimal calculateDiscount() {
+    if (discountPerUnit == null) {
+      return BigDecimal.ZERO;
+    }
+    return discountPerUnit.multiply(BigDecimal.valueOf(quantity.value()));
+  }
+
+  public ItemPrice calculateTotal() {
+    ItemPrice subtotal = calculateSubtotal();
+    BigDecimal totalDiscount = calculateDiscount();
+    return subtotal.subtract(new ItemPrice(totalDiscount));
+  }
+
   /**
    * Checks if this cart item can be merged with another item.
    * Items can be merged if they have the same product ID.

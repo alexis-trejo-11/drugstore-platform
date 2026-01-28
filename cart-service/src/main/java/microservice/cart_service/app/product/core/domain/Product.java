@@ -20,6 +20,7 @@ public class Product {
   private final ProductId id;
   private String name;
   private BigDecimal unitPrice;
+  private BigDecimal discountPerUnit;
   private String description;
   private boolean available;
   private LocalDateTime createdAt;
@@ -35,6 +36,7 @@ public class Product {
     product.unitPrice = params.unitPrice();
     product.description = params.description();
     product.available = params.available();
+    product.discountPerUnit = params.discountPerUnit() != null ? params.discountPerUnit() : BigDecimal.ZERO;
     product.createdAt = LocalDateTime.now();
     product.updatedAt = LocalDateTime.now();
     return product;
@@ -44,6 +46,7 @@ public class Product {
     Product product = new Product(params.id());
     product.name = params.name();
     product.unitPrice = params.unitPrice();
+    product.discountPerUnit = params.discountPerUnit();
     product.description = params.description();
     product.available = params.available();
     product.createdAt = params.createdAt();
@@ -84,6 +87,7 @@ public class Product {
       ProductId id,
       String name,
       BigDecimal unitPrice,
+      BigDecimal discountPerUnit,
       String description,
       boolean available) {
   }
@@ -92,6 +96,7 @@ public class Product {
       ProductId id,
       String name,
       BigDecimal unitPrice,
+      BigDecimal discountPerUnit,
       String description,
       boolean available,
       LocalDateTime createdAt,

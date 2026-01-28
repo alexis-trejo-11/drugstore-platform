@@ -15,6 +15,7 @@ public record ReconstructCartParams(
     CartId id,
     CustomerId customerId,
     List<CartItem> items,
+    List<AfterwardsItem> afterwardsItems,
     CartTimeStamps timeStamps) {
   /**
    * Creates reconstruction params with an empty item list.
@@ -28,6 +29,6 @@ public record ReconstructCartParams(
       CartId id,
       CustomerId customerId,
       CartTimeStamps timeStamps) {
-    return new ReconstructCartParams(id, customerId, List.of(), timeStamps);
+    return new ReconstructCartParams(id, customerId, List.of(), List.of(),timeStamps);
   }
 }
