@@ -68,8 +68,15 @@ public class CartAdminController {
 	@SearchCartOperation
 	@GetMapping("/search")
 	private ResponseWrapper<PageResponse<CartResponse>> searchCarts(
-			@Valid @NotNull @ModelAttribute SearchCartsRequest params,
-			@Valid @NotNull @ModelAttribute PageRequest pageParams) {
+			@Valid @ModelAttribute SearchCartsRequest params,
+			@Valid @ModelAttribute PageRequest pageParams) {
+		if (params == null) {
+			params = SearchCartsRequest.empty();
+		}
+		if (pageParams == null) {
+			pageParams = PageRequest.defaultPageRequest();
+		}
+
 		Pageable pageable = pageParams.toPageable();
 		SearchCartsQuery query = params.toQuery(pageable);
 

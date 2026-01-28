@@ -43,7 +43,7 @@ public class CartRepositoryImpl implements CartRepository {
   public Page<Cart> search(CartSearchCriteria criteria, Pageable pageable) {
     var specification = cartSpecificationBuilder.build(criteria);
     Page<CartModel> cartModelsPage = cartJpaRepository.findAll(specification, pageable);
-    return cartModelsPage.map(cartModel -> cartModelMapper.toDomain(cartModel, criteria.hasItems(), criteria.hasAfterwardItems()));
+    return cartModelsPage.map(cartModel -> cartModelMapper.toDomain(cartModel, criteria.includeCartItems(), criteria.includeAfterwardItems()));
   }
 
   @Override
