@@ -1,5 +1,6 @@
 package microservice.cart_service.app.cart.adapter.input.web.dto.input;
 
+import lombok.Builder;
 import microservice.cart_service.app.cart.core.application.queries.SearchCartsQuery;
 import microservice.cart_service.app.cart.core.domain.specficication.CartSearchCriteria;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Builder
 public record SearchCartsRequest(
 		String cartId,
 		String customerId,
@@ -47,6 +49,19 @@ public record SearchCartsRequest(
 		String sortBy,
 		String sortDirection
 ) {
+
+	public SearchCartsRequest {
+		if (includeCartItems == null) {
+			includeCartItems = Boolean.FALSE;
+		}
+		if (includeAfterwardItems == null) {
+			includeAfterwardItems = Boolean.FALSE;
+		}
+	}
+
+	public static SearchCartsRequest empty() {
+		return SearchCartsRequest.builder().build();
+	}
 
 	public SearchCartsQuery toQuery(Pageable pageable) {
 		var criteria = CartSearchCriteria.builder()
