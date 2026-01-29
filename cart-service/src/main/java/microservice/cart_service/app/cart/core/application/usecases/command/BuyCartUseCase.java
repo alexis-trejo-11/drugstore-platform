@@ -2,6 +2,7 @@ package microservice.cart_service.app.cart.core.application.usecases.command;
 
 import microservice.cart_service.app.cart.core.application.command.BuyCartCommand;
 import microservice.cart_service.app.cart.core.domain.exception.CartNotFoundException;
+import microservice.cart_service.app.cart.core.domain.exception.CartValidationException;
 import microservice.cart_service.app.cart.core.domain.model.Cart;
 import microservice.cart_service.app.cart.core.domain.model.CartItem;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.ProductId;
@@ -39,10 +40,12 @@ public class BuyCartUseCase {
 		Cart cart = cartRepository.findByCustomerIdWithItems(command.customerId())
 				.orElseThrow(() -> new CartNotFoundException(command.customerId()));
 
+		/*
 		List<ProductId> productsToPurchase = validateProductsAvailability(
 				cart,
 				command.productsToExclude()
 		);
+		 */
 
 		cart.purchaseItems(command.productsToExclude());
 		cartRepository.save(cart);
@@ -77,13 +80,13 @@ public class BuyCartUseCase {
 
 			// Validar resultados
 			if (!outOfStockProducts.isEmpty()) {
-				throw new IllegalStateException(
+				throw new CartValidationException(
 						"Products out of stock: " + outOfStockProducts
 				);
 			}
 
 			if (!unavailableProducts.isEmpty()) {
-				throw new IllegalStateException(
+				throw new CartValidationException(
 						"Products unavailable: " + unavailableProducts
 				);
 			}
@@ -91,7 +94,7 @@ public class BuyCartUseCase {
 			return productsToPurchase;
 
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			throw new RuntimeException("Error validating product availability", e);
+			throw new CartValidationException("Error validating product availability", e);
 		}
 	}
 

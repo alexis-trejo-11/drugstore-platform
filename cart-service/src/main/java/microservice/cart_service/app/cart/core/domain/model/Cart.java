@@ -198,6 +198,7 @@ public class Cart {
    */
   public int removeItems(List<ProductId> productIds) {
     if (productIds == null || productIds.isEmpty()) {
+      log.debug("No items to remove from cart: cartId={}", id);
       return 0;
     }
 
@@ -210,7 +211,6 @@ public class Cart {
     if (removedCount > 0) {
       timeStamps.markAsUpdated();
     }
-
     log.debug("Removed {} items from cart", removedCount);
     return removedCount;
   }
@@ -234,8 +234,15 @@ public class Cart {
    */
   public void setItems(List<CartItem> newItems) {
     log.info("Setting items in Cart: cartId={}, newItemCount={}", id, newItems != null ? newItems.size() : 0);
+    if (newItems == null) {
+      throw new CartValidationException("New items list cannot be null");
+    }
+    if (newItems.size() > MAX_ITEMS_PER_CART) {
+      throw new CartOperationException("setItems",
+          String.format("Cart cannot have more than %d unique items", MAX_ITEMS_PER_CART));
+    }
 
-    this.items = newItems != null ? new ArrayList<>(newItems) : new ArrayList<>();
+    this.items = new ArrayList<>(newItems);
     timeStamps.markAsUpdated();
   }
 
@@ -346,7 +353,7 @@ public class Cart {
   private void validateCanAddItem() {
     if (isFull()) {
       throw new CartOperationException("addItem",
-          String.format("Cart cannot have more than %d unique items", MAX_ITEMS_PER_CART));
+          String.format("Cart cannot have more than %d unique item", MAX_ITEMS_PER_CART));
     }
   }
 

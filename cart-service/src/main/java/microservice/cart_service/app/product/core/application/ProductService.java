@@ -1,5 +1,6 @@
 package microservice.cart_service.app.product.core.application;
 
+import libs_kernel.response.Result;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.ProductId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import microservice.cart_service.app.product.core.port.in.ProductUseCases;
 import microservice.cart_service.app.product.core.port.out.ProductRepository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -60,4 +62,7 @@ public class ProductService implements ProductUseCases {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
+  public Result<Void> validateAllExistAndAvailableByIdIn( Map<ProductId, Integer> productQuantitiesMap) {
+    return Result.success();
+  }
 }

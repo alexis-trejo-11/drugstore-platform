@@ -20,4 +20,5 @@ public interface ProductUseCases {
 	void updateProduct(Product product);
 
 	void deleteProduct(String productId);
+
 }

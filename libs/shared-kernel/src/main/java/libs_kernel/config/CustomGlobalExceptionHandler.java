@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  * </p>
  */
 @RestControllerAdvice
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(0) // Default order, can be overridden by specific microservices
 public class CustomGlobalExceptionHandler {
 
   private static final Logger log = LoggerFactory.getLogger(CustomGlobalExceptionHandler.class);

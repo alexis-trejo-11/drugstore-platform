@@ -19,7 +19,7 @@ public class MoveCartItemToAfterwardsUseCase {
 
 	@Transactional
 	public void execute(CreateAfterwardsCommand command) {
-		Cart cart = cartRepository.findById(command.cartId(), false, true)
+		Cart cart = cartRepository.findById(command.cartId(), true, true)
 				.orElseThrow(() -> new CartNotFoundException(command.cartId()));
 
 		cart.moveItemsToAfterwards(command.productIds());

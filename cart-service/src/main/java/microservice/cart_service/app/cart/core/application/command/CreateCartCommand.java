@@ -1,5 +1,6 @@
 package microservice.cart_service.app.cart.core.application.command;
 
+import microservice.cart_service.app.cart.core.domain.exception.CartValidationException;
 import microservice.cart_service.app.cart.core.domain.model.CreateCartParams;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.CustomerId;
 
@@ -7,7 +8,7 @@ public record CreateCartCommand(CustomerId customerId) {
 
   public CreateCartCommand {
     if (customerId == null || customerId.value() == null) {
-      throw new IllegalArgumentException("CustomerId cannot be null");
+      throw new CartValidationException("CustomerId cannot be null");
     }
   }
 

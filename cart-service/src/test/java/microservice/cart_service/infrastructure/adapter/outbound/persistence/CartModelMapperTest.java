@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.anyList;
 import org.mockito.Mock;
+
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -66,7 +68,7 @@ public class CartModelMapperTest {
   void toDomain_WithValidModel_ReturnsCart() {
     // Given
     CartModel model = createTestCartModel();
-    when(itemMapper.toDomains(anyList())).thenReturn(Collections.emptyList());
+    when(itemMapper.toDomains(anySet())).thenReturn(Collections.emptyList());
 
     // When
     Cart result = cartModelMapper.toDomain(model, false, false);

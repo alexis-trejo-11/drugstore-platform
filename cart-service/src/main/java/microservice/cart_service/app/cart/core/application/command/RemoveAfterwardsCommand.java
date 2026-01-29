@@ -2,6 +2,7 @@ package microservice.cart_service.app.cart.core.application.command;
 
 
 
+import microservice.cart_service.app.cart.core.domain.exception.CartValidationException;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.CartId;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.ProductId;
 
@@ -11,11 +12,11 @@ import java.util.List;
 public record RemoveAfterwardsCommand(CartId cartId, List<ProductId> productIds) {
   public RemoveAfterwardsCommand {
     if (productIds.isEmpty()) {
-      throw new IllegalArgumentException("Product IDs list cannot be empty");
+      throw new CartValidationException("Product IDs list cannot be empty");
     }
 
     if (cartId != null && cartId.value() == null) {
-      throw new IllegalArgumentException("Cart ID cannot be null");
+      throw new CartValidationException("Cart ID cannot be null");
     }
   }
 

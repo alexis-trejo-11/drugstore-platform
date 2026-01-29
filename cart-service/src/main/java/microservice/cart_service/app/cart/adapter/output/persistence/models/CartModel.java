@@ -1,6 +1,9 @@
 package microservice.cart_service.app.cart.adapter.output.persistence.models;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -25,10 +28,10 @@ public class CartModel {
   private String customerId;
 
   @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-  private List<CartItemModel> cartItems;
+  private Set<CartItemModel> cartItems = new HashSet<>();
 
   @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-  private Set<AfterwardModel> afterwardItems;
+  private Set<AfterwardModel> afterwardItems = new HashSet<>();
 
   @Column(name = "created_at")
   private LocalDateTime createdAt;
@@ -44,6 +47,14 @@ public class CartModel {
   public void onCreate() {
     createdAt = LocalDateTime.now();
     updatedAt = createdAt;
+  }
+
+  public Set<CartItemModel> getCartItems() {
+    return Collections.unmodifiableSet(cartItems);
+  }
+
+  public Set<AfterwardModel> getAfterwardItems() {
+    return Collections.unmodifiableSet(afterwardItems);
   }
 
   @PreUpdate

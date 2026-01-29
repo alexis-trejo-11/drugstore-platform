@@ -52,6 +52,10 @@ ALTER TABLE afterwards
     ADD CONSTRAINT fk_afterwards_cart_id
     FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE;
 
+ALTER TABLE afterwards
+    ADD CONSTRAINT fk_afterwards_product_id
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE;
+
 -- Add check constraints
 ALTER TABLE products
     ADD CONSTRAINT chk_products_unit_price_positive

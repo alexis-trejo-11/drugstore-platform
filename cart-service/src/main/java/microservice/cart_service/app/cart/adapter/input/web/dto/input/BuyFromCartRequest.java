@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import microservice.cart_service.app.cart.core.application.command.BuyCartCommand;
+import microservice.cart_service.app.cart.core.domain.exception.CartValidationException;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.CustomerId;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.ProductId;
 
@@ -25,7 +26,7 @@ public record BuyFromCartRequest(Set<String> productsIdsToExclude) {
         .toList();
 
     if (customerId == null) {
-      throw new IllegalArgumentException("CustomerId cannot be null");
+      throw new CartValidationException("CustomerId cannot be null");
     }
 
     var customerIdObj = new CustomerId(customerId);

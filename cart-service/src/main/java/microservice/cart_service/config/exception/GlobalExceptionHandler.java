@@ -32,7 +32,7 @@ import microservice.cart_service.app.cart.core.domain.exception.ProductNotFoundE
  * </p>
  */
 @RestControllerAdvice
-@Order(0) // Higher priority than parent handler
+@Order(-1) // Higher priority than shared kernel
 public class GlobalExceptionHandler extends CustomGlobalExceptionHandler {
 
   private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);

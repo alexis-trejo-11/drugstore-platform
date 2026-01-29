@@ -30,7 +30,7 @@ import jakarta.validation.constraints.NotBlank;
 
 
 @RestController
-@RequestMapping("/v2/api/carts/users")
+@RequestMapping("/api/v2/carts/users")
 @CartUserControllerTag
 public class UserCartController {
 	private final CartCommandUseCase commandUseCase;
@@ -60,11 +60,11 @@ public class UserCartController {
 	}
 
 
-	@PutMapping("/{userId}")
+	@PutMapping("/items/{userId}")
 	@UpdateMyCartItemsOperation
-	private ResponseWrapper<Void> UpdateMyCartItems(
+	private ResponseWrapper<Void> updateMyCartItems(
 			@Valid @PathVariable @NotBlank String userId,
-			@RequestBody @NotNull UpdateCartRequest updateCartRequest) {
+			@Valid @RequestBody @NotNull UpdateCartRequest updateCartRequest) {
 
 		UpdateCartCommand command = updateCartRequest.toCommand(userId);
 		commandUseCase.updateCartItems(command);
@@ -86,7 +86,7 @@ public class UserCartController {
 
 
 
-	@PostMapping("items/move-to-afterwards")
+	@PostMapping("/items/move-to-afterwards")
 	@MoveCartItemsToAfterwards
 	public ResponseEntity<ResponseWrapper<Void>> moveItemsToAfterwards(
 			@RequestBody @Valid @NotNull CreateAfterwardsRequest afterwardsRequest) {
@@ -98,9 +98,9 @@ public class UserCartController {
 	}
 
 	@RestoreItemsFromAfterwardsOperation
-	@PostMapping("/restore-from-afterwards")
+	@PutMapping("/items/restore-from-afterwards")
 	public ResponseWrapper<Void> restoreItemsFromAfterwards(
-			@Valid @RequestBody DeleteAfterwardsRequest afterwardsRequest) {
+			@RequestBody @Valid @NotNull DeleteAfterwardsRequest afterwardsRequest) {
 
 		RemoveAfterwardsCommand command = afterwardsRequest.toCommand();
 		commandUseCase.removeItemFromAfterwards(command);
