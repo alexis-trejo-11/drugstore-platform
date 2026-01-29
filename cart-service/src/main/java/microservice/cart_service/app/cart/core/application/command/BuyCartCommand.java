@@ -1,5 +1,6 @@
 package microservice.cart_service.app.cart.core.application.command;
 
+import microservice.cart_service.app.cart.core.domain.exception.CartValidationException;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.CustomerId;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.ProductId;
 import microservice.cart_service.app.cart.core.domain.validation.CartValidation;
@@ -15,7 +16,7 @@ public record BuyCartCommand(
 
 	public BuyCartCommand {
 		if (customerId == null) {
-			throw new IllegalArgumentException("customerId cannot be null");
+			throw new CartValidationException("customerId cannot be null");
 		}
 		if (productsToExclude == null) {
 			productsToExclude = new ArrayList<>();

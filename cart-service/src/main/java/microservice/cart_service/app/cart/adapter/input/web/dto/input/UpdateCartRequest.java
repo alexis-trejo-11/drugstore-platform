@@ -4,16 +4,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hibernate.validator.constraints.Length;
-
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import microservice.cart_service.app.cart.core.application.command.UpdateCartCommand;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.CustomerId;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.ProductId;
 
 public record UpdateCartRequest(
-    @Valid @NotNull @Length(min = 1, max = 50) Set<CartItemRequest> items) {
+    @Valid @NotEmpty @Size(max = 50) Set<CartItemRequest> items) {
 
   public UpdateCartCommand toCommand(String customerId) {
     Map<ProductId, Integer> items = this.items.stream()

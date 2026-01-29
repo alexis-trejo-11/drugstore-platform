@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import microservice.cart_service.app.cart.core.domain.exception.CartValidationException;
 import microservice.cart_service.app.cart.core.domain.model.CartItem;
 import microservice.cart_service.app.cart.core.domain.model.CreateCartItemParams;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.ItemPrice;
@@ -27,7 +28,7 @@ public class CartItemFactory {
    *                             for
    * @param productQuantitiesMap map of product IDs to their quantities
    * @return set of created cart items
-   * @throws IllegalArgumentException if a product is not found in the quantities
+   * @throws CartValidationException if a product is not found in the quantities
    *                                  map
    */
   public static Set<CartItem> createItems(Set<Product> products, Map<ProductId, Integer> productQuantitiesMap) {
@@ -42,13 +43,13 @@ public class CartItemFactory {
    * @param product              the product to create a cart item for
    * @param productQuantitiesMap map of product IDs to their quantities
    * @return the created cart item
-   * @throws IllegalArgumentException if the product is not found in the
+   * @throws CartValidationException if the product is not found in the
    *                                  quantities map
    */
   public static CartItem createItemForProduct(Product product, Map<ProductId, Integer> productQuantitiesMap) {
     Integer quantity = productQuantitiesMap.get(product.getId());
     if (quantity == null) {
-      throw new IllegalArgumentException("Product with ID " + product.getId() + " not found in cart update request");
+      throw new CartValidationException("Product with ID " + product.getId() + " not found in cart update request");
     }
 
     var params = createCartItemParams(product, quantity);

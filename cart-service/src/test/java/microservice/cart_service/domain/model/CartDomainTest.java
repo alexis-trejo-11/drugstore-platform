@@ -3,11 +3,7 @@ package microservice.cart_service.domain.model;
 import microservice.cart_service.app.cart.core.domain.exception.CartItemNotFoundException;
 import microservice.cart_service.app.cart.core.domain.exception.CartOperationException;
 import microservice.cart_service.app.cart.core.domain.exception.CartValidationException;
-import microservice.cart_service.app.cart.core.domain.model.Cart;
-import microservice.cart_service.app.cart.core.domain.model.CartItem;
-import microservice.cart_service.app.cart.core.domain.model.CreateCartParams;
-import microservice.cart_service.app.cart.core.domain.model.CreateCartItemParams;
-import microservice.cart_service.app.cart.core.domain.model.ReconstructCartParams;
+import microservice.cart_service.app.cart.core.domain.model.*;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.CartId;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.CartTimeStamps;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.CustomerId;
@@ -68,8 +64,9 @@ public class CartDomainTest {
     CustomerId customerId = CustomerId.from("customer-456");
     CartTimeStamps timeStamps = CartTimeStamps.now();
     List<CartItem> items = new ArrayList<>();
+    List<AfterwardsItem> afterwardsItems = new ArrayList<>();
 
-    ReconstructCartParams params = new ReconstructCartParams(cartId, customerId, items, timeStamps);
+    ReconstructCartParams params = new ReconstructCartParams(cartId, customerId, items, afterwardsItems,timeStamps);
 
     // When
     Cart cart = Cart.reconstruct(params);

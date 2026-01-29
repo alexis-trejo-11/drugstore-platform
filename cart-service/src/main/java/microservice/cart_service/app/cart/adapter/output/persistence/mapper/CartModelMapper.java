@@ -1,8 +1,12 @@
 package microservice.cart_service.app.cart.adapter.output.persistence.mapper;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import microservice.cart_service.app.cart.adapter.output.persistence.models.AfterwardModel;
 import microservice.cart_service.app.cart.core.domain.model.AfterwardsItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +64,9 @@ public class CartModelMapper {
 			itemModel.setUpdatedAt(domain.getTimeStamps().getUpdatedAt());
 		}
 
-		List<CartItemModel> items = itemMapper.toModels(domain.getItems());
+		Set<CartItemModel> items = itemMapper.toModels(domain.getItems());
+		Set<AfterwardModel> afterwardsItems = itemMapper.toAfterwardsModels(new HashSet<>(domain.getAfterwardsItems()));
+		itemModel.setAfterwardItems(afterwardsItems);
 		itemModel.setCartItems(items);
 
 		return itemModel;

@@ -16,7 +16,7 @@ public class ReturnCartItemFromAfterwardsUseCase {
 	}
 
 	public void execute(RemoveAfterwardsCommand command) {
-		var cart = cartRepository.findById(command.cartId(), false, true)
+		var cart = cartRepository.findById(command.cartId(), true, true)
 				.orElseThrow(() -> new CartNotFoundException(command.cartId()));
 
 		cart.returnItemsFromAfterwards(command.productIds());
