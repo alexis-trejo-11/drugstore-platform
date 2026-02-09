@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,50 +19,59 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        // 1. Enable CORS using the source defined below
-        .cors(Customizer.withDefaults())
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http
+				.cors(Customizer.withDefaults())
+				// Disable CSRF (Common for REST APIs)
+				.csrf(AbstractHttpConfigurer::disable)
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers(HttpMethod.GET, "/api/v2/products/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/v2/products/**").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.PUT, "/api/v2/products/**").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.PATCH, "/api/v2/products/**").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.DELETE, "/api/v2/products/**").hasRole("ADMIN")
 
-        // 2. Disable CSRF (Common for REST APIs)
-        .csrf(AbstractHttpConfigurer::disable)
+						.requestMatchers("/actuator/**").hasRole("ADMIN")
+						.requestMatchers(
+								"/v3/api-docs/**",
+								"/swagger-ui/**",
+								"/swagger-ui.html",
+								"/actuator/health",
+								"/actuator/info",
+								"/error"
+						).permitAll()
+						.anyRequest().authenticated()
+				)
+				.requiresChannel(channel -> channel
+						// Enforce HTTPS
+						.anyRequest().requiresSecure())
+		;
 
-        // 3. Set permissions
-        .authorizeHttpRequests(auth -> auth
-            .anyRequest().permitAll())
+		return http.build();
+	}
 
-        // 4. Enforce HTTPS
-        .requiresChannel(channel -> channel
-            .anyRequest().requiresSecure())
-    // 4. Placeholder for future Authentication
-    // .httpBasic(Customizer.withDefaults())
-    ;
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
 
-    return http.build();
-  }
+		// Define allowed origins (Use "*" for development, but specify domains for
+		// production)
+		configuration.setAllowedOrigins(
+				List.of("http://localhost:4200", "http://localhost:3000", "http://localhost:8000",
+						"https://localhost:8444"));
 
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
+		// Define allowed methods
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-    // Define allowed origins (Use "*" for development, but specify domains for
-    // production)
-    configuration.setAllowedOrigins(
-        List.of("http://localhost:4200", "http://localhost:3000", "http://localhost:8000",
-            "https://localhost:8444"));
+		// Define allowed headers
+		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
 
-    // Define allowed methods
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+		// Allow sending cookies or auth headers
+		configuration.setAllowCredentials(true);
 
-    // Define allowed headers
-    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
-
-    // Allow sending cookies or auth headers
-    configuration.setAllowCredentials(true);
-
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
-  }
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
+	}
 }
