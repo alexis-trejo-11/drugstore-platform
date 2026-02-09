@@ -2,7 +2,6 @@ package microservice.cart_service.app.cart.adapter.input.web.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import libs_kernel.page.PageRequest;
 import libs_kernel.page.PageResponse;
 import microservice.cart_service.app.cart.adapter.input.web.annotation.CartAdminControllerTag;
@@ -22,17 +21,19 @@ import microservice.cart_service.app.shared.ResponseWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v2/carts/admin")
 @CartAdminControllerTag
-public class CartAdminController {
+@PreAuthorize("hasRole('ADMIN')")
+public class CartManagerController {
 	private final CartQueryUseCase cartQueryUseCase;
 	private final CartResponseMapper mapper;
 
 	@Autowired
-	public CartAdminController(CartQueryUseCase cartQueryUseCase, CartResponseMapper mapper) {
+	public CartManagerController(CartQueryUseCase cartQueryUseCase, CartResponseMapper mapper) {
 		this.cartQueryUseCase = cartQueryUseCase;
 		this.mapper = mapper;
 	}

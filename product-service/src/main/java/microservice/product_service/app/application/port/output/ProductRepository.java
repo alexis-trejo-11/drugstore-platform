@@ -1,4 +1,4 @@
-package microservice.product_service.app.application.port.out;
+package microservice.product_service.app.application.port.output;
 
 import microservice.product_service.app.domain.model.Product;
 import microservice.product_service.app.domain.model.valueobjects.SKU;

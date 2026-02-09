@@ -7,12 +7,10 @@ import microservice.cart_service.app.cart.core.application.command.RemoveAfterwa
 import java.util.Set;
 
 public record DeleteAfterwardsRequest(
-		@NotNull(message = "Cart ID cannot be null")
-		String cartId,
 		@NotNull(message = "Product IDs cannot be null")
 		Set<String> productIds) {
 
-	public RemoveAfterwardsCommand toCommand() {
-		return RemoveAfterwardsCommand.from(cartId, productIds.stream().toList());
+	public RemoveAfterwardsCommand toCommand(String customerId) {
+		return RemoveAfterwardsCommand.from(customerId, productIds.stream().toList());
 	}
 }

@@ -1,6 +1,4 @@
-package microservice.product_service.app.application.port.in.query;
-
-import microservice.product_service.app.domain.model.valueobjects.SKU;
+package microservice.product_service.app.application.port.input.query;
 
 
 public record GetProductByBarCodeQuery(String barCode)  {

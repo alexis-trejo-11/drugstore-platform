@@ -31,7 +31,19 @@ public class Product {
   }
 
   public static Product create(CreateProductParams params) {
-    Product product = new Product(params.id());
+    if (params.id() == null) {
+			throw new IllegalArgumentException("Product ID cannot be null");
+		}
+
+		if (params.name() == null || params.name().isBlank()) {
+			throw new IllegalArgumentException("Product name cannot be null or blank");
+		}
+
+		if (params.unitPrice() == null || params.unitPrice().compareTo(BigDecimal.ZERO) < 0) {
+			throw new IllegalArgumentException("Product unit price cannot be null or negative");
+		}
+
+		Product product = new Product(params.id());
     product.name = params.name();
     product.unitPrice = params.unitPrice();
     product.description = params.description();
@@ -82,6 +94,10 @@ public class Product {
   public LocalDateTime getUpdatedAt() {
     return updatedAt;
   }
+
+	public BigDecimal getDiscountPerUnit() {
+		return discountPerUnit;
+	}
 
   public record CreateProductParams(
       ProductId id,

@@ -1,6 +1,7 @@
 package microservice.cart_service.app.product.core.port.in;
 
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.ProductId;
+import microservice.cart_service.app.product.core.application.ProductInsertCommand;
 import microservice.cart_service.app.product.core.domain.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,10 +16,10 @@ public interface ProductUseCases {
 
 	Product getProductById(String productId);
 
-	void createProduct(Product product);
+	void createProduct(ProductInsertCommand command);
 
-	void updateProduct(Product product);
+	void updateProduct(ProductInsertCommand command);
 
-	void deleteProduct(String productId);
+	void deleteProduct(ProductId productId);
 
 }

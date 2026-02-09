@@ -1,6 +1,6 @@
 package microservice.product_service.app.application.usecase;
 
-import microservice.product_service.app.application.port.out.ProductRepository;
+import microservice.product_service.app.application.port.output.ProductRepository;
 import microservice.product_service.app.domain.exception.ProductValidationException;
 import microservice.product_service.app.domain.model.Product;
 import microservice.product_service.app.domain.model.valueobjects.ProductID;

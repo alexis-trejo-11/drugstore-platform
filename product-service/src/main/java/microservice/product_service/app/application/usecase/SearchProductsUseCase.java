@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import microservice.product_service.app.application.port.in.query.SearchProductsQuery;
-import microservice.product_service.app.application.port.out.ProductRepository;
+import microservice.product_service.app.application.port.input.query.SearchProductsQuery;
+import microservice.product_service.app.application.port.output.ProductRepository;
 import microservice.product_service.app.domain.model.Product;
 import microservice.product_service.app.domain.specification.ProductSearchCriteria;
 

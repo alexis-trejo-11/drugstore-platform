@@ -13,13 +13,11 @@ import microservice.cart_service.app.product.core.port.out.ProductRepository;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Service
 public class ProductService implements ProductUseCases {
   private final ProductRepository productRepository;
-
-
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProductService.class);
 
   @Autowired
   public ProductService(ProductRepository productRepository) {
@@ -27,8 +25,10 @@ public class ProductService implements ProductUseCases {
   }
 
   public List<ProductId> getUnavailableProductsIn(List<ProductId> productIds) {
-    // Placeholder implementation
-    throw new UnsupportedOperationException("Not supported yet.");
+    return productRepository.findAvailableByIdIn(productIds).stream()
+				.map(Product::getId)
+				.filter(id -> !productIds.contains(id))
+				.toList();
   }
 
   @Override
@@ -39,30 +39,51 @@ public class ProductService implements ProductUseCases {
 
   @Override
   public Page<Product> getProducts(Pageable pageable) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return productRepository.findProducts(pageable);
   }
 
   @Override
   public Product getProductById(String productId) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return productRepository.findProductById(productId)
+				.orElseThrow(() -> new IllegalArgumentException("Product with ID " + productId + " does not exist"));
   }
 
   @Override
-  public void createProduct(Product product) {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public void createProduct(ProductInsertCommand command) {
+		log.info("Creating product with ID: {}", command.id());
+		if (productRepository.existsById(command.id())) {
+			log.error("Product with ID {} already exists", command.id());
+			throw new IllegalArgumentException("Product with ID " + command.id() + " already exists");
+		}
+	  Product.CreateProductParams params = command.toParams();
+		Product product = Product.create(params);
+
+		Product savedProduct = productRepository.save(product);
+		log.info("Product with ID: {} Persisted", savedProduct.getId());
   }
 
   @Override
-  public void updateProduct(Product product) {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public void updateProduct(ProductInsertCommand command) {
+    Product existingProduct = productRepository.findProductById(command.id())
+				.orElseThrow(() -> new IllegalArgumentException("Product with ID " + command.id() + " does not exist"));
+
+	  Product.CreateProductParams params = command.toParams();
+	  Product product = Product.create(params);
+
+		Product updatedProduct = productRepository.save(product);
+		log.info("Product with ID: {} Updated", updatedProduct.getId());
   }
 
   @Override
-  public void deleteProduct(String productId) {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public void deleteProduct(ProductId productId) {
+    Product product = productRepository.findProductById(productId.value())
+				.orElseThrow(() -> new IllegalArgumentException("Product with ID " + productId.value() + " does not exist"));
+
+		productRepository.delete(product);
+		log.info("Product with ID: {} Deleted", productId.value());
   }
 
-  public Result<Void> validateAllExistAndAvailableByIdIn( Map<ProductId, Integer> productQuantitiesMap) {
+  public Result<Void> validateAllExistAndAvailableByIdIn(Map<ProductId, Integer> productQuantitiesMap) {
     return Result.success();
   }
 }

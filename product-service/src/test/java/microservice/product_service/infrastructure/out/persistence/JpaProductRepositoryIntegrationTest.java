@@ -13,7 +13,7 @@ import microservice.product_service.app.domain.model.valueobjects.ProductPrice;
 import microservice.product_service.app.domain.model.valueobjects.ProductDates;
 import microservice.product_service.app.domain.model.valueobjects.Dosage;
 import microservice.product_service.app.domain.model.valueobjects.Administration;
-import microservice.product_service.app.application.port.out.ProductRepository;
+import microservice.product_service.app.application.port.output.ProductRepository;
 import microservice.product_service.app.domain.specification.ProductSearchCriteria;
 import microservice.product_service.app.domain.specification.SortCriteria;
 import microservice.product_service.app.domain.model.enums.ProductStatus;

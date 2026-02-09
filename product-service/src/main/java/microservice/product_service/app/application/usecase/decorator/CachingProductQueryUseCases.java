@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import microservice.product_service.app.application.port.in.query.GetProductByBarCodeQuery;
-import microservice.product_service.app.application.port.in.query.GetProductByIDQuery;
-import microservice.product_service.app.application.port.in.query.GetProductBySKUQuery;
-import microservice.product_service.app.application.port.in.query.SearchProductsQuery;
-import microservice.product_service.app.application.port.in.usecase.ProductQueryUseCases;
+import microservice.product_service.app.application.port.input.query.GetProductByBarCodeQuery;
+import microservice.product_service.app.application.port.input.query.GetProductByIDQuery;
+import microservice.product_service.app.application.port.input.query.GetProductBySKUQuery;
+import microservice.product_service.app.application.port.input.query.SearchProductsQuery;
+import microservice.product_service.app.application.port.input.usecase.ProductQueryUseCases;
 import microservice.product_service.app.application.usecase.JoinedProductUseCases;
 import microservice.product_service.app.domain.model.Product;
 

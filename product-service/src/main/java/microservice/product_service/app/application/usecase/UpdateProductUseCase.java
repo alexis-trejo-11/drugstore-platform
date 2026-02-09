@@ -3,8 +3,8 @@ package microservice.product_service.app.application.usecase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import microservice.product_service.app.application.port.in.command.UpdateProductCommand;
-import microservice.product_service.app.application.port.out.ProductRepository;
+import microservice.product_service.app.application.port.input.command.UpdateProductCommand;
+import microservice.product_service.app.application.port.output.ProductRepository;
 import microservice.product_service.app.domain.exception.ProductConflictException;
 import microservice.product_service.app.domain.exception.ProductNotFoundException;
 import microservice.product_service.app.domain.model.Product;

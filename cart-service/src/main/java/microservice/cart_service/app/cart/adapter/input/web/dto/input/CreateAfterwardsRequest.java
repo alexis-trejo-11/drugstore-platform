@@ -13,13 +13,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateAfterwardsRequest {
-  @NotNull(message = "Cart ID cannot be null")
-  private String cartId;
 
   @NotNull(message = "Product IDs cannot be null")
   private Set<String> productIds;
 
-  public CreateAfterwardsCommand toCommand() {
-    return CreateAfterwardsCommand.from(cartId, productIds.stream().toList());
+  public CreateAfterwardsCommand toCommand(String userId) {
+    return CreateAfterwardsCommand.from(userId, productIds.stream().toList());
   }
 }
