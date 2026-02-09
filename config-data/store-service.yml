@@ -125,3 +125,9 @@ app:
         maxRequests: 50
         durationSeconds: 1
 # No logging configuration needed here since logback-spring.xml manages it
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:15}
+  refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200} # 30 days
+  issuer: ${ISSUER}

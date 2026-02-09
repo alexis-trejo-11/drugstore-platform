@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import libs_kernel.config.rate_limit.RateLimit;
 import libs_kernel.config.rate_limit.RateLimitProfile;
+import libs_kernel.config.rate_limit.RateLimitProperties;
 import libs_kernel.config.rate_limit.RateLimitType;
 import libs_kernel.exceptions.RateLimitExceededException;
 import lombok.RequiredArgsConstructor;
