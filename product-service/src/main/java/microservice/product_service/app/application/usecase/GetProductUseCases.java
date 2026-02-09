@@ -1,10 +1,10 @@
 package microservice.product_service.app.application.usecase;
 
-import microservice.product_service.app.application.port.in.query.GetProductByBarCodeQuery;
-import microservice.product_service.app.application.port.in.query.GetProductByIDQuery;
-import microservice.product_service.app.application.port.in.query.GetProductBySKUQuery;
+import microservice.product_service.app.application.port.input.query.GetProductByBarCodeQuery;
+import microservice.product_service.app.application.port.input.query.GetProductByIDQuery;
+import microservice.product_service.app.application.port.input.query.GetProductBySKUQuery;
 import microservice.product_service.app.domain.exception.ProductNotFoundException;
-import microservice.product_service.app.application.port.out.ProductRepository;
+import microservice.product_service.app.application.port.output.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import microservice.product_service.app.domain.model.Product;

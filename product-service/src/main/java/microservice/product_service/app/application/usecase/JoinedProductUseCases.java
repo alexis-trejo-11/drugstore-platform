@@ -1,17 +1,17 @@
 package microservice.product_service.app.application.usecase;
 
-import microservice.product_service.app.application.port.in.query.GetProductByBarCodeQuery;
-import microservice.product_service.app.application.port.in.query.GetProductBySKUQuery;
+import microservice.product_service.app.application.port.input.query.GetProductByBarCodeQuery;
+import microservice.product_service.app.application.port.input.query.GetProductBySKUQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import microservice.product_service.app.application.port.in.command.CreateProductCommand;
-import microservice.product_service.app.application.port.in.command.UpdateProductCommand;
-import microservice.product_service.app.application.port.in.query.GetProductByIDQuery;
-import microservice.product_service.app.application.port.in.query.SearchProductsQuery;
-import microservice.product_service.app.application.port.in.usecase.ProductCommandUseCases;
-import microservice.product_service.app.application.port.in.usecase.ProductQueryUseCases;
+import microservice.product_service.app.application.port.input.command.CreateProductCommand;
+import microservice.product_service.app.application.port.input.command.UpdateProductCommand;
+import microservice.product_service.app.application.port.input.query.GetProductByIDQuery;
+import microservice.product_service.app.application.port.input.query.SearchProductsQuery;
+import microservice.product_service.app.application.port.input.usecase.ProductCommandUseCases;
+import microservice.product_service.app.application.port.input.usecase.ProductQueryUseCases;
 import microservice.product_service.app.domain.model.Product;
 import microservice.product_service.app.domain.model.valueobjects.ProductID;
 

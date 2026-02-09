@@ -1,10 +1,10 @@
-package microservice.cart_service.app.product.adapter.in.controller;
+package microservice.cart_service.app.product.adapter.input.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import libs_kernel.page.PageRequest;
 import libs_kernel.page.PageResponse;
-import microservice.cart_service.app.product.adapter.in.dto.ProductResponse;
+import microservice.cart_service.app.product.adapter.input.dto.ProductResponse;
 import microservice.cart_service.app.product.core.domain.Product;
 import microservice.cart_service.app.product.core.port.in.ProductUseCases;
 import microservice.cart_service.app.shared.ResponseWrapper;
@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v2/carts/products")
-public class ProductCartController {
+public class ProductController {
 	private final ProductUseCases productUseCases;
 
 	@Autowired
-	public ProductCartController(ProductUseCases productUseCases) {
+	public ProductController(ProductUseCases productUseCases) {
 		this.productUseCases = productUseCases;
 	}
 

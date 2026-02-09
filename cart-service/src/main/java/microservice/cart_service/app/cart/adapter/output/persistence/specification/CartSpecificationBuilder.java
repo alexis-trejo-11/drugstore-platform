@@ -16,7 +16,7 @@ import microservice.cart_service.app.cart.adapter.output.persistence.models.Afte
 import microservice.cart_service.app.cart.adapter.output.persistence.models.CartItemModel;
 import microservice.cart_service.app.cart.adapter.output.persistence.models.CartModel;
 import microservice.cart_service.app.cart.core.domain.specficication.CartSearchCriteria;
-import microservice.cart_service.app.product.adapter.out.persistence.ProductModel;
+import microservice.cart_service.app.product.adapter.output.persistence.ProductModel;
 
 @Component
 public class CartSpecificationBuilder {

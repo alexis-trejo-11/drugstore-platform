@@ -3,7 +3,7 @@ package microservice.cart_service.app.cart.adapter.output.persistence.models;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import microservice.cart_service.app.product.adapter.out.persistence.ProductModel;
+import microservice.cart_service.app.product.adapter.output.persistence.ProductModel;
 
 import java.time.LocalDateTime;
 

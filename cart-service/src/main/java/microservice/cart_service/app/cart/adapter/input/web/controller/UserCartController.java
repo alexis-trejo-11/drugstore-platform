@@ -2,7 +2,6 @@ package microservice.cart_service.app.cart.adapter.input.web.controller;
 
 import jakarta.validation.constraints.NotNull;
 
-
 import microservice.cart_service.app.cart.adapter.input.web.annotation.*;
 import microservice.cart_service.app.cart.adapter.input.web.dto.input.CreateAfterwardsRequest;
 import microservice.cart_service.app.cart.adapter.input.web.dto.input.DeleteAfterwardsRequest;
@@ -47,15 +46,12 @@ public class UserCartController {
 		this.mapper = mapper;
 	}
 
-	//TODO: Retrieve userId from auth context instead of path variable
-	@GetMapping("/{userId}")
-	@GetMyCartCartOperation
-	private ResponseWrapper<CartResponse> getMyCart(@Valid @PathVariable @NotBlank String userId) {
+	@GetMapping("/my-cart")
+	public ResponseWrapper<CartResponse> getMyCart(@RequestAttribute("userId") String userId) {
 		var query = GetCartByCustomerIdQuery.from(userId);
-
 		Cart cart = cartQueryUseCase.getCartByCustomerId(query);
-
 		CartResponse cartResponse = mapper.fromDomain(cart);
+
 		return ResponseWrapper.found(cartResponse, "Cart");
 	}
 
@@ -63,9 +59,8 @@ public class UserCartController {
 	@PutMapping("/items/{userId}")
 	@UpdateMyCartItemsOperation
 	private ResponseWrapper<Void> updateMyCartItems(
-			@Valid @PathVariable @NotBlank String userId,
+			@RequestAttribute("userId") String userId,
 			@Valid @RequestBody @NotNull UpdateCartRequest updateCartRequest) {
-
 		UpdateCartCommand command = updateCartRequest.toCommand(userId);
 		commandUseCase.updateCartItems(command);
 
@@ -75,9 +70,8 @@ public class UserCartController {
 	@PostMapping("/{userId}/items/buy")
 	@BuyCartItemsOperation
 	private ResponseWrapper<Void> buyProductsInCart(
-			@Valid @PathVariable @NotBlank String userId,
+			@RequestAttribute("userId") String userId,
 			@Valid @RequestBody @NotNull BuyFromCartRequest request) {
-
 		BuyCartCommand command = request.toCommand(userId);
 		commandUseCase.buyCart(command);
 
@@ -89,9 +83,9 @@ public class UserCartController {
 	@PostMapping("/items/move-to-afterwards")
 	@MoveCartItemsToAfterwards
 	public ResponseEntity<ResponseWrapper<Void>> moveItemsToAfterwards(
+			@RequestAttribute("userId") String userId,
 			@RequestBody @Valid @NotNull CreateAfterwardsRequest afterwardsRequest) {
-
-		CreateAfterwardsCommand command = afterwardsRequest.toCommand();
+		CreateAfterwardsCommand command = afterwardsRequest.toCommand(userId);
 		commandUseCase.moveItemToAfterwards(command);
 
 		return ResponseEntity.ok(ResponseWrapper.ok("Products", "Moved to Afterwards"));
@@ -100,9 +94,9 @@ public class UserCartController {
 	@RestoreItemsFromAfterwardsOperation
 	@PutMapping("/items/restore-from-afterwards")
 	public ResponseWrapper<Void> restoreItemsFromAfterwards(
+			@RequestAttribute("userId") String userId,
 			@RequestBody @Valid @NotNull DeleteAfterwardsRequest afterwardsRequest) {
-
-		RemoveAfterwardsCommand command = afterwardsRequest.toCommand();
+		RemoveAfterwardsCommand command = afterwardsRequest.toCommand(userId);
 		commandUseCase.removeItemFromAfterwards(command);
 
 		return ResponseWrapper.ok("Products", "Returned to Cart");

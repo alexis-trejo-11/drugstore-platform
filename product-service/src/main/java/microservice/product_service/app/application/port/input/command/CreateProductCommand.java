@@ -1,4 +1,4 @@
-package microservice.product_service.app.application.port.in.command;
+package microservice.product_service.app.application.port.input.command;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

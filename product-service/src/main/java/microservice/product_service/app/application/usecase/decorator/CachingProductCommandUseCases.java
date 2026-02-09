@@ -6,9 +6,9 @@ import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import microservice.product_service.app.application.port.in.command.CreateProductCommand;
-import microservice.product_service.app.application.port.in.command.UpdateProductCommand;
-import microservice.product_service.app.application.port.in.usecase.ProductCommandUseCases;
+import microservice.product_service.app.application.port.input.command.CreateProductCommand;
+import microservice.product_service.app.application.port.input.command.UpdateProductCommand;
+import microservice.product_service.app.application.port.input.usecase.ProductCommandUseCases;
 import microservice.product_service.app.application.usecase.JoinedProductUseCases;
 import microservice.product_service.app.domain.model.Product;
 import microservice.product_service.app.domain.model.valueobjects.ProductID;

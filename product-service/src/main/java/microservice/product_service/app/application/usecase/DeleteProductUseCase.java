@@ -1,7 +1,7 @@
 package microservice.product_service.app.application.usecase;
 
 import microservice.product_service.app.domain.model.valueobjects.ProductID;
-import microservice.product_service.app.application.port.out.ProductRepository;
+import microservice.product_service.app.application.port.output.ProductRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -30,6 +30,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
 	// Config Server
 	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
@@ -40,6 +43,10 @@ dependencies {
 
 	// H2 for testing
 	testImplementation 'com.h2database:h2'
+
+    // Redis Cache
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
 
 	// Jackson Java 8 Date/Time module
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'

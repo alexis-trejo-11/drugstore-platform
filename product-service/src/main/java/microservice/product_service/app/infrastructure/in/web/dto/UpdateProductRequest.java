@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import microservice.product_service.app.application.port.in.command.UpdateProductCommand;
+import microservice.product_service.app.application.port.input.command.UpdateProductCommand;
 import microservice.product_service.app.domain.model.enums.ProductCategory;
 import microservice.product_service.app.domain.model.enums.ProductSubcategory;
 import microservice.product_service.app.domain.model.enums.ProductType;

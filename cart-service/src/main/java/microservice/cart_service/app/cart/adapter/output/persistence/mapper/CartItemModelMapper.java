@@ -21,7 +21,7 @@ import microservice.cart_service.app.cart.core.domain.model.valueobjects.CartTim
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.ItemPrice;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.ProductId;
 import microservice.cart_service.app.cart.core.domain.model.valueobjects.Quantity;
-import microservice.cart_service.app.product.adapter.out.persistence.ProductModel;
+import microservice.cart_service.app.product.adapter.output.persistence.ProductModel;
 
 /**
  * Mapper responsible for converting between CartItem domain models and

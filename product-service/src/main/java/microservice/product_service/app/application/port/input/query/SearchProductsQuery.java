@@ -1,4 +1,4 @@
-package microservice.product_service.app.application.port.in.query;
+package microservice.product_service.app.application.port.input.query;
 
 import microservice.product_service.app.domain.model.enums.ProductCategory;
 
