@@ -1,8 +1,8 @@
 package libs_kernel.security.jwt;
 
-
 import io.jsonwebtoken.Claims;
 import libs_kernel.security.dto.AuthUserDetails;
+import libs_kernel.security.dto.TokenValidationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,7 +33,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			"/api/v2/auth/stores",
 			"/api/v2/auth/refresh",
 			"/api/v2/auth/validate",
-			"/actuator/health"
+			"/api/v2/stores/**",
+			"/v3/api-docs/**",
+			"/swagger-ui/**",
+			"/swagger-ui.html",
+			"/actuator/health",
+			"/actuator/info",
+			"/error"
 	);
 
 	@Override
@@ -51,7 +57,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		String authHeader = request.getHeader("Authorization");
 
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-			sendUnauthorizedError(response, "Missing or invalid Authorization header");
 			return;
 		}
 

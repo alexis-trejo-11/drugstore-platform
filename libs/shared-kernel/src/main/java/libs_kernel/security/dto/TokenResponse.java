@@ -1,4 +1,4 @@
-package libs_kernel.security.jwt;
+package libs_kernel.security.dto;
 
 import lombok.Builder;
 

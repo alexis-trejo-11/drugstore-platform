@@ -1,34 +1,30 @@
 package microservice.store_service.app.infrastructure.inbound.rest.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import libs_kernel.config.rate_limit.RateLimit;
 import libs_kernel.config.rate_limit.RateLimitProfile;
-import libs_kernel.config.rate_limit.RateLimitType;
 import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.page.PageRequest;
 import libs_kernel.page.PageResponse;
 import libs_kernel.response.ResponseWrapper;
-import lombok.RequiredArgsConstructor;
 import microservice.store_service.app.application.port.in.query.GetStoreByCodeQuery;
 import microservice.store_service.app.application.port.in.query.GetStoreByIDQuery;
 import microservice.store_service.app.application.port.in.query.GetStoresByStatusQuery;
 import microservice.store_service.app.application.port.in.usecase.StoreQueryUseCases;
 import microservice.store_service.app.domain.model.Store;
 import microservice.store_service.app.domain.model.enums.StoreStatus;
+import microservice.store_service.app.infrastructure.inbound.rest.annotation.*;
 import microservice.store_service.app.infrastructure.inbound.rest.dto.request.SearchStoreRequest;
 import microservice.store_service.app.infrastructure.inbound.rest.dto.response.StoreResponse;
+
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("api/v2/stores")
 @Tag(
     name = "Store Query Operations",
@@ -39,115 +35,19 @@ public class StoreQueryController {
     private final StoreQueryUseCases storeApplicationFacade;
     private final ResponseMapper<StoreResponse, Store> responseMapper;
 
+    @Autowired
+    public StoreQueryController(
+        StoreQueryUseCases storeApplicationFacade,
+        ResponseMapper<StoreResponse, Store> responseMapper) {
+        this.storeApplicationFacade = storeApplicationFacade;
+        this.responseMapper = responseMapper;
+    }
+
     @GetMapping("/{id}")
     @RateLimit(profile = RateLimitProfile.PUBLIC)
-    @Operation(
-        summary = "Get store by ID",
-        description = "Retrieves a single store by its unique identifier. **Requires JWT authentication with ADMIN role.**",
-        tags = {"Store Query Operations"}
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Store found successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ResponseWrapper.class),
-                examples = @ExampleObject(
-                    name = "Success Response",
-                    value = """
-                    {
-                      "message": "Store found successfully",
-                      "data": {
-                        "id": "c1a2b3d4-e5f6-7890-abcd-ef1234567890",
-                        "code": "STR-001",
-                        "name": "Central Pharmacy",
-                        "status": "ACTIVE",
-                        "phone": "+1-555-0123",
-                        "email": "central@pharmacy.com",
-                        "address": {
-                          "street": "123 Main St",
-                          "city": "New York",
-                          "state": "NY",
-                          "zipCode": "10001",
-                          "country": "USA"
-                        },
-                        "latitude": 40.7128,
-                        "longitude": -74.0060,
-                        "isOpen": true,
-                        "createdAt": "2025-01-15T10:30:00",
-                        "updatedAt": "2025-10-19T14:20:00"
-                      },
-                      "timestamp": "2025-10-19T14:25:30"
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Store not found",
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(
-                    value = """
-                    {
-                      "isSuccess": false,
-                      "message": "Store not found",
-                      "timestamp": "2025-10-19T14:25:30",
-                      "error": {
-                        "errorCode": "STORE_NOT_FOUND",
-                        "message": "No store found with ID: c1a2b3d4-e5f6-7890-abcd-ef1234567890"
-                      }
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Unauthorized - Invalid or missing JWT token",
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(
-                    value = """
-                    {
-                      "isSuccess": false,
-                      "message": "Unauthorized access",
-                      "timestamp": "2025-10-19T14:25:30",
-                      "error": {
-                        "errorCode": "UNAUTHORIZED",
-                        "message": "Valid JWT token required"
-                      }
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "403",
-            description = "Forbidden - Insufficient permissions (ADMIN role required)",
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(
-                    value = """
-                    {
-                      "isSuccess": false,
-                      "message": "Forbidden access",
-                      "timestamp": "2025-10-19T14:25:30",
-                      "error": {
-                        "errorCode": "FORBIDDEN",
-                        "message": "ADMIN role required to access this resource"
-                      }
-                    }
-                    """
-                )
-            )
-        )
-    })
+    @GetStoreByIDOperation
     public ResponseWrapper<StoreResponse> getStoreByID(
-        @Parameter(description = "Unique identifier of the store", required = true, example = "c1a2b3d4-e5f6-7890-abcd-ef1234567890")
-        @PathVariable String id
+        @StoreIdURLParameter @PathVariable String id
     ) {
         var query = GetStoreByIDQuery.of(id);
         var queryResult = storeApplicationFacade.getStoreByID(query);
@@ -158,55 +58,7 @@ public class StoreQueryController {
 
     @GetMapping("/{code}/code")
     @RateLimit(profile = RateLimitProfile.PUBLIC)
-    @Operation(
-        summary = "Get store by code",
-        description = "Retrieves a single store by its unique business code. **Requires JWT authentication with ADMIN role.**",
-        tags = {"Store Query Operations"}
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Store found successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ResponseWrapper.class),
-                examples = @ExampleObject(
-                    name = "Success Response",
-                    value = """
-                    {
-                      "isSuccess": true,
-                      "message": "Store found successfully",
-                      "data": {
-                        "id": "c1a2b3d4-e5f6-7890-abcd-ef1234567890",
-                        "code": "STR-001",
-                        "name": "Central Pharmacy",
-                        "status": "ACTIVE",
-                        "phone": "+1-555-0123",
-                        "email": "central@pharmacy.com",
-                        "isOpen": true
-                      },
-                      "timestamp": "2025-10-19T14:25:30"
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Store not found with the provided code",
-            content = @Content(mediaType = "application/json")
-        ),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Unauthorized - Invalid or missing JWT token",
-            content = @Content(mediaType = "application/json")
-        ),
-        @ApiResponse(
-            responseCode = "403",
-            description = "Forbidden - ADMIN role required",
-            content = @Content(mediaType = "application/json")
-        )
-    })
+    @GetStoreByCodeOperation
     public ResponseWrapper<StoreResponse> getStoreByCode(
         @Parameter(description = "Unique business code of the store", required = true, example = "STR-001")
         @PathVariable String code
@@ -220,94 +72,7 @@ public class StoreQueryController {
 
     @GetMapping
     @RateLimit(profile = RateLimitProfile.PUBLIC)
-    @Operation(
-        summary = "Search stores by specifications",
-        description = """
-            Advanced search endpoint that allows filtering stores by multiple criteria including:
-            - Name, phone, email (partial match)
-            - Code (exact match)
-            - Geographic location (country, state, neighborhood)
-            - Status
-            - Location filters (proximity search, geographic boundaries)
-            - Schedule filters (24-hour stores, currently open, specific day/time)
-            
-            **Requires JWT authentication with ADMIN role.**
-            
-            Supports pagination and sorting.
-            """,
-        tags = {"Store Query Operations"}
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Stores retrieved successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ResponseWrapper.class),
-                examples = @ExampleObject(
-                    name = "Paginated Success Response",
-                    value = """
-                    {
-                      "isSuccess": true,
-                      "message": "Stores by specifications found successfully",
-                      "data": {
-                        "content": [
-                          {
-                            "id": "c1a2b3d4",
-                            "code": "STR-001",
-                            "name": "Central Pharmacy",
-                            "status": "ACTIVE",
-                            "phone": "+1-555-0123",
-                            "email": "central@pharmacy.com",
-                            "isOpen": true
-                          }
-                        ],
-                        "page": 0,
-                        "size": 10,
-                        "totalElements": 25,
-                        "totalPages": 3,
-                        "first": true,
-                        "last": false,
-                        "hasNext": true,
-                        "hasPrevious": false
-                      },
-                      "timestamp": "2025-10-19T14:25:30"
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Bad request - Invalid search parameters",
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(
-                    value = """
-                    {
-                      "isSuccess": false,
-                      "message": "Bad request",
-                      "timestamp": "2025-10-19T14:25:30",
-                      "error": {
-                        "errorCode": "INVALID_PARAMETERS",
-                        "message": "Invalid pagination parameters"
-                      }
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Unauthorized - Invalid or missing JWT token",
-            content = @Content(mediaType = "application/json")
-        ),
-        @ApiResponse(
-            responseCode = "403",
-            description = "Forbidden - ADMIN role required",
-            content = @Content(mediaType = "application/json")
-        )
-    })
+    @GetStoresBySpecificationsOperation
     public ResponseWrapper<PageResponse<StoreResponse>> getStoresBySpecifications(
         @Parameter(
             description = "Search criteria for filtering stores",
@@ -326,78 +91,7 @@ public class StoreQueryController {
 
     @GetMapping("/status/{status}")
     @RateLimit(profile = RateLimitProfile.PUBLIC)
-    @Operation(
-        summary = "Get stores by status",
-        description = """
-            Retrieves all stores with a specific status (ACTIVE, INACTIVE, UNDER_MAINTENANCE, TEMPORARY_CLOSURE).
-            
-            **Requires JWT authentication with ADMIN role.**
-            
-            Returns paginated results with configurable page size and sorting.
-            """,
-        tags = {"Store Query Operations"}
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Stores retrieved successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ResponseWrapper.class),
-                examples = @ExampleObject(
-                    name = "Active Stores Response",
-                    value = """
-                    {
-                      "isSuccess": true,
-                      "message": "Stores by status found successfully",
-                      "data": {
-                        "content": [
-                          {
-                            "id": "c1a2b3d4",
-                            "code": "STR-001",
-                            "name": "Central Pharmacy",
-                            "status": "ACTIVE",
-                            "isOpen": true
-                          },
-                          {
-                            "id": "e5f6g7h8",
-                            "code": "STR-002",
-                            "name": "Downtown Drugstore",
-                            "status": "ACTIVE",
-                            "isOpen": false
-                          }
-                        ],
-                        "page": 0,
-                        "size": 10,
-                        "totalElements": 42,
-                        "totalPages": 5,
-                        "first": true,
-                        "last": false,
-                        "hasNext": true,
-                        "hasPrevious": false
-                      },
-                      "timestamp": "2025-10-19T14:25:30"
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Bad request - Invalid status value",
-            content = @Content(mediaType = "application/json")
-        ),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Unauthorized - Invalid or missing JWT token",
-            content = @Content(mediaType = "application/json")
-        ),
-        @ApiResponse(
-            responseCode = "403",
-            description = "Forbidden - ADMIN role required",
-            content = @Content(mediaType = "application/json")
-        )
-    })
+    @GetStoresByStatusOperation
     public ResponseWrapper<PageResponse<StoreResponse>> getStoresByStatus(
         @Parameter(
             description = "Store status to filter by",

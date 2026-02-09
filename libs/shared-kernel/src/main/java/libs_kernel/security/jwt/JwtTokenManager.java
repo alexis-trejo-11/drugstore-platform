@@ -4,6 +4,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import libs_kernel.security.dto.TokenResponse;
+import libs_kernel.security.dto.TokenValidationResponse;
+import libs_kernel.security.dto.UserClaims;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
