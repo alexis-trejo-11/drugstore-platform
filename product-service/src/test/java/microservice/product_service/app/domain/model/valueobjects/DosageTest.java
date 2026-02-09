@@ -2,9 +2,11 @@ package microservice.product_service.app.domain.model.valueobjects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import microservice.product_service.app.core.domain.model.valueobjects.Dosage;
 import org.junit.jupiter.api.Test;
 
-import microservice.product_service.app.domain.exception.ProductValueObjectException;
+import microservice.product_service.app.core.domain.exception.ProductValueObjectException;
 
 public class DosageTest {
 

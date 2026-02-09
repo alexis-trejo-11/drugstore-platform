@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import microservice.product_service.app.core.application.usecase.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,32 +19,32 @@ import static org.mockito.Mockito.when;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
-import microservice.product_service.app.application.port.input.command.CreateProductCommand;
-import microservice.product_service.app.application.port.input.command.UpdateProductCommand;
-import microservice.product_service.app.application.port.input.query.GetProductByBarCodeQuery;
-import microservice.product_service.app.application.port.input.query.GetProductByIDQuery;
-import microservice.product_service.app.application.port.input.query.GetProductBySKUQuery;
-import microservice.product_service.app.application.port.input.query.SearchProductsQuery;
-import microservice.product_service.app.application.port.output.ProductRepository;
-import microservice.product_service.app.domain.exception.ProductNotFoundException;
-import microservice.product_service.app.domain.model.CreateProductParams;
-import microservice.product_service.app.domain.model.Product;
-import microservice.product_service.app.domain.model.enums.ProductCategory;
-import microservice.product_service.app.domain.model.enums.ProductStatus;
-import microservice.product_service.app.domain.model.enums.ProductSubcategory;
-import microservice.product_service.app.domain.model.enums.ProductType;
-import microservice.product_service.app.domain.model.valueobjects.ActiveIngredient;
-import microservice.product_service.app.domain.model.valueobjects.Administration;
-import microservice.product_service.app.domain.model.valueobjects.Dosage;
-import microservice.product_service.app.domain.model.valueobjects.ExpirationRange;
-import microservice.product_service.app.domain.model.valueobjects.Manufacturer;
-import microservice.product_service.app.domain.model.valueobjects.ProductClassification;
-import microservice.product_service.app.domain.model.valueobjects.ProductDescription;
-import microservice.product_service.app.domain.model.valueobjects.ProductID;
-import microservice.product_service.app.domain.model.valueobjects.ProductImages;
-import microservice.product_service.app.domain.model.valueobjects.ProductName;
-import microservice.product_service.app.domain.model.valueobjects.ProductPrice;
-import microservice.product_service.app.domain.model.valueobjects.SKU;
+import microservice.product_service.app.core.port.input.command.CreateProductCommand;
+import microservice.product_service.app.core.port.input.command.UpdateProductCommand;
+import microservice.product_service.app.core.port.input.query.GetProductByBarCodeQuery;
+import microservice.product_service.app.core.port.input.query.GetProductByIDQuery;
+import microservice.product_service.app.core.port.input.query.GetProductBySKUQuery;
+import microservice.product_service.app.core.port.input.query.SearchProductsQuery;
+import microservice.product_service.app.core.port.output.ProductRepository;
+import microservice.product_service.app.core.domain.exception.ProductNotFoundException;
+import microservice.product_service.app.core.domain.model.CreateProductParams;
+import microservice.product_service.app.core.domain.model.Product;
+import microservice.product_service.app.core.domain.model.enums.ProductCategory;
+import microservice.product_service.app.core.domain.model.enums.ProductStatus;
+import microservice.product_service.app.core.domain.model.enums.ProductSubcategory;
+import microservice.product_service.app.core.domain.model.enums.ProductType;
+import microservice.product_service.app.core.domain.model.valueobjects.ActiveIngredient;
+import microservice.product_service.app.core.domain.model.valueobjects.Administration;
+import microservice.product_service.app.core.domain.model.valueobjects.Dosage;
+import microservice.product_service.app.core.domain.model.valueobjects.ExpirationRange;
+import microservice.product_service.app.core.domain.model.valueobjects.Manufacturer;
+import microservice.product_service.app.core.domain.model.valueobjects.ProductClassification;
+import microservice.product_service.app.core.domain.model.valueobjects.ProductDescription;
+import microservice.product_service.app.core.domain.model.valueobjects.ProductID;
+import microservice.product_service.app.core.domain.model.valueobjects.ProductImages;
+import microservice.product_service.app.core.domain.model.valueobjects.ProductName;
+import microservice.product_service.app.core.domain.model.valueobjects.ProductPrice;
+import microservice.product_service.app.core.domain.model.valueobjects.SKU;
 
 public class UseCasesTest {
 

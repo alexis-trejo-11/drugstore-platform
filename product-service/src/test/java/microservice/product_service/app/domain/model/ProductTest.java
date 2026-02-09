@@ -6,20 +6,23 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import microservice.product_service.app.core.domain.model.CreateProductParams;
+import microservice.product_service.app.core.domain.model.Product;
 import org.junit.jupiter.api.Test;
 
 import microservice.product_service.app.domain.exception.ExpiredProductException;
-import microservice.product_service.app.domain.model.enums.ProductCategory;
-import microservice.product_service.app.domain.model.enums.ProductStatus;
-import microservice.product_service.app.domain.model.valueobjects.ActiveIngredient;
-import microservice.product_service.app.domain.model.valueobjects.Administration;
-import microservice.product_service.app.domain.model.valueobjects.Dosage;
-import microservice.product_service.app.domain.model.valueobjects.Manufacturer;
+import microservice.product_service.app.core.domain.model.enums.ProductCategory;
+import microservice.product_service.app.core.domain.model.enums.ProductStatus;
+import microservice.product_service.app.core.domain.model.valueobjects.ActiveIngredient;
+import microservice.product_service.app.core.domain.model.valueobjects.Administration;
+import microservice.product_service.app.core.domain.model.valueobjects.Dosage;
+import microservice.product_service.app.core.domain.model.valueobjects.Manufacturer;
 import microservice.product_service.app.domain.model.valueobjects.ProductCode;
-import microservice.product_service.app.domain.model.valueobjects.ProductDates;
-import microservice.product_service.app.domain.model.valueobjects.ProductDescription;
-import microservice.product_service.app.domain.model.valueobjects.ProductName;
-import microservice.product_service.app.domain.model.valueobjects.ProductPrice;
+import microservice.product_service.app.core.domain.model.valueobjects.ProductDates;
+import microservice.product_service.app.core.domain.model.valueobjects.ProductDescription;
+import microservice.product_service.app.core.domain.model.valueobjects.ProductName;
+import microservice.product_service.app.core.domain.model.valueobjects.ProductPrice;
 
 public class ProductTest {
 

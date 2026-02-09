@@ -4,7 +4,7 @@ import libs_kernel.config.CustomGlobalExceptionHandler;
 import libs_kernel.response.Error;
 import libs_kernel.response.ResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
-import microservice.product_service.app.domain.exception.*;
+import microservice.product_service.app.core.domain.exception.*;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

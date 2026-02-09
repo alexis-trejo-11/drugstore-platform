@@ -2,6 +2,9 @@ package microservice.product_service.app.domain.model.valueobjects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import microservice.product_service.app.core.domain.exception.ProductValueObjectException;
+import microservice.product_service.app.core.domain.model.valueobjects.Administration;
 import org.junit.jupiter.api.Test;
 
 public class AdministrationTest {
@@ -15,7 +18,7 @@ public class AdministrationTest {
 
   @Test
   void create_invalidShort_throws() {
-    assertThrows(microservice.product_service.app.domain.exception.ProductValueObjectException.class,
+    assertThrows(ProductValueObjectException.class,
         () -> Administration.create("x"));
   }
 
