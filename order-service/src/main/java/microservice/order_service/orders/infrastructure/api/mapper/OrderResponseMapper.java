@@ -35,7 +35,7 @@ public class OrderResponseMapper implements ResponseMapper<OrderResponse, OrderQ
     }
 
     @Override
-    public PageResponse<OrderResponse> toResponsePage(PageResponse<OrderQueryResult> orderQueryResults) {
+    public PageResponse<OrderResponse> toResponsePage(Page<OrderQueryResult> orderQueryResults) {
         PageResponse<OrderResponse> pageResponse = new PageResponse<>();
         if (orderQueryResults == null) return pageResponse;
 
