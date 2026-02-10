@@ -11,7 +11,6 @@ import microservice.order_service.orders.application.queries.response.OrderDetai
 import microservice.order_service.orders.application.queries.response.OrderQueryResult;
 import microservice.order_service.orders.domain.models.Order;
 import microservice.order_service.orders.domain.ports.output.OrderRepository;
-import microservice.order_service.orders.infrastructure.persistence.specification.OrderSpecifications;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.domain.Page;
@@ -56,7 +55,7 @@ public class OrderQueryHandler {
     public Page<OrderQueryResult> handle(GetOrdersByUserIDQuery query) {
         SearchOrdersQuery userOrderQuery = SearchOrdersQuery.builder()
                 .userId(query.userID())
-                .pageable(query.pagination().toPageable())
+                .pageable(query.pagination())
                 .build();
 
         Page<Order> orderPage = orderRepository.findBySpecification(userOrderQuery);
@@ -82,7 +81,7 @@ public class OrderQueryHandler {
                 .userId(query.userID())
                 .startDate(query.startDate())
                 .endDate(query.endDate())
-                .pageable(query.pagination().toPageable())
+                .pageable(query.pagination())
                 .build();
 
         Page<Order> orderPage = orderRepository.findBySpecification(userOrderQuery);
