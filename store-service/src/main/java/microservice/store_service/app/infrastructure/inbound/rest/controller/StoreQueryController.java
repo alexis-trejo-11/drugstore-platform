@@ -56,7 +56,7 @@ public class StoreQueryController {
         return ResponseWrapper.found(storeResponse, "Store");
     }
 
-    @GetMapping("/{code}/code")
+    @GetMapping("/by-code/{code}")
     @RateLimit(profile = RateLimitProfile.PUBLIC)
     @GetStoreByCodeOperation
     public ResponseWrapper<StoreResponse> getStoreByCode(

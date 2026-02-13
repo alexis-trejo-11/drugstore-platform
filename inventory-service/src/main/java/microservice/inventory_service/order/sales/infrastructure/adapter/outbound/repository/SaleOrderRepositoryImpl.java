@@ -1,6 +1,6 @@
 package microservice.inventory_service.order.sales.infrastructure.adapter.outbound.repository;
 
-import libs_kernel.mapper.EntityMapper;
+import libs_kernel.mapper.JpaEntityMapper;
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.order.sales.core.domain.entity.SaleOrder;
 import microservice.inventory_service.order.sales.core.domain.entity.valueobject.SaleOrderId;
@@ -17,7 +17,7 @@ import java.util.Optional;
 @Repository
 public class SaleOrderRepositoryImpl implements SaleOrderRepository {
     private final JpaSaleOrderRepository jpaRepository;
-    private final EntityMapper<SaleOrderEntity, SaleOrder> saleOrderMapper;
+    private final JpaEntityMapper<SaleOrderEntity, SaleOrder> saleOrderMapper;
 
     @Override
     public Optional<SaleOrder> findById(SaleOrderId saleOrderId) {

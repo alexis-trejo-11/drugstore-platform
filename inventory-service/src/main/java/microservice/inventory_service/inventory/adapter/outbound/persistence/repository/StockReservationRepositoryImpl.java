@@ -1,6 +1,6 @@
 package microservice.inventory_service.inventory.adapter.outbound.persistence.repository;
 
-import libs_kernel.mapper.EntityMapper;
+import libs_kernel.mapper.JpaEntityMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.inventory_service.inventory.adapter.outbound.persistence.model.StockReservationsEntity;
@@ -24,34 +24,34 @@ import java.util.Optional;
 @Slf4j
 public class StockReservationRepositoryImpl implements StockReservationRepository {
     private final JpaStockReservationRepository reservationRepository;
-    private final EntityMapper<StockReservationsEntity, StockReservation> reservationEntityMapper;
+    private final JpaEntityMapper<StockReservationsEntity, StockReservation> reservationJpaEntityMapper;
 
     @Override
     public StockReservation save(StockReservation reservation) {
-        StockReservationsEntity entity = reservationEntityMapper.fromDomain(reservation);
+        StockReservationsEntity entity = reservationJpaEntityMapper.fromDomain(reservation);
 
         log.info("Saving StockReservation inventory item0: {}", entity.getItems().getFirst());
         StockReservationsEntity createdEntity = reservationRepository.save(entity);
 
-       return reservationEntityMapper.toDomain(createdEntity);
+       return reservationJpaEntityMapper.toDomain(createdEntity);
     }
 
     @Override
     public Optional<StockReservation> findById(ReservationId id) {
        return reservationRepository.findById(id.value()).
-               map(reservationEntityMapper::toDomain);
+               map(reservationJpaEntityMapper::toDomain);
     }
 
     @Override
     public Optional<StockReservation> findByOrderReference(OrderReference orderReference) {
         return reservationRepository.findByOrderIdAndOrderType(orderReference.orderId(), orderReference.type())
-                .map(reservationEntityMapper::toDomain);
+                .map(reservationJpaEntityMapper::toDomain);
     }
 
     @Override
     public Page<StockReservation> findByStatus(ReservationStatus status, Pageable pageable) {
         Page<StockReservationsEntity> entitiesPage = reservationRepository.findByStatus(status, pageable);
-        return entitiesPage.map(reservationEntityMapper::toDomain);
+        return entitiesPage.map(reservationJpaEntityMapper::toDomain);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class StockReservationRepositoryImpl implements StockReservationRepositor
                 .findByExpirationTimeBeforeAndStatus(currentTime, ReservationStatus.ACTIVE);
 
         return entities.stream()
-                .map(reservationEntityMapper::toDomain)
+                .map(reservationJpaEntityMapper::toDomain)
                 .toList();
 
     }

@@ -1,6 +1,6 @@
 package microservice.inventory_service.inventory.adapter.outbound.persistence.repository;
 
-import libs_kernel.mapper.EntityMapper;
+import libs_kernel.mapper.JpaEntityMapper;
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.inventory.core.movement.domain.InventoryMovement;
 import microservice.inventory_service.inventory.core.movement.domain.port.InventoryMovementRepository;
@@ -22,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class InventoryMovementRepositoryImpl implements InventoryMovementRepository {
     private final JpaInventoryMovementRepository movementRepository;
-    private final EntityMapper<InventoryMovementEntity, InventoryMovement> movementMapper;
+    private final JpaEntityMapper<InventoryMovementEntity, InventoryMovement> movementMapper;
 
     @Override
     public InventoryMovement save(InventoryMovement movement) {

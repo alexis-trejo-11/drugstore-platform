@@ -1,6 +1,6 @@
 package microservice.inventory_service.order.supplier_purchase.adapter.outbound.persistence.repository;
 
-import libs_kernel.mapper.EntityMapper;
+import libs_kernel.mapper.JpaEntityMapper;
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.order.supplier_purchase.adapter.outbound.persistence.model.PurchaseOrderEntityOrder;
 import microservice.inventory_service.order.supplier_purchase.domain.entity.PurchaseOrder;
@@ -17,7 +17,7 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class PurchaseOrderRepositoryImpl implements PurchaseOrderRepository {
-    private final EntityMapper<PurchaseOrderEntityOrder, PurchaseOrder> mapper;
+    private final JpaEntityMapper<PurchaseOrderEntityOrder, PurchaseOrder> mapper;
     private final JpaOrderRepository jpaRepository;
 
     @Override
