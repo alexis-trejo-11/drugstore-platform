@@ -11,6 +11,10 @@ allprojects {
 		mavenCentral()
 	}
 
+	ext {
+		kafkaVersion = '3.6.0'
+	}
+
 	dependencyManagement {
 		imports {
 			mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.3"
@@ -34,6 +38,14 @@ subprojects {
 	// Common dependencies
 	dependencies {
 		implementation 'org.springframework.boot:spring-boot-starter-web'
+
+		// Spring Kafka
+		implementation 'org.springframework.kafka:spring-kafka'
+
+		// Jackson for JSON serialization
+		implementation 'com.fasterxml.jackson.core:jackson-databind'
+		implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
 		testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	}
 

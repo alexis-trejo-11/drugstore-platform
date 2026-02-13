@@ -13,7 +13,7 @@ java {
 
 repositories {
 	mavenCentral()
-   maven {
+  maven {
     url 'https://projectlombok.org/edge-releases'
   }
 }

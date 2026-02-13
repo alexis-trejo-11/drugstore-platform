@@ -1,6 +1,6 @@
 package microservice.inventory_service.inventory.adapter.outbound.persistence.repository;
 
-import libs_kernel.mapper.EntityMapper;
+import libs_kernel.mapper.JpaEntityMapper;
 import lombok.RequiredArgsConstructor;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.Inventory;
 import microservice.inventory_service.inventory.core.inventory.domain.entity.enums.InventoryStatus;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Repository
 @RequiredArgsConstructor
 public class InventoryRepositoryImpl implements InventoryRepository {
-    private final EntityMapper<InventoryEntity, Inventory> mapper;
+    private final JpaEntityMapper<InventoryEntity, Inventory> mapper;
     private final JpaInventoryRepository jpaInventoryRepository;
 
     @Override
