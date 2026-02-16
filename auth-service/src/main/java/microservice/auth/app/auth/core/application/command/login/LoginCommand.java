@@ -1,4 +1,4 @@
-package microservice.auth.app.auth.core.application.command;
+package microservice.auth.app.auth.core.application.command.login;
 
 import lombok.Builder;
 

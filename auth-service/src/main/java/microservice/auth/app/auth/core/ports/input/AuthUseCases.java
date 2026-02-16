@@ -1,16 +1,15 @@
 package microservice.auth.app.auth.core.ports.input;
 
-import libs_kernel.response.Result;
-import microservice.auth.app.auth.core.application.command.LoginCommand;
-import microservice.auth.app.auth.core.application.command.OAuth2LoginCommand;
+import microservice.auth.app.auth.core.application.command.login.LoginCommand;
+import microservice.auth.app.auth.core.application.command.login.OAuth2LoginCommand;
 import microservice.auth.app.auth.core.application.command.RefreshAccessTokenCommand;
 import microservice.auth.app.auth.core.application.command.SignupCommand;
-import microservice.auth.app.auth.core.application.command.TwoFactorLoginCommand;
+import microservice.auth.app.auth.core.application.command.login.TwoFactorLoginCommand;
 import microservice.auth.app.auth.core.application.result.SessionResult;
-import microservice.auth.app.auth.core.domain.valueobjects.UserId;
+import microservice.auth.app.auth.core.application.result.SignUpResult;
 
 public interface AuthUseCases {
-  Result<UserId> signUp(SignupCommand command);
+	SignUpResult signUp(SignupCommand command);
 
   SessionResult login(LoginCommand command);
 

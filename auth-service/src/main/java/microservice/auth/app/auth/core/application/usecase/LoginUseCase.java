@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.auth.app.User;
-import microservice.auth.app.auth.core.application.command.LoginCommand;
+import microservice.auth.app.auth.core.application.command.login.LoginCommand;
 import microservice.auth.app.auth.core.application.events.UserLoginEvent;
 import microservice.auth.app.auth.core.application.result.SessionResult;
 import microservice.auth.app.auth.core.domain.exceptions.InvalidCredentialsException;
 import microservice.auth.app.auth.core.domain.valueobjects.Token;
-import microservice.auth.app.auth.core.ports.input.EventPublisher;
-import microservice.auth.app.auth.core.ports.input.PasswordEncoder;
-import microservice.auth.app.auth.core.ports.input.TokenProvider;
+import microservice.auth.app.auth.core.ports.input.UserEventPublisher;
+import microservice.auth.app.auth.core.ports.output.PasswordEncoder;
+import microservice.auth.app.auth.core.ports.output.TokenProvider;
 import microservice.auth.app.auth.core.ports.output.UserServiceClient;
 
 /**
@@ -28,7 +28,7 @@ import microservice.auth.app.auth.core.ports.output.UserServiceClient;
 public class LoginUseCase {
   private final PasswordEncoder passwordEncoder;
   private final TokenProvider tokenProvider;
-  private final EventPublisher eventPublisher;
+  private final UserEventPublisher eventPublisher;
   private final UserServiceClient userServiceClient;
 
   /**

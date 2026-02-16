@@ -10,7 +10,7 @@ import microservice.auth.app.auth.core.application.result.SessionResult;
 import microservice.auth.app.auth.core.domain.exceptions.InvalidCredentialsException;
 import microservice.auth.app.auth.core.domain.exceptions.SessionExpiredException;
 import microservice.auth.app.auth.core.domain.valueobjects.Token;
-import microservice.auth.app.auth.core.ports.input.TokenProvider;
+import microservice.auth.app.auth.core.ports.output.TokenProvider;
 import microservice.auth.app.auth.core.ports.output.SessionService;
 import microservice.auth.app.auth.core.ports.output.UserServiceClient;
 

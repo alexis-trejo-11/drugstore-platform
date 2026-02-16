@@ -6,23 +6,6 @@ server:
 spring:
   application:
     name: auth-service
-
-  # Database Configuration
-  datasource:
-    url: jdbc:postgresql://localhost:5432/auth_db
-    username: ${DB_USERNAME:auth_user}
-    password: ${DB_PASSWORD:auth_password}
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-
   # Redis Configuration
   data:
     redis:
@@ -37,16 +20,52 @@ spring:
           min-idle: 2
           max-wait: 1000ms
 
-# Kafka Configuration
-kafka:
-  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-  producer:
-    key-serializer: org.apache.kafka.common.serialization.StringSerializer
-    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    properties:
-      spring.json.add.type.headers: false
-    retries: 3
-    acks: all
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
-  consumer:
-    group-i
+    producer:
+      # Serialization
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      # Reliability
+      acks: all # Waits for confirmation from all replicas
+      retries: 3
+      enable-idempotence: true
+
+      # Performance
+      batch-size: 16384 # 16KB
+      linger-ms: 10 # Waits 10ms to batch messages
+      buffer-memory: 33554432 # 32MB
+      compression-type: snappy
+      max-in-flight-requests: 5
+
+      # Timeouts
+      request-timeout-ms: 30000 # 30 seconds
+      delivery-timeout-ms: 120000 # 2 minutes
+
+      properties:
+        # Additional configuration
+        max.block.ms: 5000 # Maximum block time in send()
+
+# Kafka Topics
+kafka:
+  topics:
+    # User Topics
+    user:
+      created: user.created
+      updated: user.updated
+      deleted: user.deleted
+
+    # Notification Topics
+    notification:
+      email-verification: notification.email-verification
+      two-factor-code: notification.two-factor-code
+      welcome-email: notification.welcome-email
+
+    # Topic Configuration
+    partitions: 3
+    replication-factor: 1 # 1 for development, 3 for production
+
+  producer:
+    timeout-seconds: 10

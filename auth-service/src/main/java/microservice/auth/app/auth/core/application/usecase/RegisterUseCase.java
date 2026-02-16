@@ -2,15 +2,14 @@ package microservice.auth.app.auth.core.application.usecase;
 
 import org.springframework.stereotype.Service;
 
-import libs_kernel.response.Result;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.auth.app.User;
 import microservice.auth.app.auth.core.application.command.SignupCommand;
 import microservice.auth.app.auth.core.application.events.UserRegisteredEvent;
+import microservice.auth.app.auth.core.application.result.SignUpResult;
 import microservice.auth.app.auth.core.domain.exceptions.UserAlreadyExistsError;
-import microservice.auth.app.auth.core.domain.valueobjects.UserId;
-import microservice.auth.app.auth.core.ports.input.EventPublisher;
+import microservice.auth.app.auth.core.ports.input.UserEventPublisher;
 import microservice.auth.app.auth.core.ports.output.UserServiceClient;
 
 /**
@@ -23,7 +22,7 @@ import microservice.auth.app.auth.core.ports.output.UserServiceClient;
 @Slf4j
 @RequiredArgsConstructor
 public class RegisterUseCase {
-  private final EventPublisher eventPublisher;
+  private final UserEventPublisher eventPublisher;
   private final UserServiceClient userServiceClient;
 
   /**
@@ -34,22 +33,19 @@ public class RegisterUseCase {
    *         message
    * @throws UserAlreadyExistsError if email or phone already exists
    */
-  public Result<UserId> execute(SignupCommand command) {
+  public SignUpResult execute(SignupCommand command) {
     log.info("Processing user registration for email: {}", command.email().value());
 
-    // Step 1: Validate unique credentials (email and phone)
     validateUserUniqueness(command);
     log.debug("Unique credentials validation passed for user: {}", command.email().value());
 
-    // Step 2: Create User aggregate from command
     User newUser = createUserFromCommand(command);
     log.debug("User aggregate created with role: {}", command.role().getRoleName());
 
-    // Step 4: Publish domain event for other bounded contexts
     publishUserRegisteredEvent(newUser);
     log.debug("UserRegisteredEvent published for user ID: {}", newUser.getId());
 
-    return Result.success(newUser.getId());
+    return SignUpResult.success(newUser, true); // Assuming email verification is required
   }
 
   /**
@@ -86,7 +82,7 @@ public class RegisterUseCase {
     return User.builder()
         .email(command.email())
         .phoneNumber(command.phone())
-        .password(command.password())
+        .password(command.password() != null ? command.password().value() : "")
         .role(command.role())
         .build();
   }

@@ -7,7 +7,7 @@ import microservice.auth.app.auth.core.application.events.UserRegisteredEvent;
 import microservice.auth.app.auth.core.application.result.SignUpResult;
 import microservice.auth.app.auth.core.domain.exceptions.UserAlreadyExistsError;
 import microservice.auth.app.User;
-import microservice.auth.app.auth.core.ports.input.EventPublisher;
+import microservice.auth.app.auth.core.ports.input.UserEventPublisher;
 import microservice.auth.app.auth.core.ports.output.UserServiceClient;
 
 import org.springframework.stereotype.Service;
@@ -16,11 +16,11 @@ import microservice.auth.app.auth.core.domain.valueobjects.UserRole;
 
 @Service
 public class SingUpUseCase {
-  private final EventPublisher eventPublisher;
+  private final UserEventPublisher eventPublisher;
   private final UserServiceClient serviceClient;
 
   @Autowired
-  public SingUpUseCase(EventPublisher eventPublisher, UserServiceClient serviceClient) {
+  public SingUpUseCase(UserEventPublisher eventPublisher, UserServiceClient serviceClient) {
     this.eventPublisher = eventPublisher;
     this.serviceClient = serviceClient;
   }
