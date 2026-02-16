@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import microservice.auth.app.auth.core.application.command.OAuth2LoginCommand;
+import microservice.auth.app.auth.core.application.command.login.OAuth2LoginCommand;
 import microservice.auth.app.auth.core.domain.valueobjects.OAuth2Provider;
 
 @Data

@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import microservice.auth.app.auth.core.application.command.ForgotPasswordCommand;
+import microservice.auth.app.auth.core.application.command.password.ForgotPasswordCommand;
 
 @Data
 @Builder

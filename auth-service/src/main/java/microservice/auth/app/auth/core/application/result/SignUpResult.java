@@ -16,7 +16,7 @@ public record SignUpResult(
   public static SignUpResult success(User user, Boolean requiresEmailVerification) {
     return new SignUpResult(
         user.getId(),
-        user.getEmail(),
+        user.getEmail() != null ? user.getEmail().value() : null,
         user.getFirstName(),
         user.getLastName(),
         user.getRole(),

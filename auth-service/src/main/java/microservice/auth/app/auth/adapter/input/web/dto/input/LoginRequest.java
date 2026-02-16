@@ -2,9 +2,7 @@ package microservice.auth.app.auth.adapter.input.web.dto.input;
 
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import microservice.auth.app.auth.core.application.command.LoginCommand;
+import microservice.auth.app.auth.core.application.command.login.LoginCommand;
 
 
 public record LoginRequest(

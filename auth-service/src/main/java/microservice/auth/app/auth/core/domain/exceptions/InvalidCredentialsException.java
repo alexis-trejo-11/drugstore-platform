@@ -1,6 +1,6 @@
 package microservice.auth.app.auth.core.domain.exceptions;
 
-import microservice.auth.app.shared.exceptions.UnauthorizedException;
+import libs_kernel.exceptions.UnauthorizedException;
 
 /**
  * Exception thrown when user credentials are invalid during login.

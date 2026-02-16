@@ -4,5 +4,5 @@ public enum RateLimitProfile {
 	STANDARD,
 	SENSITIVE,
 	PUBLIC,
-	ADMIN,
+	ADMIN
 }

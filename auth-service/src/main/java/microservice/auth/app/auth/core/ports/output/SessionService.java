@@ -10,9 +10,9 @@ public interface SessionService {
 
   boolean isBlacklisted(String refreshToken);
 
-  void invalidateAllSessionsForUser(String userId);
+  void blackListAllRefreshTokensForUser(String userId);
 
   void save(JWTSessions session);
-   Optional<JWTSessions> findUserJwtSessions(String userId);
-  // void deleteBySessionId(String sessionId);
+
+  Optional<JWTSessions> findUserJwtSessions(String userId);
 }

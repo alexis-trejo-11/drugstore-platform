@@ -1,4 +1,4 @@
-package microservice.auth.app.auth.core.ports.input;
+package microservice.auth.app.auth.core.ports.output;
 
 import java.util.Map;
 

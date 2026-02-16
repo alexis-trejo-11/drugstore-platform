@@ -1,6 +1,6 @@
 package microservice.auth.app.auth.adapter.output.persitence;
 
-import microservice.auth.app.auth.core.ports.input.PasswordEncoder;
+import microservice.auth.app.auth.core.ports.output.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component

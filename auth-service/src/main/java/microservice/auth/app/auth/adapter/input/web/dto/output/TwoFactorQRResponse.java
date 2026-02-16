@@ -1,4 +1,3 @@
-// 4. TwoFactorQRResponse.java (NUEVO)
 package microservice.auth.app.auth.adapter.input.web.dto.output;
 
 import lombok.AllArgsConstructor;
@@ -18,9 +17,9 @@ public class TwoFactorQRResponse {
 
 	public static TwoFactorQRResponse fromResult(TwoFactorQRResult result) {
 		return TwoFactorQRResponse.builder()
-				.qrCodeUrl(result.getQrCodeUrl())
-				.secret(result.getSecret())
-				.manualEntryKey(result.getManualEntryKey())
+				.qrCodeUrl(result.qrCodeUrl())
+				.secret(result.secret())
+				.manualEntryKey(result.manualEntryKey())
 				.build();
 	}
 }

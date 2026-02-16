@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import microservice.auth.app.auth.core.application.command.LogoutCommand;
 import microservice.auth.app.auth.core.domain.exceptions.InvalidCredentialsException;
-import microservice.auth.app.auth.core.ports.input.TokenProvider;
+import microservice.auth.app.auth.core.ports.output.TokenProvider;
 import microservice.auth.app.auth.core.ports.output.SessionService;
 import org.springframework.stereotype.Service;
 
