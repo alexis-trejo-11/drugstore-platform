@@ -30,6 +30,7 @@ dependencies {
 	// Spring Boot dependencies
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	// Test
@@ -56,12 +57,20 @@ dependencies {
 	// Annotations for Java 9+
 	compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
 
-	// Lombok
+	// Kafka
+	implementation 'org.springframework.kafka:spring-kafka'
+
+	// Lombok - Force edge-SNAPSHOT version
     compileOnly 'org.projectlombok:lombok:edge-SNAPSHOT'
     annotationProcessor 'org.projectlombok:lombok:edge-SNAPSHOT'
 
     // Common library
     implementation project(':libs:shared-kernel')
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 }
 
 dependencyManagement {
@@ -84,6 +93,11 @@ protobuf {
 			grpc {}
 		}
 	}
+}
+
+// Make sure shared-kernel is compiled first
+tasks.named('compileJava') {
+	dependsOn(':libs:shared-kernel:build')
 }
 
 tasks.named('test') {

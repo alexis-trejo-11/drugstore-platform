@@ -1,7 +1,20 @@
 server:
   port: 8080
-  servlet:
-    context-path: /auth-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,mappings
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    microservice.auth: DEBUG
+    org.springframework.boot.autoconfigure: DEBUG
+    org.springframework.web: DEBUG
 
 spring:
   application:
@@ -69,3 +82,25 @@ kafka:
 
   producer:
     timeout-seconds: 10
+
+
+
+app:
+  rate-limit:
+    global:
+      enabled: true
+      maxRequests: 5000
+      durationHours: 1
+    profiles:
+      standard:
+        maxRequests: 100
+        durationSeconds: 60
+      sensitive:
+        maxRequests: 10
+        durationSeconds: 60
+      public:
+        maxRequests: 1000
+        durationSeconds: 60
+      admin:
+        maxRequests: 50
+        durationSeconds: 1

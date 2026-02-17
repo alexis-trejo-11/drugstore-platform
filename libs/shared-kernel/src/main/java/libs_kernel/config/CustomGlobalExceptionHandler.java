@@ -6,11 +6,11 @@ import libs_kernel.response.ResponseWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -21,10 +21,13 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import jakarta.validation.ConstraintViolationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -118,6 +121,123 @@ public class CustomGlobalExceptionHandler {
 
     ResponseWrapper<?> response = ResponseWrapper.error("Validation Error", error);
     return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
+  }
+
+  /**
+   * Handle Jakarta Bean Validation constraint violations (e.g., method parameter
+   * validation).
+   */
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<ResponseWrapper<?>> handleConstraintViolationException(ConstraintViolationException ex) {
+    log.warn("Constraint violations: {}", ex.getConstraintViolations().size());
+
+    Map<String, String> violations = ex.getConstraintViolations()
+        .stream()
+        .collect(Collectors.toMap(
+            v -> v.getPropertyPath().toString(),
+            v -> v.getMessage(),
+            (existing, neo) -> existing + "; " + neo));
+
+    Error error = buildError("VALIDATION_FAILED", "Validation failed for request parameters",
+        "ConstraintViolationException");
+    error.setDetails(violations);
+
+    ResponseWrapper<?> response = ResponseWrapper.error("Validation Error", error);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
+  /**
+   * Handle method-level validation failures thrown by Spring's
+   * HandlerMethodValidator.
+   * This exception is thrown when Jakarta Bean Validation constraints fail on
+   * method parameters.
+   * Extracts all validation errors and returns them with appropriate details.
+   */
+  @ExceptionHandler(HandlerMethodValidationException.class)
+  public ResponseEntity<ResponseWrapper<?>> handleHandlerMethodValidationException(
+      HandlerMethodValidationException ex) {
+    log.warn("Method validation failed: {} validation error(s)", ex.getValueResults().size());
+
+    Map<String, String> validationErrors = new HashMap<>();
+
+    // Extract validation errors from all parameter results
+    ex.getAllValidationResults().forEach(result -> {
+      String parameterName = result.getMethodParameter().getParameterName();
+      final String finalParameterName = parameterName == null 
+          ? "parameter" + result.getMethodParameter().getParameterIndex()
+          : parameterName;
+
+      // Collect all constraint violations for this parameter
+      result.getResolvableErrors().forEach(error -> {
+        String errorMessage = error.getDefaultMessage();
+        if (errorMessage == null) {
+          errorMessage = "Validation failed";
+        }
+
+        // If the parameter is an object with field errors, extract field names
+        final String finalFieldName;
+        if (error.getCodes() != null && error.getCodes().length > 0) {
+          // Try to extract field name from error codes
+          String code = error.getCodes()[0];
+          int lastDot = code.lastIndexOf('.');
+          if (lastDot > 0) {
+            finalFieldName = code.substring(lastDot + 1);
+          } else {
+            finalFieldName = finalParameterName;
+          }
+        } else {
+          finalFieldName = finalParameterName;
+        }
+
+        validationErrors.merge(finalFieldName, errorMessage,
+            (existing, newMsg) -> existing + "; " + newMsg);
+      });
+    });
+
+    Error error = buildError("VALIDATION_FAILED",
+        "Method parameter validation failed",
+        "HandlerMethodValidationException");
+    error.setDetails(validationErrors);
+
+    ResponseWrapper<?> response = ResponseWrapper.error("Validation Error", error);
+    return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
+  }
+
+  /**
+   * Handle binding errors (e.g., method argument binding failures).
+   * This complements MethodArgumentNotValidException for cases where data binding
+   * fails.
+   */
+  @ExceptionHandler(BindException.class)
+  public ResponseEntity<ResponseWrapper<?>> handleBindException(BindException ex) {
+    log.warn("Data binding failed: {} errors", ex.getErrorCount());
+
+    Map<String, String> fieldErrors = ex.getFieldErrors()
+        .stream()
+        .collect(Collectors.toMap(
+            FieldError::getField,
+            error -> error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value",
+            (existing, newMsg) -> existing + "; " + newMsg));
+
+    Error error = buildError("BINDING_FAILED", "Failed to bind request parameters", "BindException");
+    error.setDetails(fieldErrors);
+
+    ResponseWrapper<?> response = ResponseWrapper.error("Binding Error", error);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
+  /**
+   * Handle illegal argument usage from application code.
+   */
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<ResponseWrapper<?>> handleIllegalArgumentException(IllegalArgumentException ex) {
+    log.warn("Illegal argument: {}", ex.getMessage());
+
+    Error error = buildError("INVALID_ARGUMENT",
+        ex.getMessage() != null ? ex.getMessage() : "Invalid argument provided", "IllegalArgumentException");
+    ResponseWrapper<?> response = ResponseWrapper.error("Invalid Argument", error);
+
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 
   /**
