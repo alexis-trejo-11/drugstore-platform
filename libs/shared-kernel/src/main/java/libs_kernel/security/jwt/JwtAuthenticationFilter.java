@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -27,21 +26,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		this.jwtTokenService = jwtTokenService;
 	}
 
-	private static final List<String> PUBLIC_ENDPOINTS = List.of(
-			"/api/v2/auth/login",
-			"/api/v2/auth/products",
-			"/api/v2/auth/stores",
-			"/api/v2/auth/refresh",
-			"/api/v2/auth/validate",
-			"/api/v2/stores/**",
-			"/v3/api-docs/**",
-			"/swagger-ui/**",
-			"/swagger-ui.html",
-			"/actuator/health",
-			"/actuator/info",
-			"/error"
-	);
-
 	@Override
 	protected void doFilterInternal(HttpServletRequest request,
 	                                HttpServletResponse response,
@@ -49,18 +33,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		String path = request.getRequestURI();
 
-		if (isPublicEndpoint(path)) {
+		String authHeader = request.getHeader("Authorization");
+
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			log.debug("No Bearer token present for path: {}, continuing unauthenticated", path);
 			filterChain.doFilter(request, response);
 			return;
 		}
 
-		String authHeader = request.getHeader("Authorization");
+		String token = authHeader.substring(7).trim();
 
-		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+		if (token.isEmpty()) {
+			log.debug("Bearer header present but token is empty for path: {}, continuing unauthenticated", path);
+			filterChain.doFilter(request, response);
 			return;
 		}
-
-		String token = authHeader.substring(7);
 
 		try {
 			TokenValidationResponse validation = jwtTokenService.validateAccessToken(token);
@@ -75,9 +62,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 			UsernamePasswordAuthenticationToken authentication =
 					new UsernamePasswordAuthenticationToken(
-							userDetails,
-							null,
-							userDetails.getAuthorities()
+						userDetails,
+						null,
+						userDetails.getAuthorities()
 					);
 
 			SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -103,13 +90,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				.build();
 	}
 
-	private boolean isPublicEndpoint(String path) {
-		return PUBLIC_ENDPOINTS.stream().anyMatch(pattern ->
-				path.equals(pattern) ||
-						(pattern.contains("**") && path.startsWith(pattern.replace("**", ""))) ||
-						(pattern.endsWith("/**") && path.startsWith(pattern.replace("/**", "")))
-		);
-	}
 
 	private void sendUnauthorizedError(HttpServletResponse response, String message) throws IOException {
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

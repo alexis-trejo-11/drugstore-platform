@@ -59,8 +59,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	// Lombok
-  compileOnly 'org.projectlombok:lombok:edge-SNAPSHOT'
-  annotationProcessor 'org.projectlombok:lombok:edge-SNAPSHOT'
+  	compileOnly 'org.projectlombok:lombok:edge-SNAPSHOT'
+  	annotationProcessor 'org.projectlombok:lombok:edge-SNAPSHOT'
 
 	// Open Api
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'

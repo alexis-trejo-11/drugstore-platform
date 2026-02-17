@@ -14,13 +14,13 @@
 
 
 
-package microservice.auth.app;
+package microservice.auth_service.app;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.AllArgsConstructor;
-import microservice.auth.app.auth.core.domain.valueobjects.*;
-import microservice.auth.app.domain.valueobjects.*;
+import microservice.auth_service.app.auth.core.domain.valueobjects.*;
+import microservice.auth_service.app.domain.valueobjects.*;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

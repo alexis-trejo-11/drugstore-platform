@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "microservice.auth.grpc.generated";
+option java_package = "microservice.auth_service.grpc.generated";
 option java_outer_classname = "UserServiceProto";
 
 
