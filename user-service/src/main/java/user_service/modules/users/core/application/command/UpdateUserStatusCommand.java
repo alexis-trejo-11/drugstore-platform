@@ -1,22 +1,21 @@
 package user_service.modules.users.core.application.command;
 
-import user_service.modules.users.core.application.dto.UserStatusActions;
-
-import java.util.UUID;
+import user_service.modules.users.core.application.result.UserStatusActions;
+import user_service.modules.users.core.domain.models.valueobjects.UserId;
 
 public record UpdateUserStatusCommand(
-        UUID userId,
+        UserId userId,
         UserStatusActions actions,
         String activationToken) implements Command {
-    public static UpdateUserStatusCommand ban(UUID userId) {
-        return new UpdateUserStatusCommand(userId, UserStatusActions.BAN, null);
+    public static UpdateUserStatusCommand ban(String userId) {
+        return new UpdateUserStatusCommand(new UserId(userId), UserStatusActions.BAN, null);
     }
 
-    public static UpdateUserStatusCommand unban(UUID userId) {
-        return new UpdateUserStatusCommand(userId, UserStatusActions.UNBAN, null);
+    public static UpdateUserStatusCommand unban(String userId) {
+        return new UpdateUserStatusCommand(new UserId(userId), UserStatusActions.UNBAN, null);
     }
 
-    public static UpdateUserStatusCommand activate(UUID userId, String activationToken) {
-        return new UpdateUserStatusCommand(userId, UserStatusActions.ACTIVATE, activationToken);
+    public static UpdateUserStatusCommand activate(String userId, String activationToken) {
+        return new UpdateUserStatusCommand(new UserId(userId), UserStatusActions.ACTIVATE, activationToken);
     }
 }

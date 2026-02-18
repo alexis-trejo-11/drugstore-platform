@@ -1,20 +1,22 @@
 package user_service.modules.users.core.ports.output;
 
+import java.util.Optional;
+
 import user_service.modules.users.core.domain.models.entities.User;
 import user_service.modules.users.core.domain.models.enums.UserRole;
 import user_service.modules.users.core.domain.models.enums.UserStatus;
+import user_service.modules.users.core.domain.models.valueobjects.PhoneNumber;
+import user_service.modules.users.core.domain.models.valueobjects.Email;
+import user_service.modules.users.core.domain.models.valueobjects.UserId;
 import user_service.utils.page.PageInput;
 import user_service.utils.page.PageResponse;
 
-import java.util.Optional;
-import java.util.UUID;
-
 public interface UserRepository {
-    Optional<User> findById(UUID id);
+    Optional<User> findById(UserId id);
 
-    Optional<User> findByEmail(String email);
+    Optional<User> findByEmail(Email email);
 
-    Optional<User> findByPhoneNumber(String email);
+    Optional<User> findByPhoneNumber(PhoneNumber phoneNumber);
 
     PageResponse<User> ListByRole(UserRole role, PageInput pageInput);
 
@@ -22,15 +24,15 @@ public interface UserRepository {
 
     PageResponse<User> search(String searchCriteriaJSON, PageInput pageInput);
 
-    boolean existsByEmail(String email);
+    boolean existsByEmail(Email email);
 
-    boolean existsByPhoneNumber(String phoneNumber);
+    boolean existsByPhoneNumber(PhoneNumber phoneNumber);
 
-    boolean existsById(UUID id);
+    boolean existsById(UserId id);
 
-    void updateLastLoginAsync(UUID id);
+    void updateLastLoginAsync(UserId id);
 
     User save(User user);
 
-    void deleteById(UUID id);
+    void deleteById(UserId id);
 }

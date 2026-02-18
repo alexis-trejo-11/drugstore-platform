@@ -15,6 +15,9 @@ java {
 
 repositories {
 	mavenCentral()
+  maven {
+    url 'https://projectlombok.org/edge-releases'
+  }
 }
 
 ext {
@@ -29,9 +32,8 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	// Cache
-	implementation 'org.springframework.boot:spring-boot-starter-cache'
-	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.6'
+	// Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	// Spring Security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -47,16 +49,15 @@ dependencies {
 	// Validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-	// Lombok
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	testAnnotationProcessor 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+	// Kafka
+	implementation 'org.springframework.kafka:spring-kafka'
 
-	// AutoMappers
-	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-	implementation 'org.modelmapper:modelmapper:2.4.4'
+	// Lombok
+    compileOnly 'org.projectlombok:lombok:edge-SNAPSHOT'
+    annotationProcessor 'org.projectlombok:lombok:edge-SNAPSHOT'
+
+    // Common library
+    implementation project(':libs:shared-kernel')
 
 	// Redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
@@ -69,11 +70,8 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-	// Eureka
-	//implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
-
 	// Admin Service
-	//implementation 'de.codecentric:spring-boot-admin-starter-client:3.0.0'
+	implementation 'de.codecentric:spring-boot-admin-starter-client:3.0.0'
 }
 
 dependencyManagement {

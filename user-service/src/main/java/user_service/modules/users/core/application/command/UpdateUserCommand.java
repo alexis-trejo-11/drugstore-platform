@@ -3,10 +3,10 @@ package user_service.modules.users.core.application.command;
 import user_service.modules.users.core.domain.models.valueobjects.Email;
 import user_service.modules.users.core.domain.models.valueobjects.PhoneNumber;
 
-import java.util.UUID;
+import user_service.modules.users.core.domain.models.valueobjects.UserId;
 
 public record UpdateUserCommand(
-        UUID userId,
+        UserId userId,
         Email email,
         PhoneNumber phoneNumber) implements Command {
     public UpdateUserCommand {

@@ -1,6 +1,6 @@
 package user_service.modules.users.core.application.queries;
 
-import user_service.modules.users.core.application.dto.UserResponse;
+import user_service.modules.users.core.application.result.UserResponse;
 import user_service.modules.users.core.domain.models.valueobjects.PhoneNumber;
 
 public record GetUserByPhoneNumberQuery(PhoneNumber phoneNumber) implements Query<UserResponse> {

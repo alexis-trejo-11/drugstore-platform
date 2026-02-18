@@ -1,7 +1,7 @@
 package user_service.modules.users.core.application.handlers.command;
 
 import user_service.modules.users.core.application.command.DeleteUserCommand;
-import user_service.modules.users.core.application.dto.CommandResult;
+import user_service.modules.users.core.application.result.CommandResult;
 import user_service.modules.users.core.ports.input.CommandHandler;
 import user_service.modules.users.core.domain.exceptions.UserNotFoundError;
 import user_service.modules.users.core.ports.output.UserRepository;
