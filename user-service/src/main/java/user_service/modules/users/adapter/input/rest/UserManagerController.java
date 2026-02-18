@@ -1,5 +1,10 @@
 package user_service.modules.users.adapter.input.rest;
 
+import jakarta.validation.constraints.NotBlank;
+import libs_kernel.page.PageRequest;
+import libs_kernel.page.PageResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,13 +14,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import lombok.RequiredArgsConstructor;
-import user_service.modules.users.adapter.input.rest.dto.PageRequest;
+import libs_kernel.response.ResponseWrapper;
+import user_service.modules.users.adapter.input.rest.dto.UserHTTPResponse;
 import user_service.modules.users.adapter.input.rest.dto.UserRequest;
 import user_service.modules.users.core.application.command.CreateUserCommand;
 import user_service.modules.users.core.application.command.DeleteUserCommand;
@@ -26,8 +30,8 @@ import user_service.modules.users.core.application.queries.GetUserByPhoneNumberQ
 import user_service.modules.users.core.application.queries.ListUserByRoleQuery;
 import user_service.modules.users.core.application.queries.ListUserByStatusQuery;
 import user_service.modules.users.core.application.result.CommandResult;
-import user_service.modules.users.core.application.result.UserPaginatedResponse;
-import user_service.modules.users.core.application.result.UserResponse;
+
+import user_service.modules.users.core.application.result.UserQueryResult;
 import user_service.modules.users.core.domain.models.enums.UserRole;
 import user_service.modules.users.core.domain.models.enums.UserStatus;
 import user_service.modules.users.core.domain.models.valueobjects.PhoneNumber;
@@ -36,108 +40,128 @@ import user_service.modules.users.core.ports.input.QueryBus;
 
 @RestController
 @RequestMapping("/api/v2/users")
-@RequiredArgsConstructor
 public class UserManagerController {
-    private final CommandBus commandBus;
-    private final QueryBus queryBus;
+	private final CommandBus commandBus;
+	private final QueryBus queryBus;
 
-    @PostMapping("/")
-    public ResponseEntity<Object> createUser(@Valid @RequestBody UserRequest userRequest) {
-        CreateUserCommand command = userRequest.toCommand(UserRole.CUSTOMER);
+	@Autowired
+	public UserManagerController(CommandBus commandBus, QueryBus queryBus) {
+		this.commandBus = commandBus;
+		this.queryBus = queryBus;
+	}
 
-        CommandResult commandResult = commandBus.dispatch(command);
-        return ResponseEntity.status(201).body(commandResult.data());
-    }
+	@PostMapping("/")
+	public ResponseEntity<ResponseWrapper<?>> createUser(@Valid @RequestBody UserRequest userRequest) {
+		CreateUserCommand command = userRequest.toCommand(UserRole.CUSTOMER);
 
-    @PatchMapping("/{id}/ban")
-    public ResponseEntity<Void> banUser(@PathVariable String id) {
-        UpdateUserStatusCommand command = UpdateUserStatusCommand.ban(id);
-        CommandResult result = commandBus.dispatch(command);
-        if (!result.success()) {
-            throw new IllegalArgumentException("Failed to ban user: " + result.message());
-        }
+		CommandResult commandResult = commandBus.dispatch(command);
 
-        return ResponseEntity.noContent().build();
-    }
+		var response = ResponseWrapper.success(commandResult.data(), "User created successfully");
+		return ResponseEntity.status(201).body(response);
+	}
 
-    @PatchMapping("/{id}/unban")
-    public ResponseEntity<Void> unbanUser(@PathVariable String id) {
-        UpdateUserStatusCommand command = UpdateUserStatusCommand.unban(id);
-        CommandResult result = commandBus.dispatch(command);
-        if (!result.success()) {
-            throw new IllegalArgumentException("Failed to unban user: " + result.message());
-        }
-        return ResponseEntity.noContent().build();
-    }
+	@PatchMapping("/{id}/ban")
+	public ResponseWrapper<Void> banUser(@PathVariable String id) {
+		UpdateUserStatusCommand command = UpdateUserStatusCommand.ban(id);
 
-    @PatchMapping("/{id}/activate")
-    public ResponseEntity<Void> activateUser(@PathVariable @NotNull String id, @RequestParam String activationCode) {
-        if (activationCode == null || activationCode.isBlank()) {
-            throw new IllegalArgumentException("Activation code must not be empty");
-        }
+		CommandResult result = commandBus.dispatch(command);
+		if (!result.success()) {
+			throw new IllegalArgumentException("Failed to ban user: " + result.message());
+		}
 
-        UpdateUserStatusCommand command = UpdateUserStatusCommand.activate(id, activationCode);
-        CommandResult result = commandBus.dispatch(command);
-        if (!result.success()) {
-            throw new IllegalArgumentException("Failed to activate user: " + result.message());
-        }
+		return ResponseWrapper.success("User banned successfully");
+	}
 
-        return ResponseEntity.noContent().build();
-    }
+	@PatchMapping("/{id}/unban")
+	public ResponseWrapper<Void> unbanUser(@PathVariable String id) {
+		UpdateUserStatusCommand command = UpdateUserStatusCommand.unban(id);
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@Valid @PathVariable String id) {
-        GetUserByIdQuery query = GetUserByIdQuery.of(id);
+		CommandResult result = commandBus.dispatch(command);
+		if (!result.success()) {
+			throw new IllegalArgumentException("Failed to unban user: " + result.message());
+		}
 
-        UserResponse userResponse = queryBus.execute(query);
+		return ResponseWrapper.success("User unbanned successfully");
+	}
 
-        return ResponseEntity.ok(userResponse);
-    }
+	@PatchMapping("/{id}/activate/code/{activationCode}")
+	public ResponseWrapper<Void> activateUser(@PathVariable @Valid @NotBlank String id,
+	                                          @PathVariable @NotBlank String activationCode) {
+		UpdateUserStatusCommand command = UpdateUserStatusCommand.activate(id, activationCode);
 
-    @GetMapping("/by-email/{email}")
-    public ResponseEntity<UserResponse> getUserByEmail(@Valid @PathVariable @NotNull String email) {
-        GetUserByEmailQuery query = GetUserByEmailQuery.of(email);
+		CommandResult result = commandBus.dispatch(command);
+		if (!result.success()) {
+			throw new IllegalArgumentException("Failed to activate user: " + result.message());
+		}
 
-        UserResponse userResponse = queryBus.execute(query);
+		return ResponseWrapper.success("User activated successfully");
+	}
 
-        return ResponseEntity.ok(userResponse);
-    }
+	@GetMapping("/{id}")
+	public ResponseWrapper<UserHTTPResponse> getUserById(@Valid @PathVariable String id) {
+		GetUserByIdQuery query = GetUserByIdQuery.of(id);
 
-    @GetMapping("by-phone/{phone}")
-    public ResponseEntity<UserResponse> getUserByPhone(@Valid @PathVariable @NotNull String phone) {
-        GetUserByPhoneNumberQuery query = new GetUserByPhoneNumberQuery(PhoneNumber.of(phone));
+		UserQueryResult userQueryResult = queryBus.execute(query);
 
-        UserResponse userResponse = queryBus.execute(query);
+		var userResponse = UserHTTPResponse.from(userQueryResult);
+		return ResponseWrapper.success(userResponse, "User retrieved successfully");
+	}
 
-        return ResponseEntity.ok(userResponse);
-    }
+	@GetMapping("/by-email/{email}")
+	public ResponseEntity<UserHTTPResponse> getUserByEmail(@Valid @PathVariable @NotNull String email) {
+		GetUserByEmailQuery query = GetUserByEmailQuery.of(email);
 
-    @GetMapping("by-role/{role}")
-    public ResponseEntity<UserPaginatedResponse> listUserByRole(@PathVariable UserRole role,
-            @ModelAttribute PageRequest pageRequest) {
-        ListUserByRoleQuery query = new ListUserByRoleQuery(role, pageRequest.toPageInput());
-        UserPaginatedResponse response = queryBus.execute(query);
-        return ResponseEntity.ok(response);
-    }
+		UserQueryResult queryResult = queryBus.execute(query);
 
-    @GetMapping("by-status/{status}")
-    public ResponseEntity<UserPaginatedResponse> listUserByStatus(@PathVariable UserStatus status,
-            @ModelAttribute PageRequest pageRequest) {
-        ListUserByStatusQuery query = new ListUserByStatusQuery(status, pageRequest.toPageInput());
+		var userResponse = UserHTTPResponse.from(queryResult);
+		return ResponseEntity.ok(userResponse);
+	}
 
-        UserPaginatedResponse response = queryBus.execute(query);
-        return ResponseEntity.ok(response);
-    }
+	@GetMapping("by-phone/{phone}")
+	public ResponseWrapper<UserHTTPResponse> getUserByPhone(@Valid @PathVariable @NotNull String phone) {
+		GetUserByPhoneNumberQuery query = new GetUserByPhoneNumberQuery(PhoneNumber.of(phone));
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
-        DeleteUserCommand command = DeleteUserCommand.of(id);
-        CommandResult result = commandBus.dispatch(command);
-        if (!result.success()) {
-            throw new IllegalArgumentException("Failed to delete user: " + result.message());
-        }
+		UserQueryResult userResponse = queryBus.execute(query);
 
-        return ResponseEntity.noContent().build();
-    }
+		var userResponser = UserHTTPResponse.from(userResponse);
+		return ResponseWrapper.success(userResponser, "User retrieved successfully");
+	}
+
+	@GetMapping("by-role/{role}")
+	public ResponseWrapper<PageResponse<UserHTTPResponse>> listUserByRole(@PathVariable UserRole role,
+	                                                                      @ModelAttribute PageRequest pagination) {
+
+		ListUserByRoleQuery query = new ListUserByRoleQuery(role, pagination.toPageable());
+		Page<UserQueryResult> queryResultPage = queryBus.execute(query);
+		PageResponse<UserHTTPResponse> pageResponse = PageResponse.from(queryResultPage.map(UserHTTPResponse::from));
+
+		return ResponseWrapper.success(pageResponse, "Users retrieved successfully");
+	}
+
+	@GetMapping("by-status/{status}")
+	public ResponseWrapper<PageResponse<UserHTTPResponse>> listUserByStatus(
+			@PathVariable UserStatus status,
+			@ModelAttribute PageRequest pagination) {
+		if (pagination == null) {
+			pagination = PageRequest.defaultPageRequest();
+		}
+		ListUserByStatusQuery query = new ListUserByStatusQuery(status, pagination.toPageable());
+
+		Page<UserQueryResult> queryResultPage = queryBus.execute(query);
+
+		PageResponse<UserHTTPResponse> pageResponse = PageResponse.from(queryResultPage.map(UserHTTPResponse::from));
+		return ResponseWrapper.success(pageResponse, "Users retrieved successfully");
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseWrapper<Void> deleteUser(@PathVariable String id) {
+		DeleteUserCommand command = DeleteUserCommand.of(id);
+		CommandResult result = commandBus.dispatch(command);
+		if (!result.success()) {
+			throw new IllegalArgumentException("Failed to delete user: " + result.message());
+		}
+
+		return ResponseWrapper.success("User deleted successfully");
+	}
 
 }

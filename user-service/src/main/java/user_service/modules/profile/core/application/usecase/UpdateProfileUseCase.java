@@ -1,27 +1,29 @@
 package user_service.modules.profile.core.application.usecase;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
-import user_service.modules.profile.core.application.dto.ProfileResponse;
 import user_service.modules.profile.core.application.dto.ProfileUpdateCommand;
+import user_service.modules.profile.core.domain.exception.UserProfileNotFoundError;
 import user_service.modules.profile.core.domain.model.Profile;
 import user_service.modules.profile.core.ports.output.ProfileRepository;
-import user_service.utils.exceptions.NotFoundException;
 
 @Service
-@RequiredArgsConstructor
 public class UpdateProfileUseCase {
   private final ProfileRepository profileRepository;
 
-  public ProfileResponse execute(ProfileUpdateCommand command) {
+  @Autowired
+  public UpdateProfileUseCase(ProfileRepository profileRepository) {
+    this.profileRepository = profileRepository;
+  }
+
+  public Profile execute(ProfileUpdateCommand command) {
     Profile profile = profileRepository.findByUserId(command.userId())
-        .orElseThrow(() -> new NotFoundException("Profile", command.userId().toString()));
+        .orElseThrow(() -> new UserProfileNotFoundError(command.userId()));
 
     profile.updateProfileInfo(profile.getBio(), command.avatarUrl(), command.coverUrl());
     profile.updatePersonalInfo(command.fullName(), command.dateOfBirth(), command.gender());
 
-    Profile updatedProfile = profileRepository.save(profile);
-    return ProfileResponse.from(updatedProfile);
+    return profileRepository.save(profile);
   }
 }

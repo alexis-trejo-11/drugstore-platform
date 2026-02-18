@@ -91,12 +91,7 @@ public class Profile {
   }
 
   public void updatePersonalInfo(FullName fullName, LocalDate dateOfBirth, Gender gender) {
-    PersonalData current = this.personalData;
-    this.personalData = new PersonalData(
-        fullName != null ? fullName.firstName() : (current != null ? current.firstName() : null),
-        fullName != null ? fullName.lastName() : (current != null ? current.lastName() : null),
-        dateOfBirth != null ? dateOfBirth : (current != null ? current.dateOfBirth() : null),
-        gender != null ? gender : (current != null ? current.gender() : null));
+    this.personalData.update(fullName, dateOfBirth, gender);
     this.timestamps = this.timestamps.updateLastModified();
   }
 
@@ -128,13 +123,19 @@ public class Profile {
     return timestamps;
   }
 
-  // Convenience getters for backward compatibility
   public String getFirstName() {
-    return personalData != null ? personalData.firstName() : null;
+    if (personalData.fullName() == null) {
+      return null;
+    }
+
+    return personalData.fullName().firstName();
   }
 
   public String getLastName() {
-    return personalData != null ? personalData.lastName() : null;
+    if (personalData.fullName() == null) {
+      return null;
+    }
+    return personalData.fullName().lastName();
   }
 
   public LocalDate getDateOfBirth() {

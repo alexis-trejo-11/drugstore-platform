@@ -1,18 +1,20 @@
 package user_service.modules.users.core.application.queries;
 
-import user_service.modules.users.core.application.result.UserPaginatedResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import user_service.modules.users.core.application.result.UserQueryResult;
 import user_service.modules.users.core.domain.models.enums.UserRole;
-import user_service.utils.page.PageInput;
 
 public record ListUserByRoleQuery(
-        UserRole role,
-        PageInput pageInput) implements Query<UserPaginatedResponse> {
-    public ListUserByRoleQuery {
-        if (role == null) {
-            throw new IllegalArgumentException("Role cannot be null");
-        }
-        if (pageInput == null) {
-            pageInput = PageInput.defaultPageInput();
-        }
-    }
+		UserRole role,
+		Pageable pageInput) implements Query<Page<UserQueryResult>> {
+	public ListUserByRoleQuery {
+		if (role == null) {
+			throw new IllegalArgumentException("Role cannot be null");
+		}
+		if (pageInput == null) {
+			pageInput = Pageable.unpaged();
+		}
+	}
 }

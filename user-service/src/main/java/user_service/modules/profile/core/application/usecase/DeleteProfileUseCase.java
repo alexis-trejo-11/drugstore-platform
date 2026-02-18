@@ -1,24 +1,27 @@
 package user_service.modules.profile.core.application.usecase;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import user_service.modules.profile.core.domain.exception.UserProfileNotFoundError;
-import user_service.modules.profile.core.domain.model.Profile;
 import user_service.modules.profile.core.ports.output.ProfileRepository;
 import user_service.modules.users.core.domain.models.valueobjects.UserId;
 
-@Service
-public class GetProfileUseCase {
+@Component
+public class DeleteProfileUseCase {
   private final ProfileRepository profileRepository;
 
   @Autowired
-  public GetProfileUseCase(ProfileRepository profileRepository) {
+  public DeleteProfileUseCase(ProfileRepository profileRepository) {
     this.profileRepository = profileRepository;
   }
 
-  public Profile execute(UserId userId) {
-    return profileRepository.findByUserId(userId)
-        .orElseThrow(() -> new UserProfileNotFoundError(userId));
+  public void execute(UserId userId) {
+    if (profileRepository.findByUserId(userId).isEmpty()) {
+      throw new UserProfileNotFoundError(userId);
+    }
+
+    profileRepository.deleteByUserId(userId);
   }
+
 }
