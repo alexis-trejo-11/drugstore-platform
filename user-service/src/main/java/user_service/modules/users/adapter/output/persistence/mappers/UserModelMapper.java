@@ -13,94 +13,86 @@ import user_service.modules.users.core.domain.models.valueobjects.Email;
 import user_service.modules.users.core.domain.models.valueobjects.FullName;
 import user_service.modules.users.core.domain.models.valueobjects.PhoneNumber;
 import user_service.modules.users.core.domain.models.valueobjects.UserId;
-import user_service.utils.page.PageMapper;
-import user_service.utils.page.PageResponse;
+
 
 @Component
 @RequiredArgsConstructor
-public class UserModelMapper implements ModelMapper<User, UserModel> {
-    private final PageMapper pageMapper;
+public class UserModelMapper {
+	public UserModel fromEntity(User entity) {
+		if (entity == null) {
+			return null;
+		}
+		UserModel model = new UserModel();
+		model.setId(entity.getId() != null ? entity.getId().value() : null);
+		model.setEmail(entity.getEmail() != null ? entity.getEmail().value() : null);
+		model.setPhoneNumber(entity.getPhoneNumber() != null ? entity.getPhoneNumber().value() : null);
+		model.setHashedPassword(entity.getHashedPassword());
+		model.setStatus(entity.getStatus());
+		model.setRole(entity.getRole());
+		model.setTwoFactorId(entity.getTwoFactorId());
+		model.setLastLoginAt(entity.getLastLoginAt());
+		model.setCreatedAt(entity.getCreatedAt());
+		model.setUpdatedAt(entity.getUpdatedAt());
+		return model;
+	}
 
-    @Override
-    public UserModel fromEntity(User entity) {
-        if (entity == null) {
-            return null;
-        }
-        UserModel model = new UserModel();
-        model.setId(entity.getId() != null ? entity.getId().value() : null);
-        model.setEmail(entity.getEmail() != null ? entity.getEmail().value() : null);
-        model.setPhoneNumber(entity.getPhoneNumber() != null ? entity.getPhoneNumber().value() : null);
-        model.setHashedPassword(entity.getHashedPassword());
-        model.setStatus(entity.getStatus());
-        model.setRole(entity.getRole());
-        model.setTwoFactorId(entity.getTwoFactorId());
-        model.setLastLoginAt(entity.getLastLoginAt());
-        model.setCreatedAt(entity.getCreatedAt());
-        model.setUpdatedAt(entity.getUpdatedAt());
-        return model;
-    }
 
-    @Override
-    public User toEntity(UserModel model) {
-        if (model == null) {
-            return null;
-        }
+	public User toEntity(UserModel model) {
+		if (model == null) {
+			return null;
+		}
 
-        // Build the full name from profile if available
-        FullName fullName = null;
-        if (model.getProfile() != null) {
-            String firstName = model.getProfile().getFirstName();
-            String lastName = model.getProfile().getLastName();
-            if (firstName != null || lastName != null) {
-                fullName = new FullName(firstName != null ? firstName : "", lastName != null ? lastName : "");
-            }
-        }
+		// Build the full name from profile if available
+		FullName fullName = null;
+		if (model.getProfile() != null) {
+			String firstName = model.getProfile().getFirstName();
+			String lastName = model.getProfile().getLastName();
+			if (firstName != null || lastName != null) {
+				fullName = new FullName(firstName != null ? firstName : "", lastName != null ? lastName : "");
+			}
+		}
 
-        // Use the builder pattern for ReconstructUserParams
-        ReconstructUserParams params = ReconstructUserParams.builder()
-                .id(model.getId() != null ? new UserId(model.getId()) : null)
-                .email(model.getEmail() != null ? new Email(model.getEmail()) : null)
-                .fullName(fullName)
-                .phoneNumber(model.getPhoneNumber() != null ? new PhoneNumber(model.getPhoneNumber()) : null)
-                .hashedPassword(model.getHashedPassword())
-                .role(model.getRole())
-                .twoFactorEnabled(model.getTwoFactorId() != null && !model.getTwoFactorId().isEmpty())
-                .twoFactorId(model.getTwoFactorId())
-                .status(model.getStatus())
-                .lastLoginAt(model.getLastLoginAt())
-                .createdAt(model.getCreatedAt())
-                .updatedAt(model.getUpdatedAt())
-                .build();
+		// Use the builder pattern for ReconstructUserParams
+		ReconstructUserParams params = ReconstructUserParams.builder()
+				.id(model.getId() != null ? new UserId(model.getId()) : null)
+				.email(model.getEmail() != null ? new Email(model.getEmail()) : null)
+				.fullName(fullName)
+				.phoneNumber(model.getPhoneNumber() != null ? new PhoneNumber(model.getPhoneNumber()) : null)
+				.hashedPassword(model.getHashedPassword())
+				.role(model.getRole())
+				.twoFactorEnabled(model.getTwoFactorId() != null && !model.getTwoFactorId().isEmpty())
+				.twoFactorId(model.getTwoFactorId())
+				.status(model.getStatus())
+				.lastLoginAt(model.getLastLoginAt())
+				.createdAt(model.getCreatedAt())
+				.updatedAt(model.getUpdatedAt())
+				.build();
 
-        return User.reconstructUser(params);
-    }
+		return User.reconstructUser(params);
+	}
 
-    @Override
-    public List<UserModel> fromEntities(List<User> entities) {
-        if (entities == null || entities.isEmpty()) {
-            return List.of();
-        }
-        return entities.stream()
-                .map(this::fromEntity)
-                .toList();
-    }
+	public List<UserModel> fromEntities(List<User> entities) {
+		if (entities == null || entities.isEmpty()) {
+			return List.of();
+		}
+		return entities.stream()
+				.map(this::fromEntity)
+				.toList();
+	}
 
-    @Override
-    public List<User> toEntities(List<UserModel> models) {
-        if (models == null || models.isEmpty()) {
-            return List.of();
-        }
-        return models.stream()
-                .map(this::toEntity)
-                .toList();
-    }
+	public List<User> toEntities(List<UserModel> models) {
+		if (models == null || models.isEmpty()) {
+			return List.of();
+		}
+		return models.stream()
+				.map(this::toEntity)
+				.toList();
+	}
 
-    @Override
-    public PageResponse<User> toPageResponse(Page<UserModel> modelPage) {
-        if (modelPage == null) {
-            return PageResponse.empty();
-        }
-        Page<User> userPage = modelPage.map(this::toEntity);
-        return pageMapper.toPageResponse(userPage);
-    }
+	public Page<User> toDomainPage(Page<UserModel> modelPage) {
+		if (modelPage == null) {
+			return null;
+		}
+		return modelPage.map(this::toEntity);
+	}
 }

@@ -25,5 +25,4 @@ public record FullName(String firstName, String lastName) {
       throw new IllegalArgumentException("Last name must be between 3 and 100 characters");
     }
   }
-
 }

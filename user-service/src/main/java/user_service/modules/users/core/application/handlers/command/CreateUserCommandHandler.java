@@ -39,7 +39,7 @@ public class CreateUserCommandHandler implements CommandHandler<CreateUserComman
         User newUser = userMapper.fromCreateCommand(command, hashedPassword);
         User userSaved = userRepository.save(newUser);
 
-        eventPublisher.publish(userMapper.ToEvent(newUser));
+        eventPublisher.publish(userMapper.toEvent(newUser));
         return CommandResult.success("User created successfully", userSaved.getId());
     }
 

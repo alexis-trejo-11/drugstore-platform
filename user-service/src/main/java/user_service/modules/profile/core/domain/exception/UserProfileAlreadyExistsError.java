@@ -1,14 +1,14 @@
 package user_service.modules.profile.core.domain.exception;
 
-import java.util.UUID;
-
-import user_service.utils.exceptions.ConflictException;
+import libs_kernel.exceptions.ConflictException;
+import user_service.modules.users.core.domain.models.valueobjects.UserId;
 
 public class UserProfileAlreadyExistsError extends ConflictException {
 
-    public UserProfileAlreadyExistsError(UUID userId) {
-        super("Profile for UserId " + userId + " already exists", "PROFILE_ALREADY_EXISTS");
+  public UserProfileAlreadyExistsError(UserId userId) {
+    super("Profile for UserId " + (userId != null ? userId.value() : "null") + " already exists",
+        "PROFILE_ALREADY_EXISTS");
 
-    }
+  }
 
 }

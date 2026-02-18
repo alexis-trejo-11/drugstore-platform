@@ -1,4 +1,4 @@
-package user_service.modules.profile.infrastructure.presentation.rest.dto;
+package user_service.modules.profile.infrastructure.web.rest.dto;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +14,7 @@ public record UpdateProfileRequest(
     @NotEmpty(message = "First name cannot be empty") @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters") String firstName,
     @NotEmpty(message = "Last name cannot be empty") @Size(min = 2, max = 50, message = "Last name must be between 2 and 50 characters") String lastName,
     Gender gender,
-    String bio,
+    @Size(min = 3, max = 255, message = "Bio must be between 3 and 255 characters") String bio,
     String avatarUrl,
     String coverUrl,
 

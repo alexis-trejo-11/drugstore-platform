@@ -2,37 +2,38 @@ package user_service.modules.users.core.ports.output;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import user_service.modules.users.core.domain.models.entities.User;
 import user_service.modules.users.core.domain.models.enums.UserRole;
 import user_service.modules.users.core.domain.models.enums.UserStatus;
-import user_service.modules.users.core.domain.models.valueobjects.PhoneNumber;
 import user_service.modules.users.core.domain.models.valueobjects.Email;
+import user_service.modules.users.core.domain.models.valueobjects.PhoneNumber;
 import user_service.modules.users.core.domain.models.valueobjects.UserId;
-import user_service.utils.page.PageInput;
-import user_service.utils.page.PageResponse;
 
 public interface UserRepository {
-    Optional<User> findById(UserId id);
+  Optional<User> findById(UserId id);
 
-    Optional<User> findByEmail(Email email);
+  Optional<User> findByEmail(Email email);
 
-    Optional<User> findByPhoneNumber(PhoneNumber phoneNumber);
+  Optional<User> findByPhoneNumber(PhoneNumber phoneNumber);
 
-    PageResponse<User> ListByRole(UserRole role, PageInput pageInput);
+  Page<User> ListByRole(UserRole role, Pageable pageInput);
 
-    PageResponse<User> ListByStatus(UserStatus status, PageInput pageInput);
+  Page<User> ListByStatus(UserStatus status, Pageable pageInput);
 
-    PageResponse<User> search(String searchCriteriaJSON, PageInput pageInput);
+  Page<User> search(String searchCriteriaJSON, Pageable pageInput);
 
-    boolean existsByEmail(Email email);
+  boolean existsByEmail(Email email);
 
-    boolean existsByPhoneNumber(PhoneNumber phoneNumber);
+  boolean existsByPhoneNumber(PhoneNumber phoneNumber);
 
-    boolean existsById(UserId id);
+  boolean existsById(UserId id);
 
-    void updateLastLoginAsync(UserId id);
+  void updateLastLoginAsync(UserId id);
 
-    User save(User user);
+  User save(User user);
 
-    void deleteById(UserId id);
+  void deleteById(UserId id);
 }

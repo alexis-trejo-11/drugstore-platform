@@ -1,39 +1,41 @@
 package user_service.modules.profile.core.domain.model.valueobjects;
 
 import java.time.LocalDate;
+
 import user_service.modules.users.core.domain.models.enums.Gender;
+import user_service.modules.users.core.domain.models.valueobjects.FullName;
 
 public record PersonalData(
-    String firstName,
-    String lastName,
+    FullName fullName,
     LocalDate dateOfBirth,
     Gender gender) {
 
-  public static final PersonalData NONE = new PersonalData(null, null, null, null);
+  public static final PersonalData NONE = new PersonalData(null, null, null);
 
   public PersonalData {
     // Allow nullable fields but validate if provided
-    if (firstName != null && firstName.trim().isEmpty()) {
-      throw new IllegalArgumentException("First name cannot be empty");
-    }
-    if (lastName != null && lastName.trim().isEmpty()) {
-      throw new IllegalArgumentException("Last name cannot be empty");
+    if (fullName != null) {
+      if (fullName.firstName() != null && fullName.firstName().trim().isEmpty()) {
+        throw new IllegalArgumentException("First name cannot be empty");
+      }
+      if (fullName.lastName() != null && fullName.lastName().trim().isEmpty()) {
+        throw new IllegalArgumentException("Last name cannot be empty");
+      }
     }
     if (dateOfBirth != null && dateOfBirth.isAfter(LocalDate.now())) {
       throw new IllegalArgumentException("Date of birth cannot be in the future");
     }
   }
 
-  public String getFullName() {
-    if (firstName == null && lastName == null) {
-      return null;
-    }
-    String first = firstName != null ? firstName : "";
-    String last = lastName != null ? lastName : "";
-    return (first + " " + last).trim();
+  public boolean isComplete() {
+    return fullName != null && fullName.firstName() != null && fullName.lastName() != null && dateOfBirth != null
+        && gender != null;
   }
 
-  public boolean isComplete() {
-    return firstName != null && lastName != null && dateOfBirth != null && gender != null;
+  public PersonalData update(FullName fullName, LocalDate newDate, Gender gender) {
+    return new PersonalData(
+        fullName != null ? fullName : this.fullName,
+        newDate != null ? newDate : this.dateOfBirth,
+        gender != null ? gender : this.gender);
   }
 }

@@ -1,22 +1,29 @@
-package user_service.modules.profile.infrastructure.persistence.adapter;
+package user_service.modules.profile.infrastructure.persistence.repository;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import lombok.RequiredArgsConstructor;
 import user_service.modules.profile.core.domain.model.Profile;
 import user_service.modules.profile.core.ports.output.ProfileRepository;
+import user_service.modules.profile.infrastructure.persistence.ProfileModelMapper;
 import user_service.modules.users.adapter.output.persistence.jpa.ProfileJpaRepository;
-import user_service.modules.users.adapter.output.persistence.mappers.ModelMapper;
 import user_service.modules.users.adapter.output.persistence.models.ProfileModel;
 import user_service.modules.users.core.domain.models.valueobjects.UserId;
 
 @Repository
-@RequiredArgsConstructor
-public class ProfileRepositoryAdapter implements ProfileRepository {
+public class ProfileRepositoryImpl implements ProfileRepository {
   private final ProfileJpaRepository profileJpaRepository;
-  private final ModelMapper<Profile, ProfileModel> modelMapper;
+  private final ProfileModelMapper modelMapper;
+
+  @Autowired
+  public ProfileRepositoryImpl(
+      ProfileJpaRepository profileJpaRepository,
+      ProfileModelMapper modelMapper) {
+    this.profileJpaRepository = profileJpaRepository;
+    this.modelMapper = modelMapper;
+  }
 
   @Override
   public Profile save(Profile profile) {
@@ -27,16 +34,19 @@ public class ProfileRepositoryAdapter implements ProfileRepository {
 
   @Override
   public Optional<Profile> findByUserId(UserId userId) {
-    return profileJpaRepository.findByUserId(userId != null ? userId.value() : null)
+    if (userId == null)
+      return Optional.empty();
+
+    return profileJpaRepository.findByUserId(userId.value())
         .map(modelMapper::toEntity);
   }
 
   @Override
   public void deleteByUserId(UserId userId) {
-    ProfileModel profileModel = profileJpaRepository.findByUserId(userId != null ? userId.value() : null)
-        .orElseThrow(() -> new RuntimeException("Profile not found"));
+    if (userId == null)
+      return;
 
-    profileJpaRepository.delete(profileModel);
+    profileJpaRepository.deleteById(userId.value());
   }
 
 }
