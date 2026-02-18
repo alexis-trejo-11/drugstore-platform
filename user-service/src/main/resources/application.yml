@@ -16,7 +16,7 @@ spring:
 
   # Postgres - Conexión via Docker
   datasource:
-    url: jdbc:postgresql://localhost:5431/drugstore_users
+    url: jdbc:postgresql://localhost:5432/drugstore_users
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -25,7 +25,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -173,14 +173,5 @@ management:
 #server.tomcat.max-threads=200
 
 
-# Enable Eureka Client
-#spring.cloud.netflix.eureka.client.enabled=true
 
-# Eureka Client Configuration
-#eureka.client.service-url.defaultZone=http://localhost:8761/eureka/
-#eureka.instance.prefer-ip-address=true
-#eureka.instance.lease-renewal-interval-in-seconds=10
-#eureka.instance.lease-expiration-duration-in-seconds=30
-
-# Spring Boot Admin Client Configuration
 #spring.boot.admin.client.url=http://localhost:8081

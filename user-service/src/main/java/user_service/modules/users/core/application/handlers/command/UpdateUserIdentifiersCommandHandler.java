@@ -1,7 +1,7 @@
 package user_service.modules.users.core.application.handlers.command;
 
 import user_service.modules.users.core.application.command.UpdateUserCommand;
-import user_service.modules.users.core.application.dto.CommandResult;
+import user_service.modules.users.core.application.result.CommandResult;
 import user_service.modules.users.core.ports.input.CommandHandler;
 import user_service.modules.users.core.domain.exceptions.UserNotFoundError;
 import user_service.modules.users.core.domain.models.entities.User;
@@ -24,8 +24,8 @@ public class UpdateUserIdentifiersCommandHandler implements CommandHandler<Updat
                 .orElseThrow(() -> new UserNotFoundError(command.userId()));
 
         user.updateAuthFields(
-                command.email().toString(),
-                command.phoneNumber().toString());
+                command.email(),
+                command.phoneNumber());
         userRepository.save(user);
 
         return CommandResult.success("User updated successfully", user);

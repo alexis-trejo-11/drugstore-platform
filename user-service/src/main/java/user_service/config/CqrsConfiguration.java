@@ -1,21 +1,21 @@
 package user_service.config;
 
-import user_service.modules.users.core.ports.input.CommandBus;
-import user_service.modules.users.core.ports.input.QueryBus;
-import user_service.modules.users.core.application.command.Command;
-import user_service.modules.users.core.ports.input.CommandHandler;
-import user_service.modules.users.core.ports.input.QueryHandler;
-import user_service.modules.users.infrastructure.adapter.bus.SpringCommandBus;
-import user_service.modules.users.infrastructure.adapter.bus.SpringQueryBus;
-import user_service.modules.users.infrastructure.adapter.bus.decorator.LoggingCommandBusDecorator;
-import user_service.modules.users.core.application.queries.Query;
+import java.util.List;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import java.util.List;
+import user_service.modules.users.adapter.input.bus.SpringCommandBus;
+import user_service.modules.users.adapter.input.bus.SpringQueryBus;
+import user_service.modules.users.adapter.input.bus.decorator.LoggingCommandBusDecorator;
+import user_service.modules.users.core.application.command.Command;
+import user_service.modules.users.core.application.queries.Query;
+import user_service.modules.users.core.ports.input.CommandBus;
+import user_service.modules.users.core.ports.input.CommandHandler;
+import user_service.modules.users.core.ports.input.QueryBus;
+import user_service.modules.users.core.ports.input.QueryHandler;
 
 @Configuration
 public class CqrsConfiguration {

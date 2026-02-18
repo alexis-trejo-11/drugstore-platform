@@ -18,7 +18,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import user_service.modules.users.infrastructure.adapter.CustomerUserDetailService;
+import user_service.modules.users.adapter.CustomerUserDetailService;
 
 @Component
 @Slf4j

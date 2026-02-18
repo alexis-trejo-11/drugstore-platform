@@ -1,11 +1,9 @@
 package user_service.modules.users.core.application.command;
 
-import lombok.Builder;
-import java.util.UUID;
+import user_service.modules.users.core.domain.models.valueobjects.UserId;
 
-@Builder
 public record UpdatePasswordCommand(
-        UUID userId,
+        UserId userId,
         String newPlainPassword) implements Command {
     public UpdatePasswordCommand {
         if (userId == null) {
