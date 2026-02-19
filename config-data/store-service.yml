@@ -19,7 +19,7 @@ spring:
         url: http://localhost:8080
         instance:
           service-url: http://localhost:8080
-          name: order-service
+          name: store-service
 
   devtools:
     restart:
