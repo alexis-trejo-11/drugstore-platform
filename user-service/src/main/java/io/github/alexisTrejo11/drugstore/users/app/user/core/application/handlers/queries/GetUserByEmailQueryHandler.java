@@ -1,0 +1,31 @@
+package io.github.alexisTrejo11.drugstore.users.app.user.core.application.handlers.queries;
+
+import io.github.alexisTrejo11.drugstore.users.app.user.core.ports.input.QueryHandler;
+import io.github.alexisTrejo11.drugstore.users.app.user.core.application.mappers.UserMapper;
+import io.github.alexisTrejo11.drugstore.users.app.user.core.application.queries.GetUserByEmailQuery;
+import io.github.alexisTrejo11.drugstore.users.app.user.core.application.result.UserQueryResult;
+import io.github.alexisTrejo11.drugstore.users.app.user.core.domain.exceptions.UserNotFoundError;
+import io.github.alexisTrejo11.drugstore.users.app.user.core.domain.models.entities.User;
+import io.github.alexisTrejo11.drugstore.users.app.user.core.ports.output.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class GetUserByEmailQueryHandler implements QueryHandler<GetUserByEmailQuery, UserQueryResult> {
+  private final UserRepository userRepository;
+  private final UserMapper userMapper;
+
+  @Autowired
+  public GetUserByEmailQueryHandler(UserRepository userRepository, UserMapper userMapper) {
+    this.userRepository = userRepository;
+    this.userMapper = userMapper;
+  }
+
+  @Override
+  public UserQueryResult handle(GetUserByEmailQuery query) {
+    User user = userRepository.findByEmail(query.email())
+        .orElseThrow(() -> new UserNotFoundError(query.email()));
+
+    return userMapper.toUserQueryResult(user);
+  }
+}

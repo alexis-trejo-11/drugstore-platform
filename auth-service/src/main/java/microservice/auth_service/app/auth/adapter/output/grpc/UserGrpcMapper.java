@@ -3,10 +3,10 @@ package microservice.auth_service.app.auth.adapter.output.grpc;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.microservices.grpc.user.UserResponse;
 import org.springframework.stereotype.Component;
 
 import microservice.auth_service.app.User;
-import microservice.auth_service.grpc.generated.UserResponse;
 
 @Component
 public class UserGrpcMapper {

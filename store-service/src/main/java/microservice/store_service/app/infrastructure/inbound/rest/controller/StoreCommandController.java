@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v2/stores")
-@PreAuthorize("hasRole('ADMIN')")
 @Tag(
 		name = "Store Command Operations",
 		description = "Endpoints for creating, updating, and managing store entities. All operations require ADMIN role authentication."

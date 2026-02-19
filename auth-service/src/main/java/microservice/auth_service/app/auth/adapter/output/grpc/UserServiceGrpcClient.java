@@ -2,6 +2,9 @@ package microservice.auth_service.app.auth.adapter.output.grpc;
 
 import java.util.concurrent.TimeUnit;
 
+import com.microservices.grpc.user.*;
+import com.microservices.grpc.user.UserServiceGrpc;
+import microservice.auth_service.app.auth.core.ports.output.UserServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,15 +18,7 @@ import microservice.auth_service.app.auth.core.domain.exceptions.UserServiceAuth
 import microservice.auth_service.app.auth.core.domain.exceptions.UserServiceException;
 import microservice.auth_service.app.auth.core.domain.exceptions.UserServiceTimeoutException;
 import microservice.auth_service.app.auth.core.domain.exceptions.UserServiceUnavailableException;
-import microservice.auth_service.app.auth.core.ports.output.UserServiceClient;
-import microservice.auth_service.grpc.generated.BoolResponse;
-import microservice.auth_service.grpc.generated.EmailRequest;
-import microservice.auth_service.grpc.generated.PhoneNumberRequest;
-import microservice.auth_service.grpc.generated.UserIdRequest;
-import microservice.auth_service.grpc.generated.UserResponse;
-import microservice.auth_service.grpc.generated.UserServiceGrpc;
-import microservice.auth_service.grpc.generated.ValidateUserCredentialsRequest;
-import microservice.auth_service.grpc.generated.ValidateUserCredentialsResponse;
+
 
 @Component
 public class UserServiceGrpcClient implements UserServiceClient {
