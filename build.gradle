@@ -4,7 +4,7 @@ plugins {
 }
 
 allprojects {
-	group = 'com.alexisTrejo.drugstore.backend'
+	group = 'io.github.alexisTrejo11.drugstore.microservices'
 	version = '1.0.0'
 
 	repositories {

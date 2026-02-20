@@ -104,7 +104,7 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
     doc-expansion: none
-  packages-to-scan: microservice.cart_service
+  packages-to-scan: io.github.alexisTrejo11.drugstore.carts
   paths-to-match: /api/**
   cache:
     disabled: true
