@@ -1,4 +1,4 @@
-rootProject.name = 'com.alexisTrejo.drugstore.backend'
+rootProject.name = 'io.github.alexisTrejo11.drugstore.microservices'
 
 include 'product-service'
 include 'cart-service'

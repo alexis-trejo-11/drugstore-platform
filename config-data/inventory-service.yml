@@ -145,5 +145,5 @@ springdoc:
 # LOGGING FOR RATE LIMITING
 logging:
   level:
-    microservice.inventory_service.config.rate_limiter: DEBUG
+    io.github.alexisTrejo11.drugstore.inventories.config.rate_limiter: DEBUG
     org.springframework.web.filter: DEBUG
