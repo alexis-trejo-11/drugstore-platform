@@ -101,7 +101,7 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
     doc-expansion: none
-  packages-to-scan: microservice.store_service
+  packages-to-scan:  org.github.alexisTrejo11.drugstore.stores
   paths-to-match: /api/**
   cache:
     disabled: true
