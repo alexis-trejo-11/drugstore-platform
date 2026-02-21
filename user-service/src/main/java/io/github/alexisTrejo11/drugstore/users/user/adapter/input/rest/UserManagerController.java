@@ -32,7 +32,7 @@ import jakarta.validation.constraints.NotBlank;
 import libs_kernel.response.ResponseWrapper;
 
 @RestController
-@RequestMapping("/api/v2/users")
+@RequestMapping("/api/v2/users/manager")
 @Tag(name = "User Management", description = "Endpoints for managing user lifecycle operations (create, ban, unban, activate, delete)")
 public class UserManagerController {
   private final CommandBus commandBus;
