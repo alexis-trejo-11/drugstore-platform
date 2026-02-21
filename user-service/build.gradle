@@ -113,6 +113,16 @@ protobuf {
     }
 }
 
+// Mark generated proto sources as source directories for IDE recognition
+sourceSets {
+    main {
+        java {
+            srcDir 'build/generated/source/proto/main/java'
+            srcDir 'build/generated/source/proto/main/grpc'
+        }
+    }
+}
+
 // Configure duplicate handling strategy for all copy tasks
 tasks.withType(Copy) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

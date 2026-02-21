@@ -1,5 +1,11 @@
 server:
-  port: ${SERVER_PORT:8087}
+  port: ${USER_SERVER_PORT:8087}
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: ${USER_SSL_KEYSTORE_PASSWORD}
+    key-store-type: PKCS12
+    key-alias: user-service
 
 spring:
   application:
@@ -13,7 +19,7 @@ spring:
         url: ${BOOT_ADMIN_URL:http://localhost:8080}
         instance:
           service-url: ${BOOT_ADMIN_SERVICE_URL:http://localhost:8080}
-          name: ${BOOT_ADMIN_NAME:q-service}
+          name: ${BOOT_ADMIN_NAME:user-service}
 
   # Flyway
   flyway:
