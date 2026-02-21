@@ -1,4 +1,4 @@
-package io.github.alexisTrejo11.drugstore.configuration;
+package io.github.alexisTrejo11.drugstore.notifications;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

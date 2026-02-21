@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.springframework.data.domain.Page;
 
+// TODO: Update Tests to new implementation
 @SpringBootTest(properties = {
     "spring.cloud.config.enabled=false",
     "spring.cloud.config.fail-fast=false",
