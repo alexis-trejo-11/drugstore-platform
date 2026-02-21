@@ -7,15 +7,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import io.github.alexisTrejo11.drugstore.users.app.user.adapter.input.bus.SpringCommandBus;
-import io.github.alexisTrejo11.drugstore.users.app.user.adapter.input.bus.SpringQueryBus;
-import io.github.alexisTrejo11.drugstore.users.app.user.adapter.input.bus.decorator.LoggingCommandBusDecorator;
-import io.github.alexisTrejo11.drugstore.users.app.user.core.application.command.Command;
-import io.github.alexisTrejo11.drugstore.users.app.user.core.application.queries.Query;
-import io.github.alexisTrejo11.drugstore.users.app.user.core.ports.input.CommandBus;
-import io.github.alexisTrejo11.drugstore.users.app.user.core.ports.input.CommandHandler;
-import io.github.alexisTrejo11.drugstore.users.app.user.core.ports.input.QueryBus;
-import io.github.alexisTrejo11.drugstore.users.app.user.core.ports.input.QueryHandler;
+import io.github.alexisTrejo11.drugstore.users.user.adapter.input.bus.SpringCommandBus;
+import io.github.alexisTrejo11.drugstore.users.user.adapter.input.bus.SpringQueryBus;
+import io.github.alexisTrejo11.drugstore.users.user.adapter.input.bus.decorator.LoggingCommandBusDecorator;
+import io.github.alexisTrejo11.drugstore.users.user.core.application.command.Command;
+import io.github.alexisTrejo11.drugstore.users.user.core.application.queries.Query;
+import io.github.alexisTrejo11.drugstore.users.user.core.ports.input.CommandBus;
+import io.github.alexisTrejo11.drugstore.users.user.core.ports.input.CommandHandler;
+import io.github.alexisTrejo11.drugstore.users.user.core.ports.input.QueryBus;
+import io.github.alexisTrejo11.drugstore.users.user.core.ports.input.QueryHandler;
 
 @Configuration
 public class CqrsConfiguration {
