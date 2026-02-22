@@ -18,15 +18,18 @@ repositories {
 }
 
 ext {
-    set('springCloudVersion', "2023.0.3")
+    set('springCloudVersion', "2024.0.0")
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+    // Validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
     // MongoDB dependencies
-    implementation 'org.springframework.boot:spring-boot-starter-mongodb'
-    testImplementation 'org.springframework.boot:spring-boot-starter-mongodb-test'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -37,11 +40,21 @@ dependencies {
     // Config Server
     implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
+
+    // Mail dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // Twilio dependencies
+    implementation 'com.twilio.sdk:twilio:8.31.1'
+    
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
 }
 
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        mavenBom "org.springframework.boot:spring-boot-dependencies:3.3.2"
     }
 }
 
