@@ -60,8 +60,8 @@ dependencies {
     testImplementation 'com.h2database:h2'
 
     // Lombok
-    compileOnly 'org.projectlombok:lombok:edge-SNAPSHOT'
-    annotationProcessor 'org.projectlombok:lombok:edge-SNAPSHOT'
+    compileOnly 'org.projectlombok:lombok:1.18.42'
+    annotationProcessor 'org.projectlombok:lombok:1.18.42'
 
     // Config Server
     implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'

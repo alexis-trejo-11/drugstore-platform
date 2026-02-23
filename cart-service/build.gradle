@@ -13,9 +13,9 @@ java {
 
 repositories {
 	mavenCentral()
-  maven {
-    url 'https://projectlombok.org/edge-releases'
-  }
+    maven {
+        url 'https://projectlombok.org/edge-releases'
+      }
 }
 
 ext {
@@ -52,8 +52,8 @@ dependencies {
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
 	// Lombok
-  	compileOnly 'org.projectlombok:lombok:edge-SNAPSHOT'
-  	annotationProcessor 'org.projectlombok:lombok:edge-SNAPSHOT'
+  	compileOnly 'org.projectlombok:lombok:1.18.42'
+  	annotationProcessor 'org.projectlombok:lombok:1.18.42'
 
 	// Common library
 	implementation project(':libs:shared-kernel')
