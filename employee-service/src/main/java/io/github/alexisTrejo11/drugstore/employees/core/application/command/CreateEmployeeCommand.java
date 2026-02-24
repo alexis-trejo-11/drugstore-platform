@@ -2,8 +2,8 @@ package io.github.alexisTrejo11.drugstore.employees.core.application.command;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Map;
 
-import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.Address;
 import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.ContactInfo;
 import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.EmployeeNumber;
 import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.EmployeeRole;
@@ -17,8 +17,8 @@ public record CreateEmployeeCommand(
     String firstName,
     String lastName,
     LocalDate dateOfBirth,
-    Address address,
     ContactInfo contactInfo,
+    Map<String, Object> workdaySchedule,
     EmployeeRole role,
     EmployeeType employeeType,
     String department,
@@ -37,8 +37,8 @@ public record CreateEmployeeCommand(
     private String firstName;
     private String lastName;
     private LocalDate dateOfBirth;
-    private Address address;
     private ContactInfo contactInfo;
+    private Map<String, Object> workdaySchedule;
     private EmployeeRole role;
     private EmployeeType employeeType;
     private String department;
@@ -68,13 +68,13 @@ public record CreateEmployeeCommand(
       return this;
     }
 
-    public Builder address(Address address) {
-      this.address = address;
+    public Builder contactInfo(ContactInfo contactInfo) {
+      this.contactInfo = contactInfo;
       return this;
     }
 
-    public Builder contactInfo(ContactInfo contactInfo) {
-      this.contactInfo = contactInfo;
+    public Builder workdaySchedule(Map<String, Object> workdaySchedule) {
+      this.workdaySchedule = workdaySchedule;
       return this;
     }
 
@@ -124,8 +124,8 @@ public record CreateEmployeeCommand(
           firstName,
           lastName,
           dateOfBirth,
-          address,
           contactInfo,
+          workdaySchedule,
           role,
           employeeType,
           department,

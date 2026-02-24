@@ -1,8 +1,8 @@
 package io.github.alexisTrejo11.drugstore.employees.core.application.command;
 
 import java.time.LocalDate;
+import java.util.Map;
 
-import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.Address;
 import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.ContactInfo;
 import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.EmployeeId;
 
@@ -14,8 +14,8 @@ public record UpdateEmployeeCommand(
     String firstName,
     String lastName,
     LocalDate dateOfBirth,
-    Address address,
     ContactInfo contactInfo,
+    Map<String, Object> workdaySchedule,
     String updatedBy) {
 
   public static Builder builder() {
@@ -27,8 +27,8 @@ public record UpdateEmployeeCommand(
     private String firstName;
     private String lastName;
     private LocalDate dateOfBirth;
-    private Address address;
     private ContactInfo contactInfo;
+    private Map<String, Object> workdaySchedule;
     private String updatedBy;
 
     public Builder employeeId(EmployeeId employeeId) {
@@ -51,13 +51,13 @@ public record UpdateEmployeeCommand(
       return this;
     }
 
-    public Builder address(Address address) {
-      this.address = address;
+    public Builder contactInfo(ContactInfo contactInfo) {
+      this.contactInfo = contactInfo;
       return this;
     }
 
-    public Builder contactInfo(ContactInfo contactInfo) {
-      this.contactInfo = contactInfo;
+    public Builder workdaySchedule(Map<String, Object> workdaySchedule) {
+      this.workdaySchedule = workdaySchedule;
       return this;
     }
 
@@ -72,8 +72,8 @@ public record UpdateEmployeeCommand(
           firstName,
           lastName,
           dateOfBirth,
-          address,
           contactInfo,
+          workdaySchedule,
           updatedBy);
     }
   }

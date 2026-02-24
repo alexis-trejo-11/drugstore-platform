@@ -119,6 +119,14 @@ public class ResponseWrapper<T> {
         return success(null, message);
     }
 
+		public static <T> ResponseWrapper<T> success(T data) {
+				var response = new ResponseWrapper<T>();
+				response.setMessage("Operation completed successfully");
+				response.setData(data);
+				response.setTimestamp(LocalDateTime.now());
+				return response;
+		}
+
     /**
      * Creates a successful response with a default message and no data.
      * <p>

@@ -6,7 +6,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +35,10 @@ public class Employee {
   private String firstName;
   private String lastName;
   private LocalDate dateOfBirth;
-  private Address address;
   private ContactInfo contactInfo;
+
+  // Workday Schedule (stored as JSON)
+  private Map<String, Object> workdaySchedule;
 
   // Employment Details
   private EmployeeRole role;
@@ -68,6 +72,7 @@ public class Employee {
     this.status = EmployeeStatus.INACTIVE;
     this.createdAt = LocalDateTime.now();
     this.updatedAt = LocalDateTime.now();
+    this.workdaySchedule = new HashMap<>();
   }
 
   // Factory method for hiring new employee
@@ -76,7 +81,6 @@ public class Employee {
       String firstName,
       String lastName,
       LocalDate dateOfBirth,
-      Address address,
       ContactInfo contactInfo,
       EmployeeRole role,
       EmployeeType employeeType,
@@ -119,7 +123,6 @@ public class Employee {
     employee.firstName = firstName;
     employee.lastName = lastName;
     employee.dateOfBirth = dateOfBirth;
-    employee.address = address;
     employee.contactInfo = contactInfo;
     employee.role = role;
     employee.employeeType = employeeType;
@@ -495,14 +498,6 @@ public class Employee {
     this.dateOfBirth = dateOfBirth;
   }
 
-  public Address getAddress() {
-    return address;
-  }
-
-  public void setAddress(Address address) {
-    this.address = address;
-  }
-
   public ContactInfo getContactInfo() {
     return contactInfo;
   }
@@ -621,6 +616,14 @@ public class Employee {
 
   public void setLastModifiedBy(String lastModifiedBy) {
     this.lastModifiedBy = lastModifiedBy;
+  }
+
+  public Map<String, Object> getWorkdaySchedule() {
+    return workdaySchedule != null ? new HashMap<>(workdaySchedule) : new HashMap<>();
+  }
+
+  public void setWorkdaySchedule(Map<String, Object> workdaySchedule) {
+    this.workdaySchedule = workdaySchedule != null ? new HashMap<>(workdaySchedule) : new HashMap<>();
   }
 
   @Override

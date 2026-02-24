@@ -31,6 +31,10 @@ dependencies {
     // Admin Service
     implementation 'de.codecentric:spring-boot-admin-starter-client:3.0.0'
 
+    // Migrations
+    implementation 'org.flywaydb:flyway-core:10.17.0'
+    implementation 'org.flywaydb:flyway-database-postgresql:10.17.0'
+
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
@@ -63,7 +67,7 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
     // Open Api
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui'
 }
 
 dependencyManagement {
