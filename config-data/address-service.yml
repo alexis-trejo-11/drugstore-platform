@@ -1,0 +1,33 @@
+server:
+  port: 8081
+  ssl:
+    enabled: false
+    key-store: classpath:keystore.p12
+    key-store-password: ${ADDRESS_SSL_KEYSTORE_PASSWORD}
+    key-store-type: PKCS12
+    key-alias: address-service
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/drugstore_addresses
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    out-of-order: false
+    encoding: UTF-8
+    
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+    hibernate:
+      ddl-auto: validate

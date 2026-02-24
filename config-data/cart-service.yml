@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8082
   ssl:
     enabled: false
     key-store: classpath:keystore.p12
@@ -19,7 +19,7 @@ spring:
       client:
         url: http://localhost:8080
         instance:
-          service-url: http://localhost:8084
+          service-url: http://localhost:8082
           name: cart-service
 
   devtools:
