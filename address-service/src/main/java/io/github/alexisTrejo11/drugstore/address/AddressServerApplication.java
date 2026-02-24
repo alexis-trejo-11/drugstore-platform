@@ -7,7 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 		scanBasePackages = {
 				"io.github.alexisTrejo11.drugstore.address",
 				"libs_kernel.config.rate_limit",
-				"libs_kernel.security,jwt",
+				"libs_kernel.security.jwt",
+				"libs_kernel.log",
 		})
 public class AddressServerApplication {
 

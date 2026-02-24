@@ -1,8 +1,10 @@
 server:
   port: 8082
 
-
 spring:
+  application:
+    name: address-service
+
   datasource:
     url: jdbc:postgresql://localhost:5432/drugstore_addresses
     username: ${DB_USERNAME:postgres}
@@ -46,8 +48,6 @@ jwt:
   refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200} # 30 days
   issuer: ${ISSUER}
 
-
-
 app:
   rate-limit:
     global:
@@ -73,3 +73,24 @@ app:
       customer-read:
         maxRequests: 100
         durationSeconds: 60
+
+logging:
+  file:
+    name: logs/address-service.log
+    path: logs
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO
+    io.github.alexisTrejo11.drugstore: DEBUG
+    libs_kernel.log.audit: INFO
+
+audit:
+  log:
+    enabled: true
+    excluded-endpoints: >
+      /actuator/health,
+      /actuator/info,
+      /swagger-ui.html,
+      /v3/api-docs
