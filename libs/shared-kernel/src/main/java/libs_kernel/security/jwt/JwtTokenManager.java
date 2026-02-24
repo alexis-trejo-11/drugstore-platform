@@ -7,6 +7,7 @@ import io.jsonwebtoken.security.Keys;
 import libs_kernel.security.dto.TokenResponse;
 import libs_kernel.security.dto.TokenValidationResponse;
 import libs_kernel.security.dto.UserClaims;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -22,6 +23,7 @@ public class JwtTokenManager {
 	private static final Logger log = org.slf4j.LoggerFactory.getLogger(JwtTokenManager.class);
 	private final JwtProperties jwtProperties;
 
+	@Autowired
 	public JwtTokenManager(JwtProperties jwtProperties) {
 		this.jwtProperties = jwtProperties;
 	}

@@ -1,10 +1,11 @@
 package io.github.alexisTrejo11.drugstore.address.utils.dto;
 
+import io.github.alexisTrejo11.drugstore.address.entity.AddressEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
 @Schema(description = "Address response object")
-public record AddressResponse(
+public record Address(
     
     @Schema(description = "Address unique identifier", example = "123e4567-e89b-12d3-a456-426614174000")
     String id,
@@ -38,4 +39,21 @@ public record AddressResponse(
     
     @Schema(description = "Address last update timestamp")
     LocalDateTime updatedAt
-) {}
+) {
+
+	public static Address fromEntity(AddressEntity entity) {
+		return new Address(
+				entity.getId() != null ? entity.getId().toString() : null,
+				entity.getUserId(),
+				entity.getStreet(),
+				entity.getCity(),
+				entity.getState(),
+				entity.getCountry(),
+				entity.getPostalCode(),
+				entity.getAdditionalDetails(),
+				entity.getIsDefault(),
+				entity.getCreatedAt(),
+				entity.getUpdatedAt()
+		);
+	}
+}

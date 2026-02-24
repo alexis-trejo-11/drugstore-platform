@@ -1,8 +1,8 @@
 package io.github.alexisTrejo11.drugstore.address.service;
 
 import io.github.alexisTrejo11.drugstore.address.utils.dto.AddressRequest;
-import io.github.alexisTrejo11.drugstore.address.utils.dto.AddressResponse;
-import io.github.alexisTrejo11.drugstore.address.utils.dto.AddressSummaryResponse;
+import io.github.alexisTrejo11.drugstore.address.utils.dto.Address;
+import io.github.alexisTrejo11.drugstore.address.utils.dto.AddressSummary;
 import io.github.alexisTrejo11.drugstore.address.utils.exceptions.*;
 import io.github.alexisTrejo11.drugstore.address.entity.AddressEntity;
 import io.github.alexisTrejo11.drugstore.address.repository.AddressRepository;
@@ -28,42 +28,42 @@ public class AddressService {
 
 
 	@Transactional(readOnly = true)
-	public AddressResponse findAddressById(String addressId) {
+	public Address findAddressById(String addressId) {
 		AddressEntity entity = findActiveAddressById(addressId);
-		return mapToResponse(entity);
+		return Address.fromEntity(entity);
 	}
 
 	@Transactional(readOnly = true)
-	public AddressResponse findAddressByIdAndUserId(String addressId, String userId) {
+	public Address findAddressByIdAndUserId(String addressId, String userId) {
 		UUID id = parseUUID(addressId);
 
 		AddressEntity entity = addressRepository.findByIdAndUserIdAndActiveTrue(id, userId)
 				.orElseThrow(() -> new AddressNotFoundException(addressId, userId));
-		return mapToResponse(entity);
+		return Address.fromEntity(entity);
 	}
 
 	@Transactional(readOnly = true)
-	public List<AddressResponse> findAddressesByUserId(String userId) {
+	public List<Address> findAddressesByUserId(String userId) {
 		return addressRepository.findByUserIdAndActiveTrue(userId).stream()
-				.map(this::mapToResponse)
+				.map(Address::fromEntity)
 				.collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = true)
-	public List<AddressSummaryResponse> findAddressSummariesByUserId(String userId) {
+	public List<AddressSummary> findAddressSummariesByUserId(String userId) {
 		return addressRepository.findByUserIdAndActiveTrue(userId).stream()
 				.map(this::mapToSummaryResponse)
 				.collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = true)
-	public Page<AddressSummaryResponse> findAllAddresses(Pageable pageable) {
+	public Page<AddressSummary> findAllAddresses(Pageable pageable) {
 		return addressRepository.findByActiveTrue(pageable)
 				.map(this::mapToSummaryResponse);
 	}
 
 	@Transactional
-	public AddressResponse createAddress(String userId, AddressRequest request) {
+	public Address createAddress(String userId, AddressRequest request) {
 		validateAddress(request);
 
 		AddressEntity.UserType userType = determineUserType(userId);
@@ -79,16 +79,16 @@ public class AddressService {
 		AddressEntity savedEntity = addressRepository.save(entity);
 		log.info("Address created successfully for user: {}, addressId: {}", userId, savedEntity.getId());
 
-		return mapToResponse(savedEntity);
+		return Address.fromEntity(savedEntity);
 	}
 
 	@Transactional
-	public AddressResponse updateAddress(String addressId, AddressRequest request) {
+	public Address updateAddress(String addressId, AddressRequest request) {
 		return updateAddress(addressId, request, null);
 	}
 
 	@Transactional
-	public AddressResponse updateAddress(String addressId, AddressRequest request, String userId) {
+	public Address updateAddress(String addressId, AddressRequest request, String userId) {
 		validateAddress(request);
 
 		UUID id = parseUUID(addressId);
@@ -110,7 +110,7 @@ public class AddressService {
 		AddressEntity updatedEntity = addressRepository.save(entity);
 		log.info("Address updated successfully: {}", addressId);
 
-		return mapToResponse(updatedEntity);
+		return Address.fromEntity(updatedEntity);
 	}
 
 	@Transactional
@@ -131,7 +131,7 @@ public class AddressService {
 	}
 
 	@Transactional
-	public AddressResponse setAddressAsDefault(String addressId, String userId) {
+	public Address setAddressAsDefault(String addressId, String userId) {
 		addressRepository.resetDefaultAddressForUser(userId);
 
 		UUID uuid = parseUUID(addressId);
@@ -142,7 +142,7 @@ public class AddressService {
 		AddressEntity updatedEntity = addressRepository.save(entity);
 
 		log.info("Address set as default: {} for user: {}", addressId, userId);
-		return mapToResponse(updatedEntity);
+		return Address.fromEntity(updatedEntity);
 	}
 
 	private AddressEntity findActiveAddressById(String addressId) {
@@ -257,28 +257,14 @@ public class AddressService {
 	}
 
 
-	private AddressResponse mapToResponse(AddressEntity entity) {
-		return new AddressResponse(
-				entity.getId() != null ? entity.getId().toString() : null,
-				entity.getUserId(),
-				entity.getStreet(),
-				entity.getCity(),
-				entity.getState(),
-				entity.getCountry(),
-				entity.getPostalCode(),
-				entity.getAdditionalDetails(),
-				entity.getIsDefault(),
-				entity.getCreatedAt(),
-				entity.getUpdatedAt()
-		);
-	}
 
-	private AddressSummaryResponse mapToSummaryResponse(AddressEntity entity) {
+
+	private AddressSummary mapToSummaryResponse(AddressEntity entity) {
 		String shortStreet = entity.getStreet().length() > 50 ?
 				entity.getStreet().substring(0, 47) + "..." :
 				entity.getStreet();
 
-		return new AddressSummaryResponse(
+		return new AddressSummary(
 				entity.getId() != null ? entity.getId().toString() : null,
 				shortStreet,
 				entity.getCity(),

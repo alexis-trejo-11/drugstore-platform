@@ -82,4 +82,21 @@ tasks.named('test') {
 }
 
 bootRun {
+    jvmArgs = [
+            "-XX:+TieredCompilation",
+            "-XX:TieredStopAtLevel=1",
+            //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ]
+
+    // Load .env file from config-server directory
+    def envFile = file('../config-server/.env')
+    if (envFile.exists()) {
+        envFile.readLines().each { line ->
+            if (line && !line.startsWith('#') && line.contains('=')) {
+                def (key, value) = line.split('=', 2)
+                systemProperty key.trim(), value.trim()
+                environment key.trim(), value.trim()
+            }
+        }
+    }
 }
