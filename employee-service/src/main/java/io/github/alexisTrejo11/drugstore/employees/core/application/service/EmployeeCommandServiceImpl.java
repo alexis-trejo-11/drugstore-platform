@@ -1,17 +1,28 @@
 package io.github.alexisTrejo11.drugstore.employees.core.application.service;
 
-import io.github.alexisTrejo11.drugstore.employees.core.application.command.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.github.alexisTrejo11.drugstore.employees.core.application.command.*;
-import io.github.alexisTrejo11.drugstore.employees.core.port.input.EmployeeCommandService;
-import io.github.alexisTrejo11.drugstore.employees.core.port.output.EmployeeRepository;
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.ActivateEmployeeCommand;
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.AddCertificationCommand;
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.ChangeRoleCommand;
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.ChangeStatusCommand;
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.CreateEmployeeCommand;
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.DeleteEmployeeCommand;
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.PutOnLeaveCommand;
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.RestoreEmployeeCommand;
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.SuspendEmployeeCommand;
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.TerminateEmployeeCommand;
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.TransferEmployeeCommand;
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.UpdateCompensationCommand;
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.UpdateEmployeeCommand;
 import io.github.alexisTrejo11.drugstore.employees.core.domain.exception.EmployeeNotFoundException;
 import io.github.alexisTrejo11.drugstore.employees.core.domain.exception.InvalidEmployeeException;
 import io.github.alexisTrejo11.drugstore.employees.core.domain.model.Employee;
 import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.EmployeeId;
+import io.github.alexisTrejo11.drugstore.employees.core.port.input.EmployeeCommandService;
+import io.github.alexisTrejo11.drugstore.employees.core.port.output.EmployeeRepository;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -46,7 +57,6 @@ public class EmployeeCommandServiceImpl implements EmployeeCommandService {
         command.firstName(),
         command.lastName(),
         command.dateOfBirth(),
-        command.address(),
         command.contactInfo(),
         command.role(),
         command.employeeType(),
@@ -56,6 +66,11 @@ public class EmployeeCommandServiceImpl implements EmployeeCommandService {
         command.hourlyRate(),
         command.weeklyHours(),
         command.createdBy());
+
+    // Set workday schedule if provided
+    if (command.workdaySchedule() != null) {
+      employee.setWorkdaySchedule(command.workdaySchedule());
+    }
 
     // Persist employee
     Employee savedEmployee = employeeRepository.save(employee);
@@ -82,11 +97,11 @@ public class EmployeeCommandServiceImpl implements EmployeeCommandService {
     if (command.dateOfBirth() != null) {
       employee.setDateOfBirth(command.dateOfBirth());
     }
-    if (command.address() != null) {
-      employee.setAddress(command.address());
-    }
     if (command.contactInfo() != null) {
       employee.setContactInfo(command.contactInfo());
+    }
+    if (command.workdaySchedule() != null) {
+      employee.setWorkdaySchedule(command.workdaySchedule());
     }
 
     employee.setLastModifiedBy(command.updatedBy());

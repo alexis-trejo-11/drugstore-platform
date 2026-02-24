@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -24,9 +25,9 @@ public record EmployeeResponse(
 
     @Schema(description = "Date of birth", example = "1990-05-15") LocalDate dateOfBirth,
 
-    @Schema(description = "Employee address") AddressResponse address,
-
     @Schema(description = "Contact information") ContactInfoResponse contactInfo,
+
+    @Schema(description = "Workday schedule (JSON)") Map<String, Object> workdaySchedule,
 
     @Schema(description = "Employee role", example = "PHARMACIST") String role,
 

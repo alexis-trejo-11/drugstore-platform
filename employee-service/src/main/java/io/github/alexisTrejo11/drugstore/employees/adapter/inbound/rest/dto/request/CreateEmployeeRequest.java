@@ -2,7 +2,12 @@ package io.github.alexisTrejo11.drugstore.employees.adapter.inbound.rest.dto.req
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Map;
 
+import io.github.alexisTrejo11.drugstore.employees.core.application.command.CreateEmployeeCommand;
+import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.EmployeeNumber;
+import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.EmployeeRole;
+import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.EmployeeType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
@@ -10,10 +15,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
-import io.github.alexisTrejo11.drugstore.employees.core.application.command.CreateEmployeeCommand;
-import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.EmployeeNumber;
-import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.EmployeeRole;
-import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.EmployeeType;
 
 /**
  * Request DTO for creating a new employee
@@ -28,9 +29,9 @@ public record CreateEmployeeRequest(
 
     @NotNull @Past @Schema(description = "Date of birth (must be 18+ years old)", example = "1990-05-15", required = true) LocalDate dateOfBirth,
 
-    @NotNull @Valid @Schema(description = "Employee address", required = true) AddressRequest address,
-
     @NotNull @Valid @Schema(description = "Contact information", required = true) ContactInfoRequest contactInfo,
+
+    @Schema(description = "Workday schedule (JSON)") Map<String, Object> workdaySchedule,
 
     @NotNull @Schema(description = "Employee role", example = "PHARMACIST", required = true) EmployeeRole role,
 
@@ -54,8 +55,8 @@ public record CreateEmployeeRequest(
         .firstName(this.firstName)
         .lastName(this.lastName)
         .dateOfBirth(this.dateOfBirth)
-        .address(this.address.toDomain())
         .contactInfo(this.contactInfo.toDomain())
+        .workdaySchedule(this.workdaySchedule)
         .role(this.role)
         .employeeType(this.employeeType)
         .department(this.department)

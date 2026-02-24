@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Component
 @Slf4j
-public class EmployeeEntityMapper  {
+public class EmployeeEntityMapper {
 
   public EmployeeEntity fromDomain(Employee employee) {
     if (employee == null) {
@@ -38,8 +38,8 @@ public class EmployeeEntityMapper  {
     entity.setFirstName(employee.getFirstName());
     entity.setLastName(employee.getLastName());
     entity.setDateOfBirth(employee.getDateOfBirth());
-    entity.setAddress(toAddressEmbeddable(employee.getAddress()));
     entity.setContactInfo(toContactInfoEmbeddable(employee.getContactInfo()));
+    entity.setWorkdaySchedule(employee.getWorkdaySchedule());
 
     // Employment Details
     entity.setRole(toRoleEnum(employee.getRole()));
@@ -87,8 +87,8 @@ public class EmployeeEntityMapper  {
     employee.setFirstName(entity.getFirstName());
     employee.setLastName(entity.getLastName());
     employee.setDateOfBirth(entity.getDateOfBirth());
-    employee.setAddress(toAddressDomain(entity.getAddress()));
     employee.setContactInfo(toContactInfoDomain(entity.getContactInfo()));
+    employee.setWorkdaySchedule(entity.getWorkdaySchedule());
 
     // Employment Details
     employee.setRole(toRoleDomain(entity.getRole()));
@@ -125,31 +125,6 @@ public class EmployeeEntityMapper  {
         .collect(Collectors.toList());
 
     return new PageImpl<>(employees, entityPage.getPageable(), entityPage.getTotalElements());
-  }
-
-  // Helper methods for Address
-  private AddressEmbeddable toAddressEmbeddable(Address address) {
-    if (address == null) {
-      return null;
-    }
-    return new AddressEmbeddable(
-        address.getStreet(),
-        address.getCity(),
-        address.getState(),
-        address.getPostalCode(),
-        address.getCountry());
-  }
-
-  private Address toAddressDomain(AddressEmbeddable embeddable) {
-    if (embeddable == null || embeddable.getStreet() == null) {
-      return null;
-    }
-    return Address.of(
-        embeddable.getStreet(),
-        embeddable.getCity(),
-        embeddable.getState(),
-        embeddable.getPostalCode(),
-        embeddable.getCountry());
   }
 
   // Helper methods for ContactInfo
