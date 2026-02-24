@@ -1,5 +1,6 @@
 rootProject.name = 'io.github.alexisTrejo11.drugstore.microservices'
 
+include 'address-service'
 include 'product-service'
 include 'cart-service'
 include 'inventory-service'
