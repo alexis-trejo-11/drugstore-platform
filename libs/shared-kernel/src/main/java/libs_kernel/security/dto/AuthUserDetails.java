@@ -10,20 +10,20 @@ import java.util.Collections;
 
 @Builder
 public class AuthUserDetails implements UserDetails {
-    private String userId;
-    private String email;
-    private String role;
-    private String token;
-    
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
-    }
-    
-    @Override
-    public String getPassword() {
-        return null;
-    }
+	private String userId;
+	private String email;
+	private String role;
+	private String token;
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
+	}
+
+	@Override
+	public String getPassword() {
+		return null;
+	}
 
 	public String getUserId() {
 		return userId;
@@ -41,28 +41,40 @@ public class AuthUserDetails implements UserDetails {
 		return token;
 	}
 
+	public boolean isAdmin() {
+		return "ADMIN".equalsIgnoreCase(role);
+	}
+
+	public boolean isEmployee() {
+		return "EMPLOYEE".equalsIgnoreCase(role);
+	}
+
+	public boolean isCustomer() {
+		return "CUSTOMER".equalsIgnoreCase(role);
+	}
+
 	@Override
-    public String getUsername() {
-        return userId;
-    }
-    
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-    
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-    
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-    
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
+	public String getUsername() {
+		return userId;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
 }
