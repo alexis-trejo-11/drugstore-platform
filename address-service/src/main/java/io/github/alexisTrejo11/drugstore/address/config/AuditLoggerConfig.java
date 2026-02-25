@@ -91,7 +91,7 @@ public class AuditLoggerConfig implements WebMvcConfigurer {
 			protected String getClientIp(HttpServletRequest request) {
 				String ip = super.getClientIp(request);
 
-				// Normalize IPv6 localhost
+				// Normalizar IPv6 localhost
 				if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) {
 					return "127.0.0.1";
 				}

@@ -1,143 +1,119 @@
 package io.github.alexisTrejo11.drugstore.address.controller;
 
-import io.github.alexisTrejo11.drugstore.address.utils.dto.AddressRequest;
-import io.github.alexisTrejo11.drugstore.address.utils.dto.Address;
-import io.github.alexisTrejo11.drugstore.address.utils.dto.AddressSummary;
-import io.github.alexisTrejo11.drugstore.address.service.AddressService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import libs_kernel.config.rate_limit.RateLimit;
-import libs_kernel.config.rate_limit.RateLimitProfile;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-// import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import io.github.alexisTrejo11.drugstore.address.controller.annotation.CreateAddressForUserAnnotation;
+import io.github.alexisTrejo11.drugstore.address.controller.annotation.DeleteAddressAdminAnnotation;
+import io.github.alexisTrejo11.drugstore.address.controller.annotation.GetAddressByIdAdminAnnotation;
+import io.github.alexisTrejo11.drugstore.address.controller.annotation.GetAddressesByUserIdAnnotation;
+import io.github.alexisTrejo11.drugstore.address.controller.annotation.GetAllAddressesAnnotation;
+import io.github.alexisTrejo11.drugstore.address.controller.annotation.SetDefaultAddressAdminAnnotation;
+import io.github.alexisTrejo11.drugstore.address.controller.annotation.UpdateAddressAdminAnnotation;
+import io.github.alexisTrejo11.drugstore.address.service.AddressService;
+import io.github.alexisTrejo11.drugstore.address.utils.dto.Address;
+import io.github.alexisTrejo11.drugstore.address.utils.dto.AddressRequest;
+import io.github.alexisTrejo11.drugstore.address.utils.dto.AddressSummary;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import libs_kernel.config.rate_limit.RateLimit;
+import libs_kernel.config.rate_limit.RateLimitProfile;
+import libs_kernel.response.ResponseWrapper;
+import lombok.RequiredArgsConstructor;
 
 @RestController
-	@RequestMapping("/api/v2/addresses/admin")
+@RequestMapping("/api/v2/addresses/admin")
 @RequiredArgsConstructor
 @Tag(name = "Admin Address Management", description = "Endpoints for administrative address management (requires ADMIN role)")
 @SecurityRequirement(name = "bearerAuth")
 public class AddressAdminController {
 
-	private final AddressService addressService;
+  private final AddressService addressService;
 
-	@GetMapping
-	@Operation(summary = "Get all addresses with pagination", description = "Retrieves a paginated list of all addresses in the system")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Successfully retrieved addresses"),
-			@ApiResponse(responseCode = "403", description = "Access denied - ADMIN role required")
-	})
-	@RateLimit(profile = RateLimitProfile.STANDARD)
-	public ResponseEntity<Page<AddressSummary>> getAllAddresses(
-			@Parameter(description = "Pagination parameters")
-			@PageableDefault(size = 20) Pageable pageable) {
-		return ResponseEntity.ok(addressService.findAllAddresses(pageable));
-	}
+  @GetMapping
+  @GetAllAddressesAnnotation
+  @RateLimit(profile = RateLimitProfile.STANDARD)
+  public ResponseWrapper<Page<AddressSummary>> getAllAddresses(
+      @Parameter(description = "Pagination parameters") @PageableDefault(size = 20) Pageable pageable) {
+    Page<AddressSummary> addresses = addressService.findAllAddresses(pageable);
+    return ResponseWrapper.found(addresses, "Addresses");
+  }
 
-	@GetMapping("/{id}")
-	@Operation(summary = "Get address by ID", description = "Retrieves detailed address information by its ID")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Successfully retrieved address"),
-			@ApiResponse(responseCode = "404", description = "Address not found"),
-			@ApiResponse(responseCode = "403", description = "Access denied - ADMIN role required")
-	})
-	@RateLimit(profile = RateLimitProfile.STANDARD)
-	public ResponseEntity<Address> getAddressById(
-			@Parameter(description = "Address ID", required = true)
-			@PathVariable String id) {
-		return ResponseEntity.ok(addressService.findAddressById(id));
-	}
+  @GetMapping("/{id}")
+  @GetAddressByIdAdminAnnotation
+  @RateLimit(profile = RateLimitProfile.STANDARD)
+  public ResponseWrapper<Address> getAddressById(
+      @Parameter(description = "Address ID", required = true) @PathVariable String id) {
+    Address address = addressService.findAddressById(id);
+    return ResponseWrapper.found(address, "Address");
+  }
 
-	@GetMapping("/user/{userId}")
-	@Operation(summary = "Get addresses by user ID", description = "Retrieves all addresses for a specific user")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Successfully retrieved user addresses"),
-			@ApiResponse(responseCode = "403", description = "Access denied - ADMIN role required")
-	})
-	@RateLimit(profile = RateLimitProfile.STANDARD)
-	public ResponseEntity<List<Address>> getAddressesByUserId(
-			@Parameter(description = "User ID", required = true)
-			@PathVariable String userId) {
-		return ResponseEntity.ok(addressService.findAddressesByUserId(userId));
-	}
+  @GetMapping("/user/{userId}")
+  @GetAddressesByUserIdAnnotation
+  @RateLimit(profile = RateLimitProfile.STANDARD)
+  public ResponseWrapper<List<Address>> getAddressesByUserId(
+      @Parameter(description = "User ID", required = true) @PathVariable String userId) {
+    List<Address> addresses = addressService.findAddressesByUserId(userId);
+    return ResponseWrapper.found(addresses, "Addresses");
+  }
 
-	@PostMapping
-	@Operation(summary = "Create address for any user", description = "Creates a new address for any user (admin only)")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "201", description = "Address created successfully"),
-			@ApiResponse(responseCode = "400", description = "Invalid input data"),
-			@ApiResponse(responseCode = "403", description = "Access denied - ADMIN role required")
-	})
-	@RateLimit(profile = RateLimitProfile.STANDARD)
-	public ResponseEntity<Address> createAddressForUser(
-			@Parameter(description = "User ID to assign the address to", required = true)
-			@RequestParam String userId,
+  @PostMapping
+  @CreateAddressForUserAnnotation
+  @RateLimit(profile = RateLimitProfile.STANDARD)
+  public ResponseEntity<ResponseWrapper<Address>> createAddressForUser(
+      @Parameter(description = "User ID to assign the address to", required = true) @RequestParam String userId,
+      @Parameter(description = "Address details", required = true) @Valid @RequestBody AddressRequest addressRequest) {
 
-			@Parameter(description = "Address details", required = true)
-			@Valid @RequestBody AddressRequest addressRequest) {
-		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(addressService.createAddress(userId, addressRequest));
-	}
+    Address address = addressService.createAddress(userId, "ADMIN", addressRequest);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(ResponseWrapper.created(address, "Address"));
+  }
 
-	@PutMapping("/{id}")
-	@Operation(summary = "Update any address", description = "Updates an existing address by ID (admin only)")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Address updated successfully"),
-			@ApiResponse(responseCode = "400", description = "Invalid input data"),
-			@ApiResponse(responseCode = "404", description = "Address not found"),
-			@ApiResponse(responseCode = "403", description = "Access denied - ADMIN role required")
-	})
-	@RateLimit(profile = RateLimitProfile.STANDARD)
-	public ResponseEntity<Address> updateAddress(
-			@Parameter(description = "Address ID", required = true)
-			@PathVariable String id,
+  @PutMapping("/{id}")
+  @UpdateAddressAdminAnnotation
+  @RateLimit(profile = RateLimitProfile.STANDARD)
+  public ResponseWrapper<Address> updateAddress(
+      @Parameter(description = "Address ID", required = true) @PathVariable String id,
+      @Parameter(description = "Updated address details", required = true) @Valid @RequestBody AddressRequest addressRequest) {
 
-			@Parameter(description = "Updated address details", required = true)
-			@Valid @RequestBody AddressRequest addressRequest) {
-		return ResponseEntity.ok(addressService.updateAddress(id, addressRequest));
-	}
+    Address address = addressService.updateAddress(id, addressRequest);
+    return ResponseWrapper.updated(address, "Address");
+  }
 
-	@DeleteMapping("/{id}")
-	@Operation(summary = "Delete any address", description = "Deletes an address by ID (admin only)")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "204", description = "Address deleted successfully"),
-			@ApiResponse(responseCode = "404", description = "Address not found"),
-			@ApiResponse(responseCode = "403", description = "Access denied - ADMIN role required")
-	})
-	@RateLimit(profile = RateLimitProfile.STANDARD)
-	public ResponseEntity<Void> deleteAddress(
-			@Parameter(description = "Address ID", required = true)
-			@PathVariable String id) {
-		addressService.deleteAddress(id);
-		return ResponseEntity.noContent().build();
-	}
+  @DeleteMapping("/{id}")
+  @DeleteAddressAdminAnnotation
+  @RateLimit(profile = RateLimitProfile.STANDARD)
+  public ResponseWrapper<Void> deleteAddress(
+      @Parameter(description = "Address ID", required = true) @PathVariable String id) {
 
-	@PutMapping("/{id}/set-default-for-user/{userId}")
-	@Operation(summary = "Set address as default for a user", description = "Sets a specific address as default for a user (admin only)")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Address set as default successfully"),
-			@ApiResponse(responseCode = "404", description = "Address or user not found"),
-			@ApiResponse(responseCode = "403", description = "Access denied - ADMIN role required")
-	})
-	@RateLimit(profile = RateLimitProfile.STANDARD)
-	public ResponseEntity<Address> setAddressAsDefault(
-			@Parameter(description = "Address ID", required = true)
-			@PathVariable String id,
+    addressService.deleteAddress(id);
+    return ResponseWrapper.success("Address");
+  }
 
-			@Parameter(description = "User ID", required = true)
-			@PathVariable String userId) {
-		return ResponseEntity.ok(addressService.setAddressAsDefault(id, userId));
-	}
+  @PutMapping("/{id}/set-default-for-user/{userId}")
+  @SetDefaultAddressAdminAnnotation
+  @RateLimit(profile = RateLimitProfile.STANDARD)
+  public ResponseWrapper<Address> setAddressAsDefault(
+      @Parameter(description = "Address ID", required = true) @PathVariable String id,
+      @Parameter(description = "User ID", required = true) @PathVariable String userId) {
+
+    Address address = addressService.setAddressAsDefault(id, userId);
+    return ResponseWrapper.updated(address, "Address");
+  }
 }

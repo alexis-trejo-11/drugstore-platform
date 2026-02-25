@@ -14,6 +14,7 @@ java {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -35,7 +36,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
     // Common library
-    implementation project(':libs:shared-kernel')
+    implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
 
     // Config Server
     implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
