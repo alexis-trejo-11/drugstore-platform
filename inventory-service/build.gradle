@@ -14,6 +14,7 @@ java {
 }
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 }
 
@@ -51,7 +52,7 @@ dependencies {
 	implementation 'org.postgresql:postgresql'
 
     // Common library
-    implementation project(':libs:shared-kernel')
+    implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
 
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
@@ -59,7 +60,7 @@ dependencies {
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
 	// Swagger
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
     // Logstash Encoder for Elk
     implementation 'net.logstash.logback:logstash-logback-encoder:7.4'

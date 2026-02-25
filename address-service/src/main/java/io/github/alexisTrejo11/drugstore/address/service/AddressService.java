@@ -1,283 +1,234 @@
 package io.github.alexisTrejo11.drugstore.address.service;
 
-import io.github.alexisTrejo11.drugstore.address.utils.dto.AddressRequest;
-import io.github.alexisTrejo11.drugstore.address.utils.dto.Address;
-import io.github.alexisTrejo11.drugstore.address.utils.dto.AddressSummary;
-import io.github.alexisTrejo11.drugstore.address.utils.exceptions.*;
-import io.github.alexisTrejo11.drugstore.address.entity.AddressEntity;
-import io.github.alexisTrejo11.drugstore.address.repository.AddressRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import io.github.alexisTrejo11.drugstore.address.config.AddressServiceProperties;
+import io.github.alexisTrejo11.drugstore.address.entity.AddressEntity;
+import io.github.alexisTrejo11.drugstore.address.repository.AddressRepository;
+import io.github.alexisTrejo11.drugstore.address.utils.dto.Address;
+import io.github.alexisTrejo11.drugstore.address.utils.dto.AddressRequest;
+import io.github.alexisTrejo11.drugstore.address.utils.dto.AddressSummary;
+import io.github.alexisTrejo11.drugstore.address.utils.exceptions.AddressException;
+import io.github.alexisTrejo11.drugstore.address.utils.exceptions.AddressLimitExceededException;
+import io.github.alexisTrejo11.drugstore.address.utils.exceptions.AddressNotFoundException;
+import io.github.alexisTrejo11.drugstore.address.utils.exceptions.UnauthorizedAddressAccessException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Service layer for address management operations.
+ * Orchestrates business logic while delegating validation and mapping to
+ * specialized components.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AddressService {
 
-	private final AddressRepository addressRepository;
-	private static final int CUSTOMER_MAX_ADDRESSES = 5;
-	private static final int EMPLOYEE_MAX_ADDRESSES = 1;
+  private final AddressRepository addressRepository;
+  private final AddressValidator addressValidator;
+  private final AddressMapper addressMapper;
+  private final AddressServiceProperties properties;
 
+  @Transactional(readOnly = true)
+  public Address findAddressById(String addressId) {
+    AddressEntity entity = findActiveAddressById(addressId);
+    return Address.fromEntity(entity);
+  }
 
-	@Transactional(readOnly = true)
-	public Address findAddressById(String addressId) {
-		AddressEntity entity = findActiveAddressById(addressId);
-		return Address.fromEntity(entity);
-	}
+  @Transactional(readOnly = true)
+  public Address findAddressByIdAndUserId(String addressId, String userId) {
+    UUID id = parseUUID(addressId);
 
-	@Transactional(readOnly = true)
-	public Address findAddressByIdAndUserId(String addressId, String userId) {
-		UUID id = parseUUID(addressId);
+    AddressEntity entity = addressRepository.findByIdAndUserIdAndActiveTrue(id, userId)
+        .orElseThrow(() -> new AddressNotFoundException(addressId, userId));
+    return Address.fromEntity(entity);
+  }
 
-		AddressEntity entity = addressRepository.findByIdAndUserIdAndActiveTrue(id, userId)
-				.orElseThrow(() -> new AddressNotFoundException(addressId, userId));
-		return Address.fromEntity(entity);
-	}
+  @Transactional(readOnly = true)
+  public List<Address> findAddressesByUserId(String userId) {
+    return addressRepository.findByUserIdAndActiveTrue(userId).stream()
+        .map(Address::fromEntity)
+        .collect(Collectors.toList());
+  }
 
-	@Transactional(readOnly = true)
-	public List<Address> findAddressesByUserId(String userId) {
-		return addressRepository.findByUserIdAndActiveTrue(userId).stream()
-				.map(Address::fromEntity)
-				.collect(Collectors.toList());
-	}
+  @Transactional(readOnly = true)
+  public List<AddressSummary> findAddressSummariesByUserId(String userId) {
+    return addressRepository.findByUserIdAndActiveTrue(userId).stream()
+        .map(addressMapper::toSummary)
+        .collect(Collectors.toList());
+  }
 
-	@Transactional(readOnly = true)
-	public List<AddressSummary> findAddressSummariesByUserId(String userId) {
-		return addressRepository.findByUserIdAndActiveTrue(userId).stream()
-				.map(this::mapToSummaryResponse)
-				.collect(Collectors.toList());
-	}
+  @Transactional(readOnly = true)
+  public Page<AddressSummary> findAllAddresses(Pageable pageable) {
+    return addressRepository.findByActiveTrue(pageable)
+        .map(addressMapper::toSummary);
+  }
 
-	@Transactional(readOnly = true)
-	public Page<AddressSummary> findAllAddresses(Pageable pageable) {
-		return addressRepository.findByActiveTrue(pageable)
-				.map(this::mapToSummaryResponse);
-	}
+  @Transactional
+  public Address createAddress(String userId, String role, AddressRequest request) {
+    addressValidator.validate(request);
 
-	@Transactional
-	public Address createAddress(String userId, AddressRequest request) {
-		validateAddress(request);
+    AddressEntity.UserType userType = determineUserType(role);
+    validateAddressLimit(userId, userType);
 
-		AddressEntity.UserType userType = determineUserType(userId);
+    AddressEntity entity = addressMapper.toEntity(userId, userType, request);
 
-		validateAddressLimit(userId, userType);
+    if (Boolean.TRUE.equals(request.isDefault()) || isFirstAddress(userId)) {
+      setAsDefaultAddress(entity);
+    }
 
-		AddressEntity entity = buildAddressEntity(userId, userType, request);
+    AddressEntity savedEntity = addressRepository.save(entity);
+    log.info("Address created successfully for user: {}, addressId: {}", userId, savedEntity.getId());
 
-		if (Boolean.TRUE.equals(request.isDefault()) || isFirstAddress(userId)) {
-			handleDefaultAddress(entity);
-		}
+    return Address.fromEntity(savedEntity);
+  }
 
-		AddressEntity savedEntity = addressRepository.save(entity);
-		log.info("Address created successfully for user: {}, addressId: {}", userId, savedEntity.getId());
+  @Transactional
+  public Address updateAddress(String addressId, AddressRequest request) {
+    return updateAddress(addressId, request, null);
+  }
 
-		return Address.fromEntity(savedEntity);
-	}
+  @Transactional
+  public Address updateAddress(String addressId, AddressRequest request, String userId) {
+    addressValidator.validate(request);
 
-	@Transactional
-	public Address updateAddress(String addressId, AddressRequest request) {
-		return updateAddress(addressId, request, null);
-	}
+    UUID id = parseUUID(addressId);
+    AddressEntity entity = findAddressEntityForUpdate(id, userId);
 
-	@Transactional
-	public Address updateAddress(String addressId, AddressRequest request, String userId) {
-		validateAddress(request);
+    addressMapper.updateEntity(entity, request);
 
-		UUID id = parseUUID(addressId);
-		AddressEntity entity;
+    if (Boolean.TRUE.equals(request.isDefault()) && !entity.getIsDefault()) {
+      setAsDefaultAddress(entity);
+    }
 
-		if (userId != null) {
-			entity = addressRepository.findByIdAndUserIdAndActiveTrue(id, userId)
-					.orElseThrow(() -> new UnauthorizedAddressAccessException(addressId, userId));
-		} else {
-			entity = findActiveAddressById(addressId);
-		}
+    AddressEntity updatedEntity = addressRepository.save(entity);
+    log.info("Address updated successfully: {}", addressId);
 
-		updateAddressEntity(entity, request);
+    return Address.fromEntity(updatedEntity);
+  }
 
-		if (Boolean.TRUE.equals(request.isDefault()) && !entity.getIsDefault()) {
-			handleDefaultAddress(entity);
-		}
+  @Transactional
+  public void deleteAddress(String addressId) {
+    AddressEntity entity = findActiveAddressById(addressId);
+    softDeleteAddress(entity);
+    log.info("Address deleted successfully: {}", addressId);
+  }
 
-		AddressEntity updatedEntity = addressRepository.save(entity);
-		log.info("Address updated successfully: {}", addressId);
+  @Transactional
+  public void deleteAddress(String addressId, String userId) {
+    UUID id = parseUUID(addressId);
 
-		return Address.fromEntity(updatedEntity);
-	}
+    AddressEntity entity = addressRepository.findByIdAndUserIdAndActiveTrue(id, userId)
+        .orElseThrow(() -> new UnauthorizedAddressAccessException(addressId, userId));
+    softDeleteAddress(entity);
+    log.info("Address deleted successfully by user: {}, addressId: {}", userId, addressId);
+  }
 
-	@Transactional
-	public void deleteAddress(String addressId) {
-		AddressEntity entity = findActiveAddressById(addressId);
-		softDeleteAddress(entity);
-		log.info("Address deleted successfully: {}", addressId);
-	}
+  @Transactional
+  public Address setAddressAsDefault(String addressId, String userId) {
+    UUID uuid = parseUUID(addressId);
+    AddressEntity entity = addressRepository.findByIdAndUserIdAndActiveTrue(uuid, userId)
+        .orElseThrow(() -> new AddressNotFoundException(addressId, userId));
 
-	@Transactional
-	public void deleteAddress(String addressId, String userId) {
-		UUID id = parseUUID(addressId);
+    setAsDefaultAddress(entity);
+    AddressEntity updatedEntity = addressRepository.save(entity);
 
-		AddressEntity entity = addressRepository.findByIdAndUserIdAndActiveTrue(id, userId)
-				.orElseThrow(() -> new UnauthorizedAddressAccessException(addressId, userId));
-		softDeleteAddress(entity);
-		log.info("Address deleted successfully by user: {}, addressId: {}", userId, addressId);
-	}
+    log.info("Address set as default: {} for user: {}", addressId, userId);
+    return Address.fromEntity(updatedEntity);
+  }
 
-	@Transactional
-	public Address setAddressAsDefault(String addressId, String userId) {
-		addressRepository.resetDefaultAddressForUser(userId);
+  // ==================== Private Helper Methods ====================
 
-		UUID uuid = parseUUID(addressId);
-		AddressEntity entity = addressRepository.findByIdAndUserIdAndActiveTrue(uuid, userId)
-				.orElseThrow(() -> new AddressNotFoundException(addressId, userId));
+  // ==================== Private Helper Methods ====================
 
-		entity.setIsDefault(true);
-		AddressEntity updatedEntity = addressRepository.save(entity);
+  /**
+   * Finds an active address by ID (admin access)
+   */
+  private AddressEntity findActiveAddressById(String addressId) {
+    UUID uuid = parseUUID(addressId);
+    return addressRepository.findByIdAndActiveTrue(uuid)
+        .orElseThrow(() -> new AddressNotFoundException(addressId));
+  }
 
-		log.info("Address set as default: {} for user: {}", addressId, userId);
-		return Address.fromEntity(updatedEntity);
-	}
+  /**
+   * Finds an address entity for update operation
+   * If userId is provided, validates ownership; otherwise allows admin access
+   */
+  private AddressEntity findAddressEntityForUpdate(UUID id, String userId) {
+    if (userId != null) {
+      return addressRepository.findByIdAndUserIdAndActiveTrue(id, userId)
+          .orElseThrow(() -> new UnauthorizedAddressAccessException(id.toString(), userId));
+    }
+    return addressRepository.findByIdAndActiveTrue(id)
+        .orElseThrow(() -> new AddressNotFoundException(id.toString()));
+  }
 
-	private AddressEntity findActiveAddressById(String addressId) {
-		UUID uuid = parseUUID(addressId);
-		return addressRepository.findByIdAndActiveTrue(uuid)
-				.orElseThrow(() -> new AddressNotFoundException(addressId));
-	}
+  /**
+   * Validates that user hasn't exceeded their address limit
+   */
+  private void validateAddressLimit(String userId, AddressEntity.UserType userType) {
+    long currentAddressCount = addressRepository.countByUserIdAndActiveTrue(userId);
+    int limit = properties.getAddressLimit(userType.name());
 
-	private void validateAddress(AddressRequest request) {
-		if (request.street() == null || request.street().trim().isEmpty()) {
-			throw new InvalidAddressException("Street is required");
-		}
-		if (request.city() == null || request.city().trim().isEmpty()) {
-			throw new InvalidAddressException("City is required");
-		}
-		if (request.state() == null || request.state().trim().isEmpty()) {
-			throw new InvalidAddressException("State is required");
-		}
-		if (request.country() == null || request.country().trim().isEmpty()) {
-			throw new InvalidAddressException("Country is required");
-		}
-		if (request.postalCode() == null || request.postalCode().trim().isEmpty()) {
-			throw new InvalidAddressException("Postal code is required");
-		}
+    if (currentAddressCount >= limit) {
+      throw new AddressLimitExceededException(userId, limit, userType.name());
+    }
+  }
 
-		// Validación específica para código postal según país (ejemplo básico)
-		validatePostalCodeFormat(request.country(), request.postalCode());
-	}
+  /**
+   * Determines user type from role string
+   */
+  private AddressEntity.UserType determineUserType(String role) {
+    if (role.contains("CUSTOMER")) {
+      return AddressEntity.UserType.CUSTOMER;
+    } else if (role.contains("EMPLOYEE")) {
+      return AddressEntity.UserType.EMPLOYEE;
+    }
+    return AddressEntity.UserType.CUSTOMER; // Default to CUSTOMER
+  }
 
-	private void validatePostalCodeFormat(String country, String postalCode) {
-		// Reglas básicas de validación por país
-		boolean isValid = switch (country) {
-			case "US" -> postalCode.matches("^\\d{5}(-\\d{4})?$");
-			case "ES", "MX" -> postalCode.matches("^\\d{5}$");
-			case "CA" -> postalCode.matches("^[A-Z]\\d[A-Z] \\d[A-Z]\\d$");
-			case "UK" -> postalCode.matches("^[A-Z]{1,2}\\d{1,2}[A-Z]? \\d[A-Z]{2}$");
-			default -> true; // Para países sin validación específica
-		};
+  /**
+   * Checks if this is the user's first address
+   */
+  private boolean isFirstAddress(String userId) {
+    return addressRepository.countByUserIdAndActiveTrue(userId) == 0;
+  }
 
-		if (!isValid) {
-			throw new InvalidAddressException("Invalid postal code format for country: " + country);
-		}
-	}
+  /**
+   * Sets an address as the default for the user
+   * Resets any existing default address first
+   */
+  private void setAsDefaultAddress(AddressEntity newDefaultAddress) {
+    addressRepository.resetDefaultAddressForUser(newDefaultAddress.getUserId());
+    newDefaultAddress.setIsDefault(true);
+  }
 
-	private void validateAddressLimit(String userId, AddressEntity.UserType userType) {
-		long currentAddressCount = addressRepository.countByUserIdAndActiveTrue(userId);
-		int limit = getUserAddressLimit(userType);
+  /**
+   * Performs soft delete on an address
+   */
+  private void softDeleteAddress(AddressEntity entity) {
+    entity.setActive(false);
+    addressRepository.save(entity);
+  }
 
-		if (currentAddressCount >= limit) {
-			throw new AddressLimitExceededException(userId, limit, userType.name());
-		}
-	}
-
-	private int getUserAddressLimit(AddressEntity.UserType userType) {
-		return userType == AddressEntity.UserType.CUSTOMER ?
-				CUSTOMER_MAX_ADDRESSES : EMPLOYEE_MAX_ADDRESSES;
-	}
-
-	private AddressEntity.UserType determineUserType(String userId) {
-		// En una aplicación real, esto podría venir de un servicio de usuarios
-		// o del contexto de seguridad. Para este ejemplo, usamos una lógica simple:
-		// - Los IDs que empiezan con "CUST" son customers
-		// - Los IDs que empiezan con "EMP" son employees
-
-		if (userId.startsWith("CUST")) {
-			return AddressEntity.UserType.CUSTOMER;
-		} else if (userId.startsWith("EMP")) {
-			return AddressEntity.UserType.EMPLOYEE;
-		} else {
-			// Por defecto, asumimos CUSTOMER
-			return AddressEntity.UserType.CUSTOMER;
-		}
-	}
-
-	private boolean isFirstAddress(String userId) {
-		return addressRepository.countByUserIdAndActiveTrue(userId) == 0;
-	}
-
-	private void handleDefaultAddress(AddressEntity newDefaultAddress) {
-		addressRepository.resetDefaultAddressForUser(newDefaultAddress.getUserId());
-		newDefaultAddress.setIsDefault(true);
-	}
-
-	private AddressEntity buildAddressEntity(String userId, AddressEntity.UserType userType, AddressRequest request) {
-		return AddressEntity.builder()
-				.userId(userId)
-				.userType(userType)
-				.street(request.street().trim())
-				.city(request.city().trim())
-				.state(request.state().trim())
-				.country(request.country().toUpperCase())
-				.postalCode(request.postalCode().trim())
-				.additionalDetails(request.additionalDetails() != null ? request.additionalDetails().trim() : null)
-				.isDefault(request.isDefault() != null && request.isDefault())
-				.active(true)
-				.build();
-	}
-
-	private void updateAddressEntity(AddressEntity entity, AddressRequest request) {
-		entity.setStreet(request.street().trim());
-		entity.setCity(request.city().trim());
-		entity.setState(request.state().trim());
-		entity.setCountry(request.country().toUpperCase());
-		entity.setPostalCode(request.postalCode().trim());
-		entity.setAdditionalDetails(request.additionalDetails() != null ? request.additionalDetails().trim() : null);
-		// Note: isDefault managed separately.
-	}
-
-	private void softDeleteAddress(AddressEntity entity) {
-		entity.setActive(false);
-		addressRepository.save(entity);
-	}
-
-
-
-
-	private AddressSummary mapToSummaryResponse(AddressEntity entity) {
-		String shortStreet = entity.getStreet().length() > 50 ?
-				entity.getStreet().substring(0, 47) + "..." :
-				entity.getStreet();
-
-		return new AddressSummary(
-				entity.getId() != null ? entity.getId().toString() : null,
-				shortStreet,
-				entity.getCity(),
-				entity.getCountry(),
-				entity.getIsDefault()
-		);
-	}
-
-	private UUID parseUUID(String id) {
-		try {
-			return UUID.fromString(id);
-		} catch (IllegalArgumentException e) {
-			throw new AddressException("Invalid address ID format: " + id);
-		}
-	}
+  /**
+   * Parses a string to UUID
+   * 
+   * @throws AddressException if the ID format is invalid
+   */
+  private UUID parseUUID(String id) {
+    try {
+      return UUID.fromString(id);
+    } catch (IllegalArgumentException e) {
+      throw new AddressException("Invalid address ID format: " + id);
+    }
+  }
 }
