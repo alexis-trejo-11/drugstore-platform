@@ -1,0 +1,122 @@
+services:
+  address-service:
+    build: 
+      context: ..
+      dockerfile:  ./address-service/dockerfile
+    container_name: address-service
+    hostname: address-service
+    restart: unless-stopped
+    ports:
+      - "8443:8443"  # HTTPS port
+    environment:
+      # Active profile
+      - SPRING_PROFILES_ACTIVE=docker
+      
+      # Database
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=address_db
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      
+      # SSL Configuration (override .env for Docker)
+      - ADDRESS_SSL_ENABLED=true
+      - ADDRESS_SERVER_PORT=8443
+      - SSL_KEYSTORE_PATH=file:/app/keystore.p12
+      
+      # Note: SSL password and JWT config loaded from .env file
+      
+      # Redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    
+      # Logging
+      - LOGGING_LEVEL_IO_GITHUB_ALEXISTREJO11=DEBUG
+      
+      # JVM Options
+      - JAVA_OPTS=-Xmx512m -Xms256m
+      
+      # Service-specific configuration
+      - ADDRESS_SERVICE_MAX_ADDRESSES_PER_USER=10
+      - ADDRESS_SERVICE_CACHE_TTL=3600
+      
+    env_file:
+      - .env
+      
+    volumes:
+      # Mount logs for persistence
+      - ./logs:/app/logs
+      
+    networks:
+      - drugstore-network
+      
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "--no-check-certificate", "https://localhost:8443/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+        reservations:
+          memory: 256m
+
+  # PostgreSQL (for local development only)
+  postgres:
+    image: postgres:15-alpine
+    container_name: address-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=address_db
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - drugstore-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d address_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (for local development only)
+  redis:
+    image: redis:7-alpine
+    container_name: address-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6378:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - drugstore-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+    name: address-postgres-data
+  redis-data:
+    name: address-redis-data
+
+networks:
+  drugstore-network:
+    name: drugstore-network
+    driver: bridge
