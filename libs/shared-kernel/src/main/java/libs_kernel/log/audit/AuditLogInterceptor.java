@@ -2,6 +2,7 @@ package libs_kernel.log.audit;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.util.HashMap;
@@ -25,6 +26,7 @@ public class AuditLogInterceptor implements HandlerInterceptor {
 			"/swagger-resources"
 	);
 
+	@Autowired
 	public AuditLogInterceptor(AuditLogger auditLogger, String serviceName) {
 		this.auditLogger = auditLogger;
 		this.serviceName = serviceName;
