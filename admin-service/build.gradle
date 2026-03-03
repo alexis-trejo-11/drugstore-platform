@@ -31,10 +31,6 @@ dependencies {
 
 	implementation 'de.codecentric:spring-boot-admin-starter-client'
 	implementation 'de.codecentric:spring-boot-admin-starter-server'
-
-	// Config Server
-	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
-	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 }
 
 dependencyManagement {

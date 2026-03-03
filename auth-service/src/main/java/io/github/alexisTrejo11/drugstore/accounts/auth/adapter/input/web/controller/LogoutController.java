@@ -13,39 +13,47 @@ import jakarta.validation.constraints.NotBlank;
 import libs_kernel.config.rate_limit.RateLimit;
 import libs_kernel.config.rate_limit.RateLimitProfile;
 import libs_kernel.response.ResponseWrapper;
+import lombok.extern.slf4j.Slf4j;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.LogoutAllCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.LogoutCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.input.LogoutUseCases;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v2/auth")
 public class LogoutController {
-	private final LogoutUseCases logoutUseCases;
+  private final LogoutUseCases logoutUseCases;
 
-	@Autowired
-	public LogoutController(LogoutUseCases logoutUseCases) {
-		this.logoutUseCases = logoutUseCases;
-	}
+  @Autowired
+  public LogoutController(LogoutUseCases logoutUseCases) {
+    this.logoutUseCases = logoutUseCases;
+  }
 
-	@PostMapping("/logout/{refreshToken}")
-	@RateLimit(profile = RateLimitProfile.SENSITIVE)
-	public ResponseEntity<ResponseWrapper<Void>> logout(
-			@PathVariable @Valid @NotBlank String refreshToken) {
-		LogoutCommand command = new LogoutCommand(refreshToken);
-		logoutUseCases.logout(command);
+  @PostMapping("/logout/{refreshToken}")
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  public ResponseEntity<ResponseWrapper<Void>> logout(
+      @PathVariable @Valid @NotBlank String refreshToken) {
+    log.info("Logout request received");
 
-		return ResponseEntity.ok(
-				ResponseWrapper.success(null, "Logout successfully processed"));
-	}
+    LogoutCommand command = new LogoutCommand(refreshToken);
+    logoutUseCases.logout(command);
 
-	@PostMapping("/logout-all")
-	@RateLimit(profile = RateLimitProfile.SENSITIVE)
-	public ResponseEntity<ResponseWrapper<Void>> logoutAll(
-			@RequestAttribute("userId") String userId) {
-		LogoutAllCommand command = new LogoutAllCommand(userId);
-		logoutUseCases.logoutAll(command);
+    log.info("Logout completed successfully");
+    return ResponseEntity.ok(
+        ResponseWrapper.success(null, "Logout successfully processed"));
+  }
 
-		return ResponseEntity.ok(
-				ResponseWrapper.success(null, "All sessions logged out successfully"));
-	}
+  @PostMapping("/logout-all")
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  public ResponseEntity<ResponseWrapper<Void>> logoutAll(
+      @RequestAttribute("userId") String userId) {
+    log.info("Logout all sessions request received for user: {}", userId);
+
+    LogoutAllCommand command = new LogoutAllCommand(userId);
+    logoutUseCases.logoutAll(command);
+
+    log.info("All sessions logged out successfully for user: {}", userId);
+    return ResponseEntity.ok(
+        ResponseWrapper.success(null, "All sessions logged out successfully"));
+  }
 }

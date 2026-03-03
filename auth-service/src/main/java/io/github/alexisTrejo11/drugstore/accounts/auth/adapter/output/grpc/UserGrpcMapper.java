@@ -10,48 +10,48 @@ import io.github.alexisTrejo11.drugstore.accounts.User;
 
 @Component
 public class UserGrpcMapper {
-	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+  private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-	public User toDomain(UserResponse grpcUser) {
-		if (grpcUser == null) {
-			return null;
-		}
+  public User toDomain(UserResponse grpcUser) {
+    if (grpcUser == null) {
+      return null;
+    }
 
-		/*
-		 * return User.builder()
-		 * .id(grpcUser.getUserId())
-		 * .email(grpcUser.getEmail())
-		 * .firstName(grpcUser.getFirstName())
-		 * .lastName(grpcUser.getLastName())
-		 * .phoneNumber(grpcUser.getPhoneNumber())
-		 * .role(grpcUser.getRole())
-		 * .twoFactorEnabled(grpcUser.getTwoFactorEnabled())
-		 * .emailVerified(grpcUser.getEmailVerified())
-		 * .status(grpcUser.getStatus())
-		 * .createdAt(parseDateTime(grpcUser.getCreatedAt()))
-		 * .updatedAt(parseDateTime(grpcUser.getUpdatedAt()))
-		 * .build();
-		 * 
-		 */
+    /*
+     * return User.builder()
+     * .id(grpcUser.getUserId())
+     * .email(grpcUser.getEmail())
+     * .firstName(grpcUser.getFirstName())
+     * .lastName(grpcUser.getLastName())
+     * .phoneNumber(grpcUser.getPhoneNumber())
+     * .role(grpcUser.getRole())
+     * .twoFactorEnabled(grpcUser.getTwoFactorEnabled())
+     * .emailVerified(grpcUser.getEmailVerified())
+     * .status(grpcUser.getStatus())
+     * .createdAt(parseDateTime(grpcUser.getCreatedAt()))
+     * .updatedAt(parseDateTime(grpcUser.getUpdatedAt()))
+     * .build();
+     * 
+     */
 
-		return null;
-	}
+    return null;
+  }
 
-	private LocalDateTime parseDateTime(String dateTimeStr) {
-		if (dateTimeStr == null || dateTimeStr.isEmpty()) {
-			return null;
-		}
-		try {
-			return LocalDateTime.parse(dateTimeStr, DATE_FORMATTER);
-		} catch (Exception e) {
-			return null;
-		}
-	}
+  private LocalDateTime parseDateTime(String dateTimeStr) {
+    if (dateTimeStr == null || dateTimeStr.isEmpty()) {
+      return null;
+    }
+    try {
+      return LocalDateTime.parse(dateTimeStr, DATE_FORMATTER);
+    } catch (Exception e) {
+      return null;
+    }
+  }
 
-	public String formatDateTime(LocalDateTime dateTime) {
-		if (dateTime == null) {
-			return "";
-		}
-		return dateTime.format(DATE_FORMATTER);
-	}
+  public String formatDateTime(LocalDateTime dateTime) {
+    if (dateTime == null) {
+      return "";
+    }
+    return dateTime.format(DATE_FORMATTER);
+  }
 }

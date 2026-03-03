@@ -10,7 +10,6 @@ import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.RefreshAccessTokenCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.SignupCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.login.LoginCommand;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.login.OAuth2LoginCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.login.TwoFactorLoginCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ChangePasswordCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ForgotPasswordCommand;
@@ -20,7 +19,7 @@ import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.twoFa.EnableTwoFactorCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.twoFa.SendValidationCodeCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.twoFa.VerifyTwoFactorCommand;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.result.SessionResult;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.result.SessionPayload;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.result.SignUpResult;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.result.TwoFactorQRResult;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.LoginUseCase;
@@ -62,14 +61,14 @@ public class UseCasesOrquestrator
   }
 
   @Override
-  public SessionResult login(LoginCommand command) {
+  public SessionPayload login(LoginCommand command) {
     log.info("AuthUseCases: Executing login use case for identifier: {}",
         maskIdentifier(command.identifier()));
     return loginUseCase.execute(command);
   }
 
   @Override
-  public SessionResult refreshAccessToken(RefreshAccessTokenCommand command) {
+  public SessionPayload refreshAccessToken(RefreshAccessTokenCommand command) {
     log.info("AuthUseCases: Executing refresh access token use case");
     return refreshAccessTokenUseCase.execute(command);
   }
@@ -94,13 +93,9 @@ public class UseCasesOrquestrator
     return identifier.substring(0, 3) + "***";
   }
 
-  @Override
-  public SessionResult oauth2Login(OAuth2LoginCommand command) {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
 
   @Override
-  public SessionResult twoFactorLogin(TwoFactorLoginCommand command) {
+  public SessionPayload twoFactorLogin(TwoFactorLoginCommand command) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 

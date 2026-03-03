@@ -25,49 +25,52 @@ import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.input.AuthUseC
 @RequestMapping("/api/v2/auth")
 @Slf4j
 public class RegisterController {
-	private final AuthUseCases authUseCases;
+  private final AuthUseCases authUseCases;
 
-	@Autowired
-	public RegisterController(AuthUseCases authUseCases) {
-		this.authUseCases = authUseCases;
-	}
+  @Autowired
+  public RegisterController(AuthUseCases authUseCases) {
+    this.authUseCases = authUseCases;
+  }
 
-	@PostMapping("/register/customer")
-	@RateLimit(profile = RateLimitProfile.SENSITIVE)
-	public ResponseEntity<ResponseWrapper<SignUpResponse>> registerCustomer(
-			@RequestBody @Valid @NotNull SignupRequest request) {
+  @PostMapping("/register/customer")
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  public ResponseEntity<ResponseWrapper<SignUpResponse>> registerCustomer(
+      @RequestBody @Valid @NotNull SignupRequest request) {
+    log.info("Received registration request for email: {}", request.email());
+    SignupCommand command = request.toCommand(UserRole.CUSTOMER);
 
-		log.info("Received registration request for email: {}", request.email());
-		SignupCommand command = request.toCommand(UserRole.CUSTOMER);
-		SignUpResult result = authUseCases.signUp(command);
-		SignUpResponse response = SignUpResponse.fromResult(result);
+    SignUpResult result = authUseCases.signUp(command);
 
-		log.info("Registering Customer User: {}", request.email());
-		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(ResponseWrapper.created(response, "Customer User"));
-	}
+    SignUpResponse response = SignUpResponse.fromResult(result);
+    log.info("Registering Customer User: {}", request.email());
 
-	@PostMapping("/register/employee")
-	@RateLimit(profile = RateLimitProfile.SENSITIVE)
-	public ResponseEntity<ResponseWrapper<SignUpResponse>> registerEmployee(
-			@RequestBody @Valid @NotNull SignupRequest request) {
-		SignupCommand command = request.toCommand(UserRole.EMPLOYEE);
-		SignUpResult result = authUseCases.signUp(command);
-		SignUpResponse response = SignUpResponse.fromResult(result);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(ResponseWrapper.created(response, "Customer User"));
+  }
 
-		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(ResponseWrapper.created(response, "Employee User"));
-	}
+  @PostMapping("/register/employee")
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  public ResponseEntity<ResponseWrapper<SignUpResponse>> registerEmployee(
+      @RequestBody @Valid @NotNull SignupRequest request) {
+    SignupCommand command = request.toCommand(UserRole.EMPLOYEE);
 
-	@PostMapping("/register/admin")
-	@RateLimit(profile = RateLimitProfile.SENSITIVE)
-	public ResponseEntity<ResponseWrapper<SignUpResponse>> registerAdmin(
-			@RequestBody @Valid @NotNull SignupRequest request) {
-		SignupCommand command = request.toCommand(UserRole.ADMIN);
-		SignUpResult result = authUseCases.signUp(command);
-		SignUpResponse response = SignUpResponse.fromResult(result);
+    SignUpResult result = authUseCases.signUp(command);
 
-		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(ResponseWrapper.created(response, "Admin User"));
-	}
+    SignUpResponse response = SignUpResponse.fromResult(result);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(ResponseWrapper.created(response, "Employee User"));
+  }
+
+  @PostMapping("/register/admin")
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  public ResponseEntity<ResponseWrapper<SignUpResponse>> registerAdmin(
+      @RequestBody @Valid @NotNull SignupRequest request) {
+    SignupCommand command = request.toCommand(UserRole.ADMIN);
+
+    SignUpResult result = authUseCases.signUp(command);
+
+    SignUpResponse response = SignUpResponse.fromResult(result);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(ResponseWrapper.created(response, "Admin User"));
+  }
 }

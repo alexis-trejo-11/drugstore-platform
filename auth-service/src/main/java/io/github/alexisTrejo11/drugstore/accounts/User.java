@@ -21,27 +21,29 @@ public class User {
 	private PhoneNumber phoneNumber;
 	private String password;
 	private UserRole role;
-	private LocalDateTime joinedAt;
+	private UserStatus status;
 	private LocalDateTime lastLoginAt;
-	private Boolean twoFactorEnabled;
+	private LocalDateTime createdAt;
+	private boolean twoFactorEnabled;
 
-	public static User create(Email email, PhoneNumber phoneNumber, String password, UserRole role) {
-		return User.builder()
-				.id(UserId.generate())
-				.email(email)
-				.phoneNumber(phoneNumber)
-				.password(password)
-				.role(role)
-				.joinedAt(LocalDateTime.now())
-				.twoFactorEnabled(false)
-				.build();
+	public void validateUserCanLogin() {
+		if (this.getStatus() == UserStatus.PENDING_ACTIVATION) {
+			throw new IllegalStateException("User account is pending activation. Please activate your account before logging in.");
+		}
+
+		if (this.getStatus() == UserStatus.BANNED) {
+			throw new IllegalStateException("User account is banned. Please contact support for assistance.");
+		}
 	}
 
-	public void updateEmail(Email newEmail) {
-		this.email = newEmail;
+	public String getFullName() {
+		return firstName + " " + lastName;
 	}
 
-	public void changePassword(String newPassword) {
-		this.password = newPassword;
+	public enum UserStatus {
+		ACTIVE,
+		PENDING_ACTIVATION,
+		INACTIVE,
+		BANNED
 	}
 }

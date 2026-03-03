@@ -29,9 +29,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    // Admin Service
-    implementation 'de.codecentric:spring-boot-admin-starter-client:3.0.0'
-
     // Migrations
     implementation 'org.flywaydb:flyway-core:10.17.0'
     implementation 'org.flywaydb:flyway-database-postgresql:10.17.0'

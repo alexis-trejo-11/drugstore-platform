@@ -34,10 +34,6 @@ dependencies {
     // Spring Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
-	// Config Server
-	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
-	implementation 'org.springframework.cloud:spring-cloud-starter-config'
-
 	// Postgres
 	implementation 'org.postgresql:postgresql'
 	runtimeOnly 'org.postgresql:postgresql'
@@ -64,7 +60,7 @@ dependencies {
 	implementation 'org.flywaydb:flyway-database-postgresql:10.17.0'
 
 	// Open Api
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 
 	// Admin Service
 	implementation 'de.codecentric:spring-boot-admin-starter-client:3.0.0'
@@ -87,8 +83,8 @@ bootRun {
             //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     ]
 
-    // Load .env file from config-server directory
-    def envFile = file('../config-server/.env')
+    // Load .env file
+    def envFile = file('.env')
     if (envFile.exists()) {
         envFile.readLines().each { line ->
             if (line && !line.startsWith('#') && line.contains('=')) {
