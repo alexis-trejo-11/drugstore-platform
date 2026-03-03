@@ -1,6 +1,6 @@
 package io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output;
 
-import io.github.alexisTrejo11.drugstore.accounts.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.User;
 
 public interface UserServiceClient {
 	boolean isEmailUnique(String email);

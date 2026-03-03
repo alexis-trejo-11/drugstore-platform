@@ -1,0 +1,86 @@
+services:
+  auth-service:
+    build: 
+      context: ..
+      dockerfile:  ./auth-service/dockerfile
+    container_name: auth-service
+    hostname: auth-service
+    restart: unless-stopped
+    ports:
+      - "8444:8443"  # HTTPS port
+    environment:
+      # Active profile
+      - SPRING_PROFILES_ACTIVE=docker
+      
+      # SSL Configuration (override .env for Docker)
+      - SERVER_SSL_ENABLED=true
+      - SERVER_PORT=8443
+      - SSL_KEYSTORE_PATH=file:/app/keystore.p12
+      
+      # Note: SSL password and JWT config loaded from .env file
+      
+      # Redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    
+      # Logging
+      - LOG_LEVEL_APP=DEBUG
+      
+      # JVM Options
+      - JAVA_OPTS=-Xmx512m -Xms256m
+      
+    env_file:
+      - .env
+      
+    volumes:
+      # Mount logs for persistence
+      - ./logs:/app/logs
+      
+    networks:
+      - drugstore-network
+      
+    depends_on:
+      redis:
+        condition: service_healthy
+      
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "--no-check-certificate", "https://localhost:8443/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+        reservations:
+          memory: 256m
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: auth-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6378:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - drugstore-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis-data:
+    name: auth-redis-data
+
+networks:
+  drugstore-network:
+    name: drugstore-network
+    driver: bridge

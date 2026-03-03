@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import io.github.alexisTrejo11.drugstore.accounts.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.User;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.InvalidCredentialsException;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.UserNotFoundException;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.UserServiceAuthException;

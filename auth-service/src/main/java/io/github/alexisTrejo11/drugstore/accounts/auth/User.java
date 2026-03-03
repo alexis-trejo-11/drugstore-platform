@@ -1,4 +1,4 @@
-package io.github.alexisTrejo11.drugstore.accounts;
+package io.github.alexisTrejo11.drugstore.accounts.auth;
 
 import java.time.LocalDateTime;
 

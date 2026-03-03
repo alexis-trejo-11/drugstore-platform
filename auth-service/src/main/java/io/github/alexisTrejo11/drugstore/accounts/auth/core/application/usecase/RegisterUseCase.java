@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import io.github.alexisTrejo11.drugstore.accounts.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.User;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.SignupCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.UserRegisteredEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.result.SignUpResult;
