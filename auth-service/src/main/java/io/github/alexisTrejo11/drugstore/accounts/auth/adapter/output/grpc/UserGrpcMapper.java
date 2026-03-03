@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 import com.microservices.grpc.user.UserResponse;
 import org.springframework.stereotype.Component;
 
-import io.github.alexisTrejo11.drugstore.accounts.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.User;
 
 @Component
 public class UserGrpcMapper {
