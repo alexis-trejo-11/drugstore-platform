@@ -61,9 +61,6 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.42'
     annotationProcessor 'org.projectlombok:lombok:1.18.42'
 
-    // Config Server
-    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
-    implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
     // Redis Cache
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'

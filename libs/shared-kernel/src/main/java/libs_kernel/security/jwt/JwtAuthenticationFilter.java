@@ -18,11 +18,11 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-	private final JwtTokenManager jwtTokenService;
+	private final JwtTokenValidator jwtTokenService;
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
 	@Autowired
-	public JwtAuthenticationFilter(JwtTokenManager jwtTokenService) {
+	public JwtAuthenticationFilter(JwtTokenValidator jwtTokenService) {
 		this.jwtTokenService = jwtTokenService;
 	}
 

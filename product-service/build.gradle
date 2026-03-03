@@ -47,9 +47,6 @@ dependencies {
 	// Common library
 	implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
 
-	// Config Server
-	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
-	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
 	// Postgres
 	runtimeOnly 'org.postgresql:postgresql'

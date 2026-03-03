@@ -11,8 +11,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.events.UserLoginEvent;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.events.UserRegisteredEvent;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.UserLoginEvent;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.UserRegisteredEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.user.UserCreatedEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.user.UserDeletedEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.user.UserUpdatedEvent;
@@ -33,6 +33,12 @@ public class UserEventProducer implements UserEventPublisher {
   @Value("${kafka.topics.user.deleted}")
   private String userDeletedTopic;
 
+  @Value("${kafka.topics.user.registered:user-registered}")
+  private String userRegisteredTopic;
+
+  @Value("${kafka.topics.user.login:user-login}")
+  private String userLoginTopic;
+
   @Value("${kafka.producer.timeout-seconds:10}")
   private long timeoutSeconds;
 
@@ -43,12 +49,58 @@ public class UserEventProducer implements UserEventPublisher {
 
   @Override
   public void publishUserRegistered(UserRegisteredEvent event) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    log.info("Publishing UserRegisteredEvent for userId: {}", event.userId());
+
+    try {
+      CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(
+          userRegisteredTopic,
+          event.userId(),
+          event);
+
+      future.whenComplete((result, ex) -> {
+        if (ex == null) {
+          log.info("UserRegisteredEvent published successfully. Topic: {}, Partition: {}, Offset: {}",
+              result.getRecordMetadata().topic(),
+              result.getRecordMetadata().partition(),
+              result.getRecordMetadata().offset());
+        } else {
+          log.error("Failed to publish UserRegisteredEvent for userId: {}. Error: {}",
+              event.userId(), ex.getMessage(), ex);
+        }
+      });
+
+      future.get(timeoutSeconds, TimeUnit.SECONDS);
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      log.error("Error publishing UserRegisteredEvent for userId: {}", event.userId(), e);
+      // Non-blocking: registration should succeed even if event publishing fails
+    }
   }
 
   @Override
   public void publishUserLogin(UserLoginEvent event) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    log.info("Publishing UserLoginEvent for userId: {}", event.userId());
+
+    try {
+      CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(
+          userLoginTopic,
+          event.userId(),
+          event);
+
+      future.whenComplete((result, ex) -> {
+        if (ex == null) {
+          log.debug("UserLoginEvent published successfully");
+        } else {
+          log.warn("Failed to publish UserLoginEvent for userId: {}. Error: {}",
+              event.userId(), ex.getMessage());
+        }
+      });
+
+      // Don't wait for completion - login events are non-critical
+      future.get(timeoutSeconds, TimeUnit.SECONDS);
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      log.warn("Error publishing UserLoginEvent for userId: {} - continuing anyway", event.userId());
+      // Non-blocking: login should succeed even if event publishing fails
+    }
   }
 
   @Override

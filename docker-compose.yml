@@ -1,9 +1,0 @@
-services:
-  order-service:
-    extends:
-      file: order-service/docker-compose.yml
-      service: order-service
-
-networks:
-  microservices-net:
-    driver: bridge

@@ -43,10 +43,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
 
-	// Config Server
-	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
-	implementation 'org.springframework.cloud:spring-cloud-starter-config'
-
 	// Postgres
 	runtimeOnly 'org.postgresql:postgresql'
 	implementation 'org.postgresql:postgresql'

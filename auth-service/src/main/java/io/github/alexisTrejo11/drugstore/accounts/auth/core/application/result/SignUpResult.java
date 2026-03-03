@@ -20,7 +20,7 @@ public record SignUpResult(
         user.getFirstName(),
         user.getLastName(),
         user.getRole(),
-        user.getJoinedAt(),
+        user.getCreatedAt(),
         requiresEmailVerification);
   }
 }

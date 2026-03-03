@@ -29,7 +29,7 @@ public class JwtProperties{
 		this.secret = secret;
 	}
 
-	// Compatibility: JwtTokenManager expects getters that return a value in milliseconds
+	// Compatibility: JwtTokenValidator expects getters that return a value in milliseconds
 	// The configuration YAML uses minutes, so convert minutes -> milliseconds here.
 	public long getAccessTokenExpirationSeconds() {
 		return accessTokenExpirationMinutes * 60 * 1000;

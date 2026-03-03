@@ -25,7 +25,7 @@ public class UserInfoResponse {
 				.firstName(result.getFirstName())
 				.lastName(result.getLastName())
 				.role(result.getRole() != null ? result.getRole().name() : null)
-				.twoFactorEnabled(result.getTwoFactorEnabled())
+				.twoFactorEnabled(result.isTwoFactorEnabled())
 				.build();
 	}
 }

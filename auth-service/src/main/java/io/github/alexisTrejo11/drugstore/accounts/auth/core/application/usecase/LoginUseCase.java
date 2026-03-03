@@ -2,20 +2,20 @@ package io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase
 
 import java.util.UUID;
 
+import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.output.security.tokens.TokenType;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.result.SessionPayload;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.models.JWTSessions;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.input.TokenService;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.*;
+import libs_kernel.security.dto.UserClaims;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import io.github.alexisTrejo11.drugstore.accounts.User;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.login.LoginCommand;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.events.UserLoginEvent;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.result.SessionResult;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.UserLoginEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.InvalidCredentialsException;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.Token;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.UserEventPublisher;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.PasswordEncoder;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.TokenProvider;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.UserServiceClient;
 
 /**
  * LoginUseCase - Handles user authentication and session creation
@@ -27,42 +27,64 @@ import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.UserSer
 @RequiredArgsConstructor
 public class LoginUseCase {
   private final PasswordEncoder passwordEncoder;
-  private final TokenProvider tokenProvider;
+  private final TokenService tokenProvider;
   private final UserEventPublisher eventPublisher;
+  private final SessionRepository sessionRepository;
   private final UserServiceClient userServiceClient;
 
   /**
    * Execute the login use case
    *
    * @param command the login command containing email/phone and password
-   * @return SessionResult containing JWT tokens for the authenticated user
+   * @return SessionPayload containing JWT tokens for the authenticated user
    * @throws InvalidCredentialsException if credentials are invalid
    */
-  public SessionResult execute(LoginCommand command) {
+  public SessionPayload execute(LoginCommand command) {
     log.info("Processing login attempt for identifier: {}", maskSensitiveData(command.identifier()));
-
     User user = getUserByIdentifier(command.identifier());
-    log.debug("User found with ID: {}", user.getId());
 
     validatePassword(command.password(), user);
-    log.debug("Password validation successful for user: {}", user.getId());
+    user.validateUserCanLogin();
 
-    SessionResult sessionResult = generateSessionTokens(user);
-    log.info("Session tokens generated successfully for user: {}", user.getId());
-
+    SessionPayload sessionPayload = processJwtSession(user, command);
     publishLoginEvent(user);
-    log.debug("UserLoginEvent published for user: {}", user.getId());
 
-    return sessionResult;
+    return sessionPayload;
   }
 
   /**
-   * Validates the provided password against the user's stored password
+   * Generates access and refresh JWT tokens for the authenticated user
    *
-   * @param providedPassword the password provided by user
-   * @param user             the user from repository
-   * @throws InvalidCredentialsException if password is invalid
+   * @param user the authenticated user
+   * @return SessionPayload containing both tokens
    */
+  private SessionPayload processJwtSession(User user, LoginCommand command) {
+    log.debug("Generating session tokens for user: {}", user.getId());
+
+    var claims = UserClaims.builder()
+        .userId(user.getId().value())
+        .email(user.getEmail().value())
+        .role(user.getRole().getRoleName())
+        .name(user.getFirstName() + " " + user.getLastName())
+        .phoneNumber(user.getPhoneNumber() != null ? user.getPhoneNumber().value() : null)
+        .build();
+
+    // Interface Implementation will ignore unnecessary claims based on token type
+    var accessToken = tokenProvider.generateToken(TokenType.ACCESS, claims);
+    var refreshToken = tokenProvider.generateToken(TokenType.REFRESH, claims);
+
+    // Save it on session service for track and blacklist if required
+    var jwtSession = JWTSessions.from(
+        refreshToken,
+        command.deviceId(),
+        command.ipAddress(),
+        user.getId().value());
+    sessionRepository.save(jwtSession);
+
+    log.debug("Session tokens generated for user: {}", user.getId());
+    return SessionPayload.bearer(user.getId().value(), accessToken, refreshToken);
+  }
+
   private void validatePassword(String providedPassword, User user) {
     log.debug("Validating password for user: {}", user.getId());
 
@@ -70,45 +92,17 @@ public class LoginUseCase {
       log.warn("Invalid password attempt for user: {}", user.getId());
       throw new InvalidCredentialsException("Invalid credentials: incorrect password");
     }
+
+    log.debug("Password validation successful for user: {}", user.getId());
   }
 
-  /**
-   * Generates access and refresh JWT tokens for the authenticated user
-   *
-   * @param user the authenticated user
-   * @return SessionResult containing both tokens
-   */
-  private SessionResult generateSessionTokens(User user) {
-    log.debug("Generating session tokens for user: {}", user.getId());
-
-    Token accessToken = tokenProvider.generateAccessToken(
-        user.getId(),
-        user.getEmail().value(),
-        user.getRole());
-
-    Token refreshToken = tokenProvider.generateRefreshToken(
-        user.getId(),
-        user.getEmail().value());
-
-    var sessionResult = SessionResult.bearer(
-        user.getId(),
-        accessToken,
-        refreshToken);
-
-    log.debug("Session tokens generated for user: {}", user.getId());
-
-    return sessionResult;
-  }
-
-  /**
-   * Publishes a UserLoginEvent for audit trail and metrics
-   *
-   * @param user the logged-in user
-   */
+  // Event publishing is non-blocking - if it fails, we log the error but do not
+  // prevent login
+  // Will send to kafka to create user and send notification if required
   private void publishLoginEvent(User user) {
     try {
       UserLoginEvent event = new UserLoginEvent(
-          user.getId().value().toString(),
+          user.getId().value(),
           user.getEmail().value(),
           UUID.randomUUID().toString());
       eventPublisher.publishUserLogin(event);
@@ -119,12 +113,6 @@ public class LoginUseCase {
     }
   }
 
-  /**
-   * Masks sensitive data in logs (email/phone)
-   *
-   * @param identifier the email or phone to mask
-   * @return masked identifier
-   */
   private String maskSensitiveData(String identifier) {
     if (identifier == null || identifier.length() < 4) {
       return "***";
@@ -132,18 +120,10 @@ public class LoginUseCase {
     return identifier.substring(0, 3) + "***";
   }
 
-  /**
-   * Retrieves a user by email or phone number using the UserServiceClient
-   *
-   * @param identifier email or phone number
-   * @return User object if found
-   * @throws InvalidCredentialsException if user is not found
-   */
   private User getUserByIdentifier(String identifier) {
     User user;
     if (identifier.contains("@")) {
       user = userServiceClient.getUserByEmail(identifier);
-
     } else {
       user = userServiceClient.getUserByPhone(identifier);
     }
@@ -152,6 +132,8 @@ public class LoginUseCase {
       log.warn("No user found with identifier: {}", maskSensitiveData(identifier));
       throw new InvalidCredentialsException("Invalid credentials: user not found");
     }
+
+    log.debug("User found with ID: {}", user.getId());
     return user;
   }
 }

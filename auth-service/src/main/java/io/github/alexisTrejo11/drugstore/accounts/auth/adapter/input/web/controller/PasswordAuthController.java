@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import libs_kernel.config.rate_limit.RateLimit;
 import libs_kernel.config.rate_limit.RateLimitProfile;
 import libs_kernel.response.ResponseWrapper;
+import lombok.extern.slf4j.Slf4j;
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.input.web.dto.input.ChangePasswordRequest;
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.input.web.dto.input.ForgotPasswordRequest;
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.input.web.dto.input.ResetPasswordRequest;
@@ -23,57 +24,67 @@ import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ValidateResetTokenCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.input.PasswordUseCases;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v2/auth/password")
 public class PasswordAuthController {
-    private final PasswordUseCases passwordUseCases;
+  private final PasswordUseCases passwordUseCases;
 
-    @Autowired
-    public PasswordAuthController(PasswordUseCases passwordUseCases) {
-        this.passwordUseCases = passwordUseCases;
-    }
+  @Autowired
+  public PasswordAuthController(PasswordUseCases passwordUseCases) {
+    this.passwordUseCases = passwordUseCases;
+  }
 
-    @PostMapping("/forgot")
-    @RateLimit(profile = RateLimitProfile.SENSITIVE)
-    public ResponseWrapper<Void> forgotPassword(
-            @RequestBody @Valid @NotNull ForgotPasswordRequest request) {
-        ForgotPasswordCommand command = request.toCommand();
-        passwordUseCases.forgotPassword(command);
+  @PostMapping("/forgot")
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  public ResponseWrapper<Void> forgotPassword(
+      @RequestBody @Valid @NotNull ForgotPasswordRequest request) {
+    log.info("Password reset request received");
 
-        return ResponseWrapper.success("Password reset email sent successfully");
-    }
+    ForgotPasswordCommand command = request.toCommand();
+    passwordUseCases.forgotPassword(command);
 
-    @PostMapping("/validate-token")
-    @RateLimit(profile = RateLimitProfile.SENSITIVE)
-    public ResponseWrapper<Void> validateResetToken(
-            @RequestBody @Valid @NotNull ValidateResetTokenRequest request) {
+    log.info("Password reset email sent successfully");
+    return ResponseWrapper.success("Password reset email sent successfully");
+  }
 
-        ValidateResetTokenCommand command = request.toCommand();
-        passwordUseCases.validateResetToken(command);
+  @PostMapping("/validate-token")
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  public ResponseWrapper<Void> validateResetToken(
+      @RequestBody @Valid @NotNull ValidateResetTokenRequest request) {
+    log.debug("Validating password reset token");
 
-        return ResponseWrapper.success("Reset token is valid");
-    }
+    ValidateResetTokenCommand command = request.toCommand();
+    passwordUseCases.validateResetToken(command);
 
-    @PostMapping("/reset")
-    @RateLimit(profile = RateLimitProfile.SENSITIVE)
-    public ResponseWrapper<Void> resetPassword(
-            @RequestBody @Valid @NotNull ResetPasswordRequest request) {
+    log.debug("Reset token validated successfully");
+    return ResponseWrapper.success("Reset token is valid");
+  }
 
-        ResetPasswordCommand command = request.toCommand();
-        passwordUseCases.resetPassword(command);
+  @PostMapping("/reset")
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  public ResponseWrapper<Void> resetPassword(
+      @RequestBody @Valid @NotNull ResetPasswordRequest request) {
+    log.info("Password reset requested");
 
-        return ResponseWrapper.success("Password reset successfully");
-    }
+    ResetPasswordCommand command = request.toCommand();
+    passwordUseCases.resetPassword(command);
 
-    @PutMapping("/change")
-    @RateLimit(profile = RateLimitProfile.SENSITIVE)
-    public ResponseWrapper<Void> changePassword(
-            @RequestAttribute("userId") String userId,
-            @RequestBody @Valid @NotNull ChangePasswordRequest request) {
+    log.info("Password reset successfully");
+    return ResponseWrapper.success("Password reset successfully");
+  }
 
-        ChangePasswordCommand command = request.toCommand(userId);
-        passwordUseCases.changePassword(command);
+  @PutMapping("/change")
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  public ResponseWrapper<Void> changePassword(
+      @RequestAttribute("userId") String userId,
+      @RequestBody @Valid @NotNull ChangePasswordRequest request) {
+    log.info("Password change request for user: {}", userId);
 
-        return ResponseWrapper.success(null, "Password changed successfully");
-    }
+    ChangePasswordCommand command = request.toCommand(userId);
+    passwordUseCases.changePassword(command);
+
+    log.info("Password changed successfully for user: {}", userId);
+    return ResponseWrapper.success(null, "Password changed successfully");
+  }
 }

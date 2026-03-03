@@ -16,7 +16,7 @@ java {
 repositories {
 	mavenLocal()
 	mavenCentral()
-  maven {
+  	maven {
     url 'https://projectlombok.org/edge-releases'
   }
 }
@@ -72,6 +72,10 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// OAuth2
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	
 }
 
 dependencyManagement {
@@ -112,8 +116,8 @@ bootRun {
             //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     ]
 
-    // Load .env file from config-server directory
-    def envFile = file('../config-server/.env')
+    // Load .env file and set system properties and environment variables
+    def envFile = file('./.env')
     if (envFile.exists()) {
         envFile.readLines().each { line ->
             if (line && !line.startsWith('#') && line.contains('=')) {

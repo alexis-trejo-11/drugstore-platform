@@ -9,6 +9,8 @@ public record Password(String value) {
         }
     }
 
+		public static final Password DEFAULT_OAUTH_PASSWORD = new Password("oauth2userdefaultpassword");
+
     public String hash() {
         return BCrypt.hashpw(value, BCrypt.gensalt());
     }

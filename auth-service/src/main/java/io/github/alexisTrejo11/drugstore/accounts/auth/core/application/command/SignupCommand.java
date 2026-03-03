@@ -15,8 +15,9 @@ public record SignupCommand(
 		PhoneNumber phone,
 		Password password,
 		UserRole role,
-		String firstName,
-		String lastName
+		String provider,
+		String pictureUrl,
+		PersonalInfo personalInfo
 		) {
 	public SignupCommand {
 		if (role == null) {
