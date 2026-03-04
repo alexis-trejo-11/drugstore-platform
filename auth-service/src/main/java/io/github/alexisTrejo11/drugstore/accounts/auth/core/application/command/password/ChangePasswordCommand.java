@@ -6,10 +6,10 @@ import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.
  * Command for changing user password.
  * Validates all required fields and password strength.
  */
-public record ChangePasswordCommand(String token, String newPassword, UserId userId) {
+public record ChangePasswordCommand(String newPassword, UserId userId, String currentPassword) {
   public ChangePasswordCommand {
-    if (token == null || token.isBlank()) {
-      throw new IllegalArgumentException("Token cannot be null or blank");
+    if (currentPassword == null || currentPassword.isBlank()) {
+      throw new IllegalArgumentException("Current Password cannot be null or blank");
     }
     if (newPassword == null || newPassword.isBlank()) {
       throw new IllegalArgumentException("New password cannot be null or blank");

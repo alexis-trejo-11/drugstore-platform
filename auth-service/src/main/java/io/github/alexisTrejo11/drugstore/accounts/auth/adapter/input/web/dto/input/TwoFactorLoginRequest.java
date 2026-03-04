@@ -18,9 +18,6 @@ public class TwoFactorLoginRequest {
     @Email(message = "Email must be valid")
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters")
-    private String password;
 
     @NotBlank(message = "2FA code is required")
     @Size(min = 6, max = 6, message = "2FA code must be 6 digits")
@@ -33,10 +30,8 @@ public class TwoFactorLoginRequest {
     public TwoFactorLoginCommand toCommand() {
         return TwoFactorLoginCommand.builder()
                 .email(this.email)
-                .password(this.password)
-                .twoFactorCode(this.twoFactorCode)
+                .code(this.twoFactorCode)
                 .deviceId(this.deviceId)
-                .deviceName(this.deviceName)
                 .ipAddress(this.ipAddress)
                 .build();
     }

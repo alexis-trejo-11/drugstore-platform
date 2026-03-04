@@ -5,6 +5,7 @@ import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.Password;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.UserRole;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.input.AuthUseCases;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.input.RegisterUseCases;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -15,10 +16,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CustomOAuth2UserService.class);
-    private final AuthUseCases authUseCases;
+    private final RegisterUseCases authUseCases;
 
 		@Autowired
-    public CustomOAuth2UserService(AuthUseCases authUseCases) {
+    public CustomOAuth2UserService( RegisterUseCases authUseCases) {
         this.authUseCases = authUseCases;
     }
 
@@ -50,7 +51,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		        .password(Password.DEFAULT_OAUTH_PASSWORD) // Placeholder password, not used for OAuth2 users
 		        .build();
 
-         authUseCases.signUp(command);
+         authUseCases.register(command);
 
         return oAuth2User;
     }

@@ -44,4 +44,10 @@ public interface TokenService {
    */
   UserClaims extractClaims(String token);
 
+	/**
+	 * Invalidate a token (e.g. on logout)
+	 *
+	 * @param token the JWT token string to invalidate
+	 */
+	void invalidateToken(String token);
 }

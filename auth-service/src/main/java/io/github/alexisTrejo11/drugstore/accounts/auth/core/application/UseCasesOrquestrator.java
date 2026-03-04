@@ -1,10 +1,17 @@
 package io.github.alexisTrejo11.drugstore.accounts.auth.core.application;
 
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.password.ChangePasswordUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.password.ForgotPasswordUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.password.ResetPasswordUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.token.ActivateAccountUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.token.SendValidationCodeUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.token.ValidateResetTokenUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.twofa.DisableTwoFactorAuthUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.twofa.EnableTwoFactorAuthUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.twofa.TwoFactorLoginUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.twofa.VerifyTwoFactorCodeUseCase;
 import org.springframework.stereotype.Service;
 
-import libs_kernel.response.Result;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.LogoutAllCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.LogoutCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.RefreshAccessTokenCommand;
@@ -23,16 +30,17 @@ import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.result.S
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.result.SignUpResult;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.result.TwoFactorQRResult;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.LoginUseCase;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.LogoutAllUseCase;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.LogoutUseCase;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.RefreshAccessTokenUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.logout.LogoutAllUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.logout.LogoutUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.token.RefreshAccessTokenUseCase;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.RegisterUseCase;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.UserId;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.input.AuthUseCases;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.input.LogoutUseCases;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.input.PasswordUseCases;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.input.RegisterUseCases;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.input.TwoFaConfigUseCases;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * UseCasesOrquestrator - Orchestrator for all authentication use cases
@@ -52,9 +60,19 @@ public class UseCasesOrquestrator
   private final RefreshAccessTokenUseCase refreshAccessTokenUseCase;
   private final LogoutUseCase logoutUseCase;
   private final LogoutAllUseCase logoutAllUseCase;
+	private final TwoFactorLoginUseCase twoFactorLoginUseCase;
+	private final ForgotPasswordUseCase forgotPasswordUseCase;
+	private final ValidateResetTokenUseCase validateResetTokenUseCase;
+	private final ResetPasswordUseCase resetPasswordUseCase;
+	private final ChangePasswordUseCase changePasswordUseCase;
+	private final ActivateAccountUseCase activateAccountUseCase;
+	private final EnableTwoFactorAuthUseCase enableTwoFactorAuthUseCase;
+	private final DisableTwoFactorAuthUseCase disableTwoFactorAuthUseCase;
+	private final SendValidationCodeUseCase sendValidationCodeUseCase;
+	private final VerifyTwoFactorCodeUseCase verifyTwoFactorCodeUseCase;
 
   @Override
-  public SignUpResult signUp(SignupCommand command) {
+  public SignUpResult register(SignupCommand command) {
     log.info("AuthUseCases: Executing signup use case for email: {}",
         command.email().value());
     return registerUseCase.execute(command);
@@ -93,59 +111,63 @@ public class UseCasesOrquestrator
     return identifier.substring(0, 3) + "***";
   }
 
-
   @Override
   public SessionPayload twoFactorLogin(TwoFactorLoginCommand command) {
-    throw new UnsupportedOperationException("Not supported yet.");
+		log.info("AuthUseCases: Executing 2FA login use case for user: {}", command.email());
+		return twoFactorLoginUseCase.execute(command);
   }
 
   @Override
   public void forgotPassword(ForgotPasswordCommand command) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    log.info("AuthUseCases: Executing forgot password use case for email: {}", command.email());
+		forgotPasswordUseCase.execute(command);
   }
 
   @Override
   public void validateResetToken(ValidateResetTokenCommand command) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    log.info("AuthUseCases: Executing validate reset token use case");
+    validateResetTokenUseCase.execute(command);
   }
 
   @Override
   public void resetPassword(ResetPasswordCommand command) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    log.info("AuthUseCases: Executing reset password use case");
+    resetPasswordUseCase.execute(command);
   }
 
   @Override
   public void changePassword(ChangePasswordCommand command) {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
-  public Result<UserId> register(SignupCommand command) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    log.info("AuthUseCases: Executing change password use case for user: {}", command.userId());
+    changePasswordUseCase.execute(command);
   }
 
   @Override
   public void activateAccount(String activationCode) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    log.info("AuthUseCases: Executing activate account use case");
+    activateAccountUseCase.execute(activationCode);
   }
 
   @Override
   public TwoFactorQRResult enableTwoFactorAuth(EnableTwoFactorCommand command) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    log.info("AuthUseCases: Executing enable two-factor authentication use case for user: {}", command.userId());
+    return enableTwoFactorAuthUseCase.execute(command);
   }
 
   @Override
   public void disableTwoFactorAuth(DisableTwoFactorCommand command) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    log.info("AuthUseCases: Executing disable two-factor authentication use case for user: {}", command.userId());
+    disableTwoFactorAuthUseCase.execute(command);
   }
 
   @Override
   public void sendValidationCode(SendValidationCodeCommand command) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    log.info("AuthUseCases: Executing send validation code use case for user: {}", command.userIdString());
+    sendValidationCodeUseCase.execute(command);
   }
 
   @Override
   public void verifyTwoFactorCode(VerifyTwoFactorCommand command) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    log.info("AuthUseCases: Executing verify two-factor code use case for user: {}", command.userId());
+    verifyTwoFactorCodeUseCase.execute(command);
   }
 }

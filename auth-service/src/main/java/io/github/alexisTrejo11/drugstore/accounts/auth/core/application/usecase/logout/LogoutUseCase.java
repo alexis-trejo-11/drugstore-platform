@@ -1,4 +1,4 @@
-package io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase;
+package io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.logout;
 
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.output.security.tokens.TokenType;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.SessionRepository;

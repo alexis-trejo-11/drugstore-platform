@@ -6,21 +6,15 @@ import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.UserId;
 
 public record ChangePasswordRequest(
-		@NotBlank(message = "Current password is required")
-		String currentPassword,
+    @NotBlank(message = "Current password is required") String currentPassword,
 
-		@NotBlank(message = "New password is required")
-		@Size(min = 8, message = "Password must be at least 8 characters")
-		String newPassword,
+    @NotBlank(message = "New password is required") @Size(min = 8, message = "Password must be at least 8 characters") String newPassword,
 
-		@NotBlank(message = "Password confirmation is required")
-		String confirmPassword
-) {
-	public ChangePasswordCommand toCommand(String userId) {
-		return new ChangePasswordCommand(
-				this.currentPassword(),
-				this.newPassword(),
-				new UserId(userId)
-		);
-	}
+    @NotBlank(message = "Password confirmation is required") String confirmPassword) {
+  public ChangePasswordCommand toCommand(String userId) {
+    return new ChangePasswordCommand(
+        this.newPassword(),
+        new UserId(userId),
+        this.currentPassword());
+  }
 }

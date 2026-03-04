@@ -79,12 +79,25 @@ kafka:
       created: user.created
       updated: user.updated
       deleted: user.deleted
+      registered: user.registered
+      login: user.login
+
+    # Auth Topics
+    auth:
+      user-registered: auth.user-registered
+      user-login: auth.user-login
+      password-changed: auth.password-changed
+      account-activated: auth.account-activated
+      two-factor-enabled: auth.two-factor-enabled
+      two-factor-disabled: auth.two-factor-disabled
 
     # Notification Topics
     notification:
       email-verification: notification.email-verification
       two-factor-code: notification.two-factor-code
       welcome-email: notification.welcome-email
+      password-reset-token: notification.password-reset-token
+      account-activation-token: notification.account-activation-token
 
     # Topic Configuration
     partitions: 3

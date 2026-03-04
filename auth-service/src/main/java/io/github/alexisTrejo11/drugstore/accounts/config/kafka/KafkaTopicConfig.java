@@ -37,6 +37,25 @@ public class KafkaTopicConfig {
   @Value("${kafka.topics.notification.welcome-email:notification.welcome-email}")
   private String welcomeEmailTopic;
 
+  // Topics for auth events
+  @Value("${kafka.topics.auth.user-registered:auth.user-registered}")
+  private String userRegisteredTopic;
+
+  @Value("${kafka.topics.auth.user-login:auth.user-login}")
+  private String userLoginTopic;
+
+  @Value("${kafka.topics.auth.password-changed:auth.password-changed}")
+  private String passwordChangedTopic;
+
+  @Value("${kafka.topics.auth.account-activated:auth.account-activated}")
+  private String accountActivatedTopic;
+
+  @Value("${kafka.topics.auth.two-factor-enabled:auth.two-factor-enabled}")
+  private String twoFactorEnabledTopic;
+
+  @Value("${kafka.topics.auth.two-factor-disabled:auth.two-factor-disabled}")
+  private String twoFactorDisabledTopic;
+
   // Configuration for partitions and replication factor
   @Value("${kafka.topics.partitions:3}")
   private Integer partitions;
@@ -109,6 +128,71 @@ public class KafkaTopicConfig {
         .replicas(replicationFactor)
         .config("retention.ms", "86400000") // 24 horas
         .config("compression.type", "snappy")
+        .build();
+  }
+
+  // Auth event topics
+  @Bean
+  public NewTopic userRegisteredTopic() {
+    return TopicBuilder.name(userRegisteredTopic)
+        .partitions(partitions)
+        .replicas(replicationFactor)
+        .config("retention.ms", "604800000") // 7 días
+        .config("compression.type", "snappy")
+        .config("min.insync.replicas", "1")
+        .build();
+  }
+
+  @Bean
+  public NewTopic userLoginTopic() {
+    return TopicBuilder.name(userLoginTopic)
+        .partitions(partitions)
+        .replicas(replicationFactor)
+        .config("retention.ms", "259200000") // 3 días (eventos de login menos críticos)
+        .config("compression.type", "snappy")
+        .build();
+  }
+
+  @Bean
+  public NewTopic passwordChangedTopic() {
+    return TopicBuilder.name(passwordChangedTopic)
+        .partitions(partitions)
+        .replicas(replicationFactor)
+        .config("retention.ms", "2592000000") // 30 días (auditoría importante)
+        .config("compression.type", "snappy")
+        .config("min.insync.replicas", "1")
+        .build();
+  }
+
+  @Bean
+  public NewTopic accountActivatedTopic() {
+    return TopicBuilder.name(accountActivatedTopic)
+        .partitions(partitions)
+        .replicas(replicationFactor)
+        .config("retention.ms", "604800000") // 7 días
+        .config("compression.type", "snappy")
+        .build();
+  }
+
+  @Bean
+  public NewTopic twoFactorEnabledTopic() {
+    return TopicBuilder.name(twoFactorEnabledTopic)
+        .partitions(partitions)
+        .replicas(replicationFactor)
+        .config("retention.ms", "2592000000") // 30 días (seguridad importante)
+        .config("compression.type", "snappy")
+        .config("min.insync.replicas", "1")
+        .build();
+  }
+
+  @Bean
+  public NewTopic twoFactorDisabledTopic() {
+    return TopicBuilder.name(twoFactorDisabledTopic)
+        .partitions(partitions)
+        .replicas(replicationFactor)
+        .config("retention.ms", "2592000000") // 30 días (seguridad importante)
+        .config("compression.type", "snappy")
+        .config("min.insync.replicas", "1")
         .build();
   }
 

@@ -16,9 +16,6 @@ java {
 repositories {
 	mavenLocal()
 	mavenCentral()
-  	maven {
-    url 'https://projectlombok.org/edge-releases'
-  }
 }
 
 ext {
@@ -98,11 +95,6 @@ protobuf {
 			grpc {}
 		}
 	}
-}
-
-// Make sure shared-kernel is compiled first
-tasks.named('compileJava') {
-	dependsOn(':libs:shared-kernel:build')
 }
 
 tasks.named('test') {

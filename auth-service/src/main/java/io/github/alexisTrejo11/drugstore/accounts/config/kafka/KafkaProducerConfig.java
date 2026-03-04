@@ -15,7 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.std.StringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.context.annotation.Configuration;
 
+@Configuration
 public class KafkaProducerConfig {
   private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(KafkaProducerConfig.class);
 

@@ -5,14 +5,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.UserLoginEvent;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.UserRegisteredEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.user.UserCreatedEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.user.UserDeletedEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.user.UserUpdatedEvent;
@@ -38,6 +37,18 @@ public class UserEventProducer implements UserEventPublisher {
 
   @Value("${kafka.topics.user.login:user-login}")
   private String userLoginTopic;
+
+  @Value("${kafka.topics.auth.password-changed:auth.password-changed}")
+  private String passwordChangedTopic;
+
+  @Value("${kafka.topics.auth.account-activated:auth.account-activated}")
+  private String accountActivatedTopic;
+
+  @Value("${kafka.topics.auth.two-factor-enabled:auth.two-factor-enabled}")
+  private String twoFactorEnabledTopic;
+
+  @Value("${kafka.topics.auth.two-factor-disabled:auth.two-factor-disabled}")
+  private String twoFactorDisabledTopic;
 
   @Value("${kafka.producer.timeout-seconds:10}")
   private long timeoutSeconds;
@@ -202,6 +213,124 @@ public class UserEventProducer implements UserEventPublisher {
       log.error("Error publishing UserDeletedEvent for userId: {}",
           event.userId(), e);
       return false;
+    }
+  }
+
+  @Override
+  public void publishPasswordChanged(PasswordChangedEvent event) {
+    log.info("Publishing PasswordChangedEvent for userId: {}, reason: {}", 
+        event.userId(), event.changeReason());
+
+    try {
+      CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(
+          passwordChangedTopic,
+          event.userId(),
+          event);
+
+      future.whenComplete((result, ex) -> {
+        if (ex == null) {
+          log.info("PasswordChangedEvent published successfully. Topic: {}, Partition: {}, Offset: {}",
+              result.getRecordMetadata().topic(),
+              result.getRecordMetadata().partition(),
+              result.getRecordMetadata().offset());
+        } else {
+          log.error("Failed to publish PasswordChangedEvent for userId: {}. Error: {}",
+              event.userId(), ex.getMessage(), ex);
+        }
+      });
+
+      future.get(timeoutSeconds, TimeUnit.SECONDS);
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      log.error("Error publishing PasswordChangedEvent for userId: {}", event.userId(), e);
+      // Non-blocking: password change should succeed even if event publishing fails
+    }
+  }
+
+  @Override
+  public void publishAccountActivated(AccountActivatedEvent event) {
+    log.info("Publishing AccountActivatedEvent for userId: {}", event.userId());
+
+    try {
+      CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(
+          accountActivatedTopic,
+          event.userId(),
+          event);
+
+      future.whenComplete((result, ex) -> {
+        if (ex == null) {
+          log.info("AccountActivatedEvent published successfully. Topic: {}, Partition: {}, Offset: {}",
+              result.getRecordMetadata().topic(),
+              result.getRecordMetadata().partition(),
+              result.getRecordMetadata().offset());
+        } else {
+          log.error("Failed to publish AccountActivatedEvent for userId: {}. Error: {}",
+              event.userId(), ex.getMessage(), ex);
+        }
+      });
+
+      future.get(timeoutSeconds, TimeUnit.SECONDS);
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      log.error("Error publishing AccountActivatedEvent for userId: {}", event.userId(), e);
+      // Non-blocking: activation should succeed even if event publishing fails
+    }
+  }
+
+  @Override
+  public void publishTwoFactorEnabled(TwoFactorEnabledEvent event) {
+    log.info("Publishing TwoFactorEnabledEvent for userId: {}, method: {}", 
+        event.userId(), event.method());
+
+    try {
+      CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(
+          twoFactorEnabledTopic,
+          event.userId(),
+          event);
+
+      future.whenComplete((result, ex) -> {
+        if (ex == null) {
+          log.info("TwoFactorEnabledEvent published successfully. Topic: {}, Partition: {}, Offset: {}",
+              result.getRecordMetadata().topic(),
+              result.getRecordMetadata().partition(),
+              result.getRecordMetadata().offset());
+        } else {
+          log.error("Failed to publish TwoFactorEnabledEvent for userId: {}. Error: {}",
+              event.userId(), ex.getMessage(), ex);
+        }
+      });
+
+      future.get(timeoutSeconds, TimeUnit.SECONDS);
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      log.error("Error publishing TwoFactorEnabledEvent for userId: {}", event.userId(), e);
+      // Non-blocking: 2FA enable should succeed even if event publishing fails
+    }
+  }
+
+  @Override
+  public void publishTwoFactorDisabled(TwoFactorDisabledEvent event) {
+    log.info("Publishing TwoFactorDisabledEvent for userId: {}", event.userId());
+
+    try {
+      CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(
+          twoFactorDisabledTopic,
+          event.userId(),
+          event);
+
+      future.whenComplete((result, ex) -> {
+        if (ex == null) {
+          log.info("TwoFactorDisabledEvent published successfully. Topic: {}, Partition: {}, Offset: {}",
+              result.getRecordMetadata().topic(),
+              result.getRecordMetadata().partition(),
+              result.getRecordMetadata().offset());
+        } else {
+          log.error("Failed to publish TwoFactorDisabledEvent for userId: {}. Error: {}",
+              event.userId(), ex.getMessage(), ex);
+        }
+      });
+
+      future.get(timeoutSeconds, TimeUnit.SECONDS);
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      log.error("Error publishing TwoFactorDisabledEvent for userId: {}", event.userId(), e);
+      // Non-blocking: 2FA disable should succeed even if event publishing fails
     }
   }
 }

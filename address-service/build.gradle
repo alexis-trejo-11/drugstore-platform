@@ -51,7 +51,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.42'
 
     // Local Shared Classes
-    implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
+    // implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
 
     // Open Api
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'

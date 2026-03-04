@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.notification.AccountActivationTokenEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.notification.EmailVerificationEvent;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.notification.PasswordResetTokenEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.notification.TwoFactorCodeEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.notification.WelcomeEmailEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.NotificationEventPublisher;
@@ -32,6 +34,12 @@ public class NotificationEventProducer implements NotificationEventPublisher {
 
   @Value("${kafka.topics.notification.welcome-email}")
   private String welcomeEmailTopic;
+
+  @Value("${kafka.topics.notification.password-reset-token}")
+  private String passwordResetTokenTopic;
+
+  @Value("${kafka.topics.notification.account-activation-token}")
+  private String accountActivationTokenTopic;
 
   @Value("${kafka.producer.timeout-seconds:10}")
   private long timeoutSeconds;
@@ -124,6 +132,68 @@ public class NotificationEventProducer implements NotificationEventPublisher {
 
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       log.error("Error publishing WelcomeEmailEvent for userId: {}",
+          event.userId(), e);
+      return false;
+    }
+  }
+
+  @Override
+  public boolean publishPasswordResetToken(PasswordResetTokenEvent event) {
+    log.info("Publishing PasswordResetTokenEvent for userId: {}, email: {}",
+        event.userId(), event.email());
+
+    try {
+      CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(
+          passwordResetTokenTopic,
+          event.userId(),
+          event);
+
+      future.whenComplete((result, ex) -> {
+        if (ex == null) {
+          log.info("PasswordResetTokenEvent published. EventId: {}, Offset: {}",
+              event.eventId(), result.getRecordMetadata().offset());
+        } else {
+          log.error("Failed to publish PasswordResetTokenEvent. EventId: {}",
+              event.eventId(), ex);
+        }
+      });
+
+      future.get(timeoutSeconds, TimeUnit.SECONDS);
+      return true;
+
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      log.error("Error publishing PasswordResetTokenEvent for userId: {}",
+          event.userId(), e);
+      return false;
+    }
+  }
+
+  @Override
+  public boolean publishAccountActivationToken(AccountActivationTokenEvent event) {
+    log.info("Publishing AccountActivationTokenEvent for userId: {}, email: {}",
+        event.userId(), event.email());
+
+    try {
+      CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(
+          accountActivationTokenTopic,
+          event.userId(),
+          event);
+
+      future.whenComplete((result, ex) -> {
+        if (ex == null) {
+          log.info("AccountActivationTokenEvent published. EventId: {}, Offset: {}",
+              event.eventId(), result.getRecordMetadata().offset());
+        } else {
+          log.error("Failed to publish AccountActivationTokenEvent. EventId: {}",
+              event.eventId(), ex);
+        }
+      });
+
+      future.get(timeoutSeconds, TimeUnit.SECONDS);
+      return true;
+
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      log.error("Error publishing AccountActivationTokenEvent for userId: {}",
           event.userId(), e);
       return false;
     }
