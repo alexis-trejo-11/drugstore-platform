@@ -1,8 +1,8 @@
 services:
   address-service:
     build: 
-      context: ..
-      dockerfile:  ./address-service/dockerfile
+      context: .
+      dockerfile: ./dockerfile
     container_name: address-service
     hostname: address-service
     restart: unless-stopped

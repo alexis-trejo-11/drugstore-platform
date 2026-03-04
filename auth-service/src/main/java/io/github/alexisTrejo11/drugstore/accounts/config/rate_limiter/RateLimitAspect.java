@@ -24,118 +24,118 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RateLimitAspect {
 
-	private final RedisRateLimiter rateLimiter;
-	private final RateLimitProperties properties;
+  private final RedisRateLimiter rateLimiter;
+  private final RateLimitProperties properties;
 
-	@Around("@annotation(rateLimit)")
-	public Object checkRateLimit(ProceedingJoinPoint joinPoint, RateLimit rateLimit) throws Throwable {
-		RateLimitProfile profile = rateLimit.profile();
+  @Around("@annotation(rateLimit)")
+  public Object checkRateLimit(ProceedingJoinPoint joinPoint, RateLimit rateLimit) throws Throwable {
+    RateLimitProfile profile = rateLimit.profile();
 
-		RateLimitProperties.ProfileConfig config = properties.getProfiles()
-				.getOrDefault(profile.name().toLowerCase(), getDefaultConfig());
+    RateLimitProperties.ProfileConfig config = properties.getProfiles()
+        .getOrDefault(profile.name().toLowerCase(), getDefaultConfig());
 
-		// Set final values (Priority: Annotation > YAML)
-		int maxRequests = rateLimit.maxRequests() != -1
-				? rateLimit.maxRequests()
-				: config.getMaxRequests();
+    // Set final values (Priority: Annotation > YAML)
+    int maxRequests = rateLimit.maxRequests() != -1
+        ? rateLimit.maxRequests()
+        : config.getMaxRequests();
 
-		long durationSecs = rateLimit.duration() != -1
-				? rateLimit.durationUnit().toSeconds(rateLimit.duration())
-				: config.getDurationSeconds();
+    long durationSecs = rateLimit.duration() != -1
+        ? rateLimit.durationUnit().toSeconds(rateLimit.duration())
+        : config.getDurationSeconds();
 
-		String key = buildRateLimitKey(rateLimit, joinPoint);
+    String key = buildRateLimitKey(rateLimit, joinPoint);
 
-		log.info("Rate Limit Check - Key: {}, Max: {}, Duration: {}s", key, maxRequests, durationSecs);
+    log.info("Rate Limit Check - Key: {}, Max: {}, Duration: {}s", key, maxRequests, durationSecs);
 
-		if (!rateLimiter.isAllowed(key, maxRequests, Duration.ofSeconds(durationSecs))) {
-			log.warn("Rate limit exceeded for key: {}", key);
-			// Add rate limit info to response headers even when limit is exceeded
-			addRateLimitHeaders(key, maxRequests);
-			throw new RateLimitExceededException("Limit exceeded for profile: " + profile);
-		}
+    if (!rateLimiter.isAllowed(key, maxRequests, Duration.ofSeconds(durationSecs))) {
+      log.warn("Rate limit exceeded for key: {}", key);
+      // Add rate limit info to response headers even when limit is exceeded
+      addRateLimitHeaders(key, maxRequests);
+      throw new RateLimitExceededException("Limit exceeded for profile: " + profile);
+    }
 
-		// Add rate limit info to response headers
-		addRateLimitHeaders(key, maxRequests);
+    // Add rate limit info to response headers
+    addRateLimitHeaders(key, maxRequests);
 
-		log.info("Rate limit check passed for key: {}", key);
+    log.info("Rate limit check passed for key: {}", key);
 
-		return joinPoint.proceed();
-	}
+    return joinPoint.proceed();
+  }
 
-	private void addRateLimitHeaders(String key, int maxRequests) {
-		try {
-			HttpServletResponse response = getCurrentResponse();
-			if (response != null) {
-				RedisRateLimiter.RateLimitInfo info = rateLimiter.getRateLimitInfo(key, maxRequests);
+  private void addRateLimitHeaders(String key, int maxRequests) {
+    try {
+      HttpServletResponse response = getCurrentResponse();
+      if (response != null) {
+        RedisRateLimiter.RateLimitInfo info = rateLimiter.getRateLimitInfo(key, maxRequests);
 
-				response.setHeader("X-RateLimit-Limit", String.valueOf(info.getLimit()));
-				response.setHeader("X-RateLimit-Remaining", String.valueOf(info.getRemaining()));
-				response.setHeader("X-RateLimit-Reset", String.valueOf(info.getResetAfter()));
+        response.setHeader("X-RateLimit-Limit", String.valueOf(info.getLimit()));
+        response.setHeader("X-RateLimit-Remaining", String.valueOf(info.getRemaining()));
+        response.setHeader("X-RateLimit-Reset", String.valueOf(info.getResetAfter()));
 
-				log.debug("Rate limit headers added - Limit: {}, Remaining: {}, Reset: {}s",
-						info.getLimit(), info.getRemaining(), info.getResetAfter());
-			}
-		} catch (Exception e) {
-			log.error("Error adding rate limit headers", e);
-		}
-	}
+        log.debug("Rate limit headers added - Limit: {}, Remaining: {}, Reset: {}s",
+            info.getLimit(), info.getRemaining(), info.getResetAfter());
+      }
+    } catch (Exception e) {
+      log.error("Error adding rate limit headers", e);
+    }
+  }
 
-	private String buildRateLimitKey(RateLimit rateLimit, ProceedingJoinPoint joinPoint) {
-		if (!rateLimit.key().isEmpty()) {
-			return "manual:" + rateLimit.key();
-		}
+  private String buildRateLimitKey(RateLimit rateLimit, ProceedingJoinPoint joinPoint) {
+    if (!rateLimit.key().isEmpty()) {
+      return "manual:" + rateLimit.key();
+    }
 
-		HttpServletRequest request = getCurrentRequest();
+    HttpServletRequest request = getCurrentRequest();
 
-		String subjectIdentifier = switch (rateLimit.type()) {
-			case IP_BASED -> getClientIp(request);
-			case USER_BASED -> getUserId(request);
-			case API_KEY_BASED -> getApiKey(request);
-			case CUSTOM -> "custom";
-		};
+    String subjectIdentifier = switch (rateLimit.type()) {
+      case IP_BASED -> getClientIp(request);
+      case USER_BASED -> getUserId(request);
+      case API_KEY_BASED -> getApiKey(request);
+      case CUSTOM -> "custom";
+    };
 
-		String actionIdentifier = joinPoint.getSignature().toShortString();
+    String actionIdentifier = joinPoint.getSignature().toShortString();
 
-		return String.format("profile:%s:%s:%s:%s",
-				rateLimit.profile().name().toLowerCase(),
-				rateLimit.type().name().toLowerCase(),
-				subjectIdentifier,
-				actionIdentifier);
-	}
+    return String.format("profile:%s:%s:%s:%s",
+        rateLimit.profile().name().toLowerCase(),
+        rateLimit.type().name().toLowerCase(),
+        subjectIdentifier,
+        actionIdentifier);
+  }
 
-	private RateLimitProperties.ProfileConfig getDefaultConfig() {
-		RateLimitProperties.ProfileConfig config = new RateLimitProperties.ProfileConfig();
-		config.setMaxRequests(100);
-		config.setDurationSeconds(60);
-		return config;
-	}
+  private RateLimitProperties.ProfileConfig getDefaultConfig() {
+    RateLimitProperties.ProfileConfig config = new RateLimitProperties.ProfileConfig();
+    config.setMaxRequests(100);
+    config.setDurationSeconds(60);
+    return config;
+  }
 
-	private HttpServletRequest getCurrentRequest() {
-		ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-		return attrs.getRequest();
-	}
+  private HttpServletRequest getCurrentRequest() {
+    ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+    return attrs.getRequest();
+  }
 
-	private HttpServletResponse getCurrentResponse() {
-		ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-		return attrs != null ? attrs.getResponse() : null;
-	}
+  private HttpServletResponse getCurrentResponse() {
+    ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+    return attrs != null ? attrs.getResponse() : null;
+  }
 
-	private String getClientIp(HttpServletRequest request) {
-		String xfHeader = request.getHeader("X-Forwarded-For");
-		if (xfHeader != null && !xfHeader.isEmpty()) {
-			return xfHeader.split(",")[0];
-		}
-		return request.getRemoteAddr();
-	}
+  private String getClientIp(HttpServletRequest request) {
+    String xfHeader = request.getHeader("X-Forwarded-For");
+    if (xfHeader != null && !xfHeader.isEmpty()) {
+      return xfHeader.split(",")[0];
+    }
+    return request.getRemoteAddr();
+  }
 
-	private String getUserId(HttpServletRequest request) {
-		// In future extract this from SecurityContextHolder or JWT Header
-		String userId = request.getHeader("X-User-Id");
-		return userId != null ? userId : "anonymous";
-	}
+  private String getUserId(HttpServletRequest request) {
+    // In future extract this from SecurityContextHolder or JWT Header
+    String userId = request.getHeader("X-User-Id");
+    return userId != null ? userId : "anonymous";
+  }
 
-	private String getApiKey(HttpServletRequest request) {
-		String apiKey = request.getHeader("X-API-Key");
-		return apiKey != null ? apiKey : "no-key";
-	}
+  private String getApiKey(HttpServletRequest request) {
+    String apiKey = request.getHeader("X-API-Key");
+    return apiKey != null ? apiKey : "no-key";
+  }
 }

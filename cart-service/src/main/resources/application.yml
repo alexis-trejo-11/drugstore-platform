@@ -32,6 +32,18 @@ spring:
     hibernate:
       ddl-auto: validate
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: cart-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: io.github.alexisTrejo11.drugstore.carts.product.core.application.events.ProductEvent
+    listener:
+      missing-topics-fatal: false   # so the app starts even if the topic doesn't exist yet
+
 springdoc:
   api-docs:
     enabled: true

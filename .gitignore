@@ -1,122 +1,25 @@
-# ================================
-# SECRETS & CREDENTIALS
-# ================================
-.env
-.env.*
-!.env.example
-*.env
-.env.local
+# Git ignore file for a Java project using Gradle
+**/.env
+**/.env.local
 
-# Keys & Certificates
-*.pem
-*.key
-*.p12
-*.keystore
-*.jks
-*.crt
-*.csr
-id_rsa
-id_dsa
-
-# Config files with secrets
-*-credentials.yml
-*-secrets.yml
-application-*.yml
-
-# ================================
-# BUILD OUTPUTS
-# ================================
 # Gradle
-.gradle/
-build/
-!gradle/wrapper/gradle-wrapper.jar
+**/build/
+**/.gradle/
+**/bin/
+**/out/
 
-# Java
-*.class
-*.jar
-*.war
-*.ear
-*.nar
-
-# ================================
-# LOGS & TEMP FILES
-# ================================
+# Logs
+**/logs/
 *.log
-logs/
-*.tmp
-*.temp
-*.swp
-*~
-.cache/
 
-# ================================
-# IDEs
-# ================================
-# IntelliJ
-.idea/
-*.iws
-*.iml
-*.ipr
-out/
+# SSL Key
+**/keystore.p12
 
-# Eclipse
-.classpath
-.project
-.settings/
-bin/
-
-# VS Code
-.vscode/
-
-# NetBeans
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-# ================================
-# OPERATING SYSTEMS
-# ================================
-# Mac
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Windows
+# Files
+**/.DS_Store
 Thumbs.db
-ehthumbs.db
-Desktop.ini
 
-# Linux
-*~
-
-# ================================
-# DATABASES
-# ================================
-*.db
-*.sqlite
-*.h2.db
-*.dump
-backup/
-
-# ================================
-# DOCKER
-# ================================
-docker-compose.override.yml
-
-# ================================
-# APPLICATION SPECIFIC
-# ================================
-/purchaseOrder-service/logs
-/inventory-service/logs
-/order-service/logs
-
-# Crash logs
-hs_err_pid*
-replay_pid*
-
-# Package Files
-*.zip
-*.tar.gz
-*.rar
+# IDE
+.idea/
+*.iml
+.vscode/

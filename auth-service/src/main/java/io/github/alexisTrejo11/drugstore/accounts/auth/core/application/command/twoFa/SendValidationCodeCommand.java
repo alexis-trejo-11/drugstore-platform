@@ -19,4 +19,9 @@ public record SendValidationCodeCommand(UserId userId) {
     }
     return new SendValidationCodeCommand(new UserId(userId));
   }
+
+
+	public String userIdString() {
+		return userId.value();
+	}
 }

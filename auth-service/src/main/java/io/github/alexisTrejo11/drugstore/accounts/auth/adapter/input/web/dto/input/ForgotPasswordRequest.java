@@ -17,7 +17,7 @@ public class ForgotPasswordRequest {
     @Email(message = "Email must be valid")
     private String email;
 
-    public ForgotPasswordCommand toCommand() {
-        return new ForgotPasswordCommand(this.email);
+    public ForgotPasswordCommand toCommand(String ipAddress) {
+        return new ForgotPasswordCommand(this.email, ipAddress);
     }
 }

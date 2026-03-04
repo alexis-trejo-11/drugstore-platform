@@ -41,7 +41,7 @@ public class PasswordAuthController {
       @RequestBody @Valid @NotNull ForgotPasswordRequest request) {
     log.info("Password reset request received");
 
-    ForgotPasswordCommand command = request.toCommand();
+    ForgotPasswordCommand command = request.toCommand("Unknown IP");
     passwordUseCases.forgotPassword(command);
 
     log.info("Password reset email sent successfully");

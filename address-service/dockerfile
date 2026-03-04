@@ -3,36 +3,24 @@ FROM eclipse-temurin:23-jdk-alpine AS builder
 
 WORKDIR /app
 
-# Copy gradle wrapper and parent build files
+# Copy gradle wrapper and build files
 COPY gradlew .
 COPY gradle gradle
 COPY gradle.properties .
 COPY build.gradle .
 COPY settings.gradle .
 
-# Remove the org.gradle.java.home property as it points to SDKMAN path
-RUN sed -i '/org.gradle.java.home/d' gradle.properties
-
-# Copy shared-kernel library
-COPY libs/shared-kernel libs/shared-kernel
-
-# Copy address-service build file
-COPY address-service/build.gradle address-service/
-
 # Give execution permissions to gradlew
 RUN chmod +x gradlew
 
-# Build shared-kernel and publish to local Maven
-RUN ./gradlew :libs:shared-kernel:publishToMavenLocal --no-daemon
+# Download dependencies (cache layer)
+RUN ./gradlew dependencies --no-daemon
 
-# Download address-service dependencies (using parent multi-project structure)
-RUN ./gradlew :address-service:dependencies --no-daemon
-
-# Copy address-service source code
-COPY address-service/src address-service/src
+# Copy source code
+COPY src src
 
 # Build the application
-RUN ./gradlew :address-service:bootJar --no-daemon
+RUN ./gradlew bootJar --no-daemon
 
 # Execution stage
 FROM eclipse-temurin:23-jre-alpine
@@ -43,10 +31,7 @@ WORKDIR /app
 RUN addgroup -S spring && adduser -S spring -G spring
 
 # Copy the built JAR
-COPY --from=builder /app/address-service/build/libs/*.jar app.jar
-
-# Copy the SSL keystore (not included in JAR)
-COPY address-service/src/main/resources/keystore.p12 /app/keystore.p12
+COPY --from=builder /app/build/libs/*.jar app.jar
 
 # Create directory for logs and config
 RUN mkdir -p /app/logs /app/config

@@ -1,5 +1,9 @@
 package io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output;
 
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.AccountActivatedEvent;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.PasswordChangedEvent;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.TwoFactorDisabledEvent;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.TwoFactorEnabledEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.UserLoginEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.UserRegisteredEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.user.UserCreatedEvent;
@@ -17,4 +21,11 @@ public interface UserEventPublisher {
 
   boolean publishUserDeleted(UserDeletedEvent event);
 
+  void publishPasswordChanged(PasswordChangedEvent event);
+
+  void publishAccountActivated(AccountActivatedEvent event);
+
+  void publishTwoFactorEnabled(TwoFactorEnabledEvent event);
+
+  void publishTwoFactorDisabled(TwoFactorDisabledEvent event);
 }
