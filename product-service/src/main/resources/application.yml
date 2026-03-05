@@ -3,7 +3,7 @@ server:
   ssl:
     enabled: true
     key-store: classpath:keystore.p12
-    key-store-password: ${PRODUCT_SSL_KEYSTORE_PASSWORD}
+    key-store-password: ${KEYSTORE_PASSWORD}
     key-store-type: PKCS12
     key-alias: product-service
 
@@ -11,15 +11,23 @@ spring:
   application:
     name: product-service
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9093,localhost:9094,localhost:9095}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: 
+          productEvent: io.github.alexisTrejo11.drugstore.products.core.application.events.ProductEvent
   profiles:
     active: dev
 
   boot:
     admin:
       client:
-        url: http://localhost:8080
+        url: ${SPRING_BOOT_ADMIN_URL}
         instance:
-          service-url: http://localhost:8084
+          service-url: http://localhost:8444
           name: product-service
 
   devtools:
@@ -36,8 +44,8 @@ spring:
     data:
       redis:
         host: ${SPRING_REDIS_HOST:localhost}
-        port: ${SPRING_REDIS_PORT:6379}
-        password: ${SPRING_REDIS_PASSWORD:redispass}
+        port: ${SPRING_REDIS_PORT}
+        password: ${SPRING_REDIS_PASSWORD:}
         lettuce:
           pool:
             max-active: 8
@@ -112,3 +120,15 @@ jwt:
   access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:15}
   refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200} # 30 days
   issuer: ${ISSUER}
+
+app:
+  kafka:
+    topics:
+      product-events: product-events
+      product-events-dlt: product-events.DLT
+
+logging:
+  level:
+    io.github.alexisTrejo11.drugstore.products.infrastructure.adapter.output.kafka: DEBUG
+    org.apache.kafka: INFO
+
