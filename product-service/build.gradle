@@ -47,7 +47,6 @@ dependencies {
 	// Common library
 	implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
 
-
 	// Postgres
 	runtimeOnly 'org.postgresql:postgresql'
 	// In-memory DB used by tests
@@ -65,6 +64,9 @@ dependencies {
 
 	// Admin Service
 	implementation 'de.codecentric:spring-boot-admin-starter-client:3.0.0'
+
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
 }
 
 dependencyManagement {
@@ -81,11 +83,11 @@ bootRun {
     jvmArgs = [
             "-XX:+TieredCompilation",
             "-XX:TieredStopAtLevel=1",
-            "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+            //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     ]
 
     // Load .env file from config-server directory
-    def envFile = file('../config-server/.env')
+    def envFile = file('.env')
     if (envFile.exists()) {
         envFile.readLines().each { line ->
             if (line && !line.startsWith('#') && line.contains('=')) {
