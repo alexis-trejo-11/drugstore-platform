@@ -26,7 +26,7 @@ public class ReconstructCartParamsTest {
     CartTimeStamps timeStamps = CartTimeStamps.now();
 
     // When
-    ReconstructCartParams params = new ReconstructCartParams(cartId, customerId, items, timeStamps);
+    ReconstructCartParams params = new ReconstructCartParams(cartId, customerId, items, null, timeStamps);
 
     // Then
     assertThat(params).isNotNull();
@@ -63,9 +63,9 @@ public class ReconstructCartParamsTest {
     List<CartItem> items = createTestItems(cartId);
     CartTimeStamps timeStamps = CartTimeStamps.now();
 
-    ReconstructCartParams params1 = new ReconstructCartParams(cartId, customerId, items, timeStamps);
-    ReconstructCartParams params2 = new ReconstructCartParams(cartId, customerId, items, timeStamps);
-    ReconstructCartParams params3 = new ReconstructCartParams(CartId.generate(), customerId, items, timeStamps);
+    ReconstructCartParams params1 = new ReconstructCartParams(cartId, customerId, items, null, timeStamps);
+    ReconstructCartParams params2 = new ReconstructCartParams(cartId, customerId, items, null, timeStamps);
+    ReconstructCartParams params3 = new ReconstructCartParams(CartId.generate(), customerId, items, null, timeStamps);
 
     // Then
     assertThat(params1).isEqualTo(params2);
@@ -80,7 +80,7 @@ public class ReconstructCartParamsTest {
     CustomerId customerId = CustomerId.from("customer-toString");
     List<CartItem> items = createTestItems(cartId);
     CartTimeStamps timeStamps = CartTimeStamps.now();
-    ReconstructCartParams params = new ReconstructCartParams(cartId, customerId, items, timeStamps);
+    ReconstructCartParams params = new ReconstructCartParams(cartId, customerId, items, null, timeStamps);
 
     // When
     String paramsString = params.toString();
@@ -99,7 +99,7 @@ public class ReconstructCartParamsTest {
     CartTimeStamps timeStamps = CartTimeStamps.now();
 
     // When
-    ReconstructCartParams params = new ReconstructCartParams(cartId, customerId, null, timeStamps);
+    ReconstructCartParams params = new ReconstructCartParams(cartId, customerId, null, null, timeStamps);
 
     // Then
     assertThat(params.items()).isNull();
@@ -114,15 +114,16 @@ public class ReconstructCartParamsTest {
     CartId cartId = CartId.generate();
     CustomerId customerId = CustomerId.from("customer-null-timestamps");
     List<CartItem> items = createTestItems(cartId);
+    CartTimeStamps timeStamps = null;
 
     // When
-    ReconstructCartParams params = new ReconstructCartParams(cartId, customerId, items, null);
+    ReconstructCartParams params = new ReconstructCartParams(cartId, customerId, items, null, timeStamps);
 
     // Then
-    assertThat(params.timeStamps()).isNull();
     assertThat(params.id()).isEqualTo(cartId);
     assertThat(params.customerId()).isEqualTo(customerId);
     assertThat(params.items()).isEqualTo(items);
+    assertThat(params.timeStamps()).isNull();
   }
 
   @Test

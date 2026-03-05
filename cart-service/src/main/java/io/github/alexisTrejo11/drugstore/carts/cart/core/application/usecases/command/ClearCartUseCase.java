@@ -21,7 +21,7 @@ public class ClearCartUseCase {
     Cart cart = cartRepository.findByCustomerIdWithItems(command.customerId())
         .orElseThrow(() -> new CartNotFoundException(command.customerId()));
 
-    cart.clear();
+    cart.clear(command.reason(), command.excludeProductIds());
     cartRepository.save(cart);
   }
 }

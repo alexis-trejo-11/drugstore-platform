@@ -1,9 +1,9 @@
 package io.github.alexisTrejo11.drugstore.carts.cart.adapter.output.persistence.models;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -26,10 +26,10 @@ public class CartModel {
   private String customerId;
 
   @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-  private Set<CartItemModel> cartItems = new HashSet<>();
+  private List<CartItemModel> cartItems = new ArrayList<>();
 
   @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-  private Set<AfterwardModel> afterwardItems = new HashSet<>();
+  private List<AfterwardModel> afterwardItems = new ArrayList<>();
 
   @Column(name = "created_at")
   private LocalDateTime createdAt;
@@ -47,12 +47,12 @@ public class CartModel {
     updatedAt = createdAt;
   }
 
-  public Set<CartItemModel> getCartItems() {
-    return Collections.unmodifiableSet(cartItems);
+  public List<CartItemModel> getCartItems() {
+    return Collections.unmodifiableList(cartItems);
   }
 
-  public Set<AfterwardModel> getAfterwardItems() {
-    return Collections.unmodifiableSet(afterwardItems);
+  public List<AfterwardModel> getAfterwardItems() {
+    return Collections.unmodifiableList(afterwardItems);
   }
 
   @PreUpdate

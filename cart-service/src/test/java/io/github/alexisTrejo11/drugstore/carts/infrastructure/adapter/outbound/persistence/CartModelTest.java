@@ -2,7 +2,6 @@ package io.github.alexisTrejo11.drugstore.carts.infrastructure.adapter.outbound.
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,7 @@ public class CartModelTest {
     CartModel cartModel = new CartModel(cartId);
     cartModel.setCustomerId(customerId);
     cartModel.setCartItems(new ArrayList<>());
-    cartModel.setAfterwardItems(new HashSet<>());
+    cartModel.setAfterwardItems(new ArrayList<>());
 
     // Then
     assertThat(cartModel.getId()).isEqualTo(cartId);

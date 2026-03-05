@@ -3,7 +3,6 @@ package io.github.alexisTrejo11.drugstore.carts.cart.adapter.input.web.controlle
 import io.github.alexisTrejo11.drugstore.carts.cart.adapter.input.web.annotation.*;
 import jakarta.validation.constraints.NotNull;
 
-import io.github.alexisTrejo11.drugstore.carts.cart.adapter.input.web.annotation.*;
 import io.github.alexisTrejo11.drugstore.carts.cart.adapter.input.web.dto.input.CreateAfterwardsRequest;
 import io.github.alexisTrejo11.drugstore.carts.cart.adapter.input.web.dto.input.DeleteAfterwardsRequest;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.application.command.CreateAfterwardsCommand;
@@ -15,9 +14,7 @@ import io.github.alexisTrejo11.drugstore.carts.cart.core.port.in.usecase.CartCom
 import io.github.alexisTrejo11.drugstore.carts.cart.core.port.in.usecase.CartQueryUseCase;
 import io.github.alexisTrejo11.drugstore.carts.shared.ResponseWrapper;
 
-import io.github.alexisTrejo11.drugstore.carts.cart.adapter.input.web.dto.input.BuyFromCartRequest;
 import io.github.alexisTrejo11.drugstore.carts.cart.adapter.input.web.dto.input.UpdateCartRequest;
-import io.github.alexisTrejo11.drugstore.carts.cart.core.application.command.BuyCartCommand;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.application.command.UpdateCartCommand;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.application.queries.GetCartByCustomerIdQuery;
 
@@ -63,17 +60,6 @@ public class UserCartController {
     commandUseCase.updateCartItems(command);
 
     return ResponseWrapper.success("Product Items successfully updated in cart");
-  }
-
-  @PostMapping("/{userId}/items/buy")
-  @BuyCartItemsOperation
-  private ResponseWrapper<Void> buyProductsInCart(
-      @RequestAttribute("userId") String userId,
-      @Valid @RequestBody @NotNull BuyFromCartRequest request) {
-    BuyCartCommand command = request.toCommand(userId);
-    commandUseCase.buyCart(command);
-
-    return ResponseWrapper.success("Products successfully purchased from cart");
   }
 
   @PostMapping("/items/move-to-afterwards")

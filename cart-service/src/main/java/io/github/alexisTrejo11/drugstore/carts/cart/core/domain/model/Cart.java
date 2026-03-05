@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.events.CartPurchasedEvent;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.events.DomainEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +84,7 @@ public class Cart {
     cart.afterwardsItems = params.afterwardsItems() != null
         ? new ArrayList<>(params.afterwardsItems())
         : new ArrayList<>();
-    
+
     cart.timeStamps = params.timeStamps() != null ? params.timeStamps() : CartTimeStamps.now();
 
     log.debug("Reconstructed Cart: id={}, itemCount={}", cart.id, cart.items.size());
@@ -218,20 +217,19 @@ public class Cart {
   /**
    * Clears all items from the cart.
    */
-  public void clear() {
-    log.info("Clearing Cart: cartId={}, itemCount={}", id, items.size());
+  public void clear(String reason, List<ProductId> excludeProductIds) {
+    log.info("Clearing Cart: cartId={}, itemCount={}, reason={}", id, items.size(), reason);
 
-    items.clear();
+    if (excludeProductIds != null && !excludeProductIds.isEmpty()) {
+      items.removeIf(item -> !excludeProductIds.contains(item.getProductId()));
+    } else {
+      items.clear();
+    }
     timeStamps.markAsUpdated();
 
     log.debug("Cart cleared successfully");
   }
 
-  /**
-   * Sets the items in the cart, replacing any existing items.
-   *
-   * @param newItems the new list of items
-   */
   public void setItems(List<CartItem> newItems) {
     log.info("Setting items in Cart: cartId={}, newItemCount={}", id, newItems != null ? newItems.size() : 0);
     if (newItems == null) {
@@ -246,12 +244,6 @@ public class Cart {
     timeStamps.markAsUpdated();
   }
 
-  /**
-   * Finds an item in the cart by product ID.
-   *
-   * @param productId the product ID to search for
-   * @return Optional containing the item if found
-   */
   public Optional<CartItem> findItemByProductId(ProductId productId) {
     if (productId == null) {
       return Optional.empty();
@@ -259,50 +251,22 @@ public class Cart {
     return items.stream().filter(item -> item.getProductId().equals(productId)).findFirst();
   }
 
-  /**
-   * Finds an item in the cart by product ID or throws an exception.
-   *
-   * @param productId the product ID to search for
-   * @return the cart item
-   * @throws CartItemNotFoundException if the item is not found
-   */
   public CartItem findItemByProductIdOrThrow(ProductId productId) {
     return findItemByProductId(productId).orElseThrow(() -> new CartItemNotFoundException(productId));
   }
 
-  /**
-   * Checks if the cart contains an item with the specified product ID.
-   *
-   * @param productId the product ID to check
-   * @return true if the cart contains the product
-   */
   public boolean containsProduct(ProductId productId) {
     return findItemByProductId(productId).isPresent();
   }
 
-  /**
-   * Gets the total number of individual items in the cart.
-   *
-   * @return the sum of all item quantities
-   */
   public int getTotalItemCount() {
     return items.stream().mapToInt(CartItem::getQuantityValue).sum();
   }
 
-  /**
-   * Gets the number of unique products in the cart.
-   *
-   * @return the count of unique products
-   */
   public int getUniqueProductCount() {
     return items.size();
   }
 
-  /**
-   * Calculates the total price of all items in the cart.
-   *
-   * @return the total price as ItemPrice
-   */
   public ItemPrice calculateTotal() {
     if (items.isEmpty()) {
       return ItemPrice.zero();
@@ -323,29 +287,14 @@ public class Cart {
         .reduce(ItemPrice.zero(), ItemPrice::add);
   }
 
-  /**
-   * Gets all product IDs in the cart.
-   *
-   * @return list of product IDs
-   */
   public List<ProductId> getProductIds() {
     return items.stream().map(CartItem::getProductId).toList();
   }
 
-  /**
-   * Checks if the cart is empty.
-   *
-   * @return true if the cart has no items
-   */
   public boolean isEmpty() {
     return items.isEmpty();
   }
 
-  /**
-   * Checks if the cart has reached its maximum capacity.
-   *
-   * @return true if the cart is at maximum capacity
-   */
   public boolean isFull() {
     return items.size() >= MAX_ITEMS_PER_CART;
   }
@@ -357,38 +306,22 @@ public class Cart {
     }
   }
 
-  /**
-   * Checks if the cart has been soft-deleted.
-   *
-   * @return true if the cart is deleted
-   */
   public boolean isDeleted() {
     return timeStamps != null && timeStamps.isDeleted();
   }
 
-  /**
-   * Soft deletes the cart.
-   */
   public void softDelete() {
     log.info("Soft deleting Cart: cartId={}", id);
     timeStamps.markAsDeleted();
     timeStamps.markAsUpdated();
   }
 
-  /**
-   * Restores a soft-deleted cart.
-   */
   public void restore() {
     log.info("Restoring Cart: cartId={}", id);
     timeStamps.restore();
     timeStamps.markAsUpdated();
   }
 
-  /**
-   * Moves specified items from the cart to afterwards.
-   *
-   * @param productIds the list of product IDs to move
-   */
   public void moveItemsToAfterwards(List<ProductId> productIds) {
     if (productIds == null || productIds.isEmpty()) {
       log.debug("No items to move to afterwards: cartId={}", id);
@@ -410,11 +343,6 @@ public class Cart {
     timeStamps.markAsUpdated();
   }
 
-  /**
-   * Returns specified items from afterwards back to the cart.
-   *
-   * @param productIds the list of product IDs to return
-   */
   public void returnItemsFromAfterwards(List<ProductId> productIds) {
     if (productIds == null || productIds.isEmpty()) {
       log.debug("No items to return from afterwards: cartId={}", id);
@@ -443,62 +371,10 @@ public class Cart {
     timeStamps.markAsUpdated();
   }
 
-  public  List<CartItem> getItemsExcludingProducts(List<ProductId> productIdsToExclude) {
-    if (productIdsToExclude == null || productIdsToExclude.isEmpty()) {
-      return new ArrayList<>(this.items);
-    }
-    List<CartItem> itemsToKeep = items.stream()
-        .filter(item -> !productIdsToExclude.contains(item.getProductId()))
-        .toList();
-
-    return new ArrayList<>(itemsToKeep);
-  }
-
-  public void purchaseItems(List<ProductId> productIdsToExclude) {
-    if (productIdsToExclude == null) {
-      productIdsToExclude = List.of();
-    }
-
-    log.info("Processing purchase for Cart: cartId={}, itemsToExclude={}",
-        id, productIdsToExclude.size());
-
-    List<ProductId> finalProductIdsToExclude = productIdsToExclude;
-    List<ProductId> purchasedProductIds = items.stream()
-        .map(CartItem::getProductId)
-        .filter(productId -> !finalProductIdsToExclude.contains(productId))
-        .toList();
-
-    if (productIdsToExclude.isEmpty()) {
-      this.items.clear();
-    } else {
-      List<ProductId> finalProductIdsToExclude1 = productIdsToExclude;
-      List<CartItem> itemsToKeep = items.stream()
-          .filter(item -> finalProductIdsToExclude1.contains(item.getProductId()))
-          .toList();
-      this.items = new ArrayList<>(itemsToKeep);
-    }
-
-    if (!purchasedProductIds.isEmpty()) {
-      DomainEvent event = new CartPurchasedEvent(
-          this.id,
-          this.customerId,
-          purchasedProductIds,
-          productIdsToExclude
-      );
-      domainEvents.add(event);
-      log.info("Cart purchase event recorded: event={}", event);
-    } else {
-      log.info("No products purchased, skipping event creation");
-    }
-
-    timeStamps.markAsUpdated();
-  }
-
   public BigDecimal calculateDiscount() {
     if (items.isEmpty()) {
       return BigDecimal.ZERO;
     }
-
 
     return items.stream()
         .map(CartItem::calculateDiscount)
