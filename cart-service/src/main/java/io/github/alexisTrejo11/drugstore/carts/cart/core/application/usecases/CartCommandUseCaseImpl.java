@@ -12,41 +12,35 @@ import io.github.alexisTrejo11.drugstore.carts.cart.core.port.in.usecase.CartCom
 @Service
 @RequiredArgsConstructor
 public class CartCommandUseCaseImpl implements CartCommandUseCase {
-	private final CreateCartUseCase createCartUseCase;
-	private final UpdateCartItemsUseCase updateCartUseCase;
-	private final ClearCartUseCase clearCartUseCase;
-	private final BuyCartUseCase buyCartUseCase;
-	private final MoveCartItemToAfterwardsUseCase moveCartItemToAfterwards;
-	private final ReturnCartItemFromAfterwardsUseCase returnCartItemFromAfterwards;
+  private final CreateCartUseCase createCartUseCase;
+  private final UpdateCartItemsUseCase updateCartUseCase;
+  private final ClearCartUseCase clearCartUseCase;
+  private final MoveCartItemToAfterwardsUseCase moveCartItemToAfterwards;
+  private final ReturnCartItemFromAfterwardsUseCase returnCartItemFromAfterwards;
 
-	@Override
-	public void createCart(CreateCartCommand command) {
-		createCartUseCase.execute(command);
-	}
+  @Override
+  public void createCart(CreateCartCommand command) {
+    createCartUseCase.execute(command);
+  }
 
-	@Override
-	public Cart updateCartItems(UpdateCartCommand command) {
-		return updateCartUseCase.execute(command);
-	}
+  @Override
+  public Cart updateCartItems(UpdateCartCommand command) {
+    return updateCartUseCase.execute(command);
+  }
 
-	@Override
-	public void moveItemToAfterwards(CreateAfterwardsCommand command) {
-		moveCartItemToAfterwards.execute(command);
-	}
+  @Override
+  public void moveItemToAfterwards(CreateAfterwardsCommand command) {
+    moveCartItemToAfterwards.execute(command);
+  }
 
-	@Override
-	public void removeItemFromAfterwards(RemoveAfterwardsCommand command) {
-		returnCartItemFromAfterwards.execute(command);
-	}
+  @Override
+  public void removeItemFromAfterwards(RemoveAfterwardsCommand command) {
+    returnCartItemFromAfterwards.execute(command);
+  }
 
-	@Override
-	public void clearCart(ClearCartCommand command) {
-		clearCartUseCase.execute(command);
-	}
-
-	@Override
-	public void buyCart(BuyCartCommand command) {
-		buyCartUseCase.execute(command);
-	}
+  @Override
+  public void clearCart(ClearCartCommand command) {
+    clearCartUseCase.execute(command);
+  }
 
 }

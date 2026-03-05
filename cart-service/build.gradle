@@ -2,6 +2,8 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.2'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'com.google.protobuf' version '0.9.4'
+
 }
 version = '0.0.1-SNAPSHOT'
 
@@ -14,13 +16,12 @@ java {
 repositories {
 	mavenLocal()
 	mavenCentral()
-    maven {
-        url 'https://projectlombok.org/edge-releases'
-      }
 }
 
 ext {
 	set('springCloudVersion', "2023.0.3")
+	set('grpcVersion', "1.60.0")
+	set('protobufVersion', "3.25.1")
 }
 
 dependencies {
@@ -99,3 +100,20 @@ bootRun {
     }
 }
 
+
+
+protobuf {
+	protoc {
+		artifact = "com.google.protobuf:protoc:${protobufVersion}"
+	}
+	plugins {
+		grpc {
+			artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+		}
+	}
+	generateProtoTasks {
+		all()*.plugins {
+			grpc {}
+		}
+	}
+}

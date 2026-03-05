@@ -68,7 +68,7 @@ public class CartModelMapperTest {
   void toDomain_WithValidModel_ReturnsCart() {
     // Given
     CartModel model = createTestCartModel();
-    when(itemMapper.toDomains(anySet())).thenReturn(Collections.emptyList());
+    when(itemMapper.toDomains(anyList())).thenReturn(Collections.emptyList());
 
     // When
     Cart result = cartModelMapper.toDomain(model, false, false);
@@ -173,7 +173,7 @@ public class CartModelMapperTest {
     model.setCreatedAt(LocalDateTime.now().minusDays(1));
     model.setUpdatedAt(LocalDateTime.now());
     model.setCartItems(new ArrayList<>());
-    model.setAfterwardItems(new HashSet<>());
+    model.setAfterwardItems(new ArrayList<>());
     return model;
   }
 }
