@@ -1,0 +1,110 @@
+package io.github.alexisTrejo11.drugstore.inventories.inventory.adapter.outbound.persistence.repository;
+
+import libs_kernel.mapper.JpaEntityMapper;
+import lombok.RequiredArgsConstructor;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.domain.entity.Inventory;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.domain.entity.enums.InventoryStatus;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.domain.entity.valueobject.InventoryId;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.domain.entity.valueobject.ProductId;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.domain.exception.InventoryNotFoundException;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.port.InventoryRepository;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.adapter.outbound.persistence.model.InventoryEntity;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.adapter.outbound.persistence.repository.jpa.JpaInventoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+
+@Repository
+@RequiredArgsConstructor
+public class InventoryRepositoryImpl implements InventoryRepository {
+    private final JpaEntityMapper<InventoryEntity, Inventory> mapper;
+    private final JpaInventoryRepository jpaInventoryRepository;
+
+    @Override
+    public Inventory save(Inventory inventory) {
+        InventoryEntity entity = mapper.fromDomain(inventory);
+        InventoryEntity savedEntity = jpaInventoryRepository.save(entity);
+        return mapper.toDomain(savedEntity);
+    }
+
+    @Override
+    public void bulkSave(List<Inventory> inventories) {
+        List<InventoryEntity> entities = mapper.fromDomains(inventories);
+        jpaInventoryRepository.saveAll(entities);
+    }
+
+    @Override
+    public Optional<Inventory> findById(InventoryId id) {
+        return jpaInventoryRepository.findById(id.value()).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Inventory> findByIdIn(List<InventoryId> ids) {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Inventory> findByProductId(ProductId productId) {
+        return jpaInventoryRepository.findByProductId(productId.value()).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Inventory> findAll() {
+        List<InventoryEntity> entities = jpaInventoryRepository.findAll();
+        return mapper.toDomains(entities);
+    }
+
+    @Override
+    public List<Inventory> findSpec() {
+        List<InventoryEntity> entities = jpaInventoryRepository.findAll();
+        return mapper.toDomains(entities);
+    }
+
+    @Override
+    public List<Inventory> findByProductIdInOrThrow(Set<ProductId> productIds) throws InventoryNotFoundException {
+        var productIdsStr = productIds.stream()
+                .map(ProductId::value)
+                .collect(Collectors.toSet());
+
+        List<InventoryEntity> entities = jpaInventoryRepository.findByProductIdIn(productIdsStr);
+        if (entities.size() != productIds.size()) {
+            throw new InventoryNotFoundException("Some inventories not found for the provided product IDs");
+        }
+
+        return mapper.toDomains(entities);
+    }
+
+    @Override
+    public Page<Inventory> findByStatus(InventoryStatus status, Pageable pageable) {
+        var inventoryEntities = jpaInventoryRepository.findByStatus(status, pageable);
+        return inventoryEntities.map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Inventory> findAllLowStock() {
+        List<InventoryEntity> entities = jpaInventoryRepository.findByStatus(InventoryStatus.LOW_STOCK);
+        return mapper.toDomains(entities);
+    }
+
+    @Override
+    public Page<Inventory> findByWarehouseLocation(String location, Pageable pageable) {
+        Page<InventoryEntity> entities = jpaInventoryRepository.findByWarehouseLocation(location, pageable);
+        return entities.map(mapper::toDomain);
+    }
+
+    @Override
+    public void delete(InventoryId id) {
+        jpaInventoryRepository.deleteById(id.value());
+    }
+
+    @Override
+    public boolean existsByProductId(ProductId productId) {
+        return jpaInventoryRepository.existsByProductId(productId.value());
+    }
+}

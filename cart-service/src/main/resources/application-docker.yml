@@ -1,0 +1,153 @@
+server:
+  port: 8443
+  ssl:
+    enabled: true
+    key-store: ${SSL_KEYSTORE_PATH:classpath:keystore.p12}
+    key-store-password: ${SSL_KEYSTORE_PASSWORD}
+    key-store-type: PKCS12
+    key-alias: ${SSL_KEY_ALIAS:cart-service}
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+    min-response-size: 2048
+
+spring:
+  application:
+    name: cart-service
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:cart_db}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_MAX_POOL_SIZE:20}
+      minimum-idle: ${DB_MIN_IDLE:5}
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    out-of-order: false
+    encoding: UTF-8
+    table: flyway_schema_history
+    clean-disabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        show_sql: false
+        jdbc:
+          batch_size: 20
+    show-sql: false
+    open-in-view: false
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: ${REDIS_POOL_MAX_ACTIVE:20}
+          max-idle: ${REDIS_POOL_MAX_IDLE:10}
+          min-idle: ${REDIS_POOL_MIN_IDLE:5}
+  cloud:
+    config:
+      enabled: ${CONFIG_SERVER_ENABLED:false}
+      uri: ${CONFIG_SERVER_URI:http://config-server:8888}
+      fail-fast: false
+      retry:
+        max-attempts: 3
+        initial-interval: 1000
+        multiplier: 1.5
+
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:false}
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    try-it-out-enabled: false
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:15}
+  refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200}
+  issuer: ${JWT_ISSUER:drugstore-prod}
+
+app:
+  rate-limit:
+    global:
+      enabled: true
+      maxRequests: ${RATE_LIMIT_GLOBAL_MAX:5000}
+      durationHours: 1
+    profiles:
+      standard:
+        maxRequests: ${RATE_LIMIT_STANDARD:40}
+        durationSeconds: 60
+      sensitive:
+        maxRequests: ${RATE_LIMIT_SENSITIVE:7}
+        durationSeconds: 60
+      public:
+        maxRequests: ${RATE_LIMIT_PUBLIC:100}
+        durationSeconds: 60
+      admin:
+        maxRequests: ${RATE_LIMIT_ADMIN:50}
+        durationSeconds: 1
+      customer-write:
+        maxRequests: ${RATE_LIMIT_CUSTOMER_WRITE:20}
+        durationSeconds: 60
+      customer-read:
+        maxRequests: ${RATE_LIMIT_CUSTOMER_READ:100}
+        durationSeconds: 60
+
+logging:
+  file:
+    name: ${LOG_PATH:/app/logs}/cart-service.log
+    path: ${LOG_PATH:/app/logs}
+    max-size: ${LOG_MAX_SIZE:100MB}
+    max-history: ${LOG_MAX_HISTORY:30}
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
+  level:
+    root: ${LOG_LEVEL_ROOT:WARN}
+    io.github.alexisTrejo11.drugstore: ${LOG_LEVEL_APP:INFO}
+    org.springframework.web: ${LOG_LEVEL_SPRING_WEB:WARN}
+    org.springframework.security: ${LOG_LEVEL_SPRING_SECURITY:WARN}
+    org.hibernate: ${LOG_LEVEL_HIBERNATE:WARN}
+    libs_kernel.log.audit: ${LOG_LEVEL_AUDIT:INFO}
+
+audit:
+  log:
+    enabled: true
+    excluded-endpoints: /actuator/health, /actuator/info, /actuator/metrics, /actuator/prometheus
+    detailed: ${AUDIT_DETAILED:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: ${MANAGEMENT_HEALTH_DETAILS:never}
+      probes:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: cart-service
+      environment: production

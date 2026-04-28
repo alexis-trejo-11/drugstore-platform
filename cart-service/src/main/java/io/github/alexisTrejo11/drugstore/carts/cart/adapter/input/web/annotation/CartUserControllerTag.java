@@ -1,0 +1,14 @@
+package io.github.alexisTrejo11.drugstore.carts.cart.adapter.input.web.annotation;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Tag(name = "Cart User Management", description = "Operations related to user cart management, including retrieval and modification of user's shopping cart")
+public @interface CartUserControllerTag {
+}

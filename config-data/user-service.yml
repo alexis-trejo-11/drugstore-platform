@@ -1,0 +1,260 @@
+server:
+  port: ${USER_SERVER_PORT:8087}
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: ${USER_SSL_KEYSTORE_PASSWORD}
+    key-store-type: PKCS12
+    key-alias: user-service
+
+spring:
+  application:
+    name: user-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:development}
+
+  boot:
+    admin:
+      client:
+        url: ${BOOT_ADMIN_URL:http://localhost:8080}
+        instance:
+          service-url: ${BOOT_ADMIN_SERVICE_URL:http://localhost:8080}
+          name: ${BOOT_ADMIN_NAME:user-service}
+
+  # Flyway
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+    locations: ${FLYWAY_LOCATIONS:classpath:db/migration}
+    baseline-on-migrate: ${FLYWAY_BASELINE_ON_MIGRATE:true}
+    validate-on-migrate: ${FLYWAY_VALIDATE_ON_MIGRATE:true}
+    clean-disabled: ${FLYWAY_CLEAN_DISABLED:false}
+
+  # Database Configuration
+  datasource:
+    url: ${USER_DB}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: ${DB_DRIVER_CLASS:org.postgresql.Driver}
+    hikari:
+      maximum-pool-size: ${DB_HIKARI_MAX_POOL_SIZE:10}
+      minimum-idle: ${DB_HIKARI_MIN_IDLE:5}
+      connection-timeout: ${DB_HIKARI_CONNECTION_TIMEOUT:20000}
+
+  # JPA
+  jpa:
+    database-platform: ${JPA_DATABASE_PLATFORM:org.hibernate.dialect.PostgreSQLDialect}
+    hibernate:
+      ddl-auto: ${JPA_HIBERNATE_DDL_AUTO:validate}
+    show-sql: ${JPA_SHOW_SQL:false}
+    properties:
+      hibernate:
+        format_sql: ${HIBERNATE_FORMAT_SQL:true}
+        dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+
+  # Redis - Configuración
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6378}
+      password: ${REDIS_PASSWORD:}
+      timeout: ${REDIS_TIMEOUT:60000}
+      lettuce:
+        pool:
+          max-active: ${REDIS_POOL_MAX_ACTIVE:8}
+          max-idle: ${REDIS_POOL_MAX_IDLE:8}
+          min-idle: ${REDIS_POOL_MIN_IDLE:0}
+          max-wait: ${REDIS_POOL_MAX_WAIT:-1ms}
+
+  # Cache
+  cache:
+    type: ${CACHE_TYPE:redis}
+    redis:
+      time-to-live: ${CACHE_TTL:3600000}
+      cache-null-values: ${CACHE_NULL_VALUES:false}
+
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:user-service-group}
+      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:earliest}
+      enable-auto-commit: ${KAFKA_ENABLE_AUTO_COMMIT:false}
+      max-poll-records: ${KAFKA_MAX_POLL_RECORDS:10}
+      fetch-min-bytes: ${KAFKA_FETCH_MIN_BYTES:1}
+      fetch-max-wait-ms: ${KAFKA_FETCH_MAX_WAIT_MS:500}
+      session-timeout-ms: ${KAFKA_SESSION_TIMEOUT_MS:30000}
+      heartbeat-interval-ms: ${KAFKA_HEARTBEAT_INTERVAL_MS:3000}
+      concurrency: ${KAFKA_CONCURRENCY:3}
+
+      properties:
+        spring.json.trusted.packages: "${KAFKA_TRUSTED_PACKAGES:*}"
+
+# Configuración JWT
+jwt:
+  secret: ${JWT_SECRET:your-secret-key-change-in-production}
+  access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:15}
+  refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200}
+  issuer: ${JWT_ISSUER:drugstore-api}
+
+  # Expiration in milisecs
+  access-token:
+    expiration: ${JWT_ACCESS_TOKEN_EXPIRATION_MS:900000}
+    claims:
+      include-ip: ${JWT_INCLUDE_IP:true}
+      include-user-agent: ${JWT_INCLUDE_USER_AGENT:true}
+
+  refresh-token:
+    expiration: ${JWT_REFRESH_TOKEN_EXPIRATION_MS:604800000}
+    reusable: ${JWT_REFRESH_TOKEN_REUSABLE:false}
+
+  activation-token:
+    expiration: ${JWT_ACTIVATION_TOKEN_EXPIRATION_MS:86400000}
+
+# gRPC Server Configuration
+grpc:
+  server:
+    port: ${GRPC_PORT:9090}
+    # Configuración de seguridad (opcional)
+    security:
+      enabled: ${GRPC_SECURITY_ENABLED:false}
+    # Límites de tamaño de mensaje
+    max-inbound-message-size: ${GRPC_MAX_INBOUND_MESSAGE_SIZE:4MB}
+    max-inbound-metadata-size: ${GRPC_MAX_INBOUND_METADATA_SIZE:8KB}
+
+# Kafka Topics
+kafka:
+  topics:
+    user:
+      created: ${KAFKA_TOPIC_USER_CREATED:user.created}
+      updated: ${KAFKA_TOPIC_USER_UPDATED:user.updated}
+      deleted: ${KAFKA_TOPIC_USER_DELETED:user.deleted}
+
+
+token:
+  activation:
+    length: ${TOKEN_ACTIVATION_LENGTH:6}
+    expiration: ${TOKEN_ACTIVATION_EXPIRATION:300000}
+    allowed-attempts: ${TOKEN_ACTIVATION_ALLOWED_ATTEMPTS:3}
+    block-time: ${TOKEN_ACTIVATION_BLOCK_TIME:300000}
+
+  two-fa:
+    length: ${TOKEN_2FA_LENGTH:6}
+    expiration: ${TOKEN_2FA_EXPIRATION:120000}
+    allowed-attempts: ${TOKEN_2FA_ALLOWED_ATTEMPTS:3}
+    block-time: ${TOKEN_2FA_BLOCK_TIME:600000}
+
+  password-reset:
+    length: ${TOKEN_PASSWORD_RESET_LENGTH:8}
+    expiration: ${TOKEN_PASSWORD_RESET_EXPIRATION:3600000}
+    include-special-chars: ${TOKEN_PASSWORD_RESET_SPECIAL_CHARS:true}
+
+  email-verification:
+    length: ${TOKEN_EMAIL_VERIFICATION_LENGTH:6}
+    expiration: ${TOKEN_EMAIL_VERIFICATION_EXPIRATION:300000}
+
+  # General config
+  security:
+    max-tokens-per-user: ${TOKEN_SECURITY_MAX_TOKENS_PER_USER:5}
+    clean-up-interval: ${TOKEN_SECURITY_CLEANUP_INTERVAL:300000}
+    encryption-enabled: ${TOKEN_SECURITY_ENCRYPTION_ENABLED:false}
+
+# Secrets para 2FA
+two-fa:
+  secret:
+    length: ${TWO_FA_SECRET_LENGTH:32}
+    algorithm: ${TWO_FA_SECRET_ALGORITHM:HmacSHA1}
+    time-step: ${TWO_FA_SECRET_TIME_STEP:30}
+    digits: ${TWO_FA_SECRET_DIGITS:6}
+    window: ${TWO_FA_SECRET_WINDOW:1}
+
+  # Backup codes
+  backup-codes:
+    count: ${TWO_FA_BACKUP_CODES_COUNT:5}
+    length: ${TWO_FA_BACKUP_CODES_LENGTH:8}
+    expiration: ${TWO_FA_BACKUP_CODES_EXPIRATION:15778463000}
+
+# Dev Rate limit
+rate-limit:
+  token-generation:
+    max-attempts: ${RATE_LIMIT_TOKEN_GENERATION_MAX_ATTEMPTS:10}
+    time-window: ${RATE_LIMIT_TOKEN_GENERATION_TIME_WINDOW:3600000}
+  token-validation:
+    max-attempts: ${RATE_LIMIT_TOKEN_VALIDATION_MAX_ATTEMPTS:20}
+    time-window: ${RATE_LIMIT_TOKEN_VALIDATION_TIME_WINDOW:3600000}
+
+
+
+# Logging
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    microservice.user: ${LOG_LEVEL_MICROSERVICE_USER:DEBUG}
+    org.apache.kafka: ${LOG_LEVEL_KAFKA:WARN}
+    io.grpc: ${LOG_LEVEL_GRPC:INFO}
+    org.springframework: ${LOG_LEVEL_SPRING:INFO}
+    org.springframework.data.redis: ${LOG_LEVEL_REDIS:DEBUG}
+    org.springframework.security: ${LOG_LEVEL_SECURITY:DEBUG}
+    org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE_SQL:DEBUG}
+    org.hibernate.type: ${LOG_LEVEL_HIBERNATE_TYPE:TRACE}
+    user_service: ${LOG_LEVEL_USER_SERVICE:DEBUG}
+    com.yourpackage: ${LOG_LEVEL_YOURPACKAGE:DEBUG}
+  pattern:
+    console: ${LOG_PATTERN_CONSOLE:%d{yyyy-MM-dd HH:mm:ss} - %msg%n}
+
+# Local Test
+debug: ${DEBUG_MODE:true}
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${ACTUATOR_ENDPOINTS_INCLUDE:health,info,metrics}
+  endpoint:
+    health:
+      show-details: ${ACTUATOR_HEALTH_SHOW_DETAILS:always}
+
+
+# Swagger
+springdoc:
+  api-docs:
+    path: ${SWAGGER_API_DOCS_PATH:/v3/api-docs}
+  swagger-ui:
+    path: ${SWAGGER_UI_PATH:/swagger-ui.html}
+  paths-to-match: ${SWAGGER_PATHS_TO_MATCH:/**}
+  packages-to-scan: ${SWAGGER_PACKAGES_TO_SCAN:io.github.alexisTrejo11.drugstore.users}
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: development
+
+logging:
+  level:
+    microservice.user: ${LOG_LEVEL_MICROSERVICE_USER_DEV:DEBUG}
+    org.apache.kafka: ${LOG_LEVEL_KAFKA_DEV:INFO}
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: production
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS_PROD:kafka-1:9092,kafka-2:9092,kafka-3:9092}
+    consumer:
+      concurrency: ${KAFKA_CONCURRENCY_PROD:6}
+
+grpc:
+  server:
+    port: ${GRPC_PORT_PROD:9090}
+    security:
+      enabled: ${GRPC_SECURITY_ENABLED_PROD:true}
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT_PROD:WARN}
+    microservice.user: ${LOG_LEVEL_MICROSERVICE_USER_PROD:INFO}

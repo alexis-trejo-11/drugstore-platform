@@ -1,0 +1,67 @@
+package io.github.alexisTrejo11.drugstore.carts.cart.core.application.command;
+
+import java.util.Map;
+
+import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.exception.CartValidationException;
+import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.model.valueobjects.CustomerId;
+import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.model.valueobjects.ProductId;
+
+/**
+ * Utility class for validating UpdateCartCommand parameters.
+ * Separates validation logic for better testability and reusability.
+ */
+public class UpdateCartCommandValidator {
+
+  /**
+   * Validates that the customer ID is not null and contains a valid value.
+   *
+   * @param customerId the customer ID to validate
+   * @throws CartValidationException if the customer ID is null or has a null
+   *                                  value
+   */
+  public static void validateCustomerId(CustomerId customerId) {
+    if (customerId == null || customerId.value() == null) {
+      throw new CartValidationException("CustomerId cannot be null");
+    }
+  }
+
+  /**
+   * Validates that the product quantities map is not null or empty.
+   *
+   * @param productQuantitiesMap the map to validate
+   * @throws CartValidationException if the map is null or empty
+   */
+  public static void validateProductQuantitiesMap(Map<ProductId, Integer> productQuantitiesMap) {
+    if (productQuantitiesMap == null || productQuantitiesMap.isEmpty()) {
+      throw new CartValidationException("Items cannot be null or empty");
+    }
+  }
+
+  /**
+   * Validates that all quantities in the map are positive numbers.
+   *
+   * @param productQuantitiesMap the map to validate
+   * @throws CartValidationException if any quantity is null or non-positive
+   */
+  public static void validateQuantities(Map<ProductId, Integer> productQuantitiesMap) {
+    productQuantitiesMap.forEach((productId, quantity) -> {
+      if (quantity == null || quantity <= 0) {
+        throw new CartValidationException(
+            "Quantity for product " + productId + " must be a positive number");
+      }
+    });
+  }
+
+  /**
+   * Performs complete validation of all UpdateCartCommand parameters.
+   *
+   * @param customerId           the customer ID to validate
+   * @param productQuantitiesMap the product quantities map to validate
+   * @throws CartValidationException if any validation fails
+   */
+  public static void validateAll(CustomerId customerId, Map<ProductId, Integer> productQuantitiesMap) {
+    validateCustomerId(customerId);
+    validateProductQuantitiesMap(productQuantitiesMap);
+    validateQuantities(productQuantitiesMap);
+  }
+}

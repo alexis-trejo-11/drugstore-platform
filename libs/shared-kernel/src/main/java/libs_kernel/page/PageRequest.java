@@ -1,0 +1,38 @@
+package libs_kernel.page;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.domain.Pageable;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class PageRequest {
+    @Min(1)
+    private int page = 1;
+    @Min(1)
+    @Max(100)
+    private int size = 10;
+    private SortInput sortInput = SortInput.defaultSort();
+
+    public static PageRequest of(int page, int size, SortInput sortInput) {
+        return new PageRequest(page, size, sortInput);
+    }
+
+    public static PageRequest of(int page, int size, String sortBy, String direction) {
+        return new PageRequest(page, size, new SortInput(sortBy, direction));
+    }
+
+    public static PageRequest defaultPageRequest() {
+        return new PageRequest(1, 10, SortInput.defaultSort());
+    }
+
+    public Pageable toPageable() {
+        return Pageable.ofSize(size).withPage(page - 1);
+    }
+}

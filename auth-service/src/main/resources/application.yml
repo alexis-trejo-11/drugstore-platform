@@ -1,0 +1,129 @@
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,mappings
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    microservice.auth: DEBUG
+    org.springframework.boot.autoconfigure: DEBUG
+    org.springframework.web: DEBUG
+
+spring:
+  application:
+    name: auth-service
+  # Redis Configuration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 2
+          max-wait: 1000ms
+    security:
+      oauth2:
+        client:
+          registration:
+            google:
+              client-id: ${GOOGLE_CLIENT_ID}
+              client-secret: ${GOOGLE_CLIENT_SECRET}
+              scope:
+                - email
+                - profile
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+    producer:
+      # Serialization
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      # Reliability
+      acks: all # Waits for confirmation from all replicas
+      retries: 3
+      enable-idempotence: true
+
+      # Performance
+      batch-size: 16384 # 16KB
+      linger-ms: 10 # Waits 10ms to batch messages
+      buffer-memory: 33554432 # 32MB
+      compression-type: snappy
+      max-in-flight-requests: 5
+
+      # Timeouts
+      request-timeout-ms: 30000 # 30 seconds
+      delivery-timeout-ms: 120000 # 2 minutes
+
+      properties:
+        # Additional configuration
+        max.block.ms: 5000 # Maximum block time in send()
+
+# Kafka Topics
+kafka:
+  topics:
+    # User Topics
+    user:
+      created: user.created
+      updated: user.updated
+      deleted: user.deleted
+      registered: user.registered
+      login: user.login
+
+    # Auth Topics
+    auth:
+      user-registered: auth.user-registered
+      user-login: auth.user-login
+      password-changed: auth.password-changed
+      account-activated: auth.account-activated
+      two-factor-enabled: auth.two-factor-enabled
+      two-factor-disabled: auth.two-factor-disabled
+
+    # Notification Topics
+    notification:
+      email-verification: notification.email-verification
+      two-factor-code: notification.two-factor-code
+      welcome-email: notification.welcome-email
+      password-reset-token: notification.password-reset-token
+      account-activation-token: notification.account-activation-token
+
+    # Topic Configuration
+    partitions: 3
+    replication-factor: 1 # 1 for development, 3 for production
+
+  producer:
+    timeout-seconds: 10
+
+
+
+app:
+  rate-limit:
+    global:
+      enabled: true
+      maxRequests: 5000
+      durationHours: 1
+    profiles:
+      standard:
+        maxRequests: 100
+        durationSeconds: 60
+      sensitive:
+        maxRequests: 10
+        durationSeconds: 60
+      public:
+        maxRequests: 1000
+        durationSeconds: 60
+      admin:
+        maxRequests: 50
+        durationSeconds: 1
