@@ -1,6 +1,6 @@
 # Project features
 
-Mirrors `docs/project/obsidian/ProjectFeature.md` in prose form for standard Markdown viewers.
+Mirrors `docs/project/source/ProjectFeature.md` in prose form for standard Markdown viewers.
 
 ---
 

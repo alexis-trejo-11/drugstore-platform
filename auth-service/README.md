@@ -185,13 +185,13 @@ Detailed docs are available under `docs/`:
 
 ### Main Service Documentation
 
-- [Project Metadata](docs/project/ProjectMetadata.md)
-- [Project Overview](docs/project/ProjectOverview.md)
-- [Project Infrastructure](docs/project/ProjectInfrastructure.md)
-- [Project Features](docs/project/ProjectFeature.md)
-- [Project Code Showcase](docs/project/ProjectCodeShowCase.md)
-- [Project Architecture](docs/project/ProjectArchitecture.md)
-- [API Schema](docs/project/APISchema.md)
+- [Project Metadata](docs/project/generated/ProjectMetadata.md)
+- [Project Overview](docs/project/generated/ProjectOverview.md)
+- [Project Infrastructure](docs/project/generated/ProjectInfrastructure.md)
+- [Project Features](docs/project/generated/ProjectFeature.md)
+- [Project Code Showcase](docs/project/generated/ProjectCodeShowCase.md)
+- [Project Architecture](docs/project/generated/ProjectArchitecture.md)
+- [API Schema](docs/project/generated/APISchema.md)
 
 ### Structured Source Docs (Obsidian-style)
 

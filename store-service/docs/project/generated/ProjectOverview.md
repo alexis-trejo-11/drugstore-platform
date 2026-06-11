@@ -1,6 +1,6 @@
 # Overview
 
-This document is the **plain-Markdown twin** of `docs/project/obsidian/ProjectOverview.md` (same facts, no Obsidian-only callouts).
+This document is the **plain-Markdown twin** of `docs/project/source/ProjectOverview.md` (same facts, no Obsidian-only callouts).
 
 ---
 

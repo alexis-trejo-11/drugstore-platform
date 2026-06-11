@@ -27,7 +27,7 @@ solution:
     - title: "Redis Caching"
       description: "Spring Cache with Redis for frequently accessed inventory data"
     - title: "Integration testing (profile test)"
-      description: "H2 in-memory, MockMvc REST tests, real JWT headers (JwtAuthenticationFilter); see docs/project/ProjectFeature.md"
+      description: "H2 in-memory, MockMvc REST tests, real JWT headers (JwtAuthenticationFilter); see docs/project/generated/ProjectFeature.md"
 
 keyMetrics:
   metricsTitle: "Inventory Service Key Metrics"
@@ -105,4 +105,4 @@ metrics:
 ---
 # Overview
 
-> Comprehensive inventory service with batch tracking, reservations, and stock movements. Uses RabbitMQ (not Kafka like other services - inconsistency). Dockerfile uses openjdk:17-jdk-slim (not Eclipse Temurin like other services). **Testing:** Spring Boot integration tests run under profile `test` (H2, real JWT headers); see `docs/project/ProjectFeature.md`. **Still missing:** broader unit coverage, migrate to Kafka for consistency, Kubernetes manifests, CI/CD pipeline.
+> Comprehensive inventory service with batch tracking, reservations, and stock movements. Uses RabbitMQ (not Kafka like other services - inconsistency). Dockerfile uses openjdk:17-jdk-slim (not Eclipse Temurin like other services). **Testing:** Spring Boot integration tests run under profile `test` (H2, real JWT headers); see `docs/project/generated/ProjectFeature.md`. **Still missing:** broader unit coverage, migrate to Kafka for consistency, Kubernetes manifests, CI/CD pipeline.

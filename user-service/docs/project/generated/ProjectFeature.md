@@ -1,6 +1,6 @@
 # Project Features
 
-Plain-Markdown twin of **`docs/project/obsidian/ProjectFeature.md`**.
+Plain-Markdown twin of **`docs/project/source/ProjectFeature.md`**.
 
 ## Authenticated user reads (`UserQueryManagerController`)
 

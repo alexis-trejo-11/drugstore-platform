@@ -24,7 +24,7 @@ Drugstore Platform is a **multi-service Spring Boot monorepo** for e-commerce an
 
 ## Service catalog
 
-Each row links to that service’s **root README** (same pattern as `address-service`: overview, stack, run instructions, and links to `docs/project/*.md`).
+Each row links to that service’s **root README** (same pattern as `address-service`: overview, stack, run instructions, and links to `docs/project/generated/*.md`).
 
 | Service | README | Role (high level) |
 |---------|--------|-------------------|
@@ -43,7 +43,7 @@ Each row links to that service’s **root README** (same pattern as `address-ser
 
 ## Cross-cutting platform components
 
-- **Kafka** — Async integration between services (topics per domain; see `kafka-infrastrucuture/` and each service’s docs under `docs/project/ProjectInfrastructure.md`).
+- **Kafka** — Async integration between services (topics per domain; see `kafka-infrastrucuture/` and each service’s docs under `docs/project/generated/ProjectInfrastructure.md`).
 - **Spring Boot Admin** — Several services register as **admin clients** (`de.codecentric:spring-boot-admin-starter-client`); the **admin server** lives under `admin-service/` for a single operations entrypoint.
 - **Config** — Services that use Spring Cloud Config consume shared settings from your config server / `config-data/` as documented per service.
 - **Shared kernel** — `libs/shared-kernel` (and published coordinates where used) for cross-cutting types, audit helpers, etc.
@@ -52,8 +52,8 @@ Each row links to that service’s **root README** (same pattern as `address-ser
 
 Every service with `docs/project/` follows the **address-service** convention:
 
-- **`docs/project/*.md`** — Human-readable Markdown (no Obsidian YAML frontmatter).
-- **`docs/project/obsidian/*.md`** — Structured source docs (frontmatter + body) for tooling or Obsidian.
+- **`docs/project/generated/*.md`** — Human-readable Markdown (no Obsidian YAML frontmatter).
+- **`docs/project/source/*.md`** — Structured source docs (frontmatter + body) for tooling or Obsidian.
 
 Start from a service README, then open **Project Overview** and **Project Architecture** for depth.
 

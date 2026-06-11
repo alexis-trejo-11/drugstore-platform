@@ -1,6 +1,6 @@
 # Infrastructure
 
-This file mirrors **`docs/project/obsidian/ProjectInfrastructure.md`** in plain Markdown. Cloud rows use **explicit placeholders**.
+This file mirrors **`docs/project/source/ProjectInfrastructure.md`** in plain Markdown. Cloud rows use **explicit placeholders**.
 
 ## Topology (local Docker Compose)
 

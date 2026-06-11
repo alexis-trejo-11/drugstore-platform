@@ -2,7 +2,7 @@
 
 REST API for **store-service**. Authoritative interactive spec: **`/swagger-ui.html`** and **`/v3/api-docs`** when `SWAGGER_ENABLED=true`.
 
-Twin of `docs/project/obsidian/APISchema.md`: that file carries **structured YAML** for tooling; this file is **human-readable** tables and notes.
+Twin of `docs/project/source/APISchema.md`: that file carries **structured YAML** for tooling; this file is **human-readable** tables and notes.
 
 ---
 

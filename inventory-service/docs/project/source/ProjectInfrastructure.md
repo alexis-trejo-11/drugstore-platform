@@ -96,4 +96,4 @@ dockerFiles:
 
 ## Automated integration tests (CI-friendly stack)
 
-When `./gradlew test` runs, the **`test`** Spring profile loads **`application-test.yml`**: H2 in-memory database (PostgreSQL compatibility mode), Flyway disabled, Hibernate schema create-drop, Redis/Kafka auto-config excluded, global rate limiting disabled. REST integration tests send **`Authorization: Bearer …`** JWTs built with **`IntegrationTestJwtSupport`** so **`JwtAuthenticationFilter`** and **`JwtTokenValidator`** execute without mocking Spring Security. See **`docs/project/ProjectFeature.md`** for the full checklist.
+When `./gradlew test` runs, the **`test`** Spring profile loads **`application-test.yml`**: H2 in-memory database (PostgreSQL compatibility mode), Flyway disabled, Hibernate schema create-drop, Redis/Kafka auto-config excluded, global rate limiting disabled. REST integration tests send **`Authorization: Bearer …`** JWTs built with **`IntegrationTestJwtSupport`** so **`JwtAuthenticationFilter`** and **`JwtTokenValidator`** execute without mocking Spring Security. See **`docs/project/generated/ProjectFeature.md`** for the full checklist.

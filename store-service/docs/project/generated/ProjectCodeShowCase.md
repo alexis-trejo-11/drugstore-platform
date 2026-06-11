@@ -1,6 +1,6 @@
 # Code showcase
 
-Plain-Markdown companion to `docs/project/obsidian/ProjectCodeShowCase.md`. Paths are relative to the `store-service` module root.
+Plain-Markdown companion to `docs/project/source/ProjectCodeShowCase.md`. Paths are relative to the `store-service` module root.
 
 ---
 

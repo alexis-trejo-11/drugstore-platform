@@ -33,7 +33,7 @@ updatedAt: "2026-05-06T00:00:00.000Z"
 | **Main class** | `io.github.alexisTrejo11.drugstore.stores.StoreServiceApplication` |
 | **Config profiles** | `dev` (default in `application.yml`), `docker` (compose) |
 
-Structured mirror of `docs/project/obsidian/ProjectMetadata.md` front matter for non-Obsidian pipelines.
+Structured mirror of `docs/project/source/ProjectMetadata.md` front matter for non-Obsidian pipelines.
 
 ## Highlighted notes (important / missing / dangerous)
 

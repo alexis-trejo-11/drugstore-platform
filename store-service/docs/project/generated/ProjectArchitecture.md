@@ -1,6 +1,6 @@
 # Architecture
 
-Plain-Markdown counterpart to `docs/project/obsidian/ProjectArchitecture.md` (diagram model and YAML blocks live there; this file is readable in GitHub and editors).
+Plain-Markdown counterpart to `docs/project/source/ProjectArchitecture.md` (diagram model and YAML blocks live there; this file is readable in GitHub and editors).
 
 ---
 

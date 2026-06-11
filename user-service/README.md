@@ -112,23 +112,23 @@ Typical URLs:
 
 ### Main Service Documentation
 
-- [Project Metadata](docs/project/ProjectMetadata.md)
-- [Project Overview](docs/project/ProjectOverview.md)
-- [Project Infrastructure](docs/project/ProjectInfrastructure.md)
-- [Project Features](docs/project/ProjectFeature.md)
-- [Project Code Showcase](docs/project/ProjectCodeShowCase.md)
-- [Project Architecture](docs/project/ProjectArchitecture.md)
-- [API Schema](docs/project/APISchema.md)
+- [Project Metadata](docs/project/generated/ProjectMetadata.md)
+- [Project Overview](docs/project/generated/ProjectOverview.md)
+- [Project Infrastructure](docs/project/generated/ProjectInfrastructure.md)
+- [Project Features](docs/project/generated/ProjectFeature.md)
+- [Project Code Showcase](docs/project/generated/ProjectCodeShowCase.md)
+- [Project Architecture](docs/project/generated/ProjectArchitecture.md)
+- [API Schema](docs/project/generated/APISchema.md)
 
 ### Structured Source Docs (Obsidian-style)
 
-- [Project Metadata (Source)](docs/project/obsidian/ProjectMetadata.md)
-- [Project Overview (Source)](docs/project/obsidian/ProjectOverview.md)
-- [Project Infrastructure (Source)](docs/project/obsidian/ProjectInfrastructure.md)
-- [Project Features (Source)](docs/project/obsidian/ProjectFeature.md)
-- [Project Code Showcase (Source)](docs/project/obsidian/ProjectCodeShowCase.md)
-- [Project Architecture (Source)](docs/project/obsidian/ProjectArchitecture.md)
-- [API Schema (Source)](docs/project/obsidian/APISchema.md)
+- [Project Metadata (Source)](docs/project/source/ProjectMetadata.md)
+- [Project Overview (Source)](docs/project/source/ProjectOverview.md)
+- [Project Infrastructure (Source)](docs/project/source/ProjectInfrastructure.md)
+- [Project Features (Source)](docs/project/source/ProjectFeature.md)
+- [Project Code Showcase (Source)](docs/project/source/ProjectCodeShowCase.md)
+- [Project Architecture (Source)](docs/project/source/ProjectArchitecture.md)
+- [API Schema (Source)](docs/project/source/APISchema.md)
 
 ---
 

@@ -251,4 +251,4 @@ codeExamples:
 > 4. **RabbitMQ Inconsistency**: Using RabbitMQ while other services use Kafka is a **major architectural inconsistency**. Consider migrating to Kafka for platform uniformity.
 > 5. **Missing gRPC**: Unlike address-service, auth-service, and cart-service, inventory-service doesn't expose gRPC endpoints for inter-service communication.
 > 6. **CQRS Pattern**: Controllers use command/query separation (e.g., `GetInventoryMovementsQuery`, `AdjustInventoryRequest.toCommand()`).
-> 7. **Integration tests**: `InventoryApiIntegrationTest` drives REST APIs through MockMvc under profile `test` (H2, real JWT validation via `IntegrationTestJwtSupport`). See `docs/project/ProjectFeature.md`.
+> 7. **Integration tests**: `InventoryApiIntegrationTest` drives REST APIs through MockMvc under profile `test` (H2, real JWT validation via `IntegrationTestJwtSupport`). See `docs/project/generated/ProjectFeature.md`.
