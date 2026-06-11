@@ -46,7 +46,12 @@ public class InventoryRepositoryImpl implements InventoryRepository {
 
     @Override
     public List<Inventory> findByIdIn(List<InventoryId> ids) {
-        return List.of();
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+        List<String> idStrings = ids.stream().map(InventoryId::value).toList();
+        List<InventoryEntity> entities = jpaInventoryRepository.findAllById(idStrings);
+        return mapper.toDomains(entities);
     }
 
     @Override

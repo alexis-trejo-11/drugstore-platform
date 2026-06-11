@@ -1,8 +1,9 @@
 plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.3.2'
-    id 'io.spring.dependency-management' version '1.1.6'
+	id 'java'
+	id 'org.springframework.boot' version '3.5.14'
+	id 'io.spring.dependency-management' version '1.1.7'
 }
+
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -14,9 +15,6 @@ java {
 repositories {
     mavenLocal()
     mavenCentral()
-    maven {
-        url 'https://projectlombok.org/edge-releases'
-    }
 }
 
 ext {
@@ -43,13 +41,14 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
     // Common library
-    implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
+    //implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
 
     // Spring Boot Admin
     implementation 'de.codecentric:spring-boot-admin-starter-client:3.1.5'
 
     // Open API
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+    // 2.7+ required for Spring Framework 6.2 / Boot 3.5 (ControllerAdviceBean constructor change)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
 
     // Migrations
     implementation 'org.flywaydb:flyway-core:10.17.0'
@@ -64,14 +63,18 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.42'
     annotationProcessor 'org.projectlombok:lombok:1.18.42'
 
-
     // Redis Cache
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
 
-    // Logstash Encoder for Elk
-    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
-    implementation 'org.codehaus.janino:janino:3.1.10'
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // Observability
+    implementation 'com.github.loki4j:loki-logback-appender:1.5.2'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 dependencyManagement {

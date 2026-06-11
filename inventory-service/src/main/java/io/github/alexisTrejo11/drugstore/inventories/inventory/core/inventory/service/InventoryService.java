@@ -5,8 +5,10 @@ import io.github.alexisTrejo11.drugstore.inventories.inventory.core.batch.applic
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.batch.application.query.GetExpiringBatchesQuery;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.command.AdjustInventoryCommand;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.command.CreateInventoryCommand;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.command.UpdateInventoryCommand;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.handler.command.AdjustInventoryCommandHandler;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.handler.command.CreateInventoryCommandHandler;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.handler.command.UpdateInventoryCommandHandler;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.batch.domain.entity.InventoryBatch;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.handler.query.GetInventoryByIdQueryHandler;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.handler.query.GetInventoryByProductQueryHandler;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
 public class InventoryService implements InventoryUseCase {
     // Handlers for Commands
     private final CreateInventoryCommandHandler createInventoryHandler;
+    private final UpdateInventoryCommandHandler updateInventoryHandler;
     private final AdjustInventoryCommandHandler adjustInventoryHandler;
     // Handlers for Queries
     private final GetExpiringBatchesQueryHandler getExpiringBatchesQueryHandler;
@@ -42,7 +45,12 @@ public class InventoryService implements InventoryUseCase {
          return createInventoryHandler.handle(inventoryCommand);
     }
 
-    // TODO: Create Event Alert after inventory adjustment
+    @Override
+    public void updateInventory(UpdateInventoryCommand command) {
+        updateInventoryHandler.handle(command);
+    }
+
+    /** Low-stock / out-of-stock alerts are raised periodically by scheduled inventory monitoring. */
     @Override
     public AdjustmentId adjustInventory(AdjustInventoryCommand command) {
         return adjustInventoryHandler.handle(command);

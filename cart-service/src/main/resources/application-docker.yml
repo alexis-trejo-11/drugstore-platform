@@ -1,11 +1,6 @@
 server:
-  port: 8443
-  ssl:
-    enabled: true
-    key-store: ${SSL_KEYSTORE_PATH:classpath:keystore.p12}
-    key-store-password: ${SSL_KEYSTORE_PASSWORD}
-    key-store-type: PKCS12
-    key-alias: ${SSL_KEY_ALIAS:cart-service}
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: native
   compression:
     enabled: true
     mime-types: application/json,application/xml,text/html,text/xml,text/plain
@@ -67,6 +62,17 @@ spring:
         max-attempts: 3
         initial-interval: 1000
         multiplier: 1.5
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:cart-service-group}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: io.github.alexisTrejo11.drugstore.carts.product.core.application.events.ProductEvent
+    listener:
+      missing-topics-fatal: false
 
 springdoc:
   api-docs:

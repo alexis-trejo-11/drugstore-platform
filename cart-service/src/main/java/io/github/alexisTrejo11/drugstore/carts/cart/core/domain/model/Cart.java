@@ -230,6 +230,16 @@ public class Cart {
     log.debug("Cart cleared successfully");
   }
 
+  public void clear() {
+    log.info("Clearing Cart NoARGS: cartId={}, itemCount={}, reason={}", id, items.size(), "None");
+
+      items.clear();
+
+    timeStamps.markAsUpdated();
+
+    log.debug("Cart NoARGS cleared successfully");
+  }
+
   public void setItems(List<CartItem> newItems) {
     log.info("Setting items in Cart: cartId={}, newItemCount={}", id, newItems != null ? newItems.size() : 0);
     if (newItems == null) {

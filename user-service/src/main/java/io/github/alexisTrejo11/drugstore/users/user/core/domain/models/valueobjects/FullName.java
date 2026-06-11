@@ -1,7 +1,7 @@
 package io.github.alexisTrejo11.drugstore.users.user.core.domain.models.valueobjects;
 
 public record FullName(String firstName, String lastName) {
-  public static FullName NONE = new FullName("N/A", "N/A");
+  public static FullName NONE = new FullName("None", "None");
 
   public FullName {
     if (firstName == null || firstName.isEmpty()) {

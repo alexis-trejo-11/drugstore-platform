@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.application.command.CreateAfterwardsCommand;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.exception.CartNotFoundException;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.model.Cart;
-import io.github.alexisTrejo11.drugstore.carts.cart.core.port.out.CartRepository;
+import io.github.alexisTrejo11.drugstore.carts.cart.core.port.output.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 

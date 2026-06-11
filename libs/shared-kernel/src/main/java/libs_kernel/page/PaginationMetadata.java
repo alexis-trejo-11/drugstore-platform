@@ -2,7 +2,6 @@ package libs_kernel.page;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.domain.Page;
 
 @Getter
 @Setter
@@ -41,17 +40,6 @@ public class PaginationMetadata {
         this.totalPages = (int) Math.ceil((double) totalElements / pageSize);
         this.hasNext = pageSize < totalPages;
         this.hasPrevious = pageSize > 1;
-    }
-
-    public static PaginationMetadata from(Page<?> page) {
-        return new PaginationMetadata(
-                page.getTotalElements(),
-                page.getTotalPages(),
-                page.getNumber() + 1, // Page 1-based index
-                page.getSize(),
-                page.hasNext(),
-                page.hasPrevious()
-        );
     }
 
     public static PaginationMetadata empty() {

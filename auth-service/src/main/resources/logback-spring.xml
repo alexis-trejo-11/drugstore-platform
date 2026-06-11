@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property name="LOG_PATH" value="${LOG_PATH:-logs}" />
+    <!-- Default to a writable directory so bootRun works when ./logs is missing or not writable (e.g. root-owned from Docker). Override with LOG_PATH or logging.file.path. -->
+    <property name="LOG_PATH" value="${LOG_PATH:-${java.io.tmpdir}/auth-service-logs}" />
     <property name="APP_NAME" value="${SPRING_APPLICATION_NAME:-auth-service}" />
 
-    <!-- Console Appender -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Application Log File Appender -->
     <appender name="FILE_APP" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${APP_NAME}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -22,27 +21,46 @@
         </encoder>
     </appender>
 
-    <!-- Audit Log File Appender -->
     <appender name="FILE_AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${APP_NAME}-audit.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_PATH}/${APP_NAME}-audit.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
-            <maxHistory>90</maxHistory> <!-- Save Audit Logs Longer -->
+            <maxHistory>90</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} - %msg%n</pattern> <!-- Simple format for audit -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Audit Specific Logger -->
+    <springProfile name="!test">
+        <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+            <http>
+                <url>http://loki:3100/loki/api/v1/push</url>
+            </http>
+            <format>
+                <label>
+                    <pattern>app=${APP_NAME},env=prod,level=%level</pattern>
+                </label>
+                <message>
+                    <pattern>l=%level c=%logger{20} t=%thread traceId=%X{traceId:-none} | %msg %ex</pattern>
+                </message>
+            </format>
+        </appender>
+    </springProfile>
+
     <logger name="libs_kernel.log.audit" level="INFO" additivity="false">
         <appender-ref ref="FILE_AUDIT" />
-        <appender-ref ref="CONSOLE" /> <!-- ALSO SHOW AUDIT LOGS ON CONSOLE -->
+        <appender-ref ref="CONSOLE" />
+        <springProfile name="!test">
+            <appender-ref ref="LOKI" />
+        </springProfile>
     </logger>
 
-    <!-- Root logger -->
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE_APP" />
+        <springProfile name="!test">
+            <appender-ref ref="LOKI" />
+        </springProfile>
     </root>
 </configuration>

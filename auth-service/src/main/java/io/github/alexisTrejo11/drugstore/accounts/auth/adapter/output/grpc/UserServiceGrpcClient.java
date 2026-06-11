@@ -3,7 +3,6 @@ package io.github.alexisTrejo11.drugstore.accounts.auth.adapter.output.grpc;
 import java.util.concurrent.TimeUnit;
 
 import com.microservices.grpc.user.*;
-import com.microservices.grpc.user.UserServiceGrpc;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.UserServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,13 +10,14 @@ import org.springframework.stereotype.Component;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import io.github.alexisTrejo11.drugstore.accounts.auth.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.models.User;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.InvalidCredentialsException;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.UserNotFoundException;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.UserServiceAuthException;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.UserServiceException;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.UserServiceTimeoutException;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.UserServiceUnavailableException;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.UserAlreadyExistsError;
 
 
 @Component
@@ -197,6 +197,105 @@ public class UserServiceGrpcClient implements UserServiceClient {
     }
   }
 
+  @Override
+  public User createUser(
+      String email,
+      String phone,
+      String firstName,
+      String lastName,
+      String hashedPassword,
+      String roleName) {
+    log.debug("Creating user with email: {}", email);
+    try {
+      CreateUserRequest request = CreateUserRequest.newBuilder()
+          .setEmail(email)
+          .setPhoneNumber(phone)
+          .setFirstName(firstName)
+          .setLastName(lastName)
+          .setHashedPassword(hashedPassword)
+          .setRole(roleName)
+          .build();
+
+      UserResponse response = userServiceStub
+          .withDeadlineAfter(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+          .createUser(request);
+
+      return userGrpcMapper.toDomain(response);
+    } catch (StatusRuntimeException e) {
+      throw handleGrpcException("createUser", e);
+    }
+  }
+
+  @Override
+  public void activateUser(String userId) {
+    log.debug("Activating user: {}", userId);
+    try {
+      UserIdRequest request = UserIdRequest.newBuilder().setUserId(userId).build();
+      userServiceStub.withDeadlineAfter(DEFAULT_TIMEOUT, TimeUnit.SECONDS).activateUser(request);
+    } catch (StatusRuntimeException e) {
+      throw handleGrpcException("activateUser", e);
+    }
+  }
+
+  @Override
+  public void updateUserPassword(String userId, String hashedPassword) {
+    log.debug("Updating password for user: {}", userId);
+    try {
+      UpdateUserPasswordRequest request = UpdateUserPasswordRequest.newBuilder()
+          .setUserId(userId)
+          .setHashedPassword(hashedPassword)
+          .build();
+      userServiceStub.withDeadlineAfter(DEFAULT_TIMEOUT, TimeUnit.SECONDS).updateUserPassword(request);
+    } catch (StatusRuntimeException e) {
+      throw handleGrpcException("updateUserPassword", e);
+    }
+  }
+
+  @Override
+  public User updateUserCredentials(String userId, String email, String phone) {
+    log.debug("Updating credentials for user: {}", userId);
+    try {
+      UpdateUserCredentialsRequest request = UpdateUserCredentialsRequest.newBuilder()
+          .setUserId(userId)
+          .setEmail(email != null ? email : "")
+          .setPhoneNumber(phone != null ? phone : "")
+          .build();
+
+      UserResponse response = userServiceStub
+          .withDeadlineAfter(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+          .updateUserCredentials(request);
+
+      return userGrpcMapper.toDomain(response);
+    } catch (StatusRuntimeException e) {
+      throw handleGrpcException("updateUserCredentials", e);
+    }
+  }
+
+  @Override
+  public void completeTwoFactorEnrollment(String userId, String totpSecretBase32) {
+    log.debug("Completing 2FA enrollment for user: {}", userId);
+    try {
+      TwoFactorEnrollmentRequest request = TwoFactorEnrollmentRequest.newBuilder()
+          .setUserId(userId)
+          .setTotpSecretBase32(totpSecretBase32)
+          .build();
+      userServiceStub.withDeadlineAfter(DEFAULT_TIMEOUT, TimeUnit.SECONDS).completeTwoFactorEnrollment(request);
+    } catch (StatusRuntimeException e) {
+      throw handleGrpcException("completeTwoFactorEnrollment", e);
+    }
+  }
+
+  @Override
+  public void disableTwoFactorOnUser(String userId) {
+    log.debug("Disabling 2FA for user: {}", userId);
+    try {
+      UserIdRequest request = UserIdRequest.newBuilder().setUserId(userId).build();
+      userServiceStub.withDeadlineAfter(DEFAULT_TIMEOUT, TimeUnit.SECONDS).disableTwoFactorAuth(request);
+    } catch (StatusRuntimeException e) {
+      throw handleGrpcException("disableTwoFactorOnUser", e);
+    }
+  }
+
   private RuntimeException handleGrpcException(String operation, StatusRuntimeException e) {
     Status.Code code = e.getStatus().getCode();
     String description = e.getStatus().getDescription();
@@ -205,6 +304,11 @@ public class UserServiceGrpcClient implements UserServiceClient {
 
     switch (code) {
       case NOT_FOUND -> throw new UserNotFoundException("User not found: " + description);
+
+      case ALREADY_EXISTS ->
+          throw new UserAlreadyExistsError(description != null ? description : "Resource already exists");
+
+      case FAILED_PRECONDITION -> throw new IllegalStateException(description != null ? description : "Precondition failed");
 
       case INVALID_ARGUMENT -> throw new IllegalArgumentException("Invalid argument: " + description);
 

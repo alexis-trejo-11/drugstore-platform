@@ -5,10 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.domain.entity.valueobject.ProductId;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.stock.application.command.ReserveStockCommand;
 import io.github.alexisTrejo11.drugstore.inventories.shared.domain.order.OrderReference;
 
-import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @Builder
@@ -21,16 +22,18 @@ public class ReserveStockRequest {
     @NotNull
     private OrderReference.OrderType orderType;
 
+    @NotNull
+    @Positive
+    private Integer quantity;
+
     private String reason;
 
-    // TODO: UPDATE BASED ON ACTUAL REQUIREMENTS
-    public ReserveStockCommand toCommand(String inventoryId) {
+    public ReserveStockCommand toCommand(ProductId productId) {
         OrderReference orderReference = new OrderReference(orderType, orderId);
-        //Map<ProductId, Integer> productQuantityMap = Map.of(new InventoryId(inventoryId), quantity);
-
+        Map<ProductId, Integer> lines = Map.of(productId, quantity);
         return ReserveStockCommand.builder()
                 .orderReference(orderReference)
-                .productQuantityMap(new HashMap<>())
+                .productQuantityMap(lines)
                 .reason(reason != null ? reason : "Reserved for order " + orderId)
                 .build();
     }

@@ -1,5 +1,7 @@
 package io.github.alexisTrejo11.drugstore.carts.product.adapter.input.controller;
 
+import io.github.alexisTrejo11.drugstore.carts.shared.PageRequestLocal;
+import io.github.alexisTrejo11.drugstore.carts.shared.PageResponseLocal;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import libs_kernel.page.PageRequest;
@@ -23,15 +25,15 @@ public class ProductController {
 	}
 
 	@GetMapping
-	public ResponseWrapper<PageResponse<ProductResponse>> getProducts(@ModelAttribute @Valid PageRequest pageRequest) {
+	public ResponseWrapper<PageResponseLocal<ProductResponse>> getProducts(@ModelAttribute @Valid PageRequestLocal pageRequest) {
 		if (pageRequest == null) {
-			pageRequest = PageRequest.defaultPageRequest();
+			pageRequest = PageRequestLocal.defaultPageRequest();
 		}
 
 		Page<Product> productPage = productUseCases.getProducts(pageRequest.toPageable());
 
 		Page<ProductResponse> responsePage = productPage.map(ProductResponse::from);
-		return ResponseWrapper.found(PageResponse.from(responsePage), "Products");
+		return ResponseWrapper.found(PageResponseLocal.from(responsePage), "Products");
 	}
 
 	@GetMapping("/{productId}")

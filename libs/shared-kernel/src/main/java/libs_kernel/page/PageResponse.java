@@ -3,7 +3,6 @@ package libs_kernel.page;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -25,24 +24,11 @@ public class PageResponse<T> {
         this.paginationMetadata = paginationMetadata;
     }
 
-    public static <T> PageResponse<T> from(Page<T> page) {
-        return new PageResponse<>(
-                page.getContent(),
-                PaginationMetadata.from(page)
-        );
-    }
 
     public static <T> PageResponse<T> empty() {
         return new PageResponse<>(
                 List.of(),
                 PaginationMetadata.empty());
-    }
-
-    public PageResponse<T> fromPage(Page<T> page) {
-        return new PageResponse<T>(
-                page.getContent(),
-                PaginationMetadata.from(page)
-        );
     }
 
     @JsonProperty("content")

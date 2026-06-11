@@ -2,7 +2,7 @@ package io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase
 
 import org.springframework.stereotype.Service;
 
-import io.github.alexisTrejo11.drugstore.accounts.auth.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.models.User;
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.output.security.tokens.TokenType;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.AccountActivatedEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.InvalidTokenException;
@@ -57,7 +57,8 @@ public class ActivateAccountUseCase {
     }
 
     try {
-      UserClaims claims = tokenService.extractClaims(activationCode);
+      UserClaims claims =
+          tokenService.extractClaimsForOpaqueToken(activationCode, TokenType.ACTIVATION);
       log.debug("Activation token validated for user: {}", claims.userId());
       return claims;
     } catch (Exception e) {
@@ -79,8 +80,7 @@ public class ActivateAccountUseCase {
       throw new RuntimeException("User not found");
     }
 
-    // TODO: Call user service to mark user as activated
-    // userServiceClient.activateUser(userId);
+    userServiceClient.activateUser(userId);
 
     log.debug("User activated successfully");
     return user;

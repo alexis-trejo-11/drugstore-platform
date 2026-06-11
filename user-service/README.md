@@ -1,0 +1,135 @@
+# User Service
+
+User Service is an internal microservice of the Drugstore Platform monorepo.  
+It owns **user identity and profile** persistence: accounts, attributes consumed by auth-service over **gRPC**, and **Kafka** events for downstream systems.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Core Capabilities](#core-capabilities)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [API Surface](#api-surface)
+- [Security and Business Rules](#security-and-business-rules)
+- [Observability](#observability)
+- [Run Locally](#run-locally)
+- [Docker and Full Local Stack](#docker-and-full-local-stack)
+- [Testing](#testing)
+- [Documentation Navigation](#documentation-navigation)
+
+## Overview
+
+- **Service name:** `user-service`
+- **Role in platform:** System of record for user data used by auth and other services.
+- **Main responsibility:** User CRUD, Flyway migrations, Redis cache, Kafka consumers/producers, gRPC server for internal calls.
+- **Protocols:** REST over HTTPS (configurable port, default **8087**), gRPC, Kafka.
+- **Persistence:** PostgreSQL via configurable JDBC URL (`USER_DB`).
+
+## Core Capabilities
+
+- User lifecycle APIs and persistence.
+- gRPC service for high-performance internal queries and updates.
+- Kafka integration for user events and related topics.
+- Spring Cloud Config bootstrap when enabled.
+- Token and 2FA configuration blocks in `application.yml` (see docs for semantics).
+
+## Tech Stack
+
+- Java 23
+- Spring Boot 3.3.2
+- Spring Web, Spring Security, Spring Data JPA, Spring Data Redis, Spring Kafka
+- gRPC + Protobuf
+- PostgreSQL, Flyway
+- Springdoc OpenAPI
+- Actuator + Micrometer + Prometheus
+- Loki4j + Loki + Grafana
+- Docker / Docker Compose + `Dockerfile`
+
+## Project Structure
+
+```text
+user-service/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   └── resources/
+│   │       ├── application.yml
+│   │       └── logback-spring.xml
+│   └── test/
+├── observability/
+│   ├── prometheus/
+│   └── grafana/provisioning/datasources/
+├── docs/
+│   └── project/
+│       ├── *.md
+│       └── obsidian/*.md
+├── docker-compose.yml
+├── Dockerfile
+├── build.gradle
+└── README.md
+```
+
+## API Surface
+
+- REST and Swagger paths driven by `springdoc` and profile-specific settings in `application.yml`.
+- gRPC port defaults from `grpc.server.port`.
+
+## Security and Business Rules
+
+- JWT configuration shared patterns with auth-service consumers.
+- Secrets only via environment (DB, Redis, Kafka, JWT).
+
+## Observability
+
+- Actuator includes Prometheus in default exposure list (customizable via `ACTUATOR_ENDPOINTS_INCLUDE`).
+- Loki via Logback; compose includes Postgres, Redis, Flyway migrate job, Prometheus, Loki, Grafana.
+
+## Run Locally
+
+```bash
+./gradlew bootRun
+./gradlew test
+```
+
+## Docker and Full Local Stack
+
+```bash
+docker compose up -d --build
+```
+
+Ensure `user-service:latest` exists for the `user-service` service in compose, or add a `build:` block.
+
+Typical URLs:
+
+- Health: `https://localhost:8087/actuator/health` (TLS; verify port mapping in compose)
+- Grafana: `http://localhost:3000`
+
+## Testing
+
+- Tests under `src/test/`.
+
+## Documentation Navigation
+
+### Main Service Documentation
+
+- [Project Metadata](docs/project/ProjectMetadata.md)
+- [Project Overview](docs/project/ProjectOverview.md)
+- [Project Infrastructure](docs/project/ProjectInfrastructure.md)
+- [Project Features](docs/project/ProjectFeature.md)
+- [Project Code Showcase](docs/project/ProjectCodeShowCase.md)
+- [Project Architecture](docs/project/ProjectArchitecture.md)
+- [API Schema](docs/project/APISchema.md)
+
+### Structured Source Docs (Obsidian-style)
+
+- [Project Metadata (Source)](docs/project/obsidian/ProjectMetadata.md)
+- [Project Overview (Source)](docs/project/obsidian/ProjectOverview.md)
+- [Project Infrastructure (Source)](docs/project/obsidian/ProjectInfrastructure.md)
+- [Project Features (Source)](docs/project/obsidian/ProjectFeature.md)
+- [Project Code Showcase (Source)](docs/project/obsidian/ProjectCodeShowCase.md)
+- [Project Architecture (Source)](docs/project/obsidian/ProjectArchitecture.md)
+- [API Schema (Source)](docs/project/obsidian/APISchema.md)
+
+---
+
+If this service changes its API contract, gRPC contracts, event schemas, or observability setup, update `docs/` and this `README.md` in the same PR.

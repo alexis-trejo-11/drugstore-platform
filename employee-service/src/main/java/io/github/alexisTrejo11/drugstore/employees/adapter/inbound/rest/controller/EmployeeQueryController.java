@@ -21,14 +21,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import libs_kernel.config.rate_limit.RateLimit;
 import libs_kernel.config.rate_limit.RateLimitProfile;
-import libs_kernel.page.PageResponse;
+import io.github.alexisTrejo11.drugstore.employees.core.utils.PageResponseLocal;
 import libs_kernel.response.ResponseWrapper;
 
 /**
  * REST Controller for employee query operations (read operations)
  */
 @RestController
-@RequestMapping("/api/v1/employees")
+@RequestMapping("/api/v2/employees")
 @Tag(name = "Employee Query Operations", description = "Endpoints for querying and retrieving employee information. These operations allow searching, filtering, and retrieving employee data based on various criteria.")
 @SecurityRequirement(name = "bearerAuth")
 public class EmployeeQueryController {
@@ -81,13 +81,13 @@ public class EmployeeQueryController {
   @GetMapping
   @RateLimit(profile = RateLimitProfile.PUBLIC)
   @SearchEmployeesOperation
-  public ResponseWrapper<PageResponse<EmployeeResponse>> searchEmployees(
+  public ResponseWrapper<PageResponseLocal<EmployeeResponse>> searchEmployees(
       @ModelAttribute SearchEmployeesRequest request) {
 
     SearchEmployeesQuery query = request.toQuery();
     Page<Employee> employeesPage = employeeQueryService.searchEmployees(query);
 
-    PageResponse<EmployeeResponse> pageResponse = responseMapper.toResponsePage(employeesPage);
+    PageResponseLocal<EmployeeResponse> pageResponse = responseMapper.toResponsePage(employeesPage);
     return ResponseWrapper.found(pageResponse, "Employees");
   }
 

@@ -37,12 +37,21 @@ public interface TokenService {
   boolean validateToken(String token, TokenType tokenType);
 
   /**
-   * Extract claims from a JWT token
-   * 
+   * Extract claims from a JWT token (access / refresh).
+   *
    * @param token the JWT token string
-   * @return map of claims
+   * @return claims embedded in the JWT
    */
   UserClaims extractClaims(String token);
+
+  /**
+   * Extract claims for opaque tokens stored in Redis (activation, password reset,
+   * etc.).
+   *
+   * @param code          numeric or opaque code used as Redis key
+   * @param expectedType  token type that must match stored metadata
+   */
+  UserClaims extractClaimsForOpaqueToken(String code, TokenType expectedType);
 
 	/**
 	 * Invalidate a token (e.g. on logout)

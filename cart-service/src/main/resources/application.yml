@@ -1,11 +1,6 @@
 server:
-  port: ${SERVER_PORT:8443}
-  ssl:
-    enabled: ${SSL_ENABLED:true}
-    key-store: classpath:keystore.p12
-    key-store-password: ${SSL_KEYSTORE_PASSWORD}
-    key-store-type: PKCS12
-    key-alias: cart-service
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: native
 
 # gRPC Server Configuration
 grpc:
@@ -19,10 +14,10 @@ grpc:
 
 spring:
   application:
-    name: cart-service
+    name: ${SPRING_APPLICATION_NAME:cart-service}
   datasource:
-    url: jdbc:postgresql://localhost:5432/drugstore_carts
-    username: ${DB_USERNAME:postgres}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:drugstore_carts}
+    username: ${DB_USERNAME:${DB_USER:postgres}}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   flyway:
@@ -37,15 +32,25 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-    show-sql: true
+        format_sql: ${JPA_FORMAT_SQL:true}
+    show-sql: ${JPA_SHOW_SQL:true}
     hibernate:
       ddl-auto: validate
-
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: ${REDIS_POOL_MAX_ACTIVE:8}
+          max-idle: ${REDIS_POOL_MAX_IDLE:8}
+          min-idle: ${REDIS_POOL_MIN_IDLE:0}
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
-      group-id: cart-service-group
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:cart-service-group}
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
@@ -56,10 +61,10 @@ spring:
 
 springdoc:
   api-docs:
-    enabled: true
+    enabled: ${SWAGGER_ENABLED:true}
     path: /v3/api-docs
   swagger-ui:
-    enabled: true
+    enabled: ${SWAGGER_ENABLED:true}
     path: /swagger-ui.html
     disable-swagger-default-url: true
     try-it-out-enabled: true
@@ -70,47 +75,69 @@ jwt:
   secret: ${JWT_SECRET_KEY}
   access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:15}
   refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200}
-  issuer: ${ISSUER}
+  issuer: ${JWT_ISSUER:${ISSUER:drugstore-dev}}
 
 app:
   rate-limit:
     global:
-      enabled: true
-      maxRequests: 5000
+      enabled: ${RATE_LIMIT_GLOBAL_ENABLED:true}
+      maxRequests: ${RATE_LIMIT_GLOBAL_MAX:5000}
       durationHours: 1
     profiles:
       standard:
-        maxRequests: 40
+        maxRequests: ${RATE_LIMIT_STANDARD:40}
         durationSeconds: 60
       sensitive:
-        maxRequests: 7
+        maxRequests: ${RATE_LIMIT_SENSITIVE:7}
         durationSeconds: 60
       public:
-        maxRequests: 100
+        maxRequests: ${RATE_LIMIT_PUBLIC:100}
         durationSeconds: 60
       admin:
-        maxRequests: 50
+        maxRequests: ${RATE_LIMIT_ADMIN:50}
         durationSeconds: 1
       customer-write:
-        maxRequests: 20
+        maxRequests: ${RATE_LIMIT_CUSTOMER_WRITE:20}
         durationSeconds: 60
       customer-read:
-        maxRequests: 100
+        maxRequests: ${RATE_LIMIT_CUSTOMER_READ:100}
         durationSeconds: 60
 
 logging:
   file:
-    name: logs/cart-service.log
-    path: logs
+    name: ${LOG_PATH:logs}/cart-service.log
+    path: ${LOG_PATH:logs}
+    max-size: ${LOG_MAX_SIZE:100MB}
+    max-history: ${LOG_MAX_HISTORY:30}
   pattern:
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
   level:
-    root: INFO
-    io.github.alexisTrejo11.drugstore: DEBUG
-    libs_kernel.log.audit: INFO
+    root: ${LOG_LEVEL_ROOT:INFO}
+    io.github.alexisTrejo11.drugstore: ${LOG_LEVEL_APP:DEBUG}
+    libs_kernel.log.audit: ${LOG_LEVEL_AUDIT:INFO}
 
 audit:
   log:
-    enabled: true
+    enabled: ${AUDIT_LOG_ENABLED:true}
     excluded-endpoints: /actuator/health, /actuator/info, /swagger-ui.
+    detailed: ${AUDIT_DETAILED:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: ${MANAGEMENT_HEALTH_DETAILS:always}
+      probes:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: cart-service
+      environment: development

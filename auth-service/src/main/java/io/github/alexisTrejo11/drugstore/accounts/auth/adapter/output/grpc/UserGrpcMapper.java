@@ -6,7 +6,11 @@ import java.time.format.DateTimeFormatter;
 import com.microservices.grpc.user.UserResponse;
 import org.springframework.stereotype.Component;
 
-import io.github.alexisTrejo11.drugstore.accounts.auth.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.models.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.Email;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.PhoneNumber;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.UserId;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.UserRole;
 
 @Component
 public class UserGrpcMapper {
@@ -17,24 +21,53 @@ public class UserGrpcMapper {
       return null;
     }
 
-    /*
-     * return User.builder()
-     * .id(grpcUser.getUserId())
-     * .email(grpcUser.getEmail())
-     * .firstName(grpcUser.getFirstName())
-     * .lastName(grpcUser.getLastName())
-     * .phoneNumber(grpcUser.getPhoneNumber())
-     * .role(grpcUser.getRole())
-     * .twoFactorEnabled(grpcUser.getTwoFactorEnabled())
-     * .emailVerified(grpcUser.getEmailVerified())
-     * .status(grpcUser.getStatus())
-     * .createdAt(parseDateTime(grpcUser.getCreatedAt()))
-     * .updatedAt(parseDateTime(grpcUser.getUpdatedAt()))
-     * .build();
-     * 
-     */
+    try {
+      Email email = new Email(grpcUser.getEmail());
+      PhoneNumber phone = toPhone(grpcUser.getPhoneNumber());
+      UserRole role = UserRole.valueOf(grpcUser.getRole().trim().toUpperCase());
 
-    return null;
+      return User.builder()
+          .id(new UserId(grpcUser.getUserId()))
+          .email(email)
+          .firstName(grpcUser.getFirstName())
+          .lastName(grpcUser.getLastName())
+          .phoneNumber(phone)
+          .password("")
+          .role(role)
+          .status(mapStatus(grpcUser.getStatus()))
+          .twoFactorEnabled(grpcUser.getTwoFactorEnabled())
+          .createdAt(parseDateTime(grpcUser.getCreatedAt()))
+          .build();
+    } catch (Exception e) {
+      throw new IllegalStateException("Failed to map UserResponse to domain User", e);
+    }
+  }
+
+  private PhoneNumber toPhone(String raw) {
+    if (raw == null || raw.isBlank()) {
+      return new PhoneNumber("+0000000000");
+    }
+    String digits = raw.replaceAll("[^0-9+]", "");
+    if (digits.isEmpty()) {
+      return new PhoneNumber("+0000000000");
+    }
+    if (!digits.startsWith("+")) {
+      digits = "+" + digits;
+    }
+    return new PhoneNumber(digits);
+  }
+
+  private User.UserStatus mapStatus(String status) {
+    if (status == null || status.isBlank()) {
+      return User.UserStatus.INACTIVE;
+    }
+    return switch (status.trim().toUpperCase()) {
+      case "ACTIVE" -> User.UserStatus.ACTIVE;
+      case "PENDING" -> User.UserStatus.PENDING_ACTIVATION;
+      case "INACTIVE", "DELETED" -> User.UserStatus.INACTIVE;
+      case "SUSPENDED" -> User.UserStatus.BANNED;
+      default -> User.UserStatus.INACTIVE;
+    };
   }
 
   private LocalDateTime parseDateTime(String dateTimeStr) {

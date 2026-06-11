@@ -57,7 +57,7 @@ public class ProductModel {
   private String description;
 
   @JdbcTypeCode(Types.ARRAY)
-  @Column(name = "images", columnDefinition = "text[]")
+  @Column(name = "images")
   private String[] images;
 
   @Enumerated(EnumType.STRING)

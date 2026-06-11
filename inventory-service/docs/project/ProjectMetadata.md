@@ -1,0 +1,2 @@
+# Project Metadata
+> Comprehensive inventory service with batch tracking, reservations, and stock movements. Uses RabbitMQ (not Kafka like other services). Has Dockerfile (uses openjdk:17-jdk-slim, not Eclipse Temurin) and docker-compose for local stacks. **Testing:** integration suite (`test` profile, H2, JWT via `IntegrationTestJwtSupport`) — details in `ProjectFeature.md`. Still missing: broad unit coverage, Kubernetes manifests. Potential improvements: Micrometer metrics, Circuit Breaker for external calls, migrate to Kafka for consistency with other services.

@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:product_service_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+  flyway:
+    enabled: false
+  cache:
+    type: simple
+  boot:
+    admin:
+      client:
+        enabled: false
+  kafka:
+    bootstrap-servers: localhost:9092
+
+jwt:
+  secret: test-secret-key-for-jwt-signing-which-is-long-enough-123456
+  issuer: test-suite
+  access-token-expiration-minutes: 30
+  refresh-token-expiration-minutes: 60
+
+app:
+  rate-limit:
+    global:
+      enabled: false

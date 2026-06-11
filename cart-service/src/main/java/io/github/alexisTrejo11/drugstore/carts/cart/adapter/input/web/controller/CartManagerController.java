@@ -1,5 +1,7 @@
 package io.github.alexisTrejo11.drugstore.carts.cart.adapter.input.web.controller;
 
+import io.github.alexisTrejo11.drugstore.carts.shared.PageRequestLocal;
+import io.github.alexisTrejo11.drugstore.carts.shared.PageResponseLocal;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import libs_kernel.page.PageRequest;
@@ -68,14 +70,14 @@ public class CartManagerController {
 
 	@SearchCartOperation
 	@GetMapping("/search")
-	private ResponseWrapper<PageResponse<CartResponse>> searchCarts(
+	private ResponseWrapper<PageResponseLocal<CartResponse>> searchCarts(
 			@Valid @ModelAttribute SearchCartsRequest params,
-			@Valid @ModelAttribute PageRequest pageParams) {
+			@Valid @ModelAttribute PageRequestLocal pageParams) {
 		if (params == null) {
 			params = SearchCartsRequest.empty();
 		}
 		if (pageParams == null) {
-			pageParams = PageRequest.defaultPageRequest();
+			pageParams = PageRequestLocal.defaultPageRequest();
 		}
 
 		Pageable pageable = pageParams.toPageable();
@@ -83,7 +85,7 @@ public class CartManagerController {
 
 		Page<Cart> cartPage = cartQueryUseCase.searchCarts(query);
 
-		PageResponse<CartResponse> responsePage = mapper.fromDomainPage(cartPage);
+		PageResponseLocal<CartResponse> responsePage = mapper.fromDomainPage(cartPage);
 		return ResponseWrapper.found(responsePage, "Search Carts");
 	}
 }

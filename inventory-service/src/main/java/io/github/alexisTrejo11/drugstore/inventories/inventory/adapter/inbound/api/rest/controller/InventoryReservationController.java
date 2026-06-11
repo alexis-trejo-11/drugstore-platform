@@ -4,8 +4,10 @@ import jakarta.validation.Valid;
 import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
+import io.github.alexisTrejo11.drugstore.inventories.config.CurrentUserIdResolver;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.domain.entity.valueobject.InventoryId;
-import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.domain.entity.valueobject.UserId;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.InventoryService;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.query.GetInventoryByIdQuery;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.stock.application.command.ConfirmReservationCommand;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.stock.application.command.ReleaseReservationCommand;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.stock.application.query.GetActiveReservationsQuery;
@@ -25,6 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InventoryReservationController {
     private final ReservationUseCase reservationUseCase;
+    private final InventoryService inventoryService;
     private final ResponseMapper<ReservationResponse, StockReservation> responseMapper;
     
     @PostMapping("/{inventoryId}/stock/reservations")
@@ -32,7 +35,8 @@ public class InventoryReservationController {
             @PathVariable String inventoryId,
             @Valid @RequestBody ReserveStockRequest request) {
 
-        ReservationId reservationId = reservationUseCase.reserveStock(request.toCommand(inventoryId));
+        var inventory = inventoryService.getInventoryById(GetInventoryByIdQuery.of(inventoryId));
+        ReservationId reservationId = reservationUseCase.reserveStock(request.toCommand(inventory.getProductId()));
         
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created(reservationId, "Stock Reservation"));
     }
@@ -48,7 +52,7 @@ public class InventoryReservationController {
     
     @PatchMapping("/stock/reservations/{reservationId}/confirm")
     public ResponseWrapper<Void> confirmReservation(@PathVariable String reservationId) {
-        var command = new ConfirmReservationCommand(ReservationId.of(reservationId), UserId.of("system"));
+        var command = new ConfirmReservationCommand(ReservationId.of(reservationId), CurrentUserIdResolver.currentUserIdOrSystem());
         reservationUseCase.confirmReservation(command);
         
         return ResponseWrapper.updated(null, "Reservation confirmed");

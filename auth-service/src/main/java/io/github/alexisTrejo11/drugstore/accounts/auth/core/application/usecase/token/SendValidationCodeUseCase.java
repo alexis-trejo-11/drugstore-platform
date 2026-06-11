@@ -2,7 +2,7 @@ package io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase
 
 import org.springframework.stereotype.Service;
 
-import io.github.alexisTrejo11.drugstore.accounts.auth.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.models.User;
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.output.security.tokens.TokenType;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.twoFa.SendValidationCodeCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.notification.TwoFactorCodeEvent;

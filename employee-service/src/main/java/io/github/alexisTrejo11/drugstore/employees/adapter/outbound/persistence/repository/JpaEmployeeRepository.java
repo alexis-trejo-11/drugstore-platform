@@ -19,36 +19,36 @@ public interface JpaEmployeeRepository
   /**
    * Find employee by employee number (excluding soft-deleted)
    */
-  @Query(value = "SELECT * FROM employees WHERE employee_number = :employeeNumber AND deleted_at IS NULL", nativeQuery = true)
+  @Query("SELECT e FROM EmployeeEntity e WHERE e.employeeNumber = :employeeNumber AND e.deletedAt IS NULL")
   Optional<EmployeeEntity> findByEmployeeNumber(@Param("employeeNumber") String employeeNumber);
 
   /**
    * Check if employee exists by employee number (excluding soft-deleted)
    */
-  @Query(value = "SELECT exists(SELECT 1 FROM employees WHERE employee_number = :employeeNumber AND deleted_at IS NULL)", nativeQuery = true)
+  @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM EmployeeEntity e WHERE e.employeeNumber = :employeeNumber AND e.deletedAt IS NULL")
   boolean existsByEmployeeNumber(@Param("employeeNumber") String employeeNumber);
 
   /**
    * Check if employee exists by ID (excluding soft-deleted)
    */
-  @Query(value = "SELECT exists(SELECT 1 FROM employees WHERE id = :id AND deleted_at IS NULL)", nativeQuery = true)
+  @Query("SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM EmployeeEntity e WHERE e.id = :id AND e.deletedAt IS NULL")
   boolean existsById(@Param("id") String id);
 
   /**
    * Find employee by ID (excluding soft-deleted)
    */
-  @Query(value = "SELECT * FROM employees WHERE id = :id AND deleted_at IS NULL", nativeQuery = true)
+  @Query("SELECT e FROM EmployeeEntity e WHERE e.id = :id AND e.deletedAt IS NULL")
   Optional<EmployeeEntity> findById(@Param("id") String id);
 
   /**
    * Find employee by ID including soft-deleted records
    */
-  @Query(value = "SELECT * FROM employees WHERE id = :id", nativeQuery = true)
+  @Query("SELECT e FROM EmployeeEntity e WHERE e.id = :id")
   Optional<EmployeeEntity> findByIdIncludeDeleted(@Param("id") String id);
 
   /**
    * Find employee by employee number including soft-deleted records
    */
-  @Query(value = "SELECT * FROM employees WHERE employee_number = :employeeNumber", nativeQuery = true)
+  @Query("SELECT e FROM EmployeeEntity e WHERE e.employeeNumber = :employeeNumber")
   Optional<EmployeeEntity> findByEmployeeNumberIncludeDeleted(@Param("employeeNumber") String employeeNumber);
 }

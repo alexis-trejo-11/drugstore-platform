@@ -1,5 +1,6 @@
 server:
-  port: 8085
+  port: ${SERVER_PORT:8085}
+  forward-headers-strategy: native
 
 spring:
   application:
@@ -70,4 +71,17 @@ springdoc:
     tags-sorter: alpha
     display-request-duration: true
   # Security note: restrict this in production
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 

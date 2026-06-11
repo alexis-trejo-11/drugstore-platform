@@ -1,15 +1,10 @@
 server:
-  port: 8443
-  ssl:
-    enabled: true
-    key-store: classpath:keystore.p12
-    key-store-password: ${STORE_SSL_KEYSTORE_PASSWORD}
-    key-store-type: PKCS12
-    key-alias: store-service
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: native
 
 spring:
   application:
-    name: store-service
+    name: product-service
 
   profiles:
     active: dev
@@ -19,7 +14,7 @@ spring:
         url: http://localhost:8080
         instance:
           service-url: http://localhost:8080
-          name: store-service
+          name: product-service
 
   devtools:
     restart:
@@ -44,11 +39,22 @@ spring:
             min-idle: 0
         timeout: 2000ms
 
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
   # Postgres
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${STORE_DB:drugstore_stores}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${product_DB:drugstore_products}
     username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
+    password: ${POSTGRES_PASSWORD:alexisAdmin1475963}
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -93,14 +99,17 @@ management:
 
 springdoc:
   api-docs:
-    path: /api-docs
+    path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
+    disable-swagger-default-url: true
+    url: /v3/api-docs
+    config-url: /v3/api-docs/swagger-config
     tags-sorter: alpha
     operations-sorter: alpha
     doc-expansion: none
-  packages-to-scan:  org.github.alexisTrejo11.drugstore.stores
+  packages-to-scan: io.github.alexisTrejo11.drugstore.stores
   paths-to-match: /api/**
   cache:
     disabled: true
@@ -124,11 +133,32 @@ app:
       admin:
         maxRequests: 50
         durationSeconds: 1
-# No logging configuration needed here since logback-spring.xml manages it
+      customer-read:
+        maxRequests: 100
+        durationSeconds: 60
+      customer-write:
+        maxRequests: 20
+        durationSeconds: 60
+
+logging:
+  file:
+    name: logs/products-service.log
+    path: logs
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO
+    io.github.alexisTrejo11.drugstore: DEBUG
+    libs_kernel.log.audit: INFO
+    io.github.alexisTrejo11.drugstore.products.infrastructure.adapter.output.kafka: DEBUG
+    org.apache.kafka: INFO
+
+audit:
+  log:
+    enabled: true
+    excluded-endpoints: /actuator/health, /actuator/info, /swagger-ui.html, /v3/api-docs
 
 jwt:
   secret: ${JWT_SECRET}
-  access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:15}
-  refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200} # 30 days
   issuer: ${ISSUER}
-

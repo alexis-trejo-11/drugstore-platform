@@ -214,6 +214,23 @@ public class Inventory {
         }
     }
 
+    public void updateSettings(Integer reorderLevel, Integer reorderQuantity, Integer maximumStockLevel, String warehouseLocation) {
+        if (reorderLevel != null) {
+            this.reorderLevel = reorderLevel;
+        }
+        if (reorderQuantity != null) {
+            this.reorderQuantity = reorderQuantity;
+        }
+        if (maximumStockLevel != null) {
+            this.maximumStockLevel = maximumStockLevel;
+        }
+        if (warehouseLocation != null) {
+            this.warehouseLocation = warehouseLocation;
+        }
+        this.updatedAt = LocalDateTime.now();
+        updateStatus();
+    }
+
     public static InventoryReconstructor reconstructor() {
         return new InventoryReconstructor();
     }

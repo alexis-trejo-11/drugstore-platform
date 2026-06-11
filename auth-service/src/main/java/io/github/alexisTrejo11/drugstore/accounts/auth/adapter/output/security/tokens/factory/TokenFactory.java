@@ -44,8 +44,11 @@ public class TokenFactory {
   @Value("${token.two-fa.length:6}")
   private int twoFaTokenLength;
 
-  @Value("${token.activation.expiration-minutes:15}")
+  @Value("${token.activation.expiration-minutes:20}")
   private int activationExpirationMinutes;
+
+  @Value("${token.password-reset.expiration-minutes:20}")
+  private int passwordResetExpirationMinutes;
 
   @Value("${token.two-fa.expiration-minutes:5}")
   private int twoFaExpirationMinutes;
@@ -67,6 +70,7 @@ public class TokenFactory {
       case ACCESS -> createAccessToken(userClaims);
       case REFRESH -> createRefreshToken(userClaims);
       case ACTIVATION -> createActivationToken(userClaims);
+      case PASSWORD_RESET -> createPasswordResetToken(userClaims);
       case TWO_FA -> createTwoFaToken(userClaims);
     };
   }
@@ -148,6 +152,23 @@ public class TokenFactory {
         tokenCode,
         "ACTIVATION",
         Duration.ofMinutes(activationExpirationMinutes),
+        expiresAt,
+        userClaims);
+  }
+
+  /**
+   * Creates a numeric password-reset token (stored in Redis, separate type from activation).
+   */
+  private Token createPasswordResetToken(UserClaims userClaims) {
+    String tokenCode = generateNumericToken(activationTokenLength);
+    LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(passwordResetExpirationMinutes);
+
+    log.debug("Created PASSWORD_RESET token for user: {}", userClaims.userId());
+
+    return new Token(
+        tokenCode,
+        "PASSWORD_RESET",
+        Duration.ofMinutes(passwordResetExpirationMinutes),
         expiresAt,
         userClaims);
   }

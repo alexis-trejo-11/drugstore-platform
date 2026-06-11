@@ -34,7 +34,9 @@ public class TokenManager implements TokenService {
     Token token = tokenFactory.createToken(tokenType, userClaims);
 
     // Persist non-JWT tokens to repository for later validation
-    if (tokenType == TokenType.ACTIVATION || tokenType == TokenType.TWO_FA) {
+    if (tokenType == TokenType.ACTIVATION
+        || tokenType == TokenType.PASSWORD_RESET
+        || tokenType == TokenType.TWO_FA) {
       tokenRepository.create(token);
       log.info("Persisted {} token for user: {}", tokenType, userClaims.userId());
     }
@@ -111,7 +113,7 @@ public class TokenManager implements TokenService {
         // Validate JWT cryptographically
         return tokenFactory.validateJwtToken(tokenCode);
       }
-      case ACTIVATION, TWO_FA -> {
+      case ACTIVATION, PASSWORD_RESET, TWO_FA -> {
         // Validate numeric token from repository
         Optional<Token> tokenOpt = tokenRepository.get(tokenCode);
         if (tokenOpt.isEmpty()) {
@@ -160,6 +162,27 @@ public class TokenManager implements TokenService {
 
     log.debug("Extracting claims from JWT token");
     return tokenFactory.extractClaimsFromJwt(tokenCode);
+  }
+
+  @Override
+  public UserClaims extractClaimsForOpaqueToken(String code, TokenType expectedType) {
+    if (code == null || code.isBlank()) {
+      throw new IllegalArgumentException("Token cannot be null or blank");
+    }
+    Optional<Token> tokenOpt = tokenRepository.get(code);
+    if (tokenOpt.isEmpty()) {
+      throw new IllegalArgumentException("Invalid or unknown token");
+    }
+    Token token = tokenOpt.get();
+    if (!expectedType.name().equals(token.type())) {
+      throw new IllegalArgumentException(
+          "Token type mismatch: expected " + expectedType.name() + " got " + token.type());
+    }
+    if (token.isExpired()) {
+      tokenRepository.delete(code);
+      throw new IllegalArgumentException("Token expired");
+    }
+    return token.claims();
   }
 
   /**

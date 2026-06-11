@@ -1,0 +1,2 @@
+# Project Metadata
+> DDD-based cart service with aggregate root pattern, gRPC endpoints for order-service, and Kafka integration for product events. Has unit tests for domain layer. Missing: integration tests, Kubernetes manifests, CI/CD pipeline. Potential improvements: Add CartPurchasedEvent publishing to Kafka when cart is cleared after order, implement Circuit Breaker for external calls, add Micrometer metrics for cart operations, add @RateLimit annotations on REST endpoints.

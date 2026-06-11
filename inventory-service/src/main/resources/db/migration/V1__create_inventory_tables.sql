@@ -131,19 +131,19 @@ CREATE INDEX IF NOT EXISTS idx_movements_movement_date ON inventory_movements(mo
 CREATE INDEX IF NOT EXISTS idx_movements_created_at ON inventory_movements(created_at);
 CREATE INDEX IF NOT EXISTS idx_movements_reference_type ON inventory_movements(reference_type);
 
--- Create foreign key constraints
-ALTER TABLE IF EXISTS inventory_batches
-ADD CONSTRAINT IF NOT EXISTS fk_batches_inventory_id
+-- Foreign keys (Flyway runs once; PostgreSQL has no ADD CONSTRAINT IF NOT EXISTS)
+ALTER TABLE inventory_batches
+ADD CONSTRAINT fk_batches_inventory_id
 FOREIGN KEY (inventory_id) REFERENCES inventories(id)
 ON DELETE CASCADE;
 
-ALTER TABLE IF EXISTS inventory_movements
-ADD CONSTRAINT IF NOT EXISTS fk_movements_inventory_id
+ALTER TABLE inventory_movements
+ADD CONSTRAINT fk_movements_inventory_id
 FOREIGN KEY (inventory_id) REFERENCES inventories(id)
 ON DELETE CASCADE;
 
-ALTER TABLE IF EXISTS inventory_movements
-ADD CONSTRAINT IF NOT EXISTS fk_movements_batch_id
+ALTER TABLE inventory_movements
+ADD CONSTRAINT fk_movements_batch_id
 FOREIGN KEY (batch_id) REFERENCES inventory_batches(id)
 ON DELETE SET NULL;
 

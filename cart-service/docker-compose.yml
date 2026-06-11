@@ -1,16 +1,19 @@
 services:
   cart-service:
-    build: 
+    build:
       context: ..
-      dockerfile:  ./cart-service/dockerfile
-    container_name: cart-service
+      dockerfile: ./cart-service/dockerfile
+      args:
+        GITHUB_ACTOR: ${GITHUB_ACTOR:-alexisTrejo11}
+        GITHUB_TOKEN: ${GITHUB_TOKEN:?Set GITHUB_TOKEN in .env for GitHub Packages}
     hostname: cart-service
     restart: unless-stopped
-    ports:
-      - "8443:8443"  # HTTPS port
+    expose:
+      - "8080"
     environment:
       # Active profile
       - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_PORT=8080
       
       # Database
       - DB_HOST=postgres
@@ -19,27 +22,23 @@ services:
       - DB_USER=${DB_USER:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
       
-      # SSL Configuration (override .env for Docker)
-      - ADDRESS_SSL_ENABLED=true
-      - ADDRESS_SERVER_PORT=8443
-      - SSL_KEYSTORE_PATH=file:/app/keystore.p12
-      
-      # Note: SSL password and JWT config loaded from .env file
-      
       # Redis
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+
+      # App identity for Loki labels
+      - SPRING_APPLICATION_NAME=cart-service
+      - LOG_PATH=/app/logs
     
       # Logging
       - LOGGING_LEVEL_IO_GITHUB_ALEXISTREJO11=DEBUG
+
+      # Kafka — broker DNS on drugstore-kafka-network (start ../infrastrucuture/kafka first)
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-1:9092,kafka-2:9092,kafka-3:9092
       
       # JVM Options
       - JAVA_OPTS=-Xmx512m -Xms256m
-      
-      # Service-specific configuration
-      - ADDRESS_SERVICE_MAX_ADDRESSES_PER_USER=10
-      - ADDRESS_SERVICE_CACHE_TTL=3600
       
     env_file:
       - .env
@@ -56,9 +55,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      loki:
+        condition: service_started
       
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "--no-check-certificate", "https://localhost:8443/actuator/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -70,6 +71,87 @@ services:
           memory: 768m
         reservations:
           memory: 256m
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: cart-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      cart-service:
+        condition: service_healthy
+    networks:
+      - drugstore-network
+
+  loki:
+    image: grafana/loki:3.1.1
+    container_name: cart-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki-data:/loki
+    networks:
+      - drugstore-network
+
+  grafana:
+    image: grafana/grafana:11.1.4
+    container_name: cart-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      prometheus:
+        condition: service_started
+      loki:
+        condition: service_started
+    networks:
+      - drugstore-network
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: cart-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80" # HTTP → redirects to HTTPS
+      - "443:443" # HTTPS — TLS termination + load balancing
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl/nginx.crt:/etc/nginx/ssl/nginx.crt:ro
+      - ./nginx/ssl/nginx.key:/etc/nginx/ssl/nginx.key:ro
+    depends_on:
+      cart-service:
+        condition: service_healthy
+    networks:
+      - drugstore-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost/health",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
   # PostgreSQL (for local development only)
   postgres:
@@ -115,8 +197,17 @@ volumes:
     name: cart-postgres-data
   redis-data:
     name: cart-redis-data
+  prometheus-data:
+    name: cart-prometheus-data
+  loki-data:
+    name: cart-loki-data
+  grafana-data:
+    name: cart-grafana-data
 
 networks:
   drugstore-network:
     name: drugstore-network
     driver: bridge
+  drugstore-kafka-network:
+    external: true
+    name: drugstore-kafka-network

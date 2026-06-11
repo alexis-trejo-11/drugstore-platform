@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import io.github.alexisTrejo11.drugstore.accounts.auth.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.models.User;
 
 @Data
 @Builder

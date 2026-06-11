@@ -5,7 +5,33 @@ plugins {
 	id 'com.google.protobuf' version '0.9.4'
 
 }
-version = '0.0.1-SNAPSHOT'
+
+def loadDotEnv = {
+	def env = [:]
+	def envFile = file('.env')
+	if (envFile.exists()) {
+		envFile.readLines().each { line ->
+			if (line && !line.startsWith('#') && line.contains('=')) {
+				def (key, value) = line.split('=', 2)
+				env[key.trim()] = value.trim()
+			}
+		}
+	}
+	return env
+}
+
+def dotEnv = loadDotEnv()
+
+def envOrDotEnv = { String key, String defaultValue = null ->
+	def fromProperty = findProperty(key)
+	(fromProperty != null ? fromProperty.toString() : null)
+			?: System.getenv(key)
+			?: dotEnv[key]
+			?: defaultValue
+}
+
+version = '2.0.0'
+
 
 java {
 	toolchain {
@@ -14,8 +40,18 @@ java {
 }
 
 repositories {
-	mavenLocal()
 	mavenCentral()
+
+	maven {
+		name = "GitHubPackages"
+		url = uri("https://maven.pkg.github.com/alexisTrejo11/drugstore-platform")
+
+		credentials {
+			username = envOrDotEnv("GITHUB_ACTOR", "alexisTrejo11")
+			password = envOrDotEnv("GITHUB_TOKEN")
+		}
+	}
+
 }
 
 ext {
@@ -28,6 +64,7 @@ dependencies {
 	// Spring Boot
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -53,8 +90,8 @@ dependencies {
   	compileOnly 'org.projectlombok:lombok:1.18.42'
   	annotationProcessor 'org.projectlombok:lombok:1.18.42'
 
-	// Common library
-	implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
+	// Github packages dependency
+	implementation 'io.github.alexisTrejo11:shared-kernel:2.0.0'
 
 	// Migrations
 	implementation 'org.flywaydb:flyway-core:10.17.0'
@@ -68,11 +105,38 @@ dependencies {
 
 	// Kafka
 	implementation 'org.springframework.kafka:spring-kafka'
+
+	// gRPC + Protobuf (runtime for generated proto stubs)
+	implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
+	implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+	implementation "io.grpc:grpc-stub:${grpcVersion}"
+	implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
+	implementation 'javax.annotation:javax.annotation-api:1.3.2'
+	implementation 'net.devh:grpc-spring-boot-starter:3.1.0.RELEASE'
+
+	// Observability
+	implementation 'com.github.loki4j:loki-logback-appender:1.5.2'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+
+	// JWT
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 }
 
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir 'build/generated/source/proto/main/java'
+			srcDir 'build/generated/source/proto/main/grpc'
+		}
 	}
 }
 
@@ -87,20 +151,11 @@ bootRun {
             //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     ]
 
-    // Load .env file
-    def envFile = file('.env')
-    if (envFile.exists()) {
-        envFile.readLines().each { line ->
-            if (line && !line.startsWith('#') && line.contains('=')) {
-                def (key, value) = line.split('=', 2)
-                systemProperty key.trim(), value.trim()
-                environment key.trim(), value.trim()
-            }
-        }
-    }
+	dotEnv.each { key, value ->
+		systemProperty key, value
+		environment key, value
+	}
 }
-
-
 
 protobuf {
 	protoc {
@@ -114,6 +169,11 @@ protobuf {
 	generateProtoTasks {
 		all()*.plugins {
 			grpc {}
+		}
+		all().each { task ->
+			task.builtins {
+				java {}
+			}
 		}
 	}
 }

@@ -21,7 +21,7 @@ public class UpdateProfileUseCase {
     Profile profile = profileRepository.findByUserId(command.userId())
         .orElseThrow(() -> new UserProfileNotFoundError(command.userId()));
 
-    profile.updateProfileInfo(profile.getBio(), command.profilePictureUrl());
+    profile.updateProfileInfo(command.bio(), command.profilePictureUrl());
     profile.updatePersonalInfo(command.fullName(), command.dateOfBirth(), command.gender());
 
     return profileRepository.save(profile);

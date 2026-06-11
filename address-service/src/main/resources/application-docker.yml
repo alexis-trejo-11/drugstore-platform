@@ -1,11 +1,6 @@
 server:
-  port: 8443
-  ssl:
-    enabled: true
-    key-store: ${SSL_KEYSTORE_PATH:classpath:keystore.p12}
-    key-store-password: ${SSL_KEYSTORE_PASSWORD}
-    key-store-type: PKCS12
-    key-alias: ${SSL_KEY_ALIAS:address-service}
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: native
   compression:
     enabled: true
     mime-types: application/json,application/xml,text/html,text/xml,text/plain
@@ -137,13 +132,15 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,prometheus
       base-path: /actuator
   endpoint:
     health:
-      show-details: ${MANAGEMENT_HEALTH_DETAILS:never}
+      show-details: ${MANAGEMENT_HEALTH_DETAILS:always}
       probes:
         enabled: true
+    prometheus:
+      enabled: true
   metrics:
     export:
       prometheus:
@@ -151,3 +148,6 @@ management:
     tags:
       application: address-service
       environment: production
+  tracing:
+    sampling:
+      probability: 1.0

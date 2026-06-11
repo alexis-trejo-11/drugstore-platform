@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @ComponentScan(basePackages = {
 				"io.github.alexisTrejo11.drugstore.users",
-				"libs_kernel.security.jwt",
+				"libs_kernel",
 })
 public class UserServiceApplication {
     public static void main(String[] args) {

@@ -42,7 +42,7 @@ public class PurchaseOrderController {
     return ResponseWrapper.created(orderId, "PurchaseOrder");
   }
 
-  @PostMapping("{id}/fullfill")
+  @PostMapping({"{id}/fullfill", "{id}/fulfill"})
   public ResponseWrapper<PurchaseOrderId> fullFillOrder(@PathVariable String id,
       @Valid @RequestBody ReceivePurchaseOrderRequest request) {
     var command = request.toCommand(id);

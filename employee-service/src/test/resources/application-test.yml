@@ -1,0 +1,49 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+      import-check:
+        enabled: false
+    bootstrap:
+      enabled: false
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+
+  boot:
+    admin:
+      client:
+        enabled: false
+
+  datasource:
+    url: jdbc:h2:mem:employees_it;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: false
+
+jwt:
+  secret: test-integration-secret-key-must-be-at-least-256-bits-long-for-hmac-sha!!!!
+  access-token-expiration-minutes: 60
+  refresh-token-expiration-minutes: 120
+  issuer: employee-service-test
+
+app:
+  rate-limit:
+    global:
+      enabled: false
+
+logging:
+  level:
+    io.github.alexisTrejo11.drugstore.employees.config.ratelimit: WARN
+    libs_kernel.security.jwt: WARN

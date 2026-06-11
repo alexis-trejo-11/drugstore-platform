@@ -3,9 +3,11 @@ package io.github.alexisTrejo11.drugstore.accounts.auth.core.application;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.password.ChangePasswordUseCase;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.password.ForgotPasswordUseCase;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.password.ResetPasswordUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.password.UpdateCredentialsUseCase;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.token.ActivateAccountUseCase;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.token.SendValidationCodeUseCase;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.token.ValidateResetTokenUseCase;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.twofa.ConfirmTwoFactorSetupUseCase;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.twofa.DisableTwoFactorAuthUseCase;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.twofa.EnableTwoFactorAuthUseCase;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase.twofa.TwoFactorLoginUseCase;
@@ -21,7 +23,9 @@ import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ChangePasswordCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ForgotPasswordCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ResetPasswordCommand;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.UpdateCredentialsCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ValidateResetTokenCommand;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.twoFa.ConfirmTwoFactorSetupCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.twoFa.DisableTwoFactorCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.twoFa.EnableTwoFactorCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.twoFa.SendValidationCodeCommand;
@@ -65,8 +69,10 @@ public class UseCasesOrquestrator
 	private final ValidateResetTokenUseCase validateResetTokenUseCase;
 	private final ResetPasswordUseCase resetPasswordUseCase;
 	private final ChangePasswordUseCase changePasswordUseCase;
+	private final UpdateCredentialsUseCase updateCredentialsUseCase;
 	private final ActivateAccountUseCase activateAccountUseCase;
 	private final EnableTwoFactorAuthUseCase enableTwoFactorAuthUseCase;
+	private final ConfirmTwoFactorSetupUseCase confirmTwoFactorSetupUseCase;
 	private final DisableTwoFactorAuthUseCase disableTwoFactorAuthUseCase;
 	private final SendValidationCodeUseCase sendValidationCodeUseCase;
 	private final VerifyTwoFactorCodeUseCase verifyTwoFactorCodeUseCase;
@@ -142,6 +148,12 @@ public class UseCasesOrquestrator
   }
 
   @Override
+  public void updateCredentials(UpdateCredentialsCommand command) {
+    log.info("AuthUseCases: Executing update credentials for user: {}", command.userId());
+    updateCredentialsUseCase.execute(command);
+  }
+
+  @Override
   public void activateAccount(String activationCode) {
     log.info("AuthUseCases: Executing activate account use case");
     activateAccountUseCase.execute(activationCode);
@@ -151,6 +163,12 @@ public class UseCasesOrquestrator
   public TwoFactorQRResult enableTwoFactorAuth(EnableTwoFactorCommand command) {
     log.info("AuthUseCases: Executing enable two-factor authentication use case for user: {}", command.userId());
     return enableTwoFactorAuthUseCase.execute(command);
+  }
+
+  @Override
+  public void confirmTwoFactorSetup(ConfirmTwoFactorSetupCommand command) {
+    log.info("AuthUseCases: Confirming 2FA setup for user: {}", command.userId());
+    confirmTwoFactorSetupUseCase.execute(command);
   }
 
   @Override

@@ -2,10 +2,11 @@ package io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase
 
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.result.SessionPayload;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.models.JWTSessions;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.Token;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.SessionRepository;
 import org.springframework.stereotype.Service;
 
-import io.github.alexisTrejo11.drugstore.accounts.auth.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.models.User;
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.output.security.tokens.TokenType;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.login.TwoFactorLoginCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.UserLoginEvent;
@@ -30,7 +31,6 @@ public class TwoFactorLoginUseCase {
   private final TokenService tokenService;
   private final SessionRepository sessionRepository;
   private final UserEventPublisher eventPublisher;
-	private final TokenService tokenProvider;
 
   /**
    * Execute the two-factor login use case.
@@ -42,33 +42,38 @@ public class TwoFactorLoginUseCase {
   public SessionPayload execute(TwoFactorLoginCommand command) {
     log.info("Processing 2FA login for user: {}", command.email());
 
-    verify2FACode(command.code());
+    verifyTwoFactorToken(command.email(), command.code());
     User user = getUserByEmail(command.email());
 
-		SessionPayload sessionPayload = createSession(user, command);
+    SessionPayload sessionPayload = createSession(user, command);
     publishLoginEvent(user, sessionPayload.refreshToken().code());
+
+    tokenService.invalidateToken(command.code());
 
     log.info("2FA login successful for user: {}", user.getId());
     return sessionPayload;
   }
 
-  /**
-   * Verifies the 2FA code.
-   */
-  private void verify2FACode(String code) {
+  private void verifyTwoFactorToken(String email, String code) {
     log.debug("Verifying 2FA code");
 
     if (code == null || code.isBlank()) {
-      log.warn("Empty 2FA code provided");
       throw TwoFactorAuthenticationException.invalidCode();
     }
 
     if (!tokenService.validateToken(code, TokenType.TWO_FA)) {
-      log.warn("Invalid or expired 2FA code");
       throw TwoFactorAuthenticationException.invalidCode();
     }
 
-    log.debug("2FA code verified successfully");
+    Token stored = tokenService.getToken(code);
+    if (stored == null || stored.claims() == null) {
+      throw TwoFactorAuthenticationException.invalidCode();
+    }
+
+    if (!email.trim().equalsIgnoreCase(stored.claims().email())) {
+      log.warn("2FA code email mismatch");
+      throw TwoFactorAuthenticationException.invalidCode();
+    }
   }
 
   private User getUserByEmail(String email) {
@@ -88,40 +93,35 @@ public class TwoFactorLoginUseCase {
   private SessionPayload createSession(User user, TwoFactorLoginCommand command) {
     log.debug("Creating session for user");
 
-	  log.debug("Generating session tokens for user: {}", user.getId());
+    log.debug("Generating session tokens for user: {}", user.getId());
 
-	  var claims = UserClaims.builder()
-			  .userId(user.getId().value())
-			  .email(user.getEmail().value())
-			  .role(user.getRole().getRoleName())
-			  .name(user.getFirstName() + " " + user.getLastName())
-			  .phoneNumber(user.getPhoneNumber() != null ? user.getPhoneNumber().value() : null)
-			  .build();
+    var claims =
+        UserClaims.builder()
+            .userId(user.getId().value())
+            .email(user.getEmail().value())
+            .role(user.getRole().getRoleName())
+            .name(user.getFirstName() + " " + user.getLastName())
+            .phoneNumber(user.getPhoneNumber() != null ? user.getPhoneNumber().value() : null)
+            .build();
 
-	  // Interface Implementation will ignore unnecessary claims based on token type
-	  var accessToken = tokenProvider.generateToken(TokenType.ACCESS, claims);
-	  var refreshToken = tokenProvider.generateToken(TokenType.REFRESH, claims);
+    var accessToken = tokenService.generateToken(TokenType.ACCESS, claims);
+    var refreshToken = tokenService.generateToken(TokenType.REFRESH, claims);
 
-	  // Save it on session service for track and blacklist if required
-	  var jwtSession = JWTSessions.from(
-			  refreshToken,
-			  command.deviceId(),
-			  command.ipAddress(),
-			  user.getId().value());
-	  sessionRepository.save(jwtSession);
+    var jwtSession =
+        JWTSessions.from(
+            refreshToken, command.deviceId(), command.ipAddress(), user.getId().value());
+    sessionRepository.save(jwtSession);
 
-	  log.debug("Session tokens generated for user: {}", user.getId());
-	  return SessionPayload.bearer(user.getId().value(), accessToken, refreshToken);
+    log.debug("Session tokens generated for user: {}", user.getId());
+    return SessionPayload.bearer(user.getId().value(), accessToken, refreshToken);
   }
 
   private void publishLoginEvent(User user, String sessionId) {
     try {
       log.debug("Publishing user login event");
 
-      UserLoginEvent event = new UserLoginEvent(
-          user.getId().value(),
-          user.getEmail().value(),
-          sessionId);
+      UserLoginEvent event =
+          new UserLoginEvent(user.getId().value(), user.getEmail().value(), sessionId);
 
       eventPublisher.publishUserLogin(event);
 

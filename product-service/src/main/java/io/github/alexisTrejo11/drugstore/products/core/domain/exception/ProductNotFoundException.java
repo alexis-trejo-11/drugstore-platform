@@ -2,19 +2,18 @@ package io.github.alexisTrejo11.drugstore.products.core.domain.exception;
 
 import io.github.alexisTrejo11.drugstore.products.core.domain.model.valueobjects.ProductID;
 import io.github.alexisTrejo11.drugstore.products.core.domain.model.valueobjects.SKU;
+import libs_kernel.exceptions.NotFoundException;
 
-public class ProductNotFoundException extends RuntimeException {
-    public ProductNotFoundException(ProductID id) {
-        super("Product with ID " + id.value() + " not found.");
+public class ProductNotFoundException extends NotFoundException {
+    public ProductNotFoundException(ProductID productID) {
+        super("Product", "ID", productID.value());
+    }
+
+    public ProductNotFoundException(String message) {
+        super(message);
     }
 
     public ProductNotFoundException(SKU sku) {
-        super("Product with SKU " + sku.value() + " not found.");
-    }
-
-    public  ProductNotFoundException(String message) {
-        super(message);
-
+        super("Product", "SKU", sku.value());
     }
 }
-

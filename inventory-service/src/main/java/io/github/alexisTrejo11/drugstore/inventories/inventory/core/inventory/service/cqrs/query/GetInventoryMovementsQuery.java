@@ -15,11 +15,15 @@ public record GetInventoryMovementsQuery(
         Pageable pageable) {
 
     public static GetInventoryMovementsQuery of(String inventoryId, LocalDateTime startDate, LocalDateTime endDate) {
+        return of(inventoryId, startDate, endDate, Pageable.unpaged());
+    }
+
+    public static GetInventoryMovementsQuery of(String inventoryId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         return GetInventoryMovementsQuery.builder()
                 .inventoryId(new InventoryId(inventoryId))
                 .startDate(Optional.ofNullable(startDate))
                 .endDate(Optional.ofNullable(endDate))
-                .pageable(Pageable.unpaged())
+                .pageable(pageable != null ? pageable : Pageable.unpaged())
                 .build();
     }
 }

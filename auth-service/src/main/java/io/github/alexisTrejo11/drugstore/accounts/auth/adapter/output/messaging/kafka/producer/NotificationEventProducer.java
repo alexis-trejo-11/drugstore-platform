@@ -16,7 +16,9 @@ import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.notific
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.notification.TwoFactorCodeEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.notification.WelcomeEmailEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.NotificationEventPublisher;
+import org.springframework.stereotype.Component;
 
+@Component
 public class NotificationEventProducer implements NotificationEventPublisher {
   private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NotificationEventProducer.class);
   private final KafkaTemplate<String, Object> kafkaTemplate;

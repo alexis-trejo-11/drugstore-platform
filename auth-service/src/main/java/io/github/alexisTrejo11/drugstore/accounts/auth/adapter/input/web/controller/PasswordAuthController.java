@@ -14,19 +14,32 @@ import libs_kernel.config.rate_limit.RateLimit;
 import libs_kernel.config.rate_limit.RateLimitProfile;
 import libs_kernel.response.ResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
+import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.input.web.dto.input.UpdateCredentialsRequest;
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.input.web.dto.input.ChangePasswordRequest;
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.input.web.dto.input.ForgotPasswordRequest;
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.input.web.dto.input.ResetPasswordRequest;
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.input.web.dto.input.ValidateResetTokenRequest;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.UpdateCredentialsCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ChangePasswordCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ForgotPasswordCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ResetPasswordCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ValidateResetTokenCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.input.PasswordUseCases;
+import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.input.web.annotations.ChangePasswordOperation;
+import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.input.web.annotations.ForgotPasswordOperation;
+import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.input.web.annotations.ResetPasswordOperation;
+import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.input.web.annotations.UpdateCredentialsOperation;
+import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.input.web.annotations.ValidateResetTokenOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/v2/auth/password")
+@Tag(
+    name = "Password & credentials",
+    description =
+        "Forgot/reset flows are **public**. Changing password or updating email/phone requires "
+            + "**Bearer** access token.")
 public class PasswordAuthController {
   private final PasswordUseCases passwordUseCases;
 
@@ -37,6 +50,7 @@ public class PasswordAuthController {
 
   @PostMapping("/forgot")
   @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  @ForgotPasswordOperation
   public ResponseWrapper<Void> forgotPassword(
       @RequestBody @Valid @NotNull ForgotPasswordRequest request) {
     log.info("Password reset request received");
@@ -50,6 +64,7 @@ public class PasswordAuthController {
 
   @PostMapping("/validate-token")
   @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  @ValidateResetTokenOperation
   public ResponseWrapper<Void> validateResetToken(
       @RequestBody @Valid @NotNull ValidateResetTokenRequest request) {
     log.debug("Validating password reset token");
@@ -63,6 +78,7 @@ public class PasswordAuthController {
 
   @PostMapping("/reset")
   @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  @ResetPasswordOperation
   public ResponseWrapper<Void> resetPassword(
       @RequestBody @Valid @NotNull ResetPasswordRequest request) {
     log.info("Password reset requested");
@@ -74,8 +90,21 @@ public class PasswordAuthController {
     return ResponseWrapper.success("Password reset successfully");
   }
 
+  @PutMapping("/credentials")
+  @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  @UpdateCredentialsOperation
+  public ResponseWrapper<Void> updateCredentials(
+      @RequestAttribute("userId") String userId,
+      @RequestBody @Valid @NotNull UpdateCredentialsRequest request) {
+    UpdateCredentialsCommand command =
+        UpdateCredentialsCommand.of(userId, request.email(), request.phone());
+    passwordUseCases.updateCredentials(command);
+    return ResponseWrapper.success(null, "Credentials updated");
+  }
+
   @PutMapping("/change")
   @RateLimit(profile = RateLimitProfile.SENSITIVE)
+  @ChangePasswordOperation
   public ResponseWrapper<Void> changePassword(
       @RequestAttribute("userId") String userId,
       @RequestBody @Valid @NotNull ChangePasswordRequest request) {

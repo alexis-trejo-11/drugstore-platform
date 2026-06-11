@@ -19,6 +19,7 @@ import io.github.alexisTrejo11.drugstore.inventories.inventory.adapter.inbound.a
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -56,11 +57,10 @@ public class InventoryBatchController {
         return ResponseWrapper.found(batchResponses, "Batches");
     }
 
-    // TODO: Parse DateTime
     @GetMapping("/batches/expiring")
     public ResponseWrapper<PageResponse<BatchResponse>> getExpiringBatches(
             @RequestParam(required = false, defaultValue = "30") Integer daysThreshold,
-            @RequestParam(required = false) LocalDateTime expirationDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime expirationDate,
             @Valid @ModelAttribute PageRequest pageRequest) {
 
         var query = GetExpiringBatchesQuery.of(expirationDate, daysThreshold, pageRequest);

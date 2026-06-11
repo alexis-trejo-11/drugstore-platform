@@ -22,7 +22,7 @@ import libs_kernel.response.ResponseWrapper;
  * REST Controller for employee command operations (write operations)
  */
 @RestController
-@RequestMapping("/api/v1/employees")
+@RequestMapping("/api/v2/employees")
 @Tag(name = "Employee Command Operations", description = "Endpoints for creating, updating, and managing employee entities. All operations require authentication with appropriate roles.")
 @SecurityRequirement(name = "bearerAuth")
 public class EmployeeCommandController {

@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.domain.Pageable;
 
 @Getter
 @Setter
@@ -32,7 +31,4 @@ public class PageRequest {
         return new PageRequest(1, 10, SortInput.defaultSort());
     }
 
-    public Pageable toPageable() {
-        return Pageable.ofSize(size).withPage(page - 1);
-    }
 }

@@ -1,33 +1,21 @@
 server:
-  port: 8444
-  ssl:
-    enabled: true
-    key-store: classpath:keystore.p12
-    key-store-password: ${KEYSTORE_PASSWORD}
-    key-store-type: PKCS12
-    key-alias: product-service
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: native
 
 spring:
   application:
     name: product-service
-
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9093,localhost:9094,localhost:9095}
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      properties:
-        spring.json.type.mapping: 
-          productEvent: io.github.alexisTrejo11.drugstore.products.core.application.events.ProductEvent
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+
   profiles:
     active: dev
-
   boot:
     admin:
       client:
-        url: ${SPRING_BOOT_ADMIN_URL}
+        url: http://localhost:8080
         instance:
-          service-url: http://localhost:8444
+          service-url: http://localhost:8080
           name: product-service
 
   devtools:
@@ -44,8 +32,8 @@ spring:
     data:
       redis:
         host: ${SPRING_REDIS_HOST:localhost}
-        port: ${SPRING_REDIS_PORT}
-        password: ${SPRING_REDIS_PASSWORD:}
+        port: ${SPRING_REDIS_PORT:6379}
+        password: ${SPRING_REDIS_PASSWORD:redispass}
         lettuce:
           pool:
             max-active: 8
@@ -53,11 +41,22 @@ spring:
             min-idle: 0
         timeout: 2000ms
 
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
   # Postgres
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${PRODUCT_DB}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${product_DB:drugstore_products}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:alexisAdmin1475963}
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -109,17 +108,10 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
     doc-expansion: none
-  packages-to-scan:  org.github.alexisTrejo11.drugstore.stores
+  packages-to-scan: io.github.alexisTrejo11.drugstore.products
   paths-to-match: /api/**
   cache:
     disabled: true
-
-
-jwt:
-  secret: ${JWT_SECRET}
-  access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:15}
-  refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200} # 30 days
-  issuer: ${ISSUER}
 
 app:
   kafka:
@@ -127,8 +119,50 @@ app:
       product-events: product-events
       product-events-dlt: product-events.DLT
 
+  rate-limit:
+    global:
+      enabled: true
+      maxRequests: 5000
+      durationHours: 1
+    profiles:
+      standard:
+        maxRequests: 100
+        durationSeconds: 60
+      sensitive:
+        maxRequests: 5
+        durationSeconds: 300
+      public:
+        maxRequests: 1000
+        durationSeconds: 60
+      admin:
+        maxRequests: 50
+        durationSeconds: 1
+      customer-read:
+        maxRequests: 100
+        durationSeconds: 60
+      customer-write:
+        maxRequests: 20
+        durationSeconds: 60
+
 logging:
+  file:
+    name: logs/products-service.log
+    path: logs
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
   level:
+    root: INFO
+    io.github.alexisTrejo11.drugstore: DEBUG
+    libs_kernel.log.audit: INFO
     io.github.alexisTrejo11.drugstore.products.infrastructure.adapter.output.kafka: DEBUG
     org.apache.kafka: INFO
 
+audit:
+  log:
+    enabled: true
+    excluded-endpoints: /actuator/health, /actuator/info, /swagger-ui.html, /v3/api-docs
+
+jwt:
+  secret: ${JWT_SECRET}
+  issuer: ${ISSUER}

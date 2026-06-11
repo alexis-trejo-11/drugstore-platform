@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import io.github.alexisTrejo11.drugstore.carts.product.core.domain.Product;
 import io.github.alexisTrejo11.drugstore.carts.product.core.port.in.ProductUseCases;
-import io.github.alexisTrejo11.drugstore.carts.product.core.port.out.ProductRepository;
+import io.github.alexisTrejo11.drugstore.carts.product.core.port.output.ProductRepository;
 
 import java.util.List;
 import java.util.Map;

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.github.alexisTrejo11.drugstore.employees.core.utils.PageResponseLocal;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,6 @@ import io.github.alexisTrejo11.drugstore.employees.adapter.inbound.rest.dto.resp
 import io.github.alexisTrejo11.drugstore.employees.core.domain.model.Employee;
 import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.Certification;
 import io.github.alexisTrejo11.drugstore.employees.core.domain.valueobject.ContactInfo;
-import libs_kernel.page.PageResponse;
 
 /**
  * Mapper for converting Employee domain to EmployeeResponse DTO
@@ -53,12 +53,12 @@ public class EmployeeResponseMapper {
         .build();
   }
 
-  public PageResponse<EmployeeResponse> toResponsePage(Page<Employee> employees) {
+  public PageResponseLocal<EmployeeResponse> toResponsePage(Page<Employee> employees) {
     if (employees == null) {
       return null;
     }
 
-    return PageResponse.from(employees.map(this::toResponse));
+    return PageResponseLocal.from(employees.map(this::toResponse));
   }
 
   private ContactInfoResponse toContactInfoResponse(ContactInfo contactInfo) {

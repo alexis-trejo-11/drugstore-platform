@@ -1,7 +1,7 @@
 package io.github.alexisTrejo11.drugstore.products.core.domain.exception;
 
-public class ProductValidationException extends RuntimeException {
+public class ProductValidationException extends ProductBaseException {
   public ProductValidationException(String message) {
-    super(message);
+    super(message, "PRODUCT_VALIDATION_EXCEPTION");
   }
 }

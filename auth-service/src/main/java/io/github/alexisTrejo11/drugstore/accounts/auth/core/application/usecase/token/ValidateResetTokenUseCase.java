@@ -41,7 +41,7 @@ public class ValidateResetTokenUseCase {
   private void validateToken(String resetToken) {
     log.debug("Checking reset token validity");
 
-    if (!tokenService.validateToken(resetToken, TokenType.ACTIVATION)) {
+    if (!tokenService.validateToken(resetToken, TokenType.PASSWORD_RESET)) {
       log.warn("Invalid or expired password reset token");
       throw TokenExpiredException.temporary("Password reset");
     }

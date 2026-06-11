@@ -10,23 +10,13 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ReserveStockCommandHandler {
-    //private final InventoryMovementRepository movementRepository;
     private final InventoryStockService stockService;
 
     public ReservationId handle(ReserveStockCommand command) {
-        var reservationId = stockService.reserveStock(
+        return stockService.reserveStock(
                 command.productQuantityMap(),
                 command.orderReference(),
-                "Reserved for sale-order"
+                command.reason() != null ? command.reason() : "Reserved for sale-order"
         );
-
-        /*
-        TODO: Create Reservation Service to handle this logic
-        InventoryMovement movement = allocationService.createReservationMovement(inventory, command.quantity(), command.purchaseOrderId(), null);
-        movementRepository.save(movement);
-        inventory.recordMovement(movement);
-         */
-
-        return reservationId;
     }
 }

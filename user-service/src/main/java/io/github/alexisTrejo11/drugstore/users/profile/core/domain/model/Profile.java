@@ -86,7 +86,7 @@ public class Profile {
   }
 
   public void updatePersonalInfo(FullName fullName, LocalDate dateOfBirth, Gender gender) {
-    this.personalData.update(fullName, dateOfBirth, gender);
+    this.personalData = this.personalData.update(fullName, dateOfBirth, gender);
     this.timestamps = this.timestamps.updateLastModified();
   }
 

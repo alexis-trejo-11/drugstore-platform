@@ -11,7 +11,7 @@ import io.github.alexisTrejo11.drugstore.carts.cart.core.application.queries.Get
 import io.github.alexisTrejo11.drugstore.carts.cart.core.application.queries.GetCartByIdQuery;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.model.Cart;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.port.in.usecase.CartQueryUseCase;
-import io.github.alexisTrejo11.drugstore.carts.cart.core.port.out.CartRepository;
+import io.github.alexisTrejo11.drugstore.carts.cart.core.port.output.CartRepository;
 
 @Service
 public class CartQueryUseCaseImpl implements CartQueryUseCase {

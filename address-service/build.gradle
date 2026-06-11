@@ -4,6 +4,30 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.6'
 }
 
+def loadDotEnv = {
+	def env = [:]
+	def envFile = file('.env')
+	if (envFile.exists()) {
+		envFile.readLines().each { line ->
+			if (line && !line.startsWith('#') && line.contains('=')) {
+				def (key, value) = line.split('=', 2)
+				env[key.trim()] = value.trim()
+			}
+		}
+	}
+	return env
+}
+
+def dotEnv = loadDotEnv()
+
+def envOrDotEnv = { String key, String defaultValue = null ->
+	def fromProperty = findProperty(key)
+	(fromProperty != null ? fromProperty.toString() : null)
+		?: System.getenv(key)
+		?: dotEnv[key]
+		?: defaultValue
+}
+
 version = '2.0.0'
 
 java {
@@ -13,8 +37,18 @@ java {
 }
 
 repositories {
-	mavenLocal()
 	mavenCentral()
+
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/alexisTrejo11/drugstore-platform")
+
+        credentials {
+            username = envOrDotEnv("GITHUB_ACTOR", "alexisTrejo11")
+            password = envOrDotEnv("GITHUB_TOKEN")
+        }
+    }
+
 }
 
 ext {
@@ -29,6 +63,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // Github packages dependency
+    implementation 'io.github.alexisTrejo11:shared-kernel:2.0.0'
+
     // Migrations
     implementation 'org.flywaydb:flyway-core:10.17.0'
     implementation 'org.flywaydb:flyway-database-postgresql:10.17.0'
@@ -38,6 +75,10 @@ dependencies {
 
     // Spring Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
+
+
+    // Requires Maven Local, Hard to dockerize will copy shared library for the moment
+    //implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
 
     // Postgres
     runtimeOnly 'org.postgresql:postgresql'
@@ -50,12 +91,24 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.42'
     annotationProcessor 'org.projectlombok:lombok:1.18.42'
 
-    // Local Shared Classes
-    // implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
-
     // Open Api
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
-    
+
+    // Testing
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'com.h2database:h2'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // Logging sink (Grafana Loki)
+    implementation 'com.github.loki4j:loki-logback-appender:1.5.2'
+
+    // Metrics + Tracing
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'io.micrometer:micrometer-tracing-bridge-otel'
 }
 
 dependencyManagement {
@@ -76,15 +129,8 @@ bootRun {
             //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     ]
 
-     // Load .env file 
-    def envFile = file('.env')
-    if (envFile.exists()) {
-        envFile.readLines().each { line ->
-            if (line && !line.startsWith('#') && line.contains('=')) {
-                def (key, value) = line.split('=', 2)
-                systemProperty key.trim(), value.trim()
-                environment key.trim(), value.trim()
-            }
-        }
+    dotEnv.each { key, value ->
+        systemProperty key, value
+        environment key, value
     }
 }

@@ -3,7 +3,7 @@ package io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.UserId;
 import org.springframework.stereotype.Service;
 
-import io.github.alexisTrejo11.drugstore.accounts.auth.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.models.User;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ChangePasswordCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.PasswordChangedEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.InvalidCredentialsException;
@@ -61,13 +61,8 @@ public class ChangePasswordUseCase {
   }
 
   private void validateCurrentPassword(User user, String currentPassword) {
-    log.debug("Validating current password");
-
-    if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-      log.warn("Invalid current password for user: {}", user.getId());
-      throw new InvalidCredentialsException("Current password is incorrect");
-    }
-
+    log.debug("Validating current password via user-service");
+    userServiceClient.validateUserCredentials(user.getEmail().value(), currentPassword);
     log.debug("Current password validated successfully");
   }
 
@@ -77,9 +72,7 @@ public class ChangePasswordUseCase {
 
     String encodedPassword = passwordEncoder.encode(newPassword);
     user.setPassword(encodedPassword);
-
-    // TODO: Call user service to persist password change
-    // userServiceClient.updateUser(user);
+    userServiceClient.updateUserPassword(user.getId().value(), encodedPassword);
 
     log.debug("Password updated successfully");
   }

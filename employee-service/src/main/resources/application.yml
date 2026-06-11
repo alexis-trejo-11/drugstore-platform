@@ -1,25 +1,27 @@
 server:
-  port: 8081
-  ssl:
-    enabled: false
-    key-store: classpath:keystore.p12
-    key-store-password: ${STORE_SSL_KEYSTORE_PASSWORD}
-    key-store-type: PKCS12
-    key-alias: employee-service
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: native
 
 spring:
   application:
     name: employee-service
+
+  config:
+    import: optional:file:.env[.properties]
 
   profiles:
     active: dev
   boot:
     admin:
       client:
-        url: http://localhost:8080
+        enabled: ${SPRING_BOOT_ADMIN_CLIENT_ENABLED:false}
+        url: ${SPRING_BOOT_ADMIN_URL:http://localhost:8080}
         instance:
-          service-url: http://localhost:8080
+          service-url: ${SPRING_BOOT_ADMIN_SERVICE_URL:http://localhost:8080}
           name: employee-service
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
 
   devtools:
     restart:
@@ -32,23 +34,23 @@ spring:
 
   cache:
     type: redis
-    data:
-      redis:
-        host: ${SPRING_REDIS_HOST:localhost}
-        port: ${SPRING_REDIS_PORT:6379}
-        password: ${SPRING_REDIS_PASSWORD:redispass}
-        lettuce:
-          pool:
-            max-active: 8
-            max-idle: 8
-            min-idle: 0
-        timeout: 2000ms
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
 
   # Postgres
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${STORE_DB:drugstore_employees}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${STORE_DB:employee_db}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -92,7 +94,7 @@ management:
     diskspace:
       enabled: true
     mail:
-      enabled: true
+      enabled: false
 
 springdoc:
   api-docs:
@@ -116,17 +118,41 @@ app:
       durationHours: 1
     profiles:
       standard:
-        maxRequests: 100
+        maxRequests: 40
         durationSeconds: 60
       sensitive:
-        maxRequests: 5
-        durationSeconds: 300
+        maxRequests: 7
+        durationSeconds: 60
       public:
-        maxRequests: 1000
+        maxRequests: 100
         durationSeconds: 60
       admin:
         maxRequests: 50
         durationSeconds: 1
+      customer-write:
+        maxRequests: 20
+        durationSeconds: 60
+      customer-read:
+        maxRequests: 100
+        durationSeconds: 60
+
+logging:
+  file:
+    name: logs/employee-service.log
+    path: logs
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO
+    io.github.alexisTrejo11.drugstore: DEBUG
+    libs_kernel.log.audit: INFO
+
+audit:
+  log:
+    enabled: true
+    excluded-endpoints: /actuator/health, /actuator/info, /swagger-ui.html, /v3/api-docs
+
 
 jwt:
   secret: ${JWT_SECRET}

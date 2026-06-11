@@ -14,7 +14,7 @@ import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.model.Cart;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.model.valueobjects.CartId;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.model.valueobjects.CustomerId;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.specficication.CartSearchCriteria;
-import io.github.alexisTrejo11.drugstore.carts.cart.core.port.out.CartRepository;
+import io.github.alexisTrejo11.drugstore.carts.cart.core.port.output.CartRepository;
 
 @Repository
 public class CartRepositoryImpl implements CartRepository {

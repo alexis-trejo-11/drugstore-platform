@@ -1,11 +1,6 @@
 server:
-  port: 8443
-  ssl:
-    enabled: true
-    key-store: classpath:keystore.p12
-    key-store-password: ${STORE_SSL_KEYSTORE_PASSWORD}
-    key-store-type: PKCS12
-    key-alias: store-service
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: native
 
 spring:
   application:
@@ -93,14 +88,15 @@ management:
 
 springdoc:
   api-docs:
-    path: /api-docs
+    path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
     tags-sorter: alpha
     operations-sorter: alpha
     doc-expansion: none
-  packages-to-scan:  org.github.alexisTrejo11.drugstore.stores
+  show-actuator: false
+  packages-to-scan: org.github.alexisTrejo11.drugstore.stores
   paths-to-match: /api/**
   cache:
     disabled: true

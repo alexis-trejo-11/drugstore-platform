@@ -12,7 +12,10 @@ import org.springframework.context.annotation.ComponentScan;
         DataSourceTransactionManagerAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class
 })
-@ComponentScan(basePackages = { "microservice.auth_service", "libs_kernel.security.jwt", "libs_kernel.config.rate_limit" })
+@ComponentScan(basePackages = {
+    "io.github.alexisTrejo11.drugstore.accounts",
+    "libs_kernel",
+})
 public class AuthServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(AuthServiceApplication.class, args);

@@ -2,6 +2,7 @@ package io.github.alexisTrejo11.drugstore.inventories.inventory.adapter.inbound.
 
 import jakarta.validation.Valid;
 import libs_kernel.mapper.ResponseMapper;
+import libs_kernel.page.PageRequest;
 import libs_kernel.page.PageResponse;
 import libs_kernel.response.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -51,9 +53,10 @@ public class InventoryStockMovementController {
     public ResponseWrapper<PageResponse<MovementResponse>> getInventoryMovements(
             @PathVariable String inventoryId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        
-        var query = GetInventoryMovementsQuery.of(inventoryId,startDate, endDate);
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @Valid @ModelAttribute PageRequest pageRequest) {
+
+        var query = GetInventoryMovementsQuery.of(inventoryId, startDate, endDate, pageRequest.toPageable());
         Page<InventoryMovement> movements = stockMovementUseCase.getInventoryMovements(query);
 
         PageResponse<MovementResponse> movementResponses = responseMapper.toResponsePage(movements);

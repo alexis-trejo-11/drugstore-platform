@@ -1,6 +1,6 @@
 package io.github.alexisTrejo11.drugstore.carts.cart.adapter.input.web.mapper;
 
-import libs_kernel.page.PageResponse;
+import io.github.alexisTrejo11.drugstore.carts.shared.PageResponseLocal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -36,8 +36,8 @@ public class CartResponseMapper {
         .build();
   }
 
-  public PageResponse<CartResponse> fromDomainPage(Page<Cart> cartPage) {
+  public PageResponseLocal<CartResponse> fromDomainPage(Page<Cart> cartPage) {
     var cartResponses = cartPage.map(this::fromDomain);
-    return PageResponse.from(cartResponses);
+    return PageResponseLocal.from(cartResponses);
   }
 }

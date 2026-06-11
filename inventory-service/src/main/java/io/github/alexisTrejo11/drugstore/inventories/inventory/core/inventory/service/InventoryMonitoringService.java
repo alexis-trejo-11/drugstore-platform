@@ -85,7 +85,6 @@ public class InventoryMonitoringService {
     }
     
     @Scheduled(cron = "0 */15 * * * *")
-    @Transactional
     public void releaseExpiredReservations() {
         log.info("Starting expired reservations release");
         reservationOrchestrationService.releaseExpiredReservations();

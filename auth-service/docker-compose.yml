@@ -1,56 +1,77 @@
 services:
   auth-service:
-    build: 
+    build:
       context: ..
-      dockerfile:  ./auth-service/dockerfile
-    container_name: auth-service
+      dockerfile: ./auth-service/dockerfile
+      args:
+        GITHUB_ACTOR: ${GITHUB_ACTOR:-alexisTrejo11}
+        GITHUB_TOKEN: ${GITHUB_TOKEN:?Set GITHUB_TOKEN in .env for GitHub Packages}
+    # container_name removed to allow scaling:
+    #   docker compose up --scale auth-service=3
     hostname: auth-service
     restart: unless-stopped
+    # Port 8080 is NOT exposed to the host — HTTP only inside the network; TLS terminates at Nginx.
+    # HTTP 8080 inside the stack. Published on 8082 on the host so dev tools work without Nginx
+    # (Kafka UI and others often bind host :8080 — use http://localhost:8082/swagger-ui.html).
+    expose:
+      - "8080"
     ports:
-      - "8444:8443"  # HTTPS port
+      - "8082:8080"
     environment:
       # Active profile
       - SPRING_PROFILES_ACTIVE=docker
-      
-      # SSL Configuration (override .env for Docker)
-      - SERVER_SSL_ENABLED=true
-      - SERVER_PORT=8443
-      - SSL_KEYSTORE_PATH=file:/app/keystore.p12
-      
-      # Note: SSL password and JWT config loaded from .env file
-      
+      - SERVER_PORT=8080
+
       # Redis
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-    
+
+      # App identity for Loki labels
+      - SPRING_APPLICATION_NAME=auth-service
+      - LOG_PATH=/app/logs
+
       # Logging
       - LOG_LEVEL_APP=DEBUG
-      
+
+      # Kafka — broker DNS on drugstore-kafka-network (start ../infrastrucuture/kafka first)
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-1:9092,kafka-2:9092,kafka-3:9092
+
       # JVM Options
       - JAVA_OPTS=-Xmx512m -Xms256m
-      
+
     env_file:
       - .env
-      
+
     volumes:
       # Mount logs for persistence
       - ./logs:/app/logs
-      
+
     networks:
       - drugstore-network
-      
+      - drugstore-kafka-network
+
     depends_on:
       redis:
         condition: service_healthy
-      
+      loki:
+        condition: service_started
+
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "--no-check-certificate", "https://localhost:8443/actuator/health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8080/actuator/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-      
+
     deploy:
       resources:
         limits:
@@ -58,6 +79,86 @@ services:
         reservations:
           memory: 256m
 
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: auth-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      auth-service:
+        condition: service_healthy
+    networks:
+      - drugstore-network
+
+  loki:
+    image: grafana/loki:3.1.1
+    container_name: auth-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki-data:/loki
+    networks:
+      - drugstore-network
+
+  grafana:
+    image: grafana/grafana:11.1.4
+    container_name: auth-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      prometheus:
+        condition: service_started
+      loki:
+        condition: service_started
+    networks:
+      - drugstore-network
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: auth-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80" # HTTP → redirects to HTTPS
+      - "443:443" # HTTPS — TLS termination + load balancing
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl/nginx.crt:/etc/nginx/ssl/nginx.crt:ro
+      - ./nginx/ssl/nginx.key:/etc/nginx/ssl/nginx.key:ro
+    depends_on:
+      auth-service:
+        condition: service_healthy
+    networks:
+      - drugstore-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost/health",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
   redis:
     image: redis:7-alpine
@@ -79,8 +180,17 @@ services:
 volumes:
   redis-data:
     name: auth-redis-data
+  prometheus-data:
+    name: auth-prometheus-data
+  loki-data:
+    name: auth-loki-data
+  grafana-data:
+    name: auth-grafana-data
 
 networks:
   drugstore-network:
     name: drugstore-network
     driver: bridge
+  drugstore-kafka-network:
+    external: true
+    name: drugstore-kafka-network

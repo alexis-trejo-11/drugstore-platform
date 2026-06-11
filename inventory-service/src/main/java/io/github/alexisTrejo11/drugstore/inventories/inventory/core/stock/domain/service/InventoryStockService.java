@@ -13,6 +13,7 @@ import io.github.alexisTrejo11.drugstore.inventories.inventory.core.stock.port.o
 import io.github.alexisTrejo11.drugstore.inventories.shared.domain.order.OrderReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -63,6 +64,7 @@ public class InventoryStockService {
     }
 
 
+    @Transactional
     public ReservationId reserveStock(Map<ProductId, Integer> productQuantityMap, OrderReference orderReference, String reservationReason) {
         logger.info("Reserving stock for order {}: {}", orderReference, productQuantityMap);
 
@@ -98,6 +100,7 @@ public class InventoryStockService {
         return savedOrderReservations.getId();
     }
 
+    @Transactional
     public void releaseStockByOrder(OrderReference orderReference) {
         logger.info("Releasing stock reservations for order {}", orderReference);
         StockReservation stockReservation = reservationRepository.findByOrderReference(orderReference)

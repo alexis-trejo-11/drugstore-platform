@@ -2,7 +2,7 @@ package io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase
 
 import org.springframework.stereotype.Service;
 
-import io.github.alexisTrejo11.drugstore.accounts.auth.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.models.User;
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.output.security.tokens.TokenType;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ForgotPasswordCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.notification.PasswordResetTokenEvent;
@@ -78,7 +78,7 @@ public class ForgotPasswordUseCase {
         .email(user.getEmail().value())
         .build();
 
-    Token token = tokenService.generateToken(TokenType.ACTIVATION, claims);
+    Token token = tokenService.generateToken(TokenType.PASSWORD_RESET, claims);
 
     log.debug("Password reset token generated successfully");
     return token;

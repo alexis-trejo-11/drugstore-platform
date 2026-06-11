@@ -1,0 +1,127 @@
+# Inventory Service
+
+Inventory Service is an internal microservice of the Drugstore Platform monorepo.  
+It owns **inventory and stock** visibility: availability, reservations-friendly data model, caching, and integration with orders and catalog.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Core Capabilities](#core-capabilities)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [API Surface](#api-surface)
+- [Security and Business Rules](#security-and-business-rules)
+- [Observability](#observability)
+- [Run Locally](#run-locally)
+- [Docker and Full Local Stack](#docker-and-full-local-stack)
+- [Testing](#testing)
+- [Documentation Navigation](#documentation-navigation)
+
+## Overview
+
+- **Service name:** `inventory-service`
+- **Role in platform:** Source of truth for stock levels and inventory-facing queries.
+- **Main responsibility:** Expose inventory APIs, apply rate limits, use Redis cache, persist to PostgreSQL.
+- **Protocol:** REST on **8083** by default in `application.yml`.
+- **Persistence:** PostgreSQL (Flyway optional per configuration).
+
+## Core Capabilities
+
+- Inventory read/update flows and validation.
+- Redis-backed cache with TTL-oriented configuration.
+- Custom rate limiting (see logging package in `application.yml`).
+- Springdoc OpenAPI.
+- RabbitMQ integration where enabled in build.
+
+## Tech Stack
+
+- Java 23
+- Spring Boot 3.3.2
+- Spring Web, Spring Data JPA, Spring Data Redis, Spring Cache, Spring AMQP
+- PostgreSQL, Flyway (optional by profile)
+- Logstash encoder (legacy ELK-style logs) + **Loki** for unified observability
+- Spring Boot Admin client
+- Actuator + Micrometer + Prometheus
+- Loki4j + Loki + Grafana
+- Docker / Docker Compose
+
+## Project Structure
+
+```text
+inventory-service/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   └── resources/
+│   │       ├── application.yml
+│   │       └── logback-spring.xml
+│   └── test/
+├── observability/
+│   ├── prometheus/
+│   └── grafana/provisioning/datasources/
+├── docs/
+│   └── project/
+│       ├── *.md
+│       └── obsidian/*.md
+├── docker-compose.yml
+├── Dockerfile
+├── build.gradle
+└── README.md
+```
+
+## API Surface
+
+- REST under `/api/**` per Springdoc configuration.
+
+## Security and Business Rules
+
+- Rate limiting filters and app-specific rules (see `docs/project/ProjectFeature.md`).
+
+## Observability
+
+- Actuator endpoints including Prometheus.
+- Loki log shipping via Logback.
+- Compose stack for local Prometheus, Loki, Grafana.
+
+## Run Locally
+
+```bash
+./gradlew bootRun
+./gradlew test
+```
+
+## Docker and Full Local Stack
+
+```bash
+docker compose up -d --build
+```
+
+## Testing
+
+- Tests under `src/test/`.
+
+## Documentation Navigation
+
+### Main Service Documentation
+
+- [Project Metadata](docs/project/ProjectMetadata.md)
+- [Project Overview](docs/project/ProjectOverview.md)
+- [Project Infrastructure](docs/project/ProjectInfrastructure.md)
+- [Project Features](docs/project/ProjectFeature.md)
+- [Project Code Showcase](docs/project/ProjectCodeShowCase.md)
+- [Project Architecture](docs/project/ProjectArchitecture.md)
+- [API Schema](docs/project/APISchema.md)
+
+### Structured Source Docs (Obsidian-style)
+
+- [Project Metadata (Source)](docs/project/obsidian/ProjectMetadata.md)
+- [Project Overview (Source)](docs/project/obsidian/ProjectOverview.md)
+- [Project Infrastructure (Source)](docs/project/obsidian/ProjectInfrastructure.md)
+- [Project Features (Source)](docs/project/obsidian/ProjectFeature.md)
+- [Project Code Showcase (Source)](docs/project/obsidian/ProjectCodeShowCase.md)
+- [Project Architecture (Source)](docs/project/obsidian/ProjectArchitecture.md)
+- [API Schema (Source)](docs/project/obsidian/APISchema.md)
+
+---
+
+If this service changes its API contract, domain rules, or observability setup, update `docs/` and this `README.md` in the same PR.

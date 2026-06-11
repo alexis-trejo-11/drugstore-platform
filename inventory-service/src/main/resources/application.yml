@@ -19,7 +19,8 @@ app:
         duration-seconds: 10
 
 server:
-  port: 8083
+  port: ${SERVER_PORT:8085}
+  forward-headers-strategy: native
 
 spring:
   application:
@@ -32,7 +33,7 @@ spring:
     redis:
       host: ${SPRING_REDIS_HOST:localhost}
       port: ${SPRING_REDIS_PORT:6379}
-      password: ${SPRING_REDIS_PASSWORD:redispass}
+      password: ${SPRING_REDIS_PASSWORD:}
       timeout: 2000ms
       lettuce:
         pool:
@@ -45,15 +46,15 @@ spring:
   cache:
     type: redis
     redis:
-      time-to-live: 3600000  # 1 hora para cache general
+      time-to-live: 3600000 # 1 hora para cache general
       cache-null-values: false
       enable-statistics: true
 
   # POSTGRES CONFIG
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${INVENTORY_DB:drugstore_inventories}
-    username: ${POSTGRES_USER:alexistrejo}
-    password: ${POSTGRES_PASSWORD:alexisAdmin1475963}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -137,7 +138,7 @@ springdoc:
     operations-sorter: alpha
     doc-expansion: none
     display-request-duration: true
-  packages-to-scan: microservice.order_service
+  packages-to-scan: io.github.alexisTrejo11.drugstore.inventories
   paths-to-match: /api/**
   cache:
     disabled: true
@@ -145,6 +146,5 @@ springdoc:
 # LOGGING FOR RATE LIMITING
 logging:
   level:
-    io.github.alexisTrejo11.drugstore.inventories.config.rate_limiter: DEBUG
+    io.github.alexisTrejo11.drugstore.inventories.config.ratelimit: DEBUG
     org.springframework.web.filter: DEBUG
-

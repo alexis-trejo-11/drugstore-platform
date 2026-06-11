@@ -1,0 +1,2 @@
+# Project Metadata
+> Comprehensive employee management service with rich JPA entity (EmployeeEntity) and enums for roles, types, and status. Has @RateLimit annotations using libs-kernel shared library. PLACEHOLDER: No Dockerfile found, no docker-compose.yml in employee-service. Missing: Kubernetes manifests, CI/CD pipeline, unit/integration tests. Potential improvements: Add Kafka event publishing for employee lifecycle events, implement caching for frequently accessed employees, add Micrometer metrics.

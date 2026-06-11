@@ -1,6 +1,5 @@
 package libs_kernel.page;
 
-import org.springframework.data.domain.Sort;
 
 public record SortInput(String sortBy, String direction) {
 
@@ -28,14 +27,6 @@ public record SortInput(String sortBy, String direction) {
 
     public static SortInput of(String sortBy, String direction) {
         return new SortInput(sortBy, direction);
-    }
-
-    public Sort toSort() {
-        Sort.Direction sortDirection = direction.equalsIgnoreCase("ASC")
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
-
-        return Sort.by(sortDirection, sortBy);
     }
 
     public String toJson() {

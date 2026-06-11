@@ -1,48 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!-- Environment variables or default values -->
     <property name="LOG_PATH" value="${LOG_PATH:-logs}" />
-    <property name="APP_NAME" value="${SPRING_APPLICATION_NAME:-address-service}" />
+    <property name="APP_NAME" value="${SPRING_APPLICATION_NAME:-backend-service}" />
 
-    <!-- Console Appender -->
+    <!-- 1. CONSOLE APPENDER: For Docker container logs -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Application Log File Appender -->
-    <appender name="FILE_APP" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH}/${APP_NAME}.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/${APP_NAME}.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
+    <springProfile name="!test">
+        <!-- 2. FILE APPENDER: Main application logs with rotation -->
+        <appender name="FILE_APP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_PATH}/${APP_NAME}.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${LOG_PATH}/${APP_NAME}.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+                <maxHistory>30</maxHistory>
+            </rollingPolicy>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
 
-    <!-- Audit Log File Appender -->
-    <appender name="FILE_AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH}/${APP_NAME}-audit.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/${APP_NAME}-audit.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
-            <maxHistory>90</maxHistory> <!-- Save Audit Logs Longer -->
-        </rollingPolicy>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} - %msg%n</pattern> <!-- Simple format for audit -->
-        </encoder>
-    </appender>
+        <!-- 3. AUDIT APPENDER: Specifically for security and business audit logs -->
+        <appender name="FILE_AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_PATH}/${APP_NAME}-audit.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${LOG_PATH}/${APP_NAME}-audit.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+                <maxHistory>90</maxHistory>
+            </rollingPolicy>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} - %msg%n</pattern>
+            </encoder>
+        </appender>
 
-    <!-- Audit Specific Logger -->
+        <!-- 4. LOKI APPENDER: Sends logs directly to Grafana Loki -->
+        <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+            <http>
+                <url>http://loki:3100/loki/api/v1/push</url>
+            </http>
+            <format>
+                <label>
+                    <pattern>app=${APP_NAME},env=prod,level=%level</pattern>
+                </label>
+                <message>
+                    <pattern>l=%level c=%logger{20} t=%thread traceId=%X{traceId:-none} | %msg %ex</pattern>
+                </message>
+            </format>
+        </appender>
+    </springProfile>
+
+    <!-- AUDIT LOGGER: Captures events from your audit package -->
     <logger name="libs_kernel.log.audit" level="INFO" additivity="false">
-        <appender-ref ref="FILE_AUDIT" />
-        <appender-ref ref="CONSOLE" /> <!-- ALSO SHOW AUDIT LOGS ON CONSOLE -->
+        <appender-ref ref="CONSOLE" />
+        <springProfile name="!test">
+            <appender-ref ref="FILE_AUDIT" />
+            <appender-ref ref="LOKI" />
+        </springProfile>
     </logger>
 
-    <!-- Root logger -->
+    <!-- ROOT LOGGER: Global log configuration -->
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILE_APP" />
+        <springProfile name="!test">
+            <appender-ref ref="FILE_APP" />
+            <appender-ref ref="LOKI" />
+        </springProfile>
     </root>
 </configuration>

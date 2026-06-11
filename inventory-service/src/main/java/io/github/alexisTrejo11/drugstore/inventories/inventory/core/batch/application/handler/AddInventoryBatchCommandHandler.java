@@ -2,6 +2,7 @@ package io.github.alexisTrejo11.drugstore.inventories.inventory.core.batch.appli
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.batch.application.command.RegisterInventoryBatchCommand;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.domain.entity.Inventory;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.batch.domain.entity.InventoryBatch;
@@ -10,6 +11,7 @@ import io.github.alexisTrejo11.drugstore.inventories.inventory.core.movement.dom
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.batch.domain.entity.valueobject.CreateBatchParams;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.movement.domain.valueobject.CreateMovementParams;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.batch.domain.entity.valueobject.BatchId;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.core.batch.domain.event.InventoryBatchRegisteredEvent;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.domain.exception.InventoryNotFoundException;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.batch.port.output.InventoryBatchRepository;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.movement.domain.port.InventoryMovementRepository;
@@ -24,6 +26,7 @@ public class AddInventoryBatchCommandHandler {
     private final InventoryRepository inventoryRepository;
     private final InventoryBatchRepository batchRepository;
     private final InventoryMovementRepository movementRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public BatchId handle(RegisterInventoryBatchCommand command) {
@@ -45,7 +48,7 @@ public class AddInventoryBatchCommandHandler {
         log.info("Saving updated inventory for Inventory ID: {}", command.inventoryId());
         inventoryRepository.save(inventory);
 
-        // TODO: Publish domain event for batch registration
+        eventPublisher.publishEvent(new InventoryBatchRegisteredEvent(savedBatch.getId(), savedBatch.getInventoryId(), command.quantity()));
         log.info("Recording inventory movement for Inventory ID: {}", command.inventoryId());
         log.info("Creating inventory movement for Inventory Quantity: {}", command.quantity());
         var movementParams = CreateMovementParams.batchMovement(

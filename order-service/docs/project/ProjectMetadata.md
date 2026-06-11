@@ -1,0 +1,19 @@
+# Project Metadata
+> Order Service is a core backend microservice built with Java 23 and Spring Boot 3.3.2, implementing domain-driven design (DDD) and hexagonal architecture. It manages the complete order lifecycle including creation, status transitions, delivery/pickup methods, and integrates with PostgreSQL for persistence, Redis for caching, and OpenSearch/ELK stack for log aggregation.
+
+<!--
+  OBSERVATIONS FOR ProjectMetadata:
+  ✅ POSITIVE:
+    - Well-structured project with clear versioning (0.0.1-SNAPSHOT)
+    - Comprehensive tech stack with modern frameworks
+    - GitHub repository properly configured
+    - DDD and hexagonal architecture properly implemented
+
+  ⚠️ WARNINGS / MISSING / DANGEROUS:
+    - liveDemoUrl is null - no live demo available yet
+    - status is "develop" - not yet deployed to production
+    - Java 23 requirement may cause toolchain issues (LSP errors show Java 25 on machine)
+    - Hardcoded credentials in application.yml (POSTGRES_PASSWORD: "alexisAdmin1475963") - SECURITY RISK
+    - No Dockerfile exists yet - needed for cloud deployment
+    - createdAt/updatedAt dates are from git history but should be updated on actual releases
+-->

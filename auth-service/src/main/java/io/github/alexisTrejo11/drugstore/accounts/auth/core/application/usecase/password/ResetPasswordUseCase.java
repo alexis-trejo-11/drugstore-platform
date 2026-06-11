@@ -2,7 +2,7 @@ package io.github.alexisTrejo11.drugstore.accounts.auth.core.application.usecase
 
 import org.springframework.stereotype.Service;
 
-import io.github.alexisTrejo11.drugstore.accounts.auth.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.models.User;
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.output.security.tokens.TokenType;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.password.ResetPasswordCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.PasswordChangedEvent;
@@ -55,13 +55,13 @@ public class ResetPasswordUseCase {
   private UserClaims validateAndExtractClaims(String resetToken) {
     log.debug("Validating reset token");
 
-    if (!tokenService.validateToken(resetToken, TokenType.ACTIVATION)) {
+    if (!tokenService.validateToken(resetToken, TokenType.PASSWORD_RESET)) {
       log.warn("Invalid or expired password reset token");
       throw TokenExpiredException.temporary("Password reset");
     }
 
     try {
-      UserClaims claims = tokenService.extractClaims(resetToken);
+      UserClaims claims = tokenService.extractClaimsForOpaqueToken(resetToken, TokenType.PASSWORD_RESET);
       log.debug("Reset token validated for user: {}", claims.userId());
       return claims;
     } catch (Exception e) {
@@ -95,9 +95,7 @@ public class ResetPasswordUseCase {
 
     String encodedPassword = passwordEncoder.encode(newPassword);
     user.setPassword(encodedPassword);
-
-    // TODO: Call user service to persist password change
-    // userServiceClient.updateUser(user);
+    userServiceClient.updateUserPassword(user.getId().value(), encodedPassword);
 
     log.debug("Password updated successfully");
   }

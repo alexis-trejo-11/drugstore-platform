@@ -55,6 +55,9 @@ public class KafkaConsumerConfig {
 	@Value("${spring.kafka.consumer.concurrency:3}")
 	private Integer concurrency;
 
+	@Value("${spring.kafka.listener.auto-startup:true}")
+	private Boolean kafkaListenerAutoStartup;
+
 
 	@Bean
 	public ObjectMapper kafkaObjectMapper() {
@@ -130,8 +133,8 @@ public class KafkaConsumerConfig {
 		// Error handler personalizado
 		factory.setCommonErrorHandler(kafkaErrorHandler);
 
-		// Auto startup
-		factory.setAutoStartup(true);
+		// Auto startup controlled by configuration (useful for integration tests)
+		factory.setAutoStartup(kafkaListenerAutoStartup);
 
 		log.info("KafkaListenerContainerFactory configured with concurrency: {}", concurrency);
 

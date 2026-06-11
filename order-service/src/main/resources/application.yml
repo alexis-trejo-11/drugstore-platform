@@ -1,11 +1,6 @@
 server:
-  port: 8446
-  ssl:
-    enabled: true
-    key-store: classpath:keystore.p12
-    key-store-password: ${ORDER_SSL_KEYSTORE_PASSWORD}
-    key-store-type: PKCS12
-    key-alias: order-service
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: native
 
 spring:
   application:
@@ -44,10 +39,21 @@ spring:
             min-idle: 0
         timeout: 2000ms
 
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
   # Postgres
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${ORDER_DB:drugstore_orders}
-    username: ${POSTGRES_USER:alexistrejo}
+    username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:alexisAdmin1475963}
     driver-class-name: org.postgresql.Driver
   jpa:
@@ -100,7 +106,7 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
     doc-expansion: none
-  packages-to-scan: microservice.order_service
+  packages-to-scan: io.github.alexisTrejo11.drugstore.order
   paths-to-match: /api/**
   cache:
     disabled: true
@@ -124,6 +130,32 @@ app:
       admin:
         maxRequests: 50
         durationSeconds: 1
+      customer-read:
+        maxRequests: 100
+        durationSeconds: 60
+      customer-write:
+        maxRequests: 20
+        durationSeconds: 60
 
-# No logging configuration needed here since logback-spring.xml manages it
+logging:
+  file:
+    name: logs/order-service.log
+    path: logs
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO
+    io.github.alexisTrejo11.drugstore: DEBUG
+    libs_kernel.log.audit: INFO
 
+audit:
+  log:
+    enabled: true
+    excluded-endpoints: /actuator/health, /actuator/info, /swagger-ui.html, /v3/api-docs
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:15}
+  refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200} # 30 days
+  issuer: ${ISSUER}

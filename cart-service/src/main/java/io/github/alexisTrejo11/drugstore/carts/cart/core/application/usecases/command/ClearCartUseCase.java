@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.application.command.ClearCartCommand;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.exception.CartNotFoundException;
 import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.model.Cart;
-import io.github.alexisTrejo11.drugstore.carts.cart.core.port.out.CartRepository;
+import io.github.alexisTrejo11.drugstore.carts.cart.core.port.output.CartRepository;
 
 @Component
 public class ClearCartUseCase {

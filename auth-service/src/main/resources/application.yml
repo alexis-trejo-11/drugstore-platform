@@ -127,3 +127,13 @@ app:
       admin:
         maxRequests: 50
         durationSeconds: 1
+
+# Opaque tokens (activation, password reset) and 2FA setup timings
+token:
+  activation:
+    expiration-minutes: 20
+  password-reset:
+    expiration-minutes: 20
+  two-fa:
+    pending-setup-minutes: 15
+    expiration-minutes: 5

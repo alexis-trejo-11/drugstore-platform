@@ -2,7 +2,7 @@ package io.github.alexisTrejo11.drugstore.carts.product.adapter.output.persisten
 
 import io.github.alexisTrejo11.drugstore.carts.cart.core.domain.model.valueobjects.ProductId;
 import io.github.alexisTrejo11.drugstore.carts.product.core.domain.Product;
-import io.github.alexisTrejo11.drugstore.carts.product.core.port.out.ProductRepository;
+import io.github.alexisTrejo11.drugstore.carts.product.core.port.output.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

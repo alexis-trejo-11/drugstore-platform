@@ -28,7 +28,7 @@ public class CartGrpcMapper {
         .setSubtotal(cart.calculateSubtotal().value().toString())
         .setDiscount(cart.calculateDiscount().toString())
         .setTotal(cart.calculateTotal().value().toString())
-        .setUpdatedAt(cart.getTimeStamps().updatedAt().format(ISO_FORMATTER));
+        .setUpdatedAt(cart.getTimeStamps().getUpdatedAt().format(ISO_FORMATTER));
 
     // Map cart items
     if (cart.getItems() != null && !cart.getItems().isEmpty()) {
@@ -57,8 +57,8 @@ public class CartGrpcMapper {
         .setUnitPrice(item.getUnitPrice().value().toString())
         .setDiscountPerUnit(item.getDiscountPerUnit().toString())
         .setSubtotal(item.calculateSubtotal().value().toString())
-        .setAddedAt(item.getTimeStamps().createdAt().format(ISO_FORMATTER))
-        .setUpdatedAt(item.getTimeStamps().updatedAt().format(ISO_FORMATTER))
+        .setAddedAt(item.getTimeStamps().getCreatedAt().format(ISO_FORMATTER))
+        .setUpdatedAt(item.getTimeStamps().getUpdatedAt().format(ISO_FORMATTER))
         .build();
   }
 
@@ -70,8 +70,8 @@ public class CartGrpcMapper {
         .setUnitPrice(item.getUnitPrice().value().toString())
         .setDiscountPerUnit(item.getDiscountPerUnit().toString())
         .setSubtotal(item.calculateSubtotal().value().toString())
-        .setMovedAt(item.getTimeStamps().createdAt().format(ISO_FORMATTER))
-        .setUpdatedAt(item.getTimeStamps().updatedAt().format(ISO_FORMATTER))
+        .setMovedAt(item.getTimeStamps().getCreatedAt().format(ISO_FORMATTER))
+        .setUpdatedAt(item.getTimeStamps().getUpdatedAt().format(ISO_FORMATTER))
         .build();
   }
 }

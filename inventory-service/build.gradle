@@ -1,8 +1,9 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.3.2'
-	id 'io.spring.dependency-management' version '1.1.6'
+	id 'org.springframework.boot' version '3.5.14'
+	id 'io.spring.dependency-management' version '1.1.7'
 }
+
 
 group = 'drugstore.microservice'
 version = '0.0.1-SNAPSHOT'
@@ -27,13 +28,17 @@ dependencies {
 	// Spring Boot
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'com.h2database:h2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+
 	// Security
-	// implementation 'org.springframework.boot:spring-boot-starter-security'
-	// implementation 'org.springframework.security:spring-security-crypto'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 
     // Migrations
     implementation 'org.flywaydb:flyway-core:10.17.0'
@@ -43,30 +48,32 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
 
-	// Postgres
-	runtimeOnly 'org.postgresql:postgresql'
-	implementation 'org.postgresql:postgresql'
+    // Postgres
+    runtimeOnly 'org.postgresql:postgresql'
+    implementation 'org.postgresql:postgresql'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
     // Common library
-    implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
+    // implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
 
-	// Lombok
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	testAnnotationProcessor 'org.projectlombok:lombok'
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
-	// Swagger
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
-
-    // Logstash Encoder for Elk
-    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
-    implementation 'org.codehaus.janino:janino:3.1.10'
-
-    // RabbitMQ
-    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    // Swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
 	// Admin Service
 	implementation 'de.codecentric:spring-boot-admin-starter-client:3.0.0'
+
+	// Observability
+	implementation 'com.github.loki4j:loki-logback-appender:1.5.2'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 

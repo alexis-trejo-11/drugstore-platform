@@ -21,22 +21,24 @@ import java.util.List;
 public class InventoryAllocationService {
     private final InventoryBatchRepository inventoryBatchRepository;
 
-    // TODO: Decrease available quantity in the batch after assignment
     public BatchId assingCompatibleBatch(Inventory inventory, Integer quantity) {
         boolean activeOnly = true;
         List<InventoryBatch> availableBatches = inventoryBatchRepository.findByInventoryId(inventory.getId(), activeOnly);
 
-        return availableBatches.stream()
+        InventoryBatch selected = availableBatches.stream()
                 .filter(batch -> batch.getAvailableQuantity() >= quantity)
                 .min(Comparator.comparing(batch ->
                         batch.getExpirationDate() != null ?
                                 batch.getExpirationDate() :
                                 batch.getReceivedDate()
                 ))
-                .map(InventoryBatch::getId)
                 .orElseThrow(() -> new InsufficientInventoryException(
                         String.format("No batch found with sufficient quantity %d for inventory %s", quantity, inventory.getId())
                 ));
+
+        selected.allocateQuantity(quantity);
+        inventoryBatchRepository.save(selected);
+        return selected.getId();
     }
 
     public void returnBatchQuantity(BatchId batchId, Integer quantity) {
@@ -50,13 +52,13 @@ public class InventoryAllocationService {
 
 
 
-    // TODO: PREV AND NEW QUANTITY IS RIGHT?
+    /** Captures state after {@link Inventory#reserveStock(int)}: previous available = current + quantity. */
     public InventoryMovement createReservationMovement(Inventory inventory, Integer quantity, PurchaseOrderId purchaseOrderId, UserId performedBy) {
         var params = CreateMovementParams.builder()
                 .inventoryId(inventory.getId())
                 .movementType(MovementType.RESERVATION)
                 .quantity(quantity)
-                .previousQuantity(inventory.getAvailableQuantity() - quantity)
+                .previousQuantity(inventory.getAvailableQuantity() + quantity)
                 .newQuantity(inventory.getAvailableQuantity())
                 .reason("Stock reserved for order")
                 .referenceId(purchaseOrderId.value())

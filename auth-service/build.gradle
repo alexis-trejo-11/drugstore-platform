@@ -5,7 +5,31 @@ plugins {
 	id 'com.google.protobuf' version '0.9.4'
 }
 
-version = '0.0.1-SNAPSHOT'
+def loadDotEnv = {
+	def env = [:]
+	def envFile = file('.env')
+	if (envFile.exists()) {
+		envFile.readLines().each { line ->
+			if (line && !line.startsWith('#') && line.contains('=')) {
+				def (key, value) = line.split('=', 2)
+				env[key.trim()] = value.trim()
+			}
+		}
+	}
+	return env
+}
+
+def dotEnv = loadDotEnv()
+
+def envOrDotEnv = { String key, String defaultValue = null ->
+	def fromProperty = findProperty(key)
+	(fromProperty != null ? fromProperty.toString() : null)
+			?: System.getenv(key)
+			?: dotEnv[key]
+			?: defaultValue
+}
+
+version = '2.0.0'
 
 java {
 	toolchain {
@@ -14,8 +38,18 @@ java {
 }
 
 repositories {
-	mavenLocal()
 	mavenCentral()
+
+	maven {
+		name = "GitHubPackages"
+		url = uri("https://maven.pkg.github.com/alexisTrejo11/drugstore-platform")
+
+		credentials {
+			username = envOrDotEnv("GITHUB_ACTOR", "alexisTrejo11")
+			password = envOrDotEnv("GITHUB_TOKEN")
+		}
+	}
+
 }
 
 ext {
@@ -31,8 +65,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	// Github packages dependency
+	implementation 'io.github.alexisTrejo11:shared-kernel:2.0.0'
+
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:kafka'
+	testImplementation 'org.testcontainers:testcontainers'
 
 	// Validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -52,27 +92,34 @@ dependencies {
 	// Protobuf
 	implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
 
-	// Annotations for Java 9+
-	compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
+	// javax.annotation (@Generated) for protoc/gRPC generated sources
+	implementation 'javax.annotation:javax.annotation-api:1.3.2'
 
 	// Kafka
 	implementation 'org.springframework.kafka:spring-kafka'
 
 	// Lombok
-    compileOnly 'org.projectlombok:lombok:1.18.42'
-    annotationProcessor 'org.projectlombok:lombok:1.18.42'
+	compileOnly 'org.projectlombok:lombok:1.18.42'
+	annotationProcessor 'org.projectlombok:lombok:1.18.42'
 
-    // Common library
-    implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
-
-    // JWT
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	// JWT
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 	// OAuth2
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-	
+
+	// Observability
+	implementation 'com.github.loki4j:loki-logback-appender:1.5.2'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+
+	// Swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'
+
+	// TOTP (Google Authenticator–compatible)
+	implementation 'com.warrenstrange:googleauth:1.5.0'
 }
 
 dependencyManagement {
@@ -94,7 +141,30 @@ protobuf {
 		all()*.plugins {
 			grpc {}
 		}
+		all().each { task ->
+			task.builtins {
+				java {}
+			}
+		}
 	}
+}
+
+// Same layout as user-service: IDE / Java LS pick up generated stubs without guessing paths
+sourceSets {
+	main {
+		java {
+			srcDir 'build/generated/source/proto/main/java'
+			srcDir 'build/generated/source/proto/main/grpc'
+		}
+	}
+}
+
+tasks.withType(Copy) {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+processResources {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.named('test') {
@@ -108,15 +178,8 @@ bootRun {
             //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     ]
 
-    // Load .env file and set system properties and environment variables
-    def envFile = file('./.env')
-    if (envFile.exists()) {
-        envFile.readLines().each { line ->
-            if (line && !line.startsWith('#') && line.contains('=')) {
-                def (key, value) = line.split('=', 2)
-                systemProperty key.trim(), value.trim()
-                environment key.trim(), value.trim()
-            }
-        }
-    }
+	dotEnv.each { key, value ->
+		systemProperty key, value
+		environment key, value
+	}
 }

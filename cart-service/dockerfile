@@ -45,9 +45,6 @@ RUN addgroup -S spring && adduser -S spring -G spring
 # Copy the built JAR
 COPY --from=builder /app/cart-service/build/libs/*.jar app.jar
 
-# Copy the SSL keystore (not included in JAR)
-COPY cart-service/src/main/resources/keystore.p12 /app/keystore.p12
-
 # Create directory for logs and config
 RUN mkdir -p /app/logs /app/config
 
@@ -62,14 +59,12 @@ RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
 
 # Install su-exec for proper user switching
 USER root
-RUN apk add --no-cache su-exec
+RUN apk add --no-cache su-exec wget
 
-# Health check (using HTTPS on 8443)
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
-  CMD wget --quiet --tries=1 --spider --no-check-certificate https://localhost:8443/actuator/health || exit 1
+  CMD wget --quiet --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
-# Expose port (HTTPS)
-EXPOSE 8443
+EXPOSE 8080
 
 # Entry command (run as root to fix permissions, then drop to spring user)
 ENTRYPOINT ["/app/entrypoint.sh"]

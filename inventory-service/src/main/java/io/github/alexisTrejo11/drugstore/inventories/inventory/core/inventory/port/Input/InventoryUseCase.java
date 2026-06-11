@@ -4,6 +4,7 @@ import io.github.alexisTrejo11.drugstore.inventories.inventory.core.batch.applic
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.batch.domain.entity.InventoryBatch;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.command.AdjustInventoryCommand;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.command.CreateInventoryCommand;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.command.UpdateInventoryCommand;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.query.GetInventoryByIdQuery;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.query.GetInventoryByProductQuery;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.service.cqrs.query.GetInventoryMovementsQuery;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 
 public interface InventoryUseCase {
     InventoryId createInventory(CreateInventoryCommand inventoryCommand);
+    void updateInventory(UpdateInventoryCommand command);
     AdjustmentId adjustInventory(AdjustInventoryCommand command);
 
     Inventory getInventoryById(GetInventoryByIdQuery query);

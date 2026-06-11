@@ -4,18 +4,25 @@ import java.util.UUID;
 
 import io.github.alexisTrejo11.drugstore.accounts.auth.adapter.output.security.tokens.TokenType;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.result.SessionPayload;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.notification.TwoFactorCodeEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.models.JWTSessions;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.valueobjects.Token;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.input.TokenService;
-import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.*;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.NotificationEventPublisher;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.SessionRepository;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.UserEventPublisher;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.ports.output.UserServiceClient;
 import libs_kernel.security.dto.UserClaims;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import io.github.alexisTrejo11.drugstore.accounts.auth.User;
+import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.models.User;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.application.command.login.LoginCommand;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.event.auth.UserLoginEvent;
 import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.InvalidCredentialsException;
+
+import java.time.LocalDateTime;
 
 /**
  * LoginUseCase - Handles user authentication and session creation
@@ -26,11 +33,11 @@ import io.github.alexisTrejo11.drugstore.accounts.auth.core.domain.exceptions.In
 @Slf4j
 @RequiredArgsConstructor
 public class LoginUseCase {
-  private final PasswordEncoder passwordEncoder;
   private final TokenService tokenProvider;
   private final UserEventPublisher eventPublisher;
   private final SessionRepository sessionRepository;
   private final UserServiceClient userServiceClient;
+  private final NotificationEventPublisher notificationEventPublisher;
 
   /**
    * Execute the login use case
@@ -43,13 +50,57 @@ public class LoginUseCase {
     log.info("Processing login attempt for identifier: {}", maskSensitiveData(command.identifier()));
     User user = getUserByIdentifier(command.identifier());
 
-    validatePassword(command.password(), user);
+    validateCredentials(command.password(), user);
     user.validateUserCanLogin();
+
+    if (user.isTwoFactorEnabled()) {
+      sendTwoFactorLoginCode(user, command);
+      return SessionPayload.pendingTwoFactor(user.getId().value());
+    }
 
     SessionPayload sessionPayload = processJwtSession(user, command);
     publishLoginEvent(user);
 
     return sessionPayload;
+  }
+
+  private void sendTwoFactorLoginCode(User user, LoginCommand command) {
+    log.debug("Sending 2FA challenge for user: {}", user.getId());
+    UserClaims claims =
+        UserClaims.builder()
+            .userId(user.getId().value())
+            .email(user.getEmail().value())
+            .name(user.getFirstName() + " " + user.getLastName())
+            .role(user.getRole().getRoleName())
+            .build();
+
+    Token twoFaToken = tokenProvider.generateToken(TokenType.TWO_FA, claims);
+
+    try {
+      TwoFactorCodeEvent event =
+          TwoFactorCodeEvent.builder()
+              .eventId(UUID.randomUUID().toString())
+              .eventType("TWO_FACTOR_CODE_LOGIN")
+              .eventTimestamp(LocalDateTime.now())
+              .correlationId(UUID.randomUUID().toString())
+              .userId(user.getId().value())
+              .email(user.getEmail().value())
+              .phoneNumber(user.getPhoneNumber() != null ? user.getPhoneNumber().value() : null)
+              .firstName(user.getFirstName())
+              .code(twoFaToken.code())
+              .expiresAt(twoFaToken.expiresAt())
+              .channel(TwoFactorCodeEvent.NotificationChannel.EMAIL)
+              .purpose("LOGIN_2FA")
+              .ipAddress(command.ipAddress())
+              .deviceName(command.deviceName())
+              .language("en")
+              .build();
+
+      notificationEventPublisher.publishTwoFactorCode(event);
+    } catch (Exception e) {
+      log.error("Failed to publish 2FA login code for user: {}", user.getId(), e);
+      throw new IllegalStateException("Could not send two-factor challenge", e);
+    }
   }
 
   /**
@@ -61,39 +112,33 @@ public class LoginUseCase {
   private SessionPayload processJwtSession(User user, LoginCommand command) {
     log.debug("Generating session tokens for user: {}", user.getId());
 
-    var claims = UserClaims.builder()
-        .userId(user.getId().value())
-        .email(user.getEmail().value())
-        .role(user.getRole().getRoleName())
-        .name(user.getFirstName() + " " + user.getLastName())
-        .phoneNumber(user.getPhoneNumber() != null ? user.getPhoneNumber().value() : null)
-        .build();
+    var claims =
+        UserClaims.builder()
+            .userId(user.getId().value())
+            .email(user.getEmail().value())
+            .role(user.getRole().getRoleName())
+            .name(user.getFirstName() + " " + user.getLastName())
+            .phoneNumber(user.getPhoneNumber() != null ? user.getPhoneNumber().value() : null)
+            .build();
 
     // Interface Implementation will ignore unnecessary claims based on token type
     var accessToken = tokenProvider.generateToken(TokenType.ACCESS, claims);
     var refreshToken = tokenProvider.generateToken(TokenType.REFRESH, claims);
 
     // Save it on session service for track and blacklist if required
-    var jwtSession = JWTSessions.from(
-        refreshToken,
-        command.deviceId(),
-        command.ipAddress(),
-        user.getId().value());
+    var jwtSession =
+        JWTSessions.from(
+            refreshToken, command.deviceId(), command.ipAddress(), user.getId().value());
     sessionRepository.save(jwtSession);
 
     log.debug("Session tokens generated for user: {}", user.getId());
     return SessionPayload.bearer(user.getId().value(), accessToken, refreshToken);
   }
 
-  private void validatePassword(String providedPassword, User user) {
-    log.debug("Validating password for user: {}", user.getId());
-
-    if (!passwordEncoder.matches(providedPassword, user.getPassword())) {
-      log.warn("Invalid password attempt for user: {}", user.getId());
-      throw new InvalidCredentialsException("Invalid credentials: incorrect password");
-    }
-
-    log.debug("Password validation successful for user: {}", user.getId());
+  private void validateCredentials(String providedPassword, User user) {
+    log.debug("Validating credentials for user: {}", user.getId());
+    userServiceClient.validateUserCredentials(user.getEmail().value(), providedPassword);
+    log.debug("Credential validation successful for user: {}", user.getId());
   }
 
   // Event publishing is non-blocking - if it fails, we log the error but do not
@@ -101,10 +146,11 @@ public class LoginUseCase {
   // Will send to kafka to create user and send notification if required
   private void publishLoginEvent(User user) {
     try {
-      UserLoginEvent event = new UserLoginEvent(
-          user.getId().value(),
-          user.getEmail().value(),
-          UUID.randomUUID().toString());
+      UserLoginEvent event =
+          new UserLoginEvent(
+              user.getId().value(),
+              user.getEmail().value(),
+              UUID.randomUUID().toString());
       eventPublisher.publishUserLogin(event);
       log.debug("UserLoginEvent successfully published");
     } catch (Exception e) {

@@ -27,7 +27,7 @@ public record UserHTTPResponse(
 
   public static UserHTTPResponse from(UserQueryResult result) {
     return new UserHTTPResponse(
-        result.id() != null ? result.id().toString() : null,
+        result.id() != null ? result.id().value() : null,
         result.email() != null ? result.email().value() : null,
         result.phoneNumber() != null ? result.phoneNumber().value() : null,
         result.role(),

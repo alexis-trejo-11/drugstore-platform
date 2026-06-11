@@ -1,8 +1,11 @@
 package io.github.alexisTrejo11.drugstore.users.user.adapter.output.grpc.server;
 
 import io.github.alexisTrejo11.drugstore.users.user.adapter.password.PasswordEncoder;
+import io.github.alexisTrejo11.drugstore.users.user.core.domain.models.entities.CreateUserParams;
 import io.github.alexisTrejo11.drugstore.users.user.core.domain.models.entities.User;
+import io.github.alexisTrejo11.drugstore.users.user.core.domain.models.enums.UserRole;
 import io.github.alexisTrejo11.drugstore.users.user.core.domain.models.valueobjects.Email;
+import io.github.alexisTrejo11.drugstore.users.user.core.domain.models.valueobjects.FullName;
 import io.github.alexisTrejo11.drugstore.users.user.core.domain.models.valueobjects.PhoneNumber;
 import io.github.alexisTrejo11.drugstore.users.user.core.domain.models.valueobjects.UserId;
 import io.github.alexisTrejo11.drugstore.users.user.core.ports.output.UserRepository;
@@ -266,6 +269,208 @@ public class UserGrpcServer extends UserServiceImplBase {
 			logger.error("Error retrieving user by ID: {}", request.getUserId(), e);
 			responseObserver.onError(io.grpc.Status.INTERNAL
 					.withDescription("Error retrieving user: " + e.getMessage())
+					.asException());
+		}
+	}
+
+	@Override
+	public void createUser(CreateUserRequest request, StreamObserver<UserResponse> responseObserver) {
+		logger.debug("CreateUser: email={}", request.getEmail());
+		try {
+			Email email = new Email(request.getEmail());
+			PhoneNumber phone = new PhoneNumber(request.getPhoneNumber());
+			if (userRepository.existsByEmail(email)) {
+				responseObserver.onError(io.grpc.Status.ALREADY_EXISTS
+						.withDescription("Email already registered")
+						.asException());
+				return;
+			}
+			if (userRepository.existsByPhoneNumber(phone)) {
+				responseObserver.onError(io.grpc.Status.ALREADY_EXISTS
+						.withDescription("Phone number already registered")
+						.asException());
+				return;
+			}
+			UserRole role = UserRole.fromString(request.getRole());
+			CreateUserParams params = CreateUserParams.builder()
+					.email(email)
+					.fullName(new FullName(request.getFirstName(), request.getLastName()))
+					.phoneNumber(phone)
+					.hashedPassword(request.getHashedPassword())
+					.role(role)
+					.build();
+			User user = User.createUser(params);
+			User saved = userRepository.save(user);
+			responseObserver.onNext(buildUserResponse(saved));
+			responseObserver.onCompleted();
+		} catch (IllegalArgumentException e) {
+			logger.warn("CreateUser validation: {}", e.getMessage());
+			responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT
+					.withDescription(e.getMessage())
+					.asException());
+		} catch (Exception e) {
+			logger.error("Error creating user", e);
+			responseObserver.onError(io.grpc.Status.INTERNAL
+					.withDescription("Error creating user: " + e.getMessage())
+					.asException());
+		}
+	}
+
+	@Override
+	public void activateUser(UserIdRequest request, StreamObserver<UserResponse> responseObserver) {
+		logger.debug("ActivateUser: id={}", request.getUserId());
+		try {
+			UserId userId = new UserId(request.getUserId());
+			Optional<User> opt = userRepository.findById(userId);
+			if (opt.isEmpty()) {
+				responseObserver.onError(io.grpc.Status.NOT_FOUND
+						.withDescription("User not found")
+						.asException());
+				return;
+			}
+			User user = opt.get();
+			user.activate();
+			User saved = userRepository.save(user);
+			responseObserver.onNext(buildUserResponse(saved));
+			responseObserver.onCompleted();
+		} catch (IllegalStateException e) {
+			responseObserver.onError(io.grpc.Status.FAILED_PRECONDITION
+					.withDescription(e.getMessage())
+					.asException());
+		} catch (Exception e) {
+			logger.error("Error activating user", e);
+			responseObserver.onError(io.grpc.Status.INTERNAL
+					.withDescription("Error activating user: " + e.getMessage())
+					.asException());
+		}
+	}
+
+	@Override
+	public void updateUserPassword(UpdateUserPasswordRequest request, StreamObserver<BoolResponse> responseObserver) {
+		logger.debug("UpdateUserPassword: userId={}", request.getUserId());
+		try {
+			UserId userId = new UserId(request.getUserId());
+			Optional<User> opt = userRepository.findById(userId);
+			if (opt.isEmpty()) {
+				responseObserver.onError(io.grpc.Status.NOT_FOUND
+						.withDescription("User not found")
+						.asException());
+				return;
+			}
+			User user = opt.get();
+			user.setHashedPassword(request.getHashedPassword());
+			userRepository.save(user);
+			responseObserver.onNext(BoolResponse.newBuilder().setValue(true).setMessage("Password updated").build());
+			responseObserver.onCompleted();
+		} catch (Exception e) {
+			logger.error("Error updating password", e);
+			responseObserver.onError(io.grpc.Status.INTERNAL
+					.withDescription("Error updating password: " + e.getMessage())
+					.asException());
+		}
+	}
+
+	@Override
+	public void updateUserCredentials(UpdateUserCredentialsRequest request, StreamObserver<UserResponse> responseObserver) {
+		logger.debug("UpdateUserCredentials: userId={}", request.getUserId());
+		try {
+			UserId userId = new UserId(request.getUserId());
+			Optional<User> opt = userRepository.findById(userId);
+			if (opt.isEmpty()) {
+				responseObserver.onError(io.grpc.Status.NOT_FOUND
+						.withDescription("User not found")
+						.asException());
+				return;
+			}
+			User user = opt.get();
+			Email nextEmail = user.getEmail();
+			PhoneNumber nextPhone = user.getPhoneNumber();
+			if (request.getEmail() != null && !request.getEmail().isBlank()) {
+				Email candidate = new Email(request.getEmail());
+				if (!candidate.equals(user.getEmail()) && userRepository.existsByEmail(candidate)) {
+					responseObserver.onError(io.grpc.Status.ALREADY_EXISTS
+							.withDescription("Email already in use")
+							.asException());
+					return;
+				}
+				nextEmail = candidate;
+			}
+			if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
+				PhoneNumber candidate = new PhoneNumber(request.getPhoneNumber());
+				if (!candidate.equals(user.getPhoneNumber()) && userRepository.existsByPhoneNumber(candidate)) {
+					responseObserver.onError(io.grpc.Status.ALREADY_EXISTS
+							.withDescription("Phone number already in use")
+							.asException());
+					return;
+				}
+				nextPhone = candidate;
+			}
+			user.updateAuthFields(nextEmail, nextPhone);
+			User saved = userRepository.save(user);
+			responseObserver.onNext(buildUserResponse(saved));
+			responseObserver.onCompleted();
+		} catch (IllegalArgumentException e) {
+			responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT
+					.withDescription(e.getMessage())
+					.asException());
+		} catch (Exception e) {
+			logger.error("Error updating credentials", e);
+			responseObserver.onError(io.grpc.Status.INTERNAL
+					.withDescription("Error updating credentials: " + e.getMessage())
+					.asException());
+		}
+	}
+
+	@Override
+	public void completeTwoFactorEnrollment(TwoFactorEnrollmentRequest request, StreamObserver<BoolResponse> responseObserver) {
+		logger.debug("CompleteTwoFactorEnrollment: userId={}", request.getUserId());
+		try {
+			UserId userId = new UserId(request.getUserId());
+			Optional<User> opt = userRepository.findById(userId);
+			if (opt.isEmpty()) {
+				responseObserver.onError(io.grpc.Status.NOT_FOUND
+						.withDescription("User not found")
+						.asException());
+				return;
+			}
+			User user = opt.get();
+			user.enableTwoFactor(request.getTotpSecretBase32());
+			userRepository.save(user);
+			responseObserver.onNext(BoolResponse.newBuilder().setValue(true).setMessage("2FA enabled").build());
+			responseObserver.onCompleted();
+		} catch (IllegalArgumentException e) {
+			responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT
+					.withDescription(e.getMessage())
+					.asException());
+		} catch (Exception e) {
+			logger.error("Error completing 2FA enrollment", e);
+			responseObserver.onError(io.grpc.Status.INTERNAL
+					.withDescription("Error completing 2FA enrollment: " + e.getMessage())
+					.asException());
+		}
+	}
+
+	@Override
+	public void disableTwoFactorAuth(UserIdRequest request, StreamObserver<BoolResponse> responseObserver) {
+		logger.debug("DisableTwoFactorAuth: userId={}", request.getUserId());
+		try {
+			UserId userId = new UserId(request.getUserId());
+			Optional<User> opt = userRepository.findById(userId);
+			if (opt.isEmpty()) {
+				responseObserver.onError(io.grpc.Status.NOT_FOUND
+						.withDescription("User not found")
+						.asException());
+				return;
+			}
+			User user = opt.get();
+			user.disableTwoFactor();
+			userRepository.save(user);
+			responseObserver.onNext(BoolResponse.newBuilder().setValue(true).setMessage("2FA disabled").build());
+			responseObserver.onCompleted();
+		} catch (Exception e) {
+			logger.error("Error disabling 2FA", e);
+			responseObserver.onError(io.grpc.Status.INTERNAL
+					.withDescription("Error disabling 2FA: " + e.getMessage())
 					.asException());
 		}
 	}

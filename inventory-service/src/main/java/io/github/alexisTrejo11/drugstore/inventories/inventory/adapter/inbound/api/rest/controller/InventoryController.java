@@ -12,6 +12,7 @@ import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.se
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.domain.entity.Inventory;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.inventory.domain.entity.valueobject.InventoryId;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.adapter.inbound.api.rest.dto.request.CreateInventoryRequest;
+import io.github.alexisTrejo11.drugstore.inventories.inventory.adapter.inbound.api.rest.dto.request.UpdateInventoryRequest;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.adapter.inbound.api.rest.dto.response.InventoryResponse;
 import io.github.alexisTrejo11.drugstore.inventories.inventory.core.stock.application.query.GetLowStockInventoriesQuery;
 import org.springframework.data.domain.Page;
@@ -59,5 +60,11 @@ public class InventoryController {
         InventoryId id = inventoryService.createInventory(request.toCommand());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseWrapper.created(id, "Inventory"));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseWrapper<Void> updateInventory(@PathVariable String id, @Valid @RequestBody UpdateInventoryRequest request) {
+        inventoryService.updateInventory(request.toCommand(id));
+        return ResponseWrapper.updated(null, "Inventory");
     }
 }
