@@ -1,12 +1,11 @@
 # Full stack: application + Nginx + Redis + monitoring (Prometheus, Loki, Grafana).
 #
-# Profiles:
-#   local — starts bundled Redis and monitoring containers (default for development)
-#   prod  — application + Nginx only; Redis/monitoring/Kafka come from cloud env vars
+# Run from auth-service root (reads .env from project root):
+#   cp .env.example .env
+#   docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 #
-# Examples:
-#   docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
-#   docker compose -f docker-compose.full.yml --profile prod  --env-file .env --env-file .env.prod  up -d --build
+# Set COMPOSE_PROFILES=local|prod in .env.
+# Profile local: bundled Redis/monitoring. Profile prod: app + Nginx only (cloud endpoints in .env).
 
 name: auth-service-full
 
@@ -41,7 +40,6 @@ services:
       args:
         GITHUB_ACTOR: ${GITHUB_ACTOR:-alexisTrejo11}
         GITHUB_TOKEN: ${GITHUB_TOKEN:?Set GITHUB_TOKEN in .env for GitHub Packages}
-    image: auth-service:latest
     hostname: auth-service
     restart: unless-stopped
     expose:
@@ -49,25 +47,12 @@ services:
     ports:
       - "${AUTH_HOST_PORT:-8082}:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SERVER_PORT=8080
-      - SPRING_APPLICATION_NAME=auth-service
-      - LOG_PATH=/app/logs
-      - REDIS_HOST=${REDIS_HOST:-redis}
-      - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      # Inter-container defaults for bundled local stack; override via root .env for prod/cloud.
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
       - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka-1:9092,kafka-2:9092,kafka-3:9092}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
-      - GRPC_CLIENT_USER_SERVICE_HOST=${GRPC_CLIENT_USER_SERVICE_HOST:-user-service}
-      - GRPC_CLIENT_USER_SERVICE_PORT=${GRPC_CLIENT_USER_SERVICE_PORT:-9090}
-      - SWAGGER_ENABLED=${SWAGGER_ENABLED:-true}
-      - LOG_LEVEL_APP=${LOG_LEVEL_APP:-DEBUG}
-      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
     env_file:
-      - path: .env
-        required: false
+      - path: ../.env
+        required: true
     volumes:
       - ../logs:/app/logs
     networks:

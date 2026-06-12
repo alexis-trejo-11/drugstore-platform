@@ -4,6 +4,22 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.6'
 }
 
+def loadDotEnv = {
+	def env = [:]
+	def envFile = file('.env')
+	if (envFile.exists()) {
+		envFile.readLines().each { line ->
+			if (line && !line.startsWith('#') && line.contains('=')) {
+				def (key, value) = line.split('=', 2)
+				env[key.trim()] = value.trim()
+			}
+		}
+	}
+	return env
+}
+
+def dotEnv = loadDotEnv()
+
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -27,6 +43,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Admin Service
@@ -82,4 +99,8 @@ tasks.named('test') {
 }
 
 bootRun {
+    dotEnv.each { key, value ->
+        systemProperty key, value
+        environment key, value
+    }
 }

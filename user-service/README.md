@@ -22,8 +22,8 @@ It owns **user identity and profile** persistence: accounts, attributes consumed
 - **Service name:** `user-service`
 - **Role in platform:** System of record for user data used by auth and other services.
 - **Main responsibility:** User CRUD, Flyway migrations, Redis cache, Kafka consumers/producers, gRPC server for internal calls.
-- **Protocols:** REST over HTTPS (configurable port, default **8087**), gRPC, Kafka.
-- **Persistence:** PostgreSQL via configurable JDBC URL (`USER_DB`).
+- **Protocols:** REST over HTTPS (port **8080**), gRPC, Kafka.
+- **Persistence:** PostgreSQL via `DATASOURCE_URL` (`user_db` by default).
 
 ## Core Capabilities
 
@@ -49,11 +49,13 @@ It owns **user identity and profile** persistence: accounts, attributes consumed
 
 ```text
 user-service/
+├── .env.example                   # Environment template (copy to .env)
 ├── src/
 │   ├── main/
 │   │   ├── java/
 │   │   └── resources/
 │   │       ├── application.yml
+│   │       ├── application-docker.yml
 │   │       └── logback-spring.xml
 │   └── test/
 ├── docker/
@@ -97,18 +99,17 @@ user-service/
 All Docker assets live under **`docker/`**. See **[docker/README.md](docker/README.md)** for compose files, profiles (`local` / `prod`), and environment setup.
 
 ```bash
-cd docker
-cp .env.example .env && cp .env.local.example .env.local
-# Edit .env — set JWT_SECRET_KEY (≥32 characters)
-./nginx/ssl/generate-certs.sh
+cp .env.example .env
+# Edit .env — set JWT_SECRET_KEY, GITHUB_TOKEN, and connection URLs
+chmod +x docker/nginx/ssl/generate-certs.sh
+./docker/nginx/ssl/generate-certs.sh
 
-docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
+docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 ```
 
 Typical URLs:
 
 - Health (via Nginx): `https://localhost/actuator/health`
-- Swagger (direct): `http://localhost:8086/swagger-ui.html`
 - Grafana: `http://localhost:3000`
 
 ## Testing

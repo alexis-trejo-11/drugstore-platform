@@ -94,11 +94,21 @@ product-service/
 All containerization lives under [`docker/`](docker/README.md). See that README for profiles (`local` / `prod`), compose files, and env setup.
 
 ```bash
-cd docker
-cp .env.example .env && cp .env.local.example .env.local
-./nginx/ssl/generate-certs.sh
-docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
+cp .env.example .env
+# Edit .env — set JWT_SECRET_KEY and GITHUB_TOKEN
+chmod +x docker/nginx/ssl/generate-certs.sh
+./docker/nginx/ssl/generate-certs.sh
+docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 ```
+
+Two compose files are available:
+
+| File | Contents |
+|------|----------|
+| `docker-compose.full.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
+| `docker-compose.app.yml` | App + Nginx only (external DB/Redis/Kafka) |
+
+Two profiles: **`local`** and **`prod`** (set `COMPOSE_PROFILES` in root `.env`).
 
 ## Testing
 

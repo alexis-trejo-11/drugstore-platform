@@ -1,12 +1,11 @@
 # Full stack: application + Nginx + PostgreSQL + Redis + monitoring (Prometheus, Loki, Grafana).
 #
-# Profiles:
-#   local — starts bundled infrastructure containers (default for development)
-#   prod  — application + Nginx only; DB/Redis/Kafka/monitoring come from cloud env vars
+# Run from product-service root (reads .env from project root):
+#   cp .env.example .env
+#   docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 #
-# Examples:
-#   docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
-#   docker compose -f docker-compose.full.yml --profile prod  --env-file .env --env-file .env.prod  up -d --build
+# Set COMPOSE_PROFILES=local|prod in .env.
+# Profile local: bundled DB/Redis/monitoring. Profile prod: app + Nginx only (cloud endpoints in .env).
 
 name: product-service-full
 
@@ -38,6 +37,9 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+      args:
+        GITHUB_ACTOR: ${GITHUB_ACTOR:-alexisTrejo11}
+        GITHUB_TOKEN: ${GITHUB_TOKEN:?Set GITHUB_TOKEN in .env for GitHub Packages}
     image: product-service:latest
     hostname: product-service
     restart: unless-stopped
@@ -46,34 +48,12 @@ services:
     ports:
       - "${PRODUCT_SERVICE_HOST_PORT:-8086}:8080"
     environment:
-      - SPRING_APPLICATION_NAME=product-service
-      - SPRING_PROFILES_ACTIVE=docker
-      - SERVER_PORT=8080
-      - SPRING_CLOUD_CONFIG_ENABLED=false
-      - SPRING_CLOUD_BOOTSTRAP_ENABLED=false
-      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
-      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
-      - POSTGRES_DB_NAME=${DB_NAME:-product_db}
-      - POSTGRES_DB_USER=${DB_USER:-postgres}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${DB_NAME:-product_db}
-      - SPRING_DATASOURCE_USERNAME=${DB_USER:-postgres}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - REDIS_HOST=${REDIS_HOST:-redis}
-      - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - SPRING_DATA_REDIS_HOST=${REDIS_HOST:-redis}
-      - SPRING_DATA_REDIS_PORT=${REDIS_PORT:-6379}
-      - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=${SPRING_KAFKA_BOOTSTRAP_SERVERS:-kafka-1:9092,kafka-2:9092,kafka-3:9092}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
-      - JWT_ISSUER=${JWT_ISSUER:-product-service}
-      - SWAGGER_ENABLED=${SWAGGER_ENABLED:-true}
-      - LOG_PATH=/app/logs
-      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
+      # Inter-container defaults for bundled local stack; override via root .env for prod/cloud.
+      - DATASOURCE_URL=${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/product_db}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
     env_file:
-      - path: .env
-        required: false
+      - path: ../.env
+        required: true
     volumes:
       - ../logs:/app/logs
     networks:
@@ -129,6 +109,7 @@ services:
     image: redis:7-alpine
     container_name: product-redis
     restart: unless-stopped
+    command: redis-server --appendonly yes
     ports:
       - "${REDIS_HOST_PORT:-6378}:6379"
     volumes:

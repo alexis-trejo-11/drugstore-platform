@@ -94,20 +94,30 @@ payment-service/
 
 ## Docker and Full Local Stack
 
-All Docker assets live under [`docker/`](docker/). See [`docker/README.md`](docker/README.md) for profiles (`local` / `prod`), compose files, and env setup.
+All Docker assets live under [`docker/`](docker/). See [`docker/README.md`](docker/README.md) for compose files, profiles, and env setup.
 
 ```bash
-cd docker
-cp .env.example .env && cp .env.local.example .env.local
-# Edit .env — set STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET, DB_PASSWORD
-./nginx/ssl/generate-certs.sh
+cp .env.example .env
+# Edit .env — set STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET, and connection URLs for your profile
+chmod +x docker/nginx/ssl/generate-certs.sh
+./docker/nginx/ssl/generate-certs.sh
 
-docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
+docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 ```
+
+Two compose files are available:
+
+| File | Contents |
+|------|----------|
+| `docker-compose.full.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
+| `docker-compose.app.yml` | App + Nginx only (external DB/Redis) |
+
+Set `COMPOSE_PROFILES=local` or `COMPOSE_PROFILES=prod` in `.env`.
 
 ## Testing
 
 - Tests under `src/test/`.
+- `application-test.yml` provides test profile configuration.
 
 ## Documentation Navigation
 

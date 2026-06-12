@@ -1,4 +1,5 @@
-# Build context: employee-service root (run from docker/: docker compose -f docker-compose.full.yml --profile local up -d --build)
+# Build context: employee-service root (run from project root):
+#   docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 # glibc-based JDK: protoc-gen-grpc-java publishes linux binaries linked against glibc (Alpine/musl cannot run them).
 # JDK 23 official images use Ubuntu Noble (no 23-jdk-jammy tag).
 FROM eclipse-temurin:23-jdk-noble AS builder

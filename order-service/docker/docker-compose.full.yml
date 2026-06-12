@@ -1,12 +1,11 @@
 # Full stack: application + Nginx + PostgreSQL + Redis + monitoring (Prometheus, Loki, Grafana).
 #
-# Profiles:
-#   local — starts bundled infrastructure containers (default for development)
-#   prod  — application + Nginx only; DB/Redis/monitoring come from cloud env vars
+# Run from order-service root (reads .env from project root):
+#   cp .env.example .env
+#   docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 #
-# Examples:
-#   docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
-#   docker compose -f docker-compose.full.yml --profile prod  --env-file .env --env-file .env.prod  up -d --build
+# Set COMPOSE_PROFILES=local|prod in .env.
+# Profile local: bundled DB/Redis/monitoring. Profile prod: app + Nginx only (cloud endpoints in .env).
 
 name: order-service-full
 
@@ -46,31 +45,12 @@ services:
     ports:
       - "${ORDER_SERVICE_HOST_PORT:-8086}:8080"
     environment:
-      - SPRING_APPLICATION_NAME=order-service
-      - SPRING_PROFILES_ACTIVE=docker
-      - SERVER_PORT=8080
-      - SPRING_CLOUD_CONFIG_ENABLED=false
-      - SPRING_CLOUD_BOOTSTRAP_ENABLED=false
-      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
-      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
-      - POSTGRES_DB_NAME=${DB_NAME:-order_db}
-      - POSTGRES_DB_USER=${DB_USER:-postgres}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${DB_NAME:-order_db}
-      - SPRING_DATASOURCE_USERNAME=${DB_USER:-postgres}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - REDIS_HOST=${REDIS_HOST:-redis}
-      - REDIS_PORT=${REDIS_PORT:-6379}
-      - SPRING_DATA_REDIS_HOST=${REDIS_HOST:-redis}
-      - SPRING_DATA_REDIS_PORT=${REDIS_PORT:-6379}
-      - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
-      - JWT_ISSUER=${JWT_ISSUER:-order-service}
-      - SWAGGER_ENABLED=${SWAGGER_ENABLED:-true}
-      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
+      # Inter-container defaults for bundled local stack; override via root .env for prod/cloud.
+      - DATASOURCE_URL=${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/order_db}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
     env_file:
-      - path: .env
-        required: false
+      - path: ../.env
+        required: true
     volumes:
       - ../logs:/app/logs
     networks:
@@ -106,7 +86,7 @@ services:
     environment:
       - POSTGRES_DB=${DB_NAME:-order_db}
       - POSTGRES_USER=${DB_USER:-postgres}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
     ports:
       - "${POSTGRES_HOST_PORT:-5431}:5432"
     volumes:
@@ -115,16 +95,16 @@ services:
       - drugstore-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-order_db}"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 15s
+      retries: 5
 
   redis:
     profiles: [local]
     image: redis:7-alpine
     container_name: order-redis
     restart: unless-stopped
+    command: redis-server --appendonly yes
     ports:
       - "${REDIS_HOST_PORT:-6378}:6379"
     volumes:

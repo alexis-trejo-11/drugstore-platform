@@ -1,12 +1,11 @@
 # Full stack: application + Nginx + MongoDB + monitoring (Prometheus, Loki, Grafana).
 #
-# Profiles:
-#   local — starts bundled MongoDB and monitoring containers (default for development)
-#   prod  — application + Nginx only; MongoDB/Kafka/monitoring come from cloud env vars
+# Run from notification-service root (reads .env from project root):
+#   cp .env.example .env
+#   docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 #
-# Examples:
-#   docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
-#   docker compose -f docker-compose.full.yml --profile prod  --env-file .env --env-file .env.prod  up -d --build
+# Set COMPOSE_PROFILES=local|prod in .env.
+# Profile local: bundled MongoDB/monitoring. Profile prod: app + Nginx only (cloud endpoints in .env).
 
 name: notification-service-full
 
@@ -46,26 +45,12 @@ services:
     ports:
       - "${NOTIFICATION_HOST_PORT:-8093}:8093"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - NOTIFICATION_SERVICE_PORT=8093
-      - SPRING_APPLICATION_NAME=notification-service
-      - LOG_PATH=/app/logs
+      # Inter-container defaults for bundled local stack; override via root .env for prod/cloud.
       - MONGODB_URI=${MONGODB_URI:-mongodb://mongodb:27017/notification_db}
-      - MONGODB_DATABASE=${MONGODB_DATABASE:-notification_db}
       - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka-1:9092,kafka-2:9092,kafka-3:9092}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
-      - GMAIL_USERNAME=${GMAIL_USERNAME:-}
-      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD:-}
-      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
-      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
-      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER:-}
-      - TWILIO_ENABLED=${TWILIO_ENABLED:-false}
-      - LOG_LEVEL_APP=${LOG_LEVEL_APP:-DEBUG}
-      - MONGODB_LOG_LEVEL=${MONGODB_LOG_LEVEL:-INFO}
-      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
     env_file:
-      - path: .env
-        required: false
+      - path: ../.env
+        required: true
     volumes:
       - ../logs:/app/logs
     networks:

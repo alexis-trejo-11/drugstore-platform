@@ -3,7 +3,6 @@ package io.github.alexisTrejo11.drugstore.users.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
+@EnableCaching
 public class RedisConfig {
 
     private final GenericJackson2JsonRedisSerializer jsonRedisSerializer;
@@ -62,7 +62,7 @@ public class RedisConfig {
             .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer));
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        cacheConfigurations.put("productById", defaultConfig);
+        cacheConfigurations.put("userById", defaultConfig);
 
         return RedisCacheManager.builder(RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory))
             .cacheDefaults(defaultConfig)

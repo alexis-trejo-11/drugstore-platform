@@ -57,7 +57,7 @@ auth-service/
 │   │   ├── java/                  # Controllers, security, Kafka, gRPC clients
 │   │   └── resources/
 │   │       ├── application.yml
-│   │       ├── application.docker.yml
+│   │       ├── application-docker.yml
 │   │       └── logback-spring.xml
 │   └── test/
 ├── docker/                        # All Docker / Compose configuration
@@ -88,7 +88,7 @@ auth-service/
 
 ## Observability
 
-- Actuator exposes health, info, and Prometheus metrics (see `application.docker.yml`).
+- Actuator exposes health, info, and Prometheus metrics (see `application-docker.yml`).
 - Logback **Loki4j** appender sends logs to Loki in non-test profiles.
 - `docker/docker-compose.full.yml` includes Prometheus, Loki, and Grafana with provisioned datasources.
 
@@ -115,16 +115,14 @@ Client → host :8082 (dev only)        → auth-service :8080 (Swagger, etc.)
 ### Generate certificates (first time)
 
 ```bash
-cd auth-service/docker
-chmod +x nginx/ssl/generate-certs.sh
-./nginx/ssl/generate-certs.sh
+chmod +x docker/nginx/ssl/generate-certs.sh
+./docker/nginx/ssl/generate-certs.sh
 ```
 
 ### Scale horizontally
 
 ```bash
-cd auth-service/docker
-docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --scale auth-service=3
+docker compose -f docker/docker-compose.full.yml --env-file .env up -d --scale auth-service=3
 ```
 
 Docker DNS resolves `auth-service` to all running replicas. Nginx distributes connections with `least_conn`.
@@ -162,14 +160,16 @@ Run tests:
 
 All Docker configuration lives in **`docker/`**. See **[docker/README.md](docker/README.md)** for profiles, env files, and run commands.
 
+Environment variables live in a single **`.env`** at the service root (copy from `.env.example`). Run Compose from the service root with `--env-file .env`.
+
 Quick start (full local stack):
 
 ```bash
-cd auth-service/docker
-cp .env.example .env && cp .env.local.example .env.local
+cp .env.example .env
 # Edit .env — set JWT_SECRET_KEY, GITHUB_ACTOR, GITHUB_TOKEN
-./nginx/ssl/generate-certs.sh
-docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
+chmod +x docker/nginx/ssl/generate-certs.sh
+./docker/nginx/ssl/generate-certs.sh
+docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 ```
 
 Typical URLs:

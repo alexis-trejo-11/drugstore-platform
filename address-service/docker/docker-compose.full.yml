@@ -1,12 +1,11 @@
 # Full stack: application + Nginx + PostgreSQL + Redis + monitoring (Prometheus, Loki, Grafana).
 #
-# Profiles:
-#   local — starts bundled infrastructure containers (default for development)
-#   prod  — application + Nginx only; DB/Redis/monitoring come from cloud env vars
+# Run from address-service root (reads .env from project root):
+#   cp .env.example .env
+#   docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 #
-# Examples:
-#   docker compose -f docker-compose.full.yml --profile local --env-file .env.local up -d --build
-#   docker compose -f docker-compose.full.yml --profile prod  --env-file .env.prod  up -d --build
+# Set COMPOSE_PROFILES=local|prod in .env.
+# Profile local: bundled DB/Redis/monitoring. Profile prod: app + Nginx only (cloud endpoints in .env).
 
 name: address-service-full
 
@@ -46,26 +45,12 @@ services:
     expose:
       - "8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SERVER_PORT=8080
-      - DB_HOST=${DB_HOST:-postgres}
-      - DB_PORT=${DB_PORT:-5432}
-      - DB_NAME=${DB_NAME:-address_db}
-      - DB_USER=${DB_USER:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
-      - REDIS_HOST=${REDIS_HOST:-redis}
-      - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - LOGGING_LEVEL_IO_GITHUB_ALEXISTREJO11=${LOG_LEVEL_APP:-DEBUG}
-      - SWAGGER_ENABLED=${SWAGGER_ENABLED:-true}
-      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
-      - ADDRESS_SERVICE_MAX_ADDRESSES_PER_USER=${ADDRESS_SERVICE_MAX_ADDRESSES_PER_USER:-10}
-      - ADDRESS_SERVICE_CACHE_TTL=${ADDRESS_SERVICE_CACHE_TTL:-3600}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
-      - JWT_ISSUER=${ISSUER:-drugstore-api}
+      # Inter-container defaults for bundled local stack; override via root .env for prod/cloud.
+      - DATASOURCE_URL=${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/address_db}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
     env_file:
-      - path: .env
-        required: false
+      - path: ../.env
+        required: true
     volumes:
       - ../logs:/app/logs
     networks:

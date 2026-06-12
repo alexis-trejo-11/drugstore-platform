@@ -4,17 +4,18 @@ server:
 
 spring:
   application:
-    name: product-service
+    name: store-service
 
   profiles:
     active: dev
+
   boot:
     admin:
       client:
         url: http://localhost:8080
         instance:
           service-url: http://localhost:8080
-          name: product-service
+          name: store-service
 
   devtools:
     restart:
@@ -27,35 +28,17 @@ spring:
 
   cache:
     type: redis
-    data:
-      redis:
-        host: ${SPRING_REDIS_HOST:localhost}
-        port: ${SPRING_REDIS_PORT:6379}
-        password: ${SPRING_REDIS_PASSWORD:redispass}
-        lettuce:
-          pool:
-            max-active: 8
-            max-idle: 8
-            min-idle: 0
-        timeout: 2000ms
+
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/store_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
 
   data:
     redis:
-      host: ${SPRING_DATA_REDIS_HOST:localhost}
-      port: ${SPRING_DATA_REDIS_PORT:6379}
-      password: ${SPRING_DATA_REDIS_PASSWORD:}
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
+      url: ${REDIS_URL:redis://localhost:6379}
 
-  # Postgres
-  datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${product_DB:drugstore_products}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:alexisAdmin1475963}
-    driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
@@ -142,7 +125,7 @@ app:
 
 logging:
   file:
-    name: logs/products-service.log
+    name: logs/store-service.log
     path: logs
   pattern:
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
@@ -151,8 +134,6 @@ logging:
     root: INFO
     io.github.alexisTrejo11.drugstore: DEBUG
     libs_kernel.log.audit: INFO
-    io.github.alexisTrejo11.drugstore.products.infrastructure.adapter.output.kafka: DEBUG
-    org.apache.kafka: INFO
 
 audit:
   log:
@@ -160,5 +141,5 @@ audit:
     excluded-endpoints: /actuator/health, /actuator/info, /swagger-ui.html, /v3/api-docs
 
 jwt:
-  secret: ${JWT_SECRET}
-  issuer: ${ISSUER}
+  secret: ${JWT_SECRET_KEY}
+  issuer: ${JWT_ISSUER:store-service}

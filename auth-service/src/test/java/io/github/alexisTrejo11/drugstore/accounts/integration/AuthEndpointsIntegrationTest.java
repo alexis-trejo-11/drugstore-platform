@@ -79,8 +79,8 @@ class AuthEndpointsIntegrationTest {
 
   @DynamicPropertySource
   static void registerProps(DynamicPropertyRegistry r) {
-    r.add("spring.data.redis.host", REDIS::getHost);
-    r.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379));
+    r.add("spring.data.redis.url",
+        () -> "redis://" + REDIS.getHost() + ":" + REDIS.getMappedPort(6379));
     r.add("spring.kafka.bootstrap-servers", KAFKA::getBootstrapServers);
     r.add("grpc.client.user-service.host", () -> "localhost");
     r.add("grpc.client.user-service.port", () -> grpcPort());

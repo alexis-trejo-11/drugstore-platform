@@ -22,7 +22,7 @@ It owns the **order** aggregate: placement, state transitions, persistence, and 
 - **Service name:** `order-service`
 - **Role in platform:** Order lifecycle and orchestration boundary.
 - **Main responsibility:** Create and manage orders, enforce business rules, expose HTTPS API, integrate with Redis and PostgreSQL.
-- **Protocol:** REST over HTTPS (default port **8446** in `application.yml`).
+- **Protocol:** REST over HTTPS (default port **8080** in `application.yml`; **8086** on host via Docker).
 - **Persistence:** PostgreSQL with Flyway.
 
 ## Core Capabilities
@@ -36,7 +36,7 @@ It owns the **order** aggregate: placement, state transitions, persistence, and 
 ## Tech Stack
 
 - Java 23
-- Spring Boot 3.3.2
+- Spring Boot 3.5.14
 - Spring Web, Spring Security, Spring Data JPA, Spring Data Redis, Spring Cache
 - PostgreSQL, Flyway
 - Springdoc OpenAPI
@@ -49,11 +49,13 @@ It owns the **order** aggregate: placement, state transitions, persistence, and 
 
 ```text
 order-service/
+├── .env.example                   # All env vars (copy to .env at project root)
 ├── src/
 │   ├── main/
 │   │   ├── java/
 │   │   └── resources/
 │   │       ├── application.yml
+│   │       ├── application-docker.yml
 │   │       └── logback-spring.xml
 │   └── test/
 ├── docker/
@@ -94,18 +96,26 @@ order-service/
 
 ## Docker and Full Local Stack
 
-All Docker assets live under [`docker/`](docker/README.md): two Compose files (full stack vs app-only) and **local** / **prod** profiles.
+All containerization lives under **`docker/`**. See **[docker/README.md](docker/README.md)** for compose files, profiles, and run commands.
+
+Quick start (full local stack):
 
 ```bash
-cd docker
-cp .env.example .env && cp .env.local.example .env.local
-# Edit .env — set JWT_SECRET_KEY (≥32 characters)
-./nginx/ssl/generate-certs.sh
-
-docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
+cp .env.example .env
+# Edit .env — set JWT_SECRET_KEY
+chmod +x docker/nginx/ssl/generate-certs.sh
+./docker/nginx/ssl/generate-certs.sh
+docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 ```
 
-See [docker/README.md](docker/README.md) for every profile, endpoints, and production notes.
+Two compose files are available:
+
+| File | Contents |
+|------|----------|
+| `docker-compose.full.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
+| `docker-compose.app.yml` | App + Nginx only (external DB/Redis) |
+
+Set `COMPOSE_PROFILES=local` or `prod` in `.env` to select bundled vs cloud infrastructure.
 
 ## Testing
 

@@ -2,13 +2,11 @@
 #
 # Use when infrastructure runs elsewhere (host machine, another compose stack, or cloud).
 #
-# Profiles:
-#   local — connect to services on the host via host.docker.internal
-#   prod  — connect to managed cloud instances (Atlas, MSK, etc.)
+# Run from notification-service root (reads .env from project root):
+#   cp .env.example .env
+#   docker compose -f docker/docker-compose.app.yml --env-file .env up -d --build
 #
-# Examples:
-#   docker compose -f docker-compose.app.yml --profile local --env-file .env --env-file .env.local up -d --build
-#   docker compose -f docker-compose.app.yml --profile prod  --env-file .env --env-file .env.prod  up -d --build
+# Set COMPOSE_PROFILES=local|prod in .env (local = host.docker.internal, prod = cloud endpoints).
 
 name: notification-service-app
 
@@ -47,27 +45,9 @@ services:
       - "8093"
     ports:
       - "${NOTIFICATION_HOST_PORT:-8093}:8093"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - NOTIFICATION_SERVICE_PORT=8093
-      - SPRING_APPLICATION_NAME=notification-service
-      - LOG_PATH=/app/logs
-      - MONGODB_URI=${MONGODB_URI}
-      - MONGODB_DATABASE=${MONGODB_DATABASE:-notification_db}
-      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
-      - GMAIL_USERNAME=${GMAIL_USERNAME:-}
-      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD:-}
-      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
-      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
-      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER:-}
-      - TWILIO_ENABLED=${TWILIO_ENABLED:-false}
-      - LOG_LEVEL_APP=${LOG_LEVEL_APP:-INFO}
-      - MONGODB_LOG_LEVEL=${MONGODB_LOG_LEVEL:-WARN}
-      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
     env_file:
-      - path: .env
-        required: false
+      - path: ../.env
+        required: true
     volumes:
       - ../logs:/app/logs
     networks:

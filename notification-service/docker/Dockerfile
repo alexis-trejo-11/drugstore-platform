@@ -1,4 +1,5 @@
-# Build context: notification-service root (run from docker/: docker compose -f docker-compose.full.yml --profile local up -d --build)
+# Build context: notification-service root (run from project root):
+#   docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 FROM eclipse-temurin:23-jdk-noble AS builder
 
 WORKDIR /app

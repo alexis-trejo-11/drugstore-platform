@@ -32,6 +32,10 @@ spring:
   flyway:
     enabled: false
 
+  data:
+    redis:
+      url: redis://localhost:6379
+
 jwt:
   secret: test-integration-secret-key-must-be-at-least-256-bits-long-for-hmac-sha!!!!
   access-token-expiration-minutes: 60

@@ -2,13 +2,11 @@
 #
 # Use when infrastructure runs elsewhere (host machine, another compose stack, or cloud).
 #
-# Profiles:
-#   local — connect to services on the host via host.docker.internal
-#   prod  — connect to managed cloud instances (RDS, ElastiCache, etc.)
+# Run from address-service root (reads .env from project root):
+#   cp .env.example .env
+#   docker compose -f docker/docker-compose.app.yml --env-file .env up -d --build
 #
-# Examples:
-#   docker compose -f docker-compose.app.yml --profile local --env-file .env.local up -d --build
-#   docker compose -f docker-compose.app.yml --profile prod  --env-file .env.prod  up -d --build
+# Set COMPOSE_PROFILES=local|prod in .env (local = host.docker.internal, prod = cloud endpoints).
 
 name: address-service-app
 
@@ -47,27 +45,9 @@ services:
     restart: unless-stopped
     expose:
       - "8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SERVER_PORT=8080
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT:-5432}
-      - DB_NAME=${DB_NAME:-address_db}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - LOGGING_LEVEL_IO_GITHUB_ALEXISTREJO11=${LOG_LEVEL_APP:-INFO}
-      - SWAGGER_ENABLED=${SWAGGER_ENABLED:-false}
-      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
-      - ADDRESS_SERVICE_MAX_ADDRESSES_PER_USER=${ADDRESS_SERVICE_MAX_ADDRESSES_PER_USER:-10}
-      - ADDRESS_SERVICE_CACHE_TTL=${ADDRESS_SERVICE_CACHE_TTL:-3600}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
-      - JWT_ISSUER=${ISSUER:-drugstore-api}
     env_file:
-      - path: .env
-        required: false
+      - path: ../.env
+        required: true
     volumes:
       - ../logs:/app/logs
     networks:

@@ -19,12 +19,9 @@ logging:
 spring:
   application:
     name: auth-service
-  # Redis Configuration
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
+      url: ${REDIS_URL:redis://localhost:6379}
       timeout: 2000ms
       lettuce:
         pool:
@@ -70,6 +67,12 @@ spring:
       properties:
         # Additional configuration
         max.block.ms: 5000 # Maximum block time in send()
+
+grpc:
+  client:
+    user-service:
+      host: ${GRPC_CLIENT_USER_SERVICE_HOST:localhost}
+      port: ${GRPC_CLIENT_USER_SERVICE_PORT:9090}
 
 # Kafka Topics
 kafka:

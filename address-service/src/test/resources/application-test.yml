@@ -15,9 +15,7 @@ spring:
     enabled: false
   data:
     redis:
-      host: localhost
-      port: 6379
-      password:
+      url: redis://localhost:6379
   cloud:
     config:
       enabled: false

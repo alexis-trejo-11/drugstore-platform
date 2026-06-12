@@ -94,7 +94,7 @@ bootRun {
             //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     ]
 
-    // Load .env file from config-server directory
+    // Load .env file from project root
     def envFile = file('.env')
     if (envFile.exists()) {
         envFile.readLines().each { line ->

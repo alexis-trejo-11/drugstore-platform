@@ -1,30 +1,96 @@
 server:
   port: ${NOTIFICATION_SERVICE_PORT:8093}
+  forward-headers-strategy: native
 
 spring:
   application:
     name: notification-service
-  
+
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/notification_db}
       database: ${MONGODB_DATABASE:notification_db}
       auto-index-creation: true
-  
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
-  
+
   cloud:
     config:
       enabled: ${CONFIG_SERVER_ENABLED:false}
       uri: ${CONFIG_SERVER_URI:http://localhost:8888}
       fail-fast: false
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: notification-service-group
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      max-poll-records: 10
+      properties:
+        fetch.min.bytes: 1
+        fetch.max.wait.ms: 500
+        session.timeout.ms: 30000
+        heartbeat.interval.ms: 3000
+    listener:
+      concurrency: 3
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USERNAME:}
+    password: ${GMAIL_APP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:15}
+  refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200}
+  issuer: ${JWT_ISSUER:drugstore-api}
+
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID:}
+  auth-token: ${TWILIO_AUTH_TOKEN:}
+  phone-number: ${TWILIO_PHONE_NUMBER:}
+  enabled: ${TWILIO_ENABLED:false}
+
+notification:
+  email:
+    from-name: ${NOTIFICATION_EMAIL_FROM_NAME:Drugstore Notifications}
+    reply-to: ${NOTIFICATION_EMAIL_REPLY_TO:noreply@drugstore.com}
+  retry:
+    max-attempts: ${NOTIFICATION_RETRY_MAX_ATTEMPTS:3}
+    backoff-delay-ms: ${NOTIFICATION_RETRY_BACKOFF_MS:5000}
+
+kafka:
+  topics:
+    notification:
+      email-verification: notification.email-verification
+      two-factor-code: notification.two-factor-code
+      welcome-email: notification.welcome-email
+
+logging:
+  level:
+    root: INFO
+    io.github.alexisTrejo11.drugstore: ${LOG_LEVEL_APP:DEBUG}
+    org.springframework.data.mongodb: ${MONGODB_LOG_LEVEL:DEBUG}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
 management:
   endpoints:
     web:
       exposure:
         include: health,info,metrics,prometheus
+      base-path: /actuator
   endpoint:
     health:
       show-details: always
@@ -32,69 +98,3 @@ management:
     export:
       prometheus:
         enabled: true
-
-    # Kafka Configuration
-    kafka:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-
-      consumer:
-        group-id: notification-service-group
-        auto-offset-reset: earliest
-        enable-auto-commit: false
-        max-poll-records: 10
-        fetch-min-bytes: 1
-        fetch-max-wait: 500
-        session-timeout-ms: 30000
-        heartbeat-interval-ms: 3000
-        concurrency: 3
-
-    # Email Configuration (Gmail SMTP)
-    mail:
-      host: smtp.gmail.com
-      port: 587
-      username: ${GMAIL_USERNAME:your-email@gmail.com}
-      password: ${GMAIL_APP_PASSWORD:your-app-password}
-      properties:
-        mail:
-          smtp:
-            auth: true
-            starttls:
-              enable: true
-              required: true
-            connectiontimeout: 5000
-            timeout: 5000
-            writetimeout: 5000
-
-  # Twilio Configuration
-  twilio:
-    account-sid: ${TWILIO_ACCOUNT_SID:your-account-sid}
-    auth-token: ${TWILIO_AUTH_TOKEN:your-auth-token}
-    phone-number: ${TWILIO_PHONE_NUMBER:+1234567890}
-    enabled: ${TWILIO_ENABLED:true}
-
-  # Notification Service Configuration
-  notification:
-    email:
-      from-name: "Drugstore Notifications"
-      reply-to: "noreply@drugstore.com"
-
-    retry:
-      max-attempts: 3
-      backoff-delay-ms: 5000
-
-  # Kafka Topics
-  kafka:
-    topics:
-      notification:
-        email-verification: notification.email-verification
-        two-factor-code: notification.two-factor-code
-        welcome-email: notification.welcome-email
-
-
-logging:
-  level:
-    io.github.alexisTrejo11.drugstore: ${LOG_LEVEL:INFO}
-    org.springframework.data.mongodb: ${MONGODB_LOG_LEVEL:DEBUG}
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

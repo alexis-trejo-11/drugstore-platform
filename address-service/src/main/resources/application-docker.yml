@@ -10,7 +10,7 @@ spring:
   application:
     name: address-service
   datasource:
-    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:address_db}
+    url: ${DATASOURCE_URL:jdbc:postgresql://postgres:5432/address_db}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -44,9 +44,7 @@ spring:
     open-in-view: false
   data:
     redis:
-      host: ${REDIS_HOST:redis}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
+      url: ${REDIS_URL:redis://redis:6379}
       timeout: 2000ms
       lettuce:
         pool:

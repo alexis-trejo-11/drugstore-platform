@@ -49,6 +49,7 @@ It owns **store** master data: locations, branding or operational attributes, an
 
 ```text
 store-service/
+├── .env.example
 ├── src/
 │   ├── main/
 │   │   ├── java/
@@ -88,19 +89,28 @@ store-service/
 ## Run Locally
 
 ```bash
+cp .env.example .env   # set JWT_SECRET_KEY, DATASOURCE_URL, REDIS_URL for local Postgres/Redis
 ./gradlew bootRun
 ./gradlew test
 ```
 
-## Docker and Full Local Stack
+## Docker
 
-All Docker assets live under **`docker/`**. See **[docker/README.md](docker/README.md)** for compose files, profiles (`local` / `prod`), and environment setup.
+All containerization lives under **`docker/`**. See **[docker/README.md](docker/README.md)** for compose files, profiles, and run commands.
+
+Quick start (full local stack):
 
 ```bash
-cd docker
-cp .env.example .env && cp .env.local.example .env.local
-docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
+cp .env.example .env
+# Edit .env — set JWT_SECRET_KEY and connection URLs
+chmod +x docker/nginx/ssl/generate-certs.sh
+./docker/nginx/ssl/generate-certs.sh
+docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 ```
+
+Two compose files: `docker-compose.full.yml` (app + infra + monitoring), `docker-compose.app.yml` (app + Nginx only).
+
+Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud RDS, ElastiCache, MSK, etc.).
 
 ## Testing
 

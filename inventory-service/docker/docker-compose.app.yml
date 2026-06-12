@@ -2,13 +2,11 @@
 #
 # Use when infrastructure runs elsewhere (host machine, another compose stack, or cloud).
 #
-# Profiles:
-#   local — connect to services on the host via host.docker.internal
-#   prod  — connect to managed cloud instances (RDS, ElastiCache, etc.)
+# Run from inventory-service root (reads .env from project root):
+#   cp .env.example .env
+#   docker compose -f docker/docker-compose.app.yml --env-file .env up -d --build
 #
-# Examples:
-#   docker compose -f docker-compose.app.yml --profile local --env-file .env --env-file .env.local up -d --build
-#   docker compose -f docker-compose.app.yml --profile prod  --env-file .env --env-file .env.prod  up -d --build
+# Set COMPOSE_PROFILES=local|prod in .env (local = host.docker.internal, prod = cloud endpoints).
 
 name: inventory-service-app
 
@@ -40,37 +38,15 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    image: inventory-service:latest
     hostname: inventory-service
     restart: unless-stopped
     expose:
       - "8080"
     ports:
       - "${INVENTORY_HOST_PORT:-8084}:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_CLOUD_CONFIG_ENABLED=false
-      - SPRING_CLOUD_BOOTSTRAP_ENABLED=false
-      - SERVER_PORT=8080
-      - SPRING_APPLICATION_NAME=inventory-service
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
-      - DB_NAME=${DB_NAME:-inventory_db}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
-      - SPRING_DATA_REDIS_PORT=${REDIS_PORT:-6379}
-      - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - JWT_SECRET=${JWT_SECRET:?Set JWT_SECRET in .env}
-      - ISSUER=${ISSUER:-inventory-service}
-      - JWT_ACCESS_TOKEN_EXPIRATION_MINUTES=${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:-15}
-      - JWT_REFRESH_TOKEN_EXPIRATION_MINUTES=${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:-43200}
-      - LOKI_PUSH_URL=${LOKI_PUSH_URL}
-      - SWAGGER_ENABLED=${SWAGGER_ENABLED:-false}
-      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
     env_file:
-      - path: .env
-        required: false
+      - path: ../.env
+        required: true
     volumes:
       - ../logs:/app/logs
     networks:

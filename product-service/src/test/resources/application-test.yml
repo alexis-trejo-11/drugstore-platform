@@ -13,6 +13,9 @@ spring:
     enabled: false
   cache:
     type: simple
+  data:
+    redis:
+      url: redis://localhost:6379
   boot:
     admin:
       client:

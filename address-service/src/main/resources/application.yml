@@ -6,8 +6,8 @@ spring:
   application:
     name: address-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/drugstore_addresses
-    username: ${DB_USERNAME:postgres}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/drugstore_addresses}
+    username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   flyway:
@@ -26,6 +26,9 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: validate
+  data:
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379}
 
 springdoc:
   api-docs:

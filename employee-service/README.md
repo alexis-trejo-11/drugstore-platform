@@ -49,18 +49,19 @@ It owns **employee** domain data and APIs: profiles, assignments, and integratio
 
 ```text
 employee-service/
+├── .env.example                   # All env vars (copy to .env at project root)
 ├── src/
 │   ├── main/
 │   │   ├── java/
 │   │   └── resources/
 │   │       ├── application.yml
+│   │       ├── application-docker.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── docker/
+├── docker/                        # All Docker assets (see docker/README.md)
 │   ├── Dockerfile
-│   ├── docker-compose.full.yml
-│   ├── docker-compose.app.yml
-│   ├── README.md
+│   ├── docker-compose.full.yml    # App + DB + Redis + monitoring
+│   ├── docker-compose.app.yml     # App + Nginx only
 │   ├── nginx/
 │   └── observability/
 ├── docs/
@@ -101,28 +102,48 @@ See [docker/README.md](docker/README.md) for TLS setup, scaling, and compose pro
 
 ## Run Locally
 
+Requirements:
+- Java 23
+- Docker + Docker Compose (recommended for full stack)
+
+Application only:
+
 ```bash
 cp .env.example .env
-# Edit .env: fill every REQUIRED variable (JWT, DB credentials, GitHub token, etc.)
+# Edit .env — set JWT_SECRET_KEY, DB_USER, DB_PASSWORD, and connection URLs for local JVM
 ./gradlew bootRun
+```
+
+Run tests:
+
+```bash
 ./gradlew test
 ```
 
 Spring Boot loads `./.env` via `spring.config.import` in `application.yml`. Gradle also reads `.env` for `bootRun` and GitHub Packages credentials (see `build.gradle`). Never commit `.env` (gitignored at repo root).
 
-## Docker and Full Local Stack
+## Docker
 
-All Docker assets live under **`docker/`**. See **[docker/README.md](docker/README.md)** for profiles (`local` / `prod`), compose files, and env setup.
+All containerization lives under **`docker/`**. See **[docker/README.md](docker/README.md)** for compose files, profiles, and run commands.
 
 Quick start (full local stack):
 
 ```bash
-cd docker
-cp .env.example .env && cp .env.local.example .env.local
-# Edit .env (GITHUB_ACTOR, GITHUB_TOKEN, JWT_SECRET_KEY), then:
-chmod +x nginx/ssl/generate-certs.sh && ./nginx/ssl/generate-certs.sh
-docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
+cp .env.example .env
+# Edit .env — set JWT_SECRET_KEY and GITHUB_TOKEN
+chmod +x docker/nginx/ssl/generate-certs.sh
+./docker/nginx/ssl/generate-certs.sh
+docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 ```
+
+Two compose files are available:
+
+| File | Contents |
+|------|----------|
+| `docker-compose.full.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
+| `docker-compose.app.yml` | App + Nginx only (external DB/Redis) |
+
+Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud RDS, ElastiCache, etc.).
 
 Main health endpoint (via Nginx): `https://localhost/actuator/health`.
 

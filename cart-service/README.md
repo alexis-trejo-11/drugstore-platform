@@ -14,7 +14,7 @@ It owns **shopping cart** persistence and behavior: line items, pricing context,
 - [Observability](#observability)
 - [Nginx Reverse Proxy and Load Balancer](#nginx-reverse-proxy-and-load-balancer)
 - [Run Locally](#run-locally)
-- [Docker and Full Local Stack](#docker-and-full-local-stack)
+- [Docker](#docker)
 - [Testing](#testing)
 - [Documentation Navigation](#documentation-navigation)
 
@@ -60,20 +60,16 @@ cart-service/
 │   │       ├── application-docker.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── nginx/
-│   ├── nginx.conf
-│   └── ssl/
-│       ├── .gitignore
-│       └── generate-certs.sh
-├── observability/
-│   ├── prometheus/
-│   └── grafana/provisioning/datasources/
+├── docker/                        # All Docker assets (see docker/README.md)
+│   ├── Dockerfile
+│   ├── docker-compose.full.yml    # App + DB + Redis + monitoring
+│   ├── docker-compose.app.yml     # App + Nginx only
+│   ├── nginx/
+│   └── observability/
 ├── docs/
 │   └── project/
 │       ├── *.md
 │       └── obsidian/*.md
-├── docker-compose.yml
-├── dockerfile
 ├── build.gradle
 └── README.md
 ```
@@ -92,16 +88,16 @@ cart-service/
 
 - Actuator + Prometheus metrics.
 - Logback pushes to Loki outside test profile.
-- Local stack via `docker-compose.yml` (Prometheus, Loki, Grafana).
+- Local stack via `docker-compose.full.yml` (Prometheus, Loki, Grafana).
 
 ## Nginx Reverse Proxy and Load Balancer
 
-External traffic enters through Nginx; `cart-service` runs on internal HTTPS `:8443` only.
+External traffic enters through Nginx; `cart-service` runs on internal port **8080** only.
 
 ### Architecture
 
 ```text
-Client -> Nginx :443 (TLS termination) -> cart-service :8443 (internal HTTPS)
+Client -> Nginx :443 (TLS termination) -> cart-service :8080 (internal HTTP)
 Client -> Nginx :80  (redirect)        -> HTTPS
 ```
 
@@ -109,14 +105,14 @@ Client -> Nginx :80  (redirect)        -> HTTPS
 
 ```bash
 cd cart-service
-chmod +x nginx/ssl/generate-certs.sh
-./nginx/ssl/generate-certs.sh
+chmod +x docker/nginx/ssl/generate-certs.sh
+./docker/nginx/ssl/generate-certs.sh
 ```
 
 ### Scale
 
 ```bash
-docker compose up -d --build --scale cart-service=3
+docker compose -f docker/docker-compose.full.yml --env-file .env up -d --scale cart-service=3
 ```
 
 Nginx uses `least_conn` and Docker DNS (`cart-service`) to distribute traffic across replicas.
@@ -129,26 +125,41 @@ Requirements:
 - PostgreSQL and Redis (or Docker Compose)
 
 ```bash
+cp .env.example .env
 ./gradlew bootRun
 ./gradlew test
 ```
 
-## Docker and Full Local Stack
+## Docker
 
-From `cart-service/`:
+All containerization lives under **`docker/`**. See **[docker/README.md](docker/README.md)** for compose files, profiles, and run commands.
+
+Quick start (full local stack):
 
 ```bash
-docker compose up -d --build
+cp .env.example .env
+# Edit .env — set JWT_SECRET_KEY and GITHUB_TOKEN
+chmod +x docker/nginx/ssl/generate-certs.sh
+./docker/nginx/ssl/generate-certs.sh
+docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 ```
 
-Typical endpoints:
+Two compose files are available:
 
-- Health (via Nginx): `https://localhost/actuator/health`
-- Prometheus / Grafana / Loki: `9090`, `3000`, `3100` on localhost when not conflicting with other stacks.
+| File | Contents |
+|------|----------|
+| `docker-compose.full.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
+| `docker-compose.app.yml` | App + Nginx only (external DB/Redis) |
+
+Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud RDS, ElastiCache, etc.).
+
+Connection URLs use **`DATASOURCE_URL`** and **`REDIS_URL`** (not host/port assembly). See `.env.example` for all variables.
 
 ## Testing
 
-- Tests under `src/test/` including H2-backed tests where configured.
+- Unit and integration tests are under `src/test/`.
+- `application-test.yml` provides test profile configuration.
+- Recommended: run tests before opening PRs in the monorepo.
 
 ## Documentation Navigation
 

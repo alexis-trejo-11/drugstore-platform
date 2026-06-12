@@ -28,9 +28,9 @@ spring:
     enabled: false
 
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${product_DB:drugstore_products}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/user_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -44,29 +44,10 @@ spring:
 
   data:
     redis:
-      host: ${SPRING_DATA_REDIS_HOST:localhost}
-      port: ${SPRING_DATA_REDIS_PORT:6379}
-      password: ${SPRING_DATA_REDIS_PASSWORD:}
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
+      url: ${REDIS_URL:redis://localhost:6379}
 
-  # Cache
   cache:
     type: redis
-    data:
-      redis:
-        host: ${SPRING_REDIS_HOST:localhost}
-        port: ${SPRING_REDIS_PORT:6379}
-        password: ${SPRING_REDIS_PASSWORD:redispass}
-        lettuce:
-          pool:
-            max-active: 8
-            max-idle: 8
-            min-idle: 0
-        timeout: 2000ms
 
   # Kafka Configuration
   kafka:
@@ -86,7 +67,7 @@ spring:
         spring.json.trusted.packages: "${KAFKA_TRUSTED_PACKAGES:*}"
 
 jwt:
-  secret: ${JWT_SECRET:your-secret-key-change-in-production}
+  secret: ${JWT_SECRET_KEY}
   access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:15}
   refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200}
   issuer: ${JWT_ISSUER:drugstore-api}
@@ -178,32 +159,19 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
-      cors:
-        allowed-origins: "*"
-        allowed-methods: "*"
+        include: health,info,prometheus
+      base-path: /actuator
   endpoint:
     health:
       show-details: always
-      show-components: always
-    info:
+    prometheus:
       enabled: true
-    metrics:
-      enabled: true
-    env:
-      enabled: true
-    loggers:
-      enabled: true
-  info:
-    env:
-      enabled: true
-  health:
-    db:
-      enabled: true
-    diskspace:
-      enabled: true
-    mail:
-      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
 
 
 # Swagger
@@ -219,7 +187,7 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
     doc-expansion: none
-  packages-to-scan: io.github.alexisTrejo11.drugstore.stores
+  packages-to-scan: io.github.alexisTrejo11.drugstore.users
   paths-to-match: /api/**
   cache:
     disabled: true
@@ -253,7 +221,7 @@ app:
 
 logging:
   file:
-    name: logs/products-service.log
+    name: logs/user-service.log
     path: logs
   pattern:
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
@@ -262,7 +230,6 @@ logging:
     root: INFO
     io.github.alexisTrejo11.drugstore: DEBUG
     libs_kernel.log.audit: INFO
-    io.github.alexisTrejo11.drugstore.products.infrastructure.adapter.output.kafka: DEBUG
     org.apache.kafka: INFO
 
 audit:

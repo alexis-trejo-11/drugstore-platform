@@ -122,11 +122,11 @@ All containerization lives under **`docker/`**. See **[docker/README.md](docker/
 Quick start (full local stack):
 
 ```bash
-cd docker
-cp .env.example .env && cp .env.local.example .env.local
+cp .env.example .env
 # Edit .env — set JWT_SECRET_KEY and GITHUB_TOKEN
-./nginx/ssl/generate-certs.sh
-docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
+chmod +x docker/nginx/ssl/generate-certs.sh
+./docker/nginx/ssl/generate-certs.sh
+docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 ```
 
 Two compose files are available:

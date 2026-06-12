@@ -49,6 +49,7 @@ It owns **inventory and stock** visibility: availability, reservations-friendly 
 
 ```text
 inventory-service/
+├── .env.example                   # All env vars (copy to .env at project root)
 ├── src/
 │   ├── main/
 │   │   ├── java/
@@ -93,16 +94,26 @@ inventory-service/
 
 ## Docker and Full Local Stack
 
-All containerization lives under `docker/`. See **[docker/README.md](docker/README.md)** for profiles, env files, and endpoints.
+All containerization lives under **`docker/`**. See **[docker/README.md](docker/README.md)** for compose files, profiles, and run commands.
+
+Quick start (full local stack):
 
 ```bash
-cd docker
-cp .env.example .env && cp .env.local.example .env.local
-./nginx/ssl/generate-certs.sh
-
-# Full local stack (app + Postgres + Redis + monitoring)
-docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
+cp .env.example .env
+# Edit .env — set JWT_SECRET_KEY and GITHUB_TOKEN
+chmod +x docker/nginx/ssl/generate-certs.sh
+./docker/nginx/ssl/generate-certs.sh
+docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
 ```
+
+Two compose files are available:
+
+| File | Contents |
+|------|----------|
+| `docker-compose.full.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
+| `docker-compose.app.yml` | App + Nginx only (external DB/Redis) |
+
+Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud RDS, ElastiCache, etc.).
 
 ## Testing
 

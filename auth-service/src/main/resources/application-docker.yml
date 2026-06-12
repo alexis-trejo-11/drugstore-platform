@@ -12,15 +12,17 @@ spring:
 
   data:
     redis:
-      host: redis
-      port: 6379
-      password: ${REDIS_PASSWORD:}
+      url: ${REDIS_URL:redis://redis:6379}
       timeout: 2000ms
       lettuce:
         pool:
           max-active: ${REDIS_POOL_MAX_ACTIVE:20}
           max-idle: ${REDIS_POOL_MAX_IDLE:10}
           min-idle: ${REDIS_POOL_MIN_IDLE:5}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-1:9092,kafka-2:9092,kafka-3:9092}
+
   cloud:
     config:
       enabled: ${CONFIG_SERVER_ENABLED:false}
@@ -30,6 +32,12 @@ spring:
         max-attempts: 3
         initial-interval: 1000
         multiplier: 1.5
+
+grpc:
+  client:
+    user-service:
+      host: ${GRPC_CLIENT_USER_SERVICE_HOST:user-service}
+      port: ${GRPC_CLIENT_USER_SERVICE_PORT:9090}
 
 springdoc:
   api-docs:

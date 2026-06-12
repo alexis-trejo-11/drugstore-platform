@@ -23,8 +23,16 @@ spring:
       auto-startup: false
   data:
     redis:
-      host: localhost
-      port: 6379
+      url: redis://localhost:6379
+
+server:
+  port: 0
+
+jwt:
+  secret: test-secret-key-must-be-at-least-32-bytes-long
+  access-token-expiration-minutes: 60
+  refresh-token-expiration-minutes: 120
+  issuer: test-issuer
 
 app:
   rate-limit:

@@ -8,8 +8,8 @@ spring:
 
   # DataSource
   datasource:
-    url: jdbc:postgresql://localhost:5432/drugstore_payments
-    username: ${DB_USERNAME:postgres}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/drugstore_payments}
+    username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
@@ -34,6 +34,10 @@ spring:
           batch_size: 20
         order_inserts: true
         order_updates: true
+
+  data:
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379}
 
   # Flyway
   flyway:

@@ -2,13 +2,11 @@
 #
 # Use when infrastructure runs elsewhere (host machine, another compose stack, or cloud).
 #
-# Profiles:
-#   local — connect to services on the host via host.docker.internal
-#   prod  — connect to managed cloud instances (RDS, ElastiCache, etc.)
+# Run from employee-service root (reads .env from project root):
+#   cp .env.example .env
+#   docker compose -f docker/docker-compose.app.yml --env-file .env up -d --build
 #
-# Examples:
-#   docker compose -f docker-compose.app.yml --profile local --env-file .env --env-file .env.local up -d --build
-#   docker compose -f docker-compose.app.yml --profile prod  --env-file .env --env-file .env.prod  up -d --build
+# Set COMPOSE_PROFILES=local|prod in .env (local = host.docker.internal, prod = cloud endpoints).
 
 name: employee-service-app
 
@@ -41,42 +39,15 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
       args:
-        GITHUB_ACTOR: ${GITHUB_ACTOR:?Set GITHUB_ACTOR in .env for GitHub Packages}
+        GITHUB_ACTOR: ${GITHUB_ACTOR:-alexisTrejo11}
         GITHUB_TOKEN: ${GITHUB_TOKEN:?Set GITHUB_TOKEN in .env for GitHub Packages}
-    image: employee-service:latest
     hostname: employee-service
     restart: unless-stopped
     expose:
       - "8080"
-    environment:
-      - SPRING_APPLICATION_NAME=employee-service
-      - SPRING_PROFILES_ACTIVE=docker
-      - SERVER_PORT=8080
-      - SPRING_CLOUD_CONFIG_ENABLED=false
-      - SPRING_CLOUD_BOOTSTRAP_ENABLED=false
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
-      - STORE_DB=${DB_NAME:-employee_db}
-      - POSTGRES_DB_NAME=${DB_NAME:-employee_db}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_DB_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
-      - SPRING_DATA_REDIS_PORT=${REDIS_PORT:-6379}
-      - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT:-6379}
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - JWT_SECRET=${JWT_SECRET_KEY}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
-      - ISSUER=${ISSUER:-drugstore-api}
-      - JWT_ISSUER=${JWT_ISSUER:-${ISSUER:-drugstore-api}}
-      - SWAGGER_ENABLED=${SWAGGER_ENABLED:-false}
-      - LOG_LEVEL_APP=${LOG_LEVEL_APP:-INFO}
-      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
     env_file:
-      - path: .env
-        required: false
+      - path: ../.env
+        required: true
     volumes:
       - ../logs:/app/logs
     networks:
