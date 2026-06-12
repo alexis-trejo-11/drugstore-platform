@@ -56,15 +56,16 @@ user-service/
 │   │       ├── application.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── observability/
-│   ├── prometheus/
-│   └── grafana/provisioning/datasources/
+├── docker/
+│   ├── Dockerfile
+│   ├── docker-compose.full.yml
+│   ├── docker-compose.app.yml
+│   ├── nginx/
+│   └── observability/
 ├── docs/
 │   └── project/
 │       ├── *.md
 │       └── obsidian/*.md
-├── docker-compose.yml
-├── Dockerfile
 ├── build.gradle
 └── README.md
 ```
@@ -93,15 +94,21 @@ user-service/
 
 ## Docker and Full Local Stack
 
-```bash
-docker compose up -d --build
-```
+All Docker assets live under **`docker/`**. See **[docker/README.md](docker/README.md)** for compose files, profiles (`local` / `prod`), and environment setup.
 
-Ensure `user-service:latest` exists for the `user-service` service in compose, or add a `build:` block.
+```bash
+cd docker
+cp .env.example .env && cp .env.local.example .env.local
+# Edit .env — set JWT_SECRET_KEY (≥32 characters)
+./nginx/ssl/generate-certs.sh
+
+docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
+```
 
 Typical URLs:
 
-- Health: `https://localhost:8087/actuator/health` (TLS; verify port mapping in compose)
+- Health (via Nginx): `https://localhost/actuator/health`
+- Swagger (direct): `http://localhost:8086/swagger-ui.html`
 - Grafana: `http://localhost:3000`
 
 ## Testing

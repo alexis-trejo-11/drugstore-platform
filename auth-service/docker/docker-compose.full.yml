@@ -1,0 +1,185 @@
+# Full stack: application + Nginx + Redis + monitoring (Prometheus, Loki, Grafana).
+#
+# Profiles:
+#   local — starts bundled Redis and monitoring containers (default for development)
+#   prod  — application + Nginx only; Redis/monitoring/Kafka come from cloud env vars
+#
+# Examples:
+#   docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
+#   docker compose -f docker-compose.full.yml --profile prod  --env-file .env --env-file .env.prod  up -d --build
+
+name: auth-service-full
+
+services:
+  nginx:
+    profiles: [local, prod]
+    image: nginx:1.27-alpine
+    container_name: auth-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      auth-service:
+        condition: service_healthy
+    networks:
+      - drugstore-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  auth-service:
+    profiles: [local, prod]
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        GITHUB_ACTOR: ${GITHUB_ACTOR:-alexisTrejo11}
+        GITHUB_TOKEN: ${GITHUB_TOKEN:?Set GITHUB_TOKEN in .env for GitHub Packages}
+    image: auth-service:latest
+    hostname: auth-service
+    restart: unless-stopped
+    expose:
+      - "8080"
+    ports:
+      - "${AUTH_HOST_PORT:-8082}:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_PORT=8080
+      - SPRING_APPLICATION_NAME=auth-service
+      - LOG_PATH=/app/logs
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka-1:9092,kafka-2:9092,kafka-3:9092}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - GRPC_CLIENT_USER_SERVICE_HOST=${GRPC_CLIENT_USER_SERVICE_HOST:-user-service}
+      - GRPC_CLIENT_USER_SERVICE_PORT=${GRPC_CLIENT_USER_SERVICE_PORT:-9090}
+      - SWAGGER_ENABLED=${SWAGGER_ENABLED:-true}
+      - LOG_LEVEL_APP=${LOG_LEVEL_APP:-DEBUG}
+      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ../logs:/app/logs
+    networks:
+      - drugstore-network
+      - drugstore-kafka-network
+    depends_on:
+      redis:
+        condition: service_healthy
+        required: false
+      loki:
+        condition: service_started
+        required: false
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+        reservations:
+          memory: 256m
+
+  redis:
+    profiles: [local]
+    image: redis:7-alpine
+    container_name: auth-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "${REDIS_HOST_PORT:-6378}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - drugstore-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    profiles: [local]
+    image: prom/prometheus:v2.54.1
+    container_name: auth-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    ports:
+      - "${PROMETHEUS_HOST_PORT:-9090}:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      auth-service:
+        condition: service_healthy
+    networks:
+      - drugstore-network
+
+  loki:
+    profiles: [local]
+    image: grafana/loki:3.1.1
+    container_name: auth-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki-config.yaml
+    ports:
+      - "${LOKI_HOST_PORT:-3100}:3100"
+    volumes:
+      - ./observability/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki-data:/loki
+    networks:
+      - drugstore-network
+
+  grafana:
+    profiles: [local]
+    image: grafana/grafana:11.1.4
+    container_name: auth-grafana
+    restart: unless-stopped
+    ports:
+      - "${GRAFANA_HOST_PORT:-3000}:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      prometheus:
+        condition: service_started
+      loki:
+        condition: service_started
+    networks:
+      - drugstore-network
+
+volumes:
+  redis-data:
+    name: auth-redis-data
+  prometheus-data:
+    name: auth-prometheus-data
+  loki-data:
+    name: auth-loki-data
+  grafana-data:
+    name: auth-grafana-data
+
+networks:
+  drugstore-network:
+    name: drugstore-network
+    driver: bridge
+  drugstore-kafka-network:
+    external: true
+    name: drugstore-kafka-network

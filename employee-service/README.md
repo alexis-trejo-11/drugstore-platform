@@ -12,8 +12,6 @@ It owns **employee** domain data and APIs: profiles, assignments, and integratio
 - [API Surface](#api-surface)
 - [Security and Business Rules](#security-and-business-rules)
 - [Observability](#observability)
-- [Nginx Reverse Proxy and Load Balancer](#nginx-reverse-proxy-and-load-balancer)
-- [Run Locally](#run-locally)
 - [Docker and Full Local Stack](#docker-and-full-local-stack)
 - [Testing](#testing)
 - [Documentation Navigation](#documentation-navigation)
@@ -58,19 +56,17 @@ employee-service/
 │   │       ├── application.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── nginx/
-│   ├── nginx.conf
-│   └── ssl/
-│       ├── .gitignore
-│       └── generate-certs.sh
-├── observability/
-│   ├── prometheus/
-│   └── grafana/provisioning/datasources/
+├── docker/
+│   ├── Dockerfile
+│   ├── docker-compose.full.yml
+│   ├── docker-compose.app.yml
+│   ├── README.md
+│   ├── nginx/
+│   └── observability/
 ├── docs/
 │   └── project/
 │       ├── *.md
 │       └── obsidian/*.md
-├── docker-compose.yml
 ├── build.gradle
 └── README.md
 ```
@@ -88,42 +84,20 @@ employee-service/
 
 - Actuator + Prometheus.
 - Logback Loki appender (non-test profiles).
-- Optional local stack via `docker-compose.yml`.
+- Optional local stack via `docker/docker-compose.full.yml` (see [docker/README.md](docker/README.md)).
 
 ## Nginx Reverse Proxy and Load Balancer
 
-External traffic now enters through Nginx over HTTPS. The app remains internal on port `8081`.
+External traffic enters through Nginx over HTTPS. The app remains internal on port `8080`.
 
 ### Architecture
 
 ```text
-Client -> Nginx :443 (TLS termination) -> employee-service :8081 (internal HTTP)
+Client -> Nginx :443 (TLS termination) -> employee-service :8080 (internal HTTP)
 Client -> Nginx :80  (redirect)        -> HTTPS
 ```
 
-### Setup
-
-```bash
-cd employee-service
-chmod +x nginx/ssl/generate-certs.sh
-./nginx/ssl/generate-certs.sh   # required before nginx starts (creates nginx.crt / nginx.key)
-```
-
-If nginx fails with `PEM_read_bio_X509` errors, Docker may have created empty `nginx.crt`/`nginx.key` **directories**. Stop nginx, remove them, and re-run the script:
-
-```bash
-docker compose stop nginx
-rm -rf nginx/ssl/nginx.crt nginx/ssl/nginx.key
-./nginx/ssl/generate-certs.sh
-```
-
-### Scale
-
-```bash
-docker compose up -d --build --scale employee-service=3
-```
-
-Nginx uses Docker DNS + `least_conn` to distribute traffic across replicas.
+See [docker/README.md](docker/README.md) for TLS setup, scaling, and compose profiles.
 
 ## Run Locally
 
@@ -138,13 +112,17 @@ Spring Boot loads `./.env` via `spring.config.import` in `application.yml`. Grad
 
 ## Docker and Full Local Stack
 
-```bash
-cp .env.example .env
-# Edit .env (GITHUB_ACTOR, GITHUB_TOKEN, JWT, DB credentials, etc.), then:
-docker compose up -d --build
-```
+All Docker assets live under **`docker/`**. See **[docker/README.md](docker/README.md)** for profiles (`local` / `prod`), compose files, and env setup.
 
-Docker **build** needs `GITHUB_ACTOR` and `GITHUB_TOKEN` in `.env` so Compose can pass them as `build.args` (see `dockerfile`). Local `./gradlew` reads the same `.env` file directly.
+Quick start (full local stack):
+
+```bash
+cd docker
+cp .env.example .env && cp .env.local.example .env.local
+# Edit .env (GITHUB_ACTOR, GITHUB_TOKEN, JWT_SECRET_KEY), then:
+chmod +x nginx/ssl/generate-certs.sh && ./nginx/ssl/generate-certs.sh
+docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
+```
 
 Main health endpoint (via Nginx): `https://localhost/actuator/health`.
 

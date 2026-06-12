@@ -42,7 +42,7 @@ It owns the **product catalog**: CRUD, search, caching, and **Kafka** publicatio
 - Springdoc OpenAPI
 - Actuator + Micrometer + Prometheus
 - Loki4j + Loki + Grafana
-- Docker / Docker Compose + `Dockerfile`
+- Docker / Docker Compose (`docker/`)
 
 ## Project Structure
 
@@ -55,15 +55,15 @@ product-service/
 │   │       ├── application.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── observability/
-│   ├── prometheus/
-│   └── grafana/provisioning/datasources/
+├── docker/
+│   ├── Dockerfile
+│   ├── docker-compose.full.yml
+│   ├── docker-compose.app.yml
+│   └── README.md
 ├── docs/
 │   └── project/
 │       ├── *.md
 │       └── obsidian/*.md
-├── docker-compose.yml
-├── Dockerfile
 ├── build.gradle
 └── README.md
 ```
@@ -80,7 +80,7 @@ product-service/
 ## Observability
 
 - Actuator (broad exposure in dev — restrict in production).
-- Prometheus + Loki + Grafana in `docker-compose.yml`.
+- Prometheus + Loki + Grafana in `docker/docker-compose.full.yml`.
 
 ## Run Locally
 
@@ -91,8 +91,13 @@ product-service/
 
 ## Docker and Full Local Stack
 
+All containerization lives under [`docker/`](docker/README.md). See that README for profiles (`local` / `prod`), compose files, and env setup.
+
 ```bash
-docker compose up -d --build
+cd docker
+cp .env.example .env && cp .env.local.example .env.local
+./nginx/ssl/generate-certs.sh
+docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
 ```
 
 ## Testing

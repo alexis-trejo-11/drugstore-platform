@@ -56,14 +56,16 @@ store-service/
 │   │       ├── application.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── observability/
-│   ├── prometheus/
-│   └── grafana/provisioning/datasources/
+├── docker/
+│   ├── Dockerfile
+│   ├── docker-compose.full.yml
+│   ├── docker-compose.app.yml
+│   ├── nginx/
+│   └── observability/
 ├── docs/
 │   └── project/
 │       ├── *.md
 │       └── obsidian/*.md
-├── docker-compose.yml
 ├── build.gradle
 └── README.md
 ```
@@ -92,10 +94,12 @@ store-service/
 
 ## Docker and Full Local Stack
 
-Compose uses `store-service:latest` — build the image first or add a `build:` directive.
+All Docker assets live under **`docker/`**. See **[docker/README.md](docker/README.md)** for compose files, profiles (`local` / `prod`), and environment setup.
 
 ```bash
-docker compose up -d --build
+cd docker
+cp .env.example .env && cp .env.local.example .env.local
+docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
 ```
 
 ## Testing

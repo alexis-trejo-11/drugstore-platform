@@ -119,6 +119,6 @@ bootRun {
 
 tasks.register('buildDockerImage', Exec) {
     dependsOn bootJar
-    commandLine 'docker', 'build', '-t', 'order-service:latest', '.'
+    commandLine 'docker', 'build', '-f', 'docker/Dockerfile', '-t', 'store-service:latest', '.'
 }
 

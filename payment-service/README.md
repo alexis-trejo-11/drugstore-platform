@@ -53,16 +53,19 @@ payment-service/
 │   │   ├── java/
 │   │   └── resources/
 │   │       ├── application.yml
+│   │       ├── application-docker.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── observability/
-│   ├── prometheus/
-│   └── grafana/provisioning/datasources/
+├── docker/
+│   ├── Dockerfile
+│   ├── docker-compose.full.yml
+│   ├── docker-compose.app.yml
+│   ├── nginx/
+│   └── observability/
 ├── docs/
 │   └── project/
 │       ├── *.md
 │       └── obsidian/*.md
-├── docker-compose.yml
 ├── build.gradle
 └── README.md
 ```
@@ -80,7 +83,7 @@ payment-service/
 
 - `/actuator/prometheus` enabled in `application.yml`.
 - Logs to Loki via Logback in non-test profiles.
-- Local Prometheus, Loki, Grafana via `docker-compose.yml`.
+- Local Prometheus, Loki, Grafana via `docker/docker-compose.full.yml`.
 
 ## Run Locally
 
@@ -91,11 +94,16 @@ payment-service/
 
 ## Docker and Full Local Stack
 
-```bash
-docker compose up -d --build
-```
+All Docker assets live under [`docker/`](docker/). See [`docker/README.md`](docker/README.md) for profiles (`local` / `prod`), compose files, and env setup.
 
-Ensure `payment-service:latest` exists or switch compose to a `build:` section.
+```bash
+cd docker
+cp .env.example .env && cp .env.local.example .env.local
+# Edit .env — set STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET, DB_PASSWORD
+./nginx/ssl/generate-certs.sh
+
+docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
+```
 
 ## Testing
 

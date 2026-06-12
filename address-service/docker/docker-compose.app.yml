@@ -1,0 +1,93 @@
+# Application only: Nginx + address-service (no bundled DB, Redis, or monitoring).
+#
+# Use when infrastructure runs elsewhere (host machine, another compose stack, or cloud).
+#
+# Profiles:
+#   local — connect to services on the host via host.docker.internal
+#   prod  — connect to managed cloud instances (RDS, ElastiCache, etc.)
+#
+# Examples:
+#   docker compose -f docker-compose.app.yml --profile local --env-file .env.local up -d --build
+#   docker compose -f docker-compose.app.yml --profile prod  --env-file .env.prod  up -d --build
+
+name: address-service-app
+
+services:
+  nginx:
+    profiles: [local, prod]
+    image: nginx:1.27-alpine
+    container_name: address-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      address-service:
+        condition: service_healthy
+    networks:
+      - drugstore-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  address-service:
+    profiles: [local, prod]
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        GITHUB_ACTOR: ${GITHUB_ACTOR:-alexisTrejo11}
+        GITHUB_TOKEN: ${GITHUB_TOKEN:?Set GITHUB_TOKEN in .env for GitHub Packages}
+    hostname: address-service
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_PORT=8080
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-address_db}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - LOGGING_LEVEL_IO_GITHUB_ALEXISTREJO11=${LOG_LEVEL_APP:-INFO}
+      - SWAGGER_ENABLED=${SWAGGER_ENABLED:-false}
+      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
+      - ADDRESS_SERVICE_MAX_ADDRESSES_PER_USER=${ADDRESS_SERVICE_MAX_ADDRESSES_PER_USER:-10}
+      - ADDRESS_SERVICE_CACHE_TTL=${ADDRESS_SERVICE_CACHE_TTL:-3600}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
+      - JWT_ISSUER=${ISSUER:-drugstore-api}
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ../logs:/app/logs
+    networks:
+      - drugstore-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+        reservations:
+          memory: 256m
+
+networks:
+  drugstore-network:
+    name: drugstore-network
+    driver: bridge

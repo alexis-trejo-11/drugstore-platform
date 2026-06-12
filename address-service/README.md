@@ -13,7 +13,7 @@ It owns user address management with secure, validated, and observable APIs for 
 - [Observability](#observability)
 - [Nginx Reverse Proxy and Load Balancer](#nginx-reverse-proxy-and-load-balancer)
 - [Run Locally](#run-locally)
-- [Docker and Full Local Stack](#docker-and-full-local-stack)
+- [Docker](#docker)
 - [Testing](#testing)
 - [Documentation Navigation](#documentation-navigation)
 
@@ -64,22 +64,17 @@ address-service/
 │   │       ├── logback-spring.xml
 │   │       └── db/migration/
 │   └── test/
-├── nginx/
-│   ├── nginx.conf                 # Reverse proxy + upstream load balancer config
-│   └── ssl/
-│       ├── generate-certs.sh      # Dev self-signed cert generator
-│       ├── nginx.crt              # Gitignored — generated locally
-│       └── nginx.key              # Gitignored — generated locally
-├── observability/
-│   ├── prometheus/
-│   └── grafana/provisioning/datasources/
+├── docker/                        # All Docker assets (see docker/README.md)
+│   ├── Dockerfile
+│   ├── docker-compose.full.yml    # App + DB + Redis + monitoring
+│   ├── docker-compose.app.yml     # App + Nginx only
+│   ├── nginx/
+│   └── observability/
 ├── docs/
 │   ├── observability-checklist.md
 │   └── project/
 │       ├── *.md                   # Human-readable docs
 │       └── obsidian/*.md          # Structured source docs
-├── Dockerfile
-├── docker-compose.yml
 ├── build.gradle
 └── README.md
 ```
@@ -105,68 +100,6 @@ address-service/
 - Tracing sampling configured for full visibility.
 - Grafana and Prometheus are provisioned through Docker Compose.
 
-## Nginx Reverse Proxy and Load Balancer
-
-All Docker traffic reaches the service through **Nginx** — the Spring Boot port `8443` is no longer bound to the host.
-
-### Architecture
-
-```
-Client
-  │
-  ├─ HTTP  :80  ──► Nginx ──► 301 redirect to HTTPS
-  │
-  └─ HTTPS :443 ──► Nginx (TLS termination)
-                      │   least_conn load balancing
-                      ├──► address-service replica 1 :8443
-                      ├──► address-service replica 2 :8443
-                      └──► address-service replica N :8443
-```
-
-Nginx uses Docker's internal DNS (`127.0.0.11`) to resolve `address-service` — all replicas share that hostname and Docker round-robins between them. The `least_conn` directive sends each new request to the replica with the fewest active connections.
-
-### Files
-
-| Path | Purpose |
-|------|---------|
-| `nginx/nginx.conf` | Worker config, upstream block, HTTP→HTTPS redirect, HTTPS proxy server. |
-| `nginx/ssl/nginx.crt` | TLS certificate for Nginx (self-signed dev cert, gitignored). |
-| `nginx/ssl/nginx.key` | Private key (gitignored). |
-| `nginx/ssl/generate-certs.sh` | One-shot script to generate the self-signed cert. |
-| `nginx/ssl/.gitignore` | Prevents committing key material. |
-
-### Generate the dev TLS certificate (first-time setup)
-
-```bash
-cd nginx/ssl
-chmod +x generate-certs.sh
-./generate-certs.sh
-```
-
-This creates `nginx.key` and `nginx.crt` (gitignored). The files are mounted read-only into the Nginx container.
-
-### Scale the service (load balancing)
-
-```bash
-# Start with 3 application replicas behind Nginx
-docker compose up -d --scale address-service=3
-
-# Check running containers
-docker compose ps
-```
-
-Nginx distributes requests across all `address-service` containers automatically through Docker DNS. No config change needed — just scale up or down.
-
-### Key Nginx settings
-
-| Setting | Value | Why |
-|---------|-------|-----|
-| `least_conn` | upstream directive | Routes to replica with fewest active connections. |
-| `proxy_ssl_verify off` | per location | Backend uses a self-signed keystore; verification is bypassed inside the private Docker network. |
-| `keepalive 32` | upstream | Reuses connections to backends for lower latency. |
-| `proxy_set_header X-Forwarded-For` | every location | Backend can log real client IPs. |
-| HTTP→HTTPS redirect | port 80 server block | Enforces TLS for all external clients. |
-
 ## Run Locally
 Requirements:
 - Java 23
@@ -182,33 +115,28 @@ Run tests:
 ./gradlew test
 ```
 
-## Docker and Full Local Stack
+## Docker
 
-From `address-service/`:
+All containerization lives under **`docker/`**. See **[docker/README.md](docker/README.md)** for compose files, profiles, and run commands.
+
+Quick start (full local stack):
 
 ```bash
-# 1. Generate Nginx TLS cert (first time only)
-cd nginx/ssl && ./generate-certs.sh && cd ../..
-
-# 2. Build and start the full stack (single replica)
-docker compose up -d --build
-
-# 3. Or start with N replicas for load balancing
-docker compose up -d --build --scale address-service=3
+cd docker
+cp .env.example .env && cp .env.local.example .env.local
+# Edit .env — set JWT_SECRET_KEY and GITHUB_TOKEN
+./nginx/ssl/generate-certs.sh
+docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
 ```
 
-Key endpoints (all external traffic via Nginx):
+Two compose files are available:
 
-| Endpoint | URL |
-|----------|-----|
-| API (via Nginx HTTPS) | `https://localhost/api/v2/user/addresses` |
-| Actuator health (via Nginx) | `https://localhost/actuator/health` |
-| Prometheus metrics (via Nginx) | `https://localhost/actuator/prometheus` |
-| Prometheus UI | `http://localhost:9090` |
-| Loki ready | `http://localhost:3100/ready` |
-| Grafana UI | `http://localhost:3000` |
+| File | Contents |
+|------|----------|
+| `docker-compose.full.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
+| `docker-compose.app.yml` | App + Nginx only (external DB/Redis) |
 
-> **Note:** `address-service:8443` is no longer exposed to the host. All API access goes through Nginx on port `443`.
+Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud RDS, ElastiCache, etc.).
 
 ## Testing
 - Unit and integration tests are under `src/test/`.

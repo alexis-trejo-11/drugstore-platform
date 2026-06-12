@@ -56,14 +56,16 @@ order-service/
 │   │       ├── application.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── observability/
-│   ├── prometheus/
-│   └── grafana/provisioning/datasources/
+├── docker/
+│   ├── Dockerfile
+│   ├── docker-compose.full.yml
+│   ├── docker-compose.app.yml
+│   ├── nginx/
+│   └── observability/
 ├── docs/
 │   └── project/
 │       ├── *.md
 │       └── obsidian/*.md
-├── docker-compose.yml
 ├── build.gradle
 └── README.md
 ```
@@ -92,13 +94,18 @@ order-service/
 
 ## Docker and Full Local Stack
 
-Compose references `order-service:latest` — build the image first or adjust the compose service to `build:`.
+All Docker assets live under [`docker/`](docker/README.md): two Compose files (full stack vs app-only) and **local** / **prod** profiles.
 
 ```bash
-docker compose up -d --build
+cd docker
+cp .env.example .env && cp .env.local.example .env.local
+# Edit .env — set JWT_SECRET_KEY (≥32 characters)
+./nginx/ssl/generate-certs.sh
+
+docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
 ```
 
-Typical scrape target: `https://order-service:8446/actuator/prometheus`.
+See [docker/README.md](docker/README.md) for every profile, endpoints, and production notes.
 
 ## Testing
 

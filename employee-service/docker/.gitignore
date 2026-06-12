@@ -1,0 +1,5 @@
+.env
+.env.local
+.env.prod
+nginx/ssl/nginx.key
+nginx/ssl/nginx.crt

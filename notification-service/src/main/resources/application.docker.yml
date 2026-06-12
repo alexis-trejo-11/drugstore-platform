@@ -1,0 +1,103 @@
+server:
+  port: ${NOTIFICATION_SERVICE_PORT:8093}
+  forward-headers-strategy: native
+
+spring:
+  application:
+    name: notification-service
+
+  cloud:
+    config:
+      enabled: ${CONFIG_SERVER_ENABLED:false}
+      uri: ${CONFIG_SERVER_URI:http://config-server:8888}
+      fail-fast: false
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://mongodb:27017/notification_db}
+      database: ${MONGODB_DATABASE:notification_db}
+      auto-index-creation: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: notification-service-group
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      max-poll-records: 10
+      properties:
+        fetch.min.bytes: 1
+        fetch.max.wait.ms: 500
+        session.timeout.ms: 30000
+        heartbeat.interval.ms: 3000
+    listener:
+      concurrency: 3
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USERNAME:}
+    password: ${GMAIL_APP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:15}
+  refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200}
+  issuer: ${JWT_ISSUER:drugstore-prod}
+
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID:}
+  auth-token: ${TWILIO_AUTH_TOKEN:}
+  phone-number: ${TWILIO_PHONE_NUMBER:}
+  enabled: ${TWILIO_ENABLED:false}
+
+notification:
+  email:
+    from-name: ${NOTIFICATION_EMAIL_FROM_NAME:Drugstore Notifications}
+    reply-to: ${NOTIFICATION_EMAIL_REPLY_TO:noreply@drugstore.com}
+  retry:
+    max-attempts: ${NOTIFICATION_RETRY_MAX_ATTEMPTS:3}
+    backoff-delay-ms: ${NOTIFICATION_RETRY_BACKOFF_MS:5000}
+
+kafka:
+  topics:
+    notification:
+      email-verification: notification.email-verification
+      two-factor-code: notification.two-factor-code
+      welcome-email: notification.welcome-email
+
+logging:
+  file:
+    name: ${LOG_PATH:/app/logs}/notification-service.log
+    path: ${LOG_PATH:/app/logs}
+  level:
+    root: ${LOG_LEVEL_ROOT:WARN}
+    io.github.alexisTrejo11.drugstore: ${LOG_LEVEL_APP:INFO}
+    org.springframework.data.mongodb: ${MONGODB_LOG_LEVEL:INFO}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: ${MANAGEMENT_HEALTH_DETAILS:always}
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: notification-service
+      environment: docker

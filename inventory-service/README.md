@@ -56,15 +56,16 @@ inventory-service/
 │   │       ├── application.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── observability/
-│   ├── prometheus/
-│   └── grafana/provisioning/datasources/
+├── docker/
+│   ├── Dockerfile
+│   ├── docker-compose.full.yml    # App + DB + Redis + monitoring
+│   ├── docker-compose.app.yml     # App + Nginx only
+│   ├── nginx/
+│   └── observability/
 ├── docs/
 │   └── project/
 │       ├── *.md
 │       └── obsidian/*.md
-├── docker-compose.yml
-├── Dockerfile
 ├── build.gradle
 └── README.md
 ```
@@ -92,8 +93,15 @@ inventory-service/
 
 ## Docker and Full Local Stack
 
+All containerization lives under `docker/`. See **[docker/README.md](docker/README.md)** for profiles, env files, and endpoints.
+
 ```bash
-docker compose up -d --build
+cd docker
+cp .env.example .env && cp .env.local.example .env.local
+./nginx/ssl/generate-certs.sh
+
+# Full local stack (app + Postgres + Redis + monitoring)
+docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build
 ```
 
 ## Testing

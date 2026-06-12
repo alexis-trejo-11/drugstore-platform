@@ -42,6 +42,7 @@ It handles **outbound notifications**: email, SMS, or other channels as implemen
 
 ```text
 notification-service/
+├── docker/                 # Dockerfile, compose files, nginx, observability
 ├── src/
 │   ├── main/
 │   └── test/
@@ -74,7 +75,14 @@ notification-service/
 
 ## Docker and Full Local Stack
 
-Add or use a `docker-compose.yml` when you containerize this service; until then run with JVM only.
+All Docker assets live under [`docker/`](docker/). See [`docker/README.md`](docker/README.md) for compose files, profiles, and run commands.
+
+| Stack | Command (from `notification-service/docker/`) |
+|-------|-----------------------------------------------|
+| Full local (app + MongoDB + monitoring) | `docker compose -f docker-compose.full.yml --profile local --env-file .env --env-file .env.local up -d --build` |
+| App only + cloud infra | `docker compose -f docker-compose.app.yml --profile prod --env-file .env --env-file .env.prod up -d --build` |
+
+First-time setup: copy `docker/.env.example` → `docker/.env`, set `JWT_SECRET_KEY`, run `docker/nginx/ssl/generate-certs.sh`, and start the Kafka cluster from `infrastructure/kafka` when using the full local profile.
 
 ## Testing
 

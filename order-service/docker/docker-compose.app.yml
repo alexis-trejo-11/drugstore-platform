@@ -1,0 +1,98 @@
+# Application only: Nginx + order-service (no bundled DB, Redis, or monitoring).
+#
+# Use when infrastructure runs elsewhere (host machine, another compose stack, or cloud).
+#
+# Profiles:
+#   local — connect to services on the host via host.docker.internal
+#   prod  — connect to managed cloud instances (RDS, ElastiCache, etc.)
+#
+# Examples:
+#   docker compose -f docker-compose.app.yml --profile local --env-file .env --env-file .env.local up -d --build
+#   docker compose -f docker-compose.app.yml --profile prod  --env-file .env --env-file .env.prod  up -d --build
+
+name: order-service-app
+
+services:
+  nginx:
+    profiles: [local, prod]
+    image: nginx:1.27-alpine
+    container_name: order-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      order-service:
+        condition: service_healthy
+    networks:
+      - drugstore-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  order-service:
+    profiles: [local, prod]
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: order-service:latest
+    hostname: order-service
+    restart: unless-stopped
+    expose:
+      - "8080"
+    ports:
+      - "${ORDER_SERVICE_HOST_PORT:-8086}:8080"
+    environment:
+      - SPRING_APPLICATION_NAME=order-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_PORT=8080
+      - SPRING_CLOUD_CONFIG_ENABLED=false
+      - SPRING_CLOUD_BOOTSTRAP_ENABLED=false
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_DB_NAME=${DB_NAME:-order_db}
+      - POSTGRES_DB_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT:-5432}/${DB_NAME:-order_db}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
+      - SPRING_DATA_REDIS_PORT=${REDIS_PORT:-6379}
+      - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
+      - JWT_ISSUER=${JWT_ISSUER:-order-service}
+      - SWAGGER_ENABLED=${SWAGGER_ENABLED:-false}
+      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m}
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ../logs:/app/logs
+    networks:
+      - drugstore-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+        reservations:
+          memory: 256m
+
+networks:
+  drugstore-network:
+    name: drugstore-network
+    driver: bridge
