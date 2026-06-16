@@ -113,9 +113,12 @@ In `.env`:
 
 ```bash
 COMPOSE_PROFILES=local
+SPRING_PROFILES_ACTIVE=docker,no-loki
 MONGODB_URI=mongodb://host.docker.internal:27017/notification_db
 KAFKA_BOOTSTRAP_SERVERS=host.docker.internal:9093
 ```
+
+`no-loki` disables the Loki log appender (the app-only stack has no Loki container).
 
 ```bash
 docker compose -f docker/docker-compose.app.yml --env-file .env up -d --build

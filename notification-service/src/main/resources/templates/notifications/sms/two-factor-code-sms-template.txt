@@ -1,0 +1,1 @@
+Drugstore: Your verification code is [[${code}]]. Valid until [[${expiresAt}]]. Purpose: [[${purpose}]]. If you did not request this, ignore this message.

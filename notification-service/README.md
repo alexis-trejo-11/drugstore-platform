@@ -27,7 +27,8 @@ It handles **outbound notifications**: email, SMS, or other channels as implemen
 
 ## Core Capabilities
 
-- Notification dispatch pipelines.
+- Notification dispatch pipelines (Kafka → orchestrator → email/SMS providers).
+- **Classpath Thymeleaf templates** for HTML email and plain-text SMS bodies (see [Notification Templates](docs/project/generated/NotificationTemplates.md)).
 - Integration with external providers (see infrastructure and feature docs).
 - Documented API schema and architecture under `docs/project/`.
 
@@ -36,6 +37,7 @@ It handles **outbound notifications**: email, SMS, or other channels as implemen
 - Java 23
 - Spring Boot 3.3.x (see `build.gradle` for exact starters)
 - Spring ecosystem components as declared in Gradle
+- **Thymeleaf** for classpath notification templates
 - Docker where a compose file is added for local stacks
 
 ## Project Structure
@@ -46,6 +48,7 @@ notification-service/
 ├── docker/                 # Dockerfile, compose files, nginx, observability
 ├── src/
 │   ├── main/
+│   │   └── resources/templates/notifications/   # Thymeleaf email (.html) & SMS (.txt) templates
 │   └── test/
 ├── docs/
 │   └── project/
@@ -54,6 +57,19 @@ notification-service/
 ├── build.gradle
 └── README.md
 ```
+
+## Notification Templates
+
+Email and SMS bodies are rendered from **Thymeleaf templates** on the classpath (`src/main/resources/templates/notifications/`). There is no database-backed template store.
+
+| Channel | Path pattern | Example |
+|---------|--------------|---------|
+| Email | `email/{templateId}.html` | `email-verification-template.html` |
+| SMS | `sms/{templateId}.txt` | `two-factor-code-sms-template.txt` |
+
+Handlers pass `templateId` to `NotificationOrchestrator`; `NotificationTemplateRenderer` resolves and renders the file at send time.
+
+Full reference: [Notification Templates](docs/project/generated/NotificationTemplates.md).
 
 ## API Surface
 
@@ -109,6 +125,7 @@ Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud
 - [Project Overview](docs/project/generated/ProjectOverview.md)
 - [Project Infrastructure](docs/project/generated/ProjectInfrastructure.md)
 - [Project Features](docs/project/generated/ProjectFeature.md)
+- [Notification Templates](docs/project/generated/NotificationTemplates.md)
 - [Project Code Showcase](docs/project/generated/ProjectCodeShowCase.md)
 - [Project Architecture](docs/project/generated/ProjectArchitecture.md)
 - [API Schema](docs/project/generated/APISchema.md)
@@ -119,6 +136,7 @@ Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud
 - [Project Overview (Source)](docs/project/source/ProjectOverview.md)
 - [Project Infrastructure (Source)](docs/project/source/ProjectInfrastructure.md)
 - [Project Features (Source)](docs/project/source/ProjectFeature.md)
+- [Notification Templates (Source)](docs/project/source/NotificationTemplates.md)
 - [Project Code Showcase (Source)](docs/project/source/ProjectCodeShowCase.md)
 - [Project Architecture (Source)](docs/project/source/ProjectArchitecture.md)
 - [API Schema (Source)](docs/project/source/APISchema.md)

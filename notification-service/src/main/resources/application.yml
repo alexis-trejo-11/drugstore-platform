@@ -49,6 +49,13 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: ${THYMELEAF_CACHE:true}
+
 jwt:
   secret: ${JWT_SECRET_KEY}
   access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:15}
@@ -75,6 +82,10 @@ kafka:
       email-verification: notification.email-verification
       two-factor-code: notification.two-factor-code
       welcome-email: notification.welcome-email
+
+loki:
+  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
+  env: ${LOKI_ENV:local}
 
 logging:
   level:

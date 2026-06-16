@@ -45,6 +45,8 @@ services:
       - "8093"
     ports:
       - "${NOTIFICATION_HOST_PORT:-8093}:8093"
+    environment:
+      LOG_PATH: /app/logs
     env_file:
       - path: ../.env
         required: true

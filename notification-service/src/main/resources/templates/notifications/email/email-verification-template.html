@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{notifications/email/fragments/base :: head('Verify your email')}"></head>
+<body>
+<div class="wrapper">
+  <div class="card">
+    <div th:replace="~{notifications/email/fragments/base :: header('Email verification')}"></div>
+    <div class="content">
+      <h2>Hello <span th:text="${firstName}">User</span>,</h2>
+      <p th:if="${isResend == 'true'}">
+        You requested a new verification link. Use the button below to confirm your email address.
+      </p>
+      <p th:unless="${isResend == 'true'}">
+        Thanks for signing up. Please confirm your email address to activate your account.
+      </p>
+      <p style="text-align: center;">
+        <a class="button" th:href="${verificationUrl}">Verify email address</a>
+      </p>
+      <p th:if="${verificationCode != null and !#strings.isEmpty(verificationCode)}" class="muted">
+        Or enter this code manually: <strong th:text="${verificationCode}">000000</strong>
+      </p>
+      <p class="muted">
+        This link expires on <span th:text="${expiresAt}">24 hours</span>.
+        If you did not create an account, you can safely ignore this email.
+      </p>
+    </div>
+    <div th:replace="~{notifications/email/fragments/base :: footer}"></div>
+  </div>
+</div>
+</body>
+</html>

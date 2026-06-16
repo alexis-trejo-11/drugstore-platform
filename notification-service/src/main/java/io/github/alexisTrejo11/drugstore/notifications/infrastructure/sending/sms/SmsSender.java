@@ -1,6 +1,7 @@
 package io.github.alexisTrejo11.drugstore.notifications.infrastructure.sending.sms;
 
 import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Balance;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import org.slf4j.Logger;
@@ -189,8 +190,8 @@ public class SmsSender {
     }
 
     try {
-      var account = com.twilio.rest.api.v2010.Account.fetcher(accountSid).fetch();
-      return account.getBalance().toString();
+      Balance balance = Balance.fetcher(accountSid).fetch();
+      return balance.getBalance();
     } catch (Exception e) {
       log.error("Failed to fetch Twilio account balance", e);
       return "Error fetching balance";

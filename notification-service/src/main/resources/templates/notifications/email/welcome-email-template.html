@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{notifications/email/fragments/base :: head('Welcome to Drugstore')}"></head>
+<body>
+<div class="wrapper">
+  <div class="card">
+    <div th:replace="~{notifications/email/fragments/base :: header('Welcome aboard')}"></div>
+    <div class="content">
+      <h2>Welcome, <span th:text="${firstName}">there</span>!</h2>
+      <p>
+        Your <span th:text="${accountType}">Customer</span> account is ready.
+        We're glad to have you at Drugstore.
+      </p>
+      <p th:if="${registeredAt != null and !#strings.isEmpty(registeredAt)}" class="muted">
+        Registered on <span th:text="${registeredAt}">today</span>.
+      </p>
+      <p style="text-align: center;">
+        <a class="button" th:href="${dashboardUrl}">Go to dashboard</a>
+      </p>
+      <p>
+        Complete your profile to get personalized recommendations and faster checkout.
+      </p>
+      <p class="muted">
+        Need help? Visit our <a th:href="${supportUrl}" style="color: #0f766e;">support center</a>.
+      </p>
+    </div>
+    <div th:replace="~{notifications/email/fragments/base :: footer}"></div>
+  </div>
+</div>
+</body>
+</html>

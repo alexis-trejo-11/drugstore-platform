@@ -3,8 +3,11 @@ package io.github.alexisTrejo11.drugstore.notifications.infrastructure.sending.e
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Component;
+
+import jakarta.mail.internet.MimeMessage;
 
 @Component
 public class EmailSender {

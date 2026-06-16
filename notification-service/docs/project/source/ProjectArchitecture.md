@@ -97,3 +97,16 @@ techDecisions:
 
 > Edge TLS is **out of scope** for this module’s repo; pair with platform ingress when exposing HTTP endpoints.
 
+## Notification template layer
+
+Notification bodies are rendered from **classpath Thymeleaf templates** (`templates/notifications/`), not from MongoDB. See [Notification Templates](NotificationTemplates.md).
+
+```text
+Kafka Handler → NotificationOrchestrator (templateId + variables)
+             → EmailNotificationService / SmsNotificationService
+             → NotificationTemplateRenderer (Thymeleaf)
+             → EmailSender / SmsSender
+```
+
+MongoDB persists **notification delivery records** (`NotificationRepository`), not template content.
+

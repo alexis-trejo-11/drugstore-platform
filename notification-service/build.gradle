@@ -4,6 +4,30 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.6'
 }
 
+def loadDotEnv = {
+    def env = [:]
+    def envFile = file('.env')
+    if (envFile.exists()) {
+        envFile.readLines().each { line ->
+            if (line && !line.startsWith('#') && line.contains('=')) {
+                def (key, value) = line.split('=', 2)
+                env[key.trim()] = value.trim()
+            }
+        }
+    }
+    return env
+}
+
+def dotEnv = loadDotEnv()
+
+def envOrDotEnv = { String key, String defaultValue = null ->
+    def fromProperty = findProperty(key)
+    (fromProperty != null ? fromProperty.toString() : null)
+        ?: System.getenv(key)
+        ?: dotEnv[key]
+        ?: defaultValue
+}
+
 version = '1.0.0-SNAPSHOT'
 group = 'io.github.alexisTrejo11.drugstore.microservices'
 
@@ -14,15 +38,27 @@ java {
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
+
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/alexisTrejo11/drugstore-platform")
+
+        credentials {
+            username = envOrDotEnv("GITHUB_ACTOR", "alexisTrejo11")
+            password = envOrDotEnv("GITHUB_TOKEN")
+        }
+    }
 }
 
 ext {
-    set('springCloudVersion', "2024.0.0")
+    set('springCloudVersion', "2023.0.3")
 }
 
 dependencies {
+    implementation 'com.github.loki4j:loki-logback-appender:1.5.2'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
     // Validation
@@ -35,8 +71,8 @@ dependencies {
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    // Common library
-    implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
+    // Github packages dependency
+    implementation 'io.github.alexisTrejo11:shared-kernel:2.0.0'
 
     // Config Server
     implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
@@ -45,9 +81,12 @@ dependencies {
     // Mail dependencies
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
+    // Thymeleaf (classpath notification templates)
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
     // Twilio dependencies
     implementation 'com.twilio.sdk:twilio:8.31.1'
-    
+
     // Kafka
     implementation 'org.springframework.kafka:spring-kafka'
 }
@@ -64,15 +103,18 @@ tasks.named('test') {
 }
 
 bootRun {
-    // Load .env file variables
-    def envFile = file('.env')
-    if (envFile.exists()) {
-        envFile.readLines().each { line ->
-            if (line && !line.startsWith('#') && line.contains('=')) {
-                def (key, value) = line.split('=', 2)
-                systemProperty key.trim(), value.trim()
-                environment key.trim(), value.trim()
-            }
+    dotEnv.each { key, value ->
+        // .env sets SPRING_PROFILES_ACTIVE=docker for Compose; bootRun should stay on the default standalone profile.
+        if (key == 'SPRING_PROFILES_ACTIVE') {
+            return
         }
+        systemProperty key, value
+        environment key, value
+    }
+
+    if (!dotEnv['LOG_PATH'] && !System.getenv('LOG_PATH')) {
+        def localLogs = file('logs').absolutePath
+        systemProperty 'LOG_PATH', localLogs
+        environment 'LOG_PATH', localLogs
     }
 }

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{notifications/email/fragments/base :: head('Your verification code')}"></head>
+<body>
+<div class="wrapper">
+  <div class="card">
+    <div th:replace="~{notifications/email/fragments/base :: header('Security verification')}"></div>
+    <div class="content">
+      <h2>Hello <span th:text="${firstName}">User</span>,</h2>
+      <p>
+        Use the code below to complete <span th:text="${purpose}">authentication</span>.
+      </p>
+      <p style="text-align: center;">
+        <span class="code-box" th:text="${code}">123456</span>
+      </p>
+      <p class="muted">
+        This code expires on <span th:text="${expiresAt}">10 minutes</span>.
+      </p>
+      <p class="muted">
+        Request from <span th:text="${deviceName}">Unknown device</span>
+        (<span th:text="${ipAddress}">Unknown</span>).
+        If this wasn't you, secure your account immediately.
+      </p>
+    </div>
+    <div th:replace="~{notifications/email/fragments/base :: footer}"></div>
+  </div>
+</div>
+</body>
+</html>

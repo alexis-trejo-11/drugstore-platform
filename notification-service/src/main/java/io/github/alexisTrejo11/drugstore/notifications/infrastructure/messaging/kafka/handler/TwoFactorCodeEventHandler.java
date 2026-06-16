@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import io.github.alexisTrejo11.drugstore.notifications.application.service.NotificationOrchestrator;
 import io.github.alexisTrejo11.drugstore.notifications.domain.event.TwoFactorCodeEvent;
@@ -14,6 +15,7 @@ import io.github.alexisTrejo11.drugstore.notifications.domain.valueobject.Notifi
 import io.github.alexisTrejo11.drugstore.notifications.domain.valueobject.NotificationType;
 import io.github.alexisTrejo11.drugstore.notifications.domain.valueobject.RecipientInfo;
 
+@Component
 public class TwoFactorCodeEventHandler {
 
   private final NotificationOrchestrator notificationOrchestrator;
