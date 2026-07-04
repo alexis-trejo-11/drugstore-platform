@@ -11,12 +11,13 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import libs_kernel.response.ResponseWrapper;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(summary = "Get Product by SKU", description = "Retrieves a single product's details using its Stock Keeping Unit (SKU)")
 @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved product", content = @Content(mediaType = "application/json", schema = @Schema(implementation = libs_kernel.response.ResponseWrapper.class), examples = @ExampleObject(name = "Success Response", value = """
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved product", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(name = "Success Response", value = """
         {
           "success": true,
           "message": "Product found",
@@ -31,14 +32,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
           }
         }
         """))),
-    @ApiResponse(responseCode = "404", description = "Product not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = libs_kernel.response.ResponseWrapper.class), examples = @ExampleObject(name = "Not Found Example", value = """
+    @ApiResponse(responseCode = "404", description = "Product not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(name = "Not Found Example", value = """
         {
           "success": false,
           "message": "Product Not Found",
           "data": "Product with SKU 'INVALID-SKU' not found."
         }
         """))),
-    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid SKU format", content = @Content(mediaType = "application/json", schema = @Schema(implementation = libs_kernel.response.ResponseWrapper.class), examples = @ExampleObject(name = "Bad Request SKU", value = """
+    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid SKU format", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(name = "Bad Request SKU", value = """
         {
           "success": false,
           "message": "Invalid Argument Type",

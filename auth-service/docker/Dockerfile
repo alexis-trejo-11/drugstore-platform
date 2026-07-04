@@ -1,4 +1,4 @@
-# Build context: auth-service root (run from docker/: docker compose -f docker-compose.full.yml --profile local up -d --build)
+# Build context: auth-service root (run from docker/: docker compose -f docker-compose.yml --profile local up -d --build)
 # glibc-based JDK: protoc-gen-grpc-java publishes linux binaries linked against glibc (Alpine/musl cannot run them).
 # JDK 23 official images use Ubuntu Noble (no 23-jdk-jammy tag).
 FROM eclipse-temurin:23-jdk-noble AS builder

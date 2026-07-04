@@ -66,8 +66,8 @@ address-service/
 │   └── test/
 ├── docker/                        # All Docker assets (see docker/README.md)
 │   ├── Dockerfile
-│   ├── docker-compose.full.yml    # App + DB + Redis + monitoring
-│   ├── docker-compose.app.yml     # App + Nginx only
+│   ├── docker-compose.yml    # App + DB + Redis + monitoring
+│   ├── docker-compose.yml     # App + Nginx only
 │   ├── nginx/
 │   └── observability/
 ├── docs/
@@ -126,15 +126,15 @@ cp .env.example .env
 # Edit .env — set JWT_SECRET_KEY and GITHUB_TOKEN
 chmod +x docker/nginx/ssl/generate-certs.sh
 ./docker/nginx/ssl/generate-certs.sh
-docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
+docker compose -f docker/docker-compose.yml --env-file .env up -d --build
 ```
 
 Two compose files are available:
 
 | File | Contents |
 |------|----------|
-| `docker-compose.full.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
-| `docker-compose.app.yml` | App + Nginx only (external DB/Redis) |
+| `docker-compose.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
+| `docker-compose.yml` | App + Nginx only (external DB/Redis) |
 
 Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud RDS, ElastiCache, etc.).
 

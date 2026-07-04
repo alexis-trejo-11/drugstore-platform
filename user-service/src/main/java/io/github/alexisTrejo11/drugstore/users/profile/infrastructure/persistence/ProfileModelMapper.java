@@ -2,6 +2,7 @@ package io.github.alexisTrejo11.drugstore.users.profile.infrastructure.persisten
 
 import java.util.List;
 
+import libs_kernel.page.PaginationMetadata;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -73,8 +74,9 @@ public class ProfileModelMapper {
   }
 
   public PageResponse<Profile> toPageResponse(Page<ProfileModel> modelPage) {
-    Page<Profile> profilePage = modelPage.map(this::toEntity);
-    return PageResponse.from(profilePage);
+    var profiles = modelPage.map(this::toEntity).stream().toList();
+    var metadata = new PaginationMetadata(modelPage.getNumber(), modelPage.getSize(), modelPage.getTotalPages());
+    return new PageResponse<>(profiles, metadata);
   }
 
 }

@@ -151,8 +151,10 @@ def render_metadata(data: dict[str, Any], body: str) -> str:
         ],
     )
     out += h2("Tech stack")
-    out += bullets(data.get("techStack", []))
-    out += append_body_notes(body)
+    stack = [item for item in data.get("techStack", []) if item and str(item).strip()]
+    out += bullets(stack)
+    if body:
+        out += body.rstrip() + "\n\n"
     return out
 
 

@@ -119,7 +119,7 @@ dockerFiles:
 
 # Infrastructure
 
-Compose file **`docker-compose.yml`** defines **`drugstore-network`**, persistent volumes for Postgres/Redis/Observability, and **mandatory env** variables **`JWT_SECRET_KEY`** and **`SPRING_KAFKA_BOOTSTRAP_SERVERS`** (Kafka container is **not** defined in this file — supply an external broker or add a kafka service).
+Compose file **`docker-compose.yml`** defines **`drugstore_network`**, persistent volumes for Postgres/Redis/Observability, and **mandatory env** variables **`JWT_SECRET_KEY`** and **`SPRING_KAFKA_BOOTSTRAP_SERVERS`** (Kafka container is **not** defined in this file — supply an external broker or add a kafka service).
 
 > [!danger] Blocking env without local Kafka  
 > Services will fail to start if **`SPRING_KAFKA_BOOTSTRAP_SERVERS`** is unset, even though event publishing is a **no-op** in code — consider relaxing Spring Kafka auto-config or providing an embedded/disabled profile.

@@ -1,12 +1,13 @@
 package io.github.alexisTrejo11.drugstore.accounts.config;
 
 import org.springframework.context.annotation.Bean;
+import io.github.alexisTrejo11.drugstore.accounts.config.PrefixedStringRedisSerializer;
+import io.github.alexisTrejo11.drugstore.accounts.config.RedisProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -26,7 +27,9 @@ public class RedisConfig {
    * @return configured RedisTemplate
    */
   @Bean
-  public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+  public RedisTemplate<String, Object> redisTemplate(
+      RedisConnectionFactory connectionFactory,
+      RedisProperties redisProperties) {
     log.info("Configuring RedisTemplate with JSON serialization");
 
     RedisTemplate<String, Object> template = new RedisTemplate<>();
@@ -41,9 +44,9 @@ public class RedisConfig {
         ObjectMapper.DefaultTyping.NON_FINAL);
 
     // Use String serializer for keys
-    StringRedisSerializer stringSerializer = new StringRedisSerializer();
-    template.setKeySerializer(stringSerializer);
-    template.setHashKeySerializer(stringSerializer);
+    PrefixedStringRedisSerializer keySerializer = new PrefixedStringRedisSerializer(redisProperties);
+    template.setKeySerializer(keySerializer);
+    template.setHashKeySerializer(keySerializer);
 
     // Use JSON serializer for values
     GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
@@ -58,7 +61,14 @@ public class RedisConfig {
   }
 
   @Bean
-  public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory connectionFactory) {
-    return new StringRedisTemplate(connectionFactory);
+  public StringRedisTemplate stringRedisTemplate(
+      RedisConnectionFactory connectionFactory,
+      RedisProperties redisProperties) {
+    StringRedisTemplate template = new StringRedisTemplate(connectionFactory);
+    PrefixedStringRedisSerializer keySerializer = new PrefixedStringRedisSerializer(redisProperties);
+    template.setKeySerializer(keySerializer);
+    template.setHashKeySerializer(keySerializer);
+    template.afterPropertiesSet();
+    return template;
   }
 }

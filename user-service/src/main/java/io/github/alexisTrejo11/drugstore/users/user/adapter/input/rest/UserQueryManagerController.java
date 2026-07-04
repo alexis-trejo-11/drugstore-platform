@@ -1,7 +1,10 @@
 package io.github.alexisTrejo11.drugstore.users.user.adapter.input.rest;
 
+import libs_kernel.page.PaginationMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -85,13 +88,19 @@ public class UserQueryManagerController {
   public ResponseWrapper<PageResponse<UserHTTPResponse>> getUserByRole(
       @Parameter(description = "User role filter", required = true, example = "CUSTOMER", schema = @Schema(allowableValues = {
           "CUSTOMER", "EMPLOYEE", "ADMIN" })) @PathVariable UserRole role,
-      @Parameter(description = "Pagination parameters (page=0, size=10, sort=createdAt,desc)", example = "page=0&size=10") @ModelAttribute PageRequest pagination) {
+      @Parameter(description = "Pagination parameters (page=1, size=10, sort=createdAt,desc)", example = "page=1&size=10") @ModelAttribute PageRequest pagination) {
+    if (pagination == null) {
+      pagination = PageRequest.defaultPageRequest();
+    }
+    Pageable pageable = toPageable(pagination);
 
-    GetUsersByRoleQuery query = new GetUsersByRoleQuery(role, pagination.toPageable());
+    GetUsersByRoleQuery query = new GetUsersByRoleQuery(role, pageable);
     Page<UserQueryResult> queryResultPage = queryBus.execute(query);
-    PageResponse<UserHTTPResponse> pageResponse = PageResponse.from(queryResultPage.map(UserHTTPResponse::from));
 
-    return ResponseWrapper.success(pageResponse, "Users retrieved successfully");
+    var userHTTPResponses = queryResultPage.map(UserHTTPResponse::from).stream().toList();
+    var metadata = new PaginationMetadata(queryResultPage.getTotalElements(), queryResultPage.getNumber(), queryResultPage.getSize());
+
+    return ResponseWrapper.success(new PageResponse<>(userHTTPResponses, metadata), "Users retrieved successfully");
   }
 
   @GetUsersByStatusOperation
@@ -99,16 +108,30 @@ public class UserQueryManagerController {
   public ResponseWrapper<PageResponse<UserHTTPResponse>> getUserByStatus(
       @Parameter(description = "User status filter", required = true, example = "ACTIVE", schema = @Schema(allowableValues = {
           "PENDING", "ACTIVE", "INACTIVE", "SUSPENDED", "DELETED" })) @PathVariable UserStatus status,
-      @Parameter(description = "Pagination parameters (page=0, size=10, sort=createdAt,desc)", example = "page=0&size=10") @ModelAttribute PageRequest pagination) {
+      @Parameter(description = "Pagination parameters (page=1, size=10, sort=createdAt,desc)", example = "page=1&size=10") @ModelAttribute PageRequest pagination) {
     if (pagination == null) {
       pagination = PageRequest.defaultPageRequest();
     }
-    GetUserByStatusQuery query = new GetUserByStatusQuery(status, pagination.toPageable());
+    Pageable pageable = toPageable(pagination);
+    GetUserByStatusQuery query = new GetUserByStatusQuery(status, pageable);
 
     Page<UserQueryResult> queryResultPage = queryBus.execute(query);
 
-    PageResponse<UserHTTPResponse> pageResponse = PageResponse.from(queryResultPage.map(UserHTTPResponse::from));
-    return ResponseWrapper.success(pageResponse, "Users retrieved successfully");
+    var userHTTPResponses = queryResultPage.map(UserHTTPResponse::from).stream().toList();
+    var metadata = new PaginationMetadata(queryResultPage.getTotalElements(), queryResultPage.getNumber(), queryResultPage.getSize());
+
+    return ResponseWrapper.success(new PageResponse<>(userHTTPResponses, metadata), "Users retrieved successfully");
+  }
+
+  /**
+   * Maps libs_kernel 1-based PageRequest to Spring 0-based Pageable.
+   */
+  private Pageable toPageable(PageRequest pagination) {
+    Sort.Direction direction = Sort.Direction.fromString(pagination.getSortInput().direction());
+    return org.springframework.data.domain.PageRequest.of(
+        pagination.getPage() - 1,
+        pagination.getSize(),
+        Sort.by(direction, pagination.getSortInput().sortBy()));
   }
 
 }

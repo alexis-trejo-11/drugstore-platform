@@ -215,7 +215,7 @@ dockerFiles:
       volumes:
         - postgres-data:/var/lib/postgresql/data
       networks:
-        - drugstore-network
+        - drugstore_network
       healthcheck:
         test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d cart_db"]
         interval: 10s
@@ -234,7 +234,7 @@ dockerFiles:
       volumes:
         - redis-data:/data
       networks:
-        - drugstore-network
+        - drugstore_network
       healthcheck:
         test: ["CMD", "redis-cli", "ping"]
         interval: 10s
@@ -257,7 +257,7 @@ dockerFiles:
         cart-service:
           condition: service_healthy
       networks:
-        - drugstore-network
+        - drugstore_network
       healthcheck:
         test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
         interval: 15s

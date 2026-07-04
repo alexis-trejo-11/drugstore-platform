@@ -115,6 +115,12 @@ bootRun {
         systemProperty key, value
         environment key, value
     }
+
+    if (!dotEnv['LOG_PATH'] && !System.getenv('LOG_PATH')) {
+        def localLogs = file('logs').absolutePath
+        systemProperty 'LOG_PATH', localLogs
+        environment 'LOG_PATH', localLogs
+    }
 }
 
 tasks.register('buildDockerImage', Exec) {

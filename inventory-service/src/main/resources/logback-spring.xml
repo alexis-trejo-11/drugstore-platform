@@ -3,9 +3,9 @@
     <!-- Environment variables or default values -->
     <property name="LOG_PATH" value="${LOG_PATH:-logs}" />
     <property name="APP_NAME" value="${SPRING_APPLICATION_NAME:-inventory-service}" />
-    <property name="LOKI_PUSH_URL" value="${LOKI_PUSH_URL:-http://loki:3100/loki/api/v1/push}" />
-
-    <!-- 1. CONSOLE APPENDER: For Docker container logs -->
+        <springProperty scope="context" name="LOKI_PUSH_URL" source="loki.push-url" />
+    <springProperty scope="context" name="LOKI_ENV" source="loki.env" defaultValue="local" />
+<!-- 1. CONSOLE APPENDER: For Docker container logs -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
@@ -47,7 +47,7 @@
             </http>
             <format>
                 <label>
-                    <pattern>app=${APP_NAME},env=prod,level=%level</pattern>
+                    <pattern>app=${APP_NAME},env=${LOKI_ENV},level=%level</pattern>
                 </label>
                 <message>
                     <pattern>l=%level c=%logger{20} t=%thread traceId=%X{traceId:-none} | %msg %ex</pattern>
@@ -60,7 +60,7 @@
     <logger name="libs_kernel.log.audit" level="INFO" additivity="false">
         <appender-ref ref="FILE_AUDIT" />
         <appender-ref ref="CONSOLE" />
-        <springProfile name="!test">
+        <springProfile name="!test &amp; !no-loki">
             <appender-ref ref="LOKI" />
         </springProfile>
     </logger>
@@ -69,7 +69,7 @@
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE_APP" />
-        <springProfile name="!test">
+        <springProfile name="!test &amp; !no-loki">
             <appender-ref ref="LOKI" />
         </springProfile>
     </root>

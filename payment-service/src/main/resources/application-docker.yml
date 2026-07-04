@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PAYMENT_SERVICE_PORT}
   forward-headers-strategy: native
 
 spring:
@@ -32,7 +32,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-        default_schema: public
         jdbc:
           batch_size: 20
         order_inserts: true
@@ -40,10 +39,14 @@ spring:
 
   flyway:
     enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
     locations: classpath:db/migration
-    baseline-on-migrate: false
     validate-on-migrate: true
     out-of-order: false
+    encoding: UTF-8
+    table: flyway_schema_history
+    clean-disabled: true
 
   data:
     redis:
@@ -83,10 +86,16 @@ management:
       prometheus:
         enabled: true
 
+loki:
+  push-url: ${LOKI_PUSH_URL:http://loki:3100/loki/api/v1/push}
+  env: ${LOKI_ENV:docker}
+
+app:
+  redis:
+    key-prefix: ${REDIS_KEY_PREFIX:drugstore:payment:}
+
+# LOG_PATH: ./logs for bootRun, /app/logs in Docker (set via compose). Path configured in logback-spring.xml.
 logging:
-  file:
-    name: ${LOG_PATH:/app/logs}/payment-service.log
-    path: ${LOG_PATH:/app/logs}
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
     io.github.alexisTrejo11.drugstore.payments: ${LOG_LEVEL_APP:DEBUG}

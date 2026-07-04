@@ -94,4 +94,4 @@ Plain-Markdown counterpart to `docs/project/source/ProjectArchitecture.md` (diag
                                          [Postgres] [Redis]
 ```
 
-Observability sidecars/containers: **Prometheus**, **Loki**, **Grafana** on `drugstore-network`.
+Observability sidecars/containers: **Prometheus**, **Loki**, **Grafana** on `drugstore_network`.

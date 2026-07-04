@@ -1,4 +1,6 @@
 app:
+  redis:
+    key-prefix: ${REDIS_KEY_PREFIX:drugstore:inventory:}
   rate-limit:
     global:
       enabled: true
@@ -19,7 +21,7 @@ app:
         duration-seconds: 10
 
 server:
-  port: ${SERVER_PORT:8085}
+  port: ${INVENTORY_SERVICE_PORT}
   forward-headers-strategy: native
 
 spring:
@@ -87,7 +89,6 @@ spring:
     enabled: false
     locations: classpath:db/migration
     validate-on-migrate: true
-    schemas: public
     clean-disabled: false
 
 # MANAGEMENT ENDPOINTS
@@ -140,6 +141,10 @@ springdoc:
     disabled: true
 
 # LOGGING FOR RATE LIMITING
+loki:
+  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
+  env: ${LOKI_ENV:local}
+
 logging:
   level:
     io.github.alexisTrejo11.drugstore.inventories.config.ratelimit: DEBUG

@@ -1,17 +1,17 @@
 package io.github.alexisTrejo11.drugstore.stores.infrastructure.inbound.rest.mapper;
 
-import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.page.PageResponse;
 import io.github.alexisTrejo11.drugstore.stores.domain.model.Store;
 import io.github.alexisTrejo11.drugstore.stores.infrastructure.inbound.rest.dto.response.StoreResponse;
+import libs_kernel.page.PaginationMetadata;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class StoreResponseMapper implements ResponseMapper<StoreResponse, Store> {
-	@Override
+public class StoreResponseMapper {
+
 	public StoreResponse toResponse(Store store) {
 		if (store == null) return null;
 		var createdAt = store.getTimeStamps() != null ? store.getTimeStamps().getCreatedAt() : null;
@@ -27,17 +27,17 @@ public class StoreResponseMapper implements ResponseMapper<StoreResponse, Store>
 				.build();
 	}
 
-	@Override
 	public List<StoreResponse> toResponses(List<Store> stores) {
 		return stores.stream()
 				.map(this::toResponse)
 				.toList();
 	}
 
-	@Override
 	public PageResponse<StoreResponse> toResponsePage(Page<Store> stores) {
 		if (stores == null) return null;
 
-		return PageResponse.from(stores.map(this::toResponse));
+		var paginationMetadata = new PaginationMetadata(stores.getNumber(), stores.getSize(), stores.getTotalPages());
+		var storeResponses =  stores.map(this::toResponse).stream().toList();
+		return new PageResponse<>(storeResponses, paginationMetadata);
 	}
 }

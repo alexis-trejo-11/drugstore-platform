@@ -60,8 +60,8 @@ user-service/
 │   └── test/
 ├── docker/
 │   ├── Dockerfile
-│   ├── docker-compose.full.yml
-│   ├── docker-compose.app.yml
+│   ├── docker-compose.yml
+│   ├── docker-compose.yml
 │   ├── nginx/
 │   └── observability/
 ├── docs/
@@ -104,7 +104,7 @@ cp .env.example .env
 chmod +x docker/nginx/ssl/generate-certs.sh
 ./docker/nginx/ssl/generate-certs.sh
 
-docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
+docker compose -f docker/docker-compose.yml --env-file .env up -d --build
 ```
 
 Typical URLs:

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import io.github.alexisTrejo11.drugstore.employees.config.RedisProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +26,9 @@ import java.util.Map;
 public class RedisCacheConfig {
 
   @Bean
-  public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+  public CacheManager cacheManager(
+      RedisConnectionFactory connectionFactory,
+      RedisProperties redisProperties) {
     ObjectMapper mapper = new ObjectMapper();
     mapper.registerModule(new JavaTimeModule());
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -33,6 +36,7 @@ public class RedisCacheConfig {
     GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(mapper);
 
     RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+        .prefixCacheNameWith(redisProperties.normalizedPrefix())
         .entryTtl(Duration.ofMinutes(10))
         .disableCachingNullValues()
         .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer));

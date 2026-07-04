@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${AUTH_SERVICE_PORT}
 
 management:
   endpoints:
@@ -9,6 +9,10 @@ management:
   endpoint:
     health:
       show-details: always
+
+loki:
+  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
+  env: ${LOKI_ENV:local}
 
 logging:
   level:
@@ -112,6 +116,8 @@ kafka:
 
 
 app:
+  redis:
+    key-prefix: ${REDIS_KEY_PREFIX:drugstore:auth:}
   rate-limit:
     global:
       enabled: true

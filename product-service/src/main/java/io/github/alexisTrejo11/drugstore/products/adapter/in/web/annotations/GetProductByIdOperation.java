@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import libs_kernel.response.ResponseWrapper;
 
 import java.lang.annotation.*;
 
@@ -13,7 +14,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(summary = "Get Product by ID", description = "Retrieves a single product's details using its unique UUID")
 @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved product", content = @Content(mediaType = "application/json", schema = @Schema(implementation = libs_kernel.response.ResponseWrapper.class), examples = @ExampleObject(name = "Success Response", value = """
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved product", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(name = "Success Response", value = """
         {
           "success": true,
           "message": "Product found",
@@ -27,14 +28,14 @@ import java.lang.annotation.*;
           }
         }
         """))),
-    @ApiResponse(responseCode = "404", description = "Product not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = libs_kernel.response.ResponseWrapper.class), examples = @ExampleObject(name = "Not Found Example", value = """
+    @ApiResponse(responseCode = "404", description = "Product not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(name = "Not Found Example", value = """
         {
           "success": false,
           "message": "Product Not Found",
           "data": "Product with ID 'non-existent-uuid' not found."
         }
         """))),
-    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid UUID format", content = @Content(mediaType = "application/json", schema = @Schema(implementation = libs_kernel.response.ResponseWrapper.class), examples = @ExampleObject(name = "Bad Request UUID", value = """
+    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid UUID format", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(name = "Bad Request UUID", value = """
         {
           "success": false,
           "message": "Invalid Argument Type",

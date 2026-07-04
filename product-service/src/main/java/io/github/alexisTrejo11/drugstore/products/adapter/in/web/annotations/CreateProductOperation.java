@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.github.alexisTrejo11.drugstore.products.adapter.in.web.dto.CreateProductRequest;
+import libs_kernel.response.ResponseWrapper;
 
 import java.lang.annotation.*;
 
@@ -37,7 +38,7 @@ import java.lang.annotation.*;
     }
     """)))
 @ApiResponses(value = {
-    @ApiResponse(responseCode = "201", description = "Product successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = libs_kernel.response.ResponseWrapper.class), examples = @ExampleObject(name = "Success Response", value = """
+    @ApiResponse(responseCode = "201", description = "Product successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(name = "Success Response", value = """
         {
           "success": true,
           "message": "Product created",
@@ -46,7 +47,7 @@ import java.lang.annotation.*;
           }
         }
         """))),
-    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = libs_kernel.response.ResponseWrapper.class), examples = @ExampleObject(name = "Validation Error", value = """
+    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(name = "Validation Error", value = """
         {
           "success": false,
           "message": "Validation Failed",

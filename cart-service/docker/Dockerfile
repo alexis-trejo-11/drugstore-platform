@@ -1,4 +1,6 @@
-FROM eclipse-temurin:23-jdk-alpine AS builder
+# glibc-based JDK: protoc-gen-grpc-java publishes linux binaries linked against glibc (Alpine/musl cannot run them).
+# JDK 23 official images use Ubuntu Noble (no 23-jdk-jammy tag).
+FROM eclipse-temurin:23-jdk-noble AS builder
 
 ARG GITHUB_ACTOR
 ARG GITHUB_TOKEN

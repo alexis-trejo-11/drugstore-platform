@@ -4,6 +4,30 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
+def loadDotEnv = {
+	def env = [:]
+	def envFile = file('.env')
+	if (envFile.exists()) {
+		envFile.readLines().each { line ->
+			if (line && !line.startsWith('#') && line.contains('=')) {
+				def (key, value) = line.split('=', 2)
+				env[key.trim()] = value.trim()
+			}
+		}
+	}
+	return env
+}
+
+def dotEnv = loadDotEnv()
+
+def envOrDotEnv = { String key, String defaultValue = null ->
+	def fromProperty = findProperty(key)
+	(fromProperty != null ? fromProperty.toString() : null)
+		?: System.getenv(key)
+		?: dotEnv[key]
+		?: defaultValue
+}
+
 group = 'io.github.alexisTrejo11.drugstore.microservices'
 version = '2.0.0'
 
@@ -14,8 +38,17 @@ java {
 }
 
 repositories {
-	mavenLocal()
 	mavenCentral()
+
+	maven {
+		name = "GitHubPackages"
+		url = uri("https://maven.pkg.github.com/alexisTrejo11/drugstore-platform")
+
+		credentials {
+			username = envOrDotEnv("GITHUB_ACTOR", "alexisTrejo11")
+			password = envOrDotEnv("GITHUB_TOKEN")
+		}
+	}
 }
 
 ext {
@@ -42,8 +75,8 @@ dependencies {
 	implementation 'org.flywaydb:flyway-core:10.17.0'
 	implementation 'org.flywaydb:flyway-database-postgresql:10.17.0'
 
-	// Common library
-	//implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
+	// Shared kernel (GitHub Packages)
+	implementation 'io.github.alexisTrejo11:shared-kernel:2.0.0'
 
 	// Postgres
 	runtimeOnly 'org.postgresql:postgresql'
@@ -94,16 +127,26 @@ bootRun {
             //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     ]
 
-    // Load .env file from project root
+    def loadedLogPath = System.getenv('LOG_PATH')
     def envFile = file('.env')
     if (envFile.exists()) {
         envFile.readLines().each { line ->
             if (line && !line.startsWith('#') && line.contains('=')) {
                 def (key, value) = line.split('=', 2)
-                systemProperty key.trim(), value.trim()
-                environment key.trim(), value.trim()
+                key = key.trim()
+                value = value.trim()
+                if (key == 'LOG_PATH') {
+                    loadedLogPath = value
+                }
+                systemProperty key, value
+                environment key, value
             }
         }
+    }
+    if (!loadedLogPath) {
+        def localLogs = file('logs').absolutePath
+        systemProperty 'LOG_PATH', localLogs
+        environment 'LOG_PATH', localLogs
     }
 }
 

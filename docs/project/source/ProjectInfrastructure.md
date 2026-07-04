@@ -214,29 +214,39 @@ deploymentLayers:
 
 # DockerFile[]
   # inventory-service
-- name: "Reverse Proxy / Edge"
-  color: "#009688"
-  components:
-  - name: "Nginx 1.27"
-    icon: "nginx"
-    description: "inventory-nginx — terminates TLS on host :443"
+  - name: "Reverse Proxy / Edge"
+    color: "#009688"
+    components:
+      - name: "Nginx 1.27"
+        icon: "nginx"
+        description: "inventory-nginx — terminates TLS on host :443"
 
-- name: "Application Layer"
-  color: "#4CAF50"
-  components:
-  - name: "Inventory Service" icon: "spring" description: "Spring Boot 3.3.2 application with Java 23 (build.gradle) but Dockerfile uses Java 17"
-  - name: "Actuator" icon: "monitoring" description: "Health, info, metrics, env, prometheus endpoints exposed"
+  - name: "Application Layer"
+    color: "#4CAF50"
+    components:
+      - name: "Inventory Service"
+        icon: "spring"
+        description: "Spring Boot 3.3.2 application with Java 23 (build.gradle) but Dockerfile uses Java 17"
+      - name: "Actuator"
+        icon: "monitoring"
+        description: "Health, info, metrics, env, prometheus endpoints exposed"
 
-- name: "Data Layer"
-  color: "#2196F3"
-  components:
-  - name: "PostgreSQL 15" icon: "postgresql" description: "Persistent storage with Flyway migrations (currently disabled)"
-  - name: "Redis" icon: "redis" description: "Cache with 1 hour TTL, lettuce connection pool"
+  - name: "Data Layer"
+    color: "#2196F3"
+    components:
+      - name: "PostgreSQL 15"
+        icon: "postgresql"
+        description: "Persistent storage with Flyway migrations (currently disabled)"
+      - name: "Redis"
+        icon: "redis"
+        description: "Cache with 1 hour TTL, lettuce connection pool"
 
-- name: "Messaging Layer"
-  color: "#FF9800"
-  components:
-  - name: "RabbitMQ" icon: "rabbitmq" description: "AMQP messaging for inventory events (INCONSISTENT: other services use Kafka)"
+  - name: "Messaging Layer"
+    color: "#FF9800"
+    components:
+      - name: "RabbitMQ"
+        icon: "rabbitmq"
+        description: "AMQP messaging for inventory events (INCONSISTENT: other services use Kafka)"
 
 # DockerFile[]
   # order-service
@@ -250,44 +260,88 @@ deploymentLayers:
   - name: "API Layer"
     color: "#4CAF50"
     components:
-      - name: "SaleOrderController" icon: "controller" description: "REST endpoints for order CRUD operations accessible by ADMIN and EMPLOYEE roles"
-      - name: "SaleOrderStatusController" icon: "controller" description: "REST endpoints for order status transitions and workflow management"
-      - name: "UserOrderController" icon: "controller" description: "REST endpoints for customer-specific order access with CUSTOMER and ADMIN role access"
-      - name: "AddressController" icon: "controller" description: "REST endpoints for delivery address management"
-      - name: "UserController" icon: "controller" description: "REST endpoints for user management operations"
+      - name: "SaleOrderController"
+        icon: "controller"
+        description: "REST endpoints for order CRUD operations accessible by ADMIN and EMPLOYEE roles"
+      - name: "SaleOrderStatusController"
+        icon: "controller"
+        description: "REST endpoints for order status transitions and workflow management"
+      - name: "UserOrderController"
+        icon: "controller"
+        description: "REST endpoints for customer-specific order access with CUSTOMER and ADMIN role access"
+      - name: "AddressController"
+        icon: "controller"
+        description: "REST endpoints for delivery address management"
+      - name: "UserController"
+        icon: "controller"
+        description: "REST endpoints for user management operations"
 
   - name: "Application Layer"
     color: "#2196F3"
     components:
-      - name: "OrderApplicationFacade" icon: "service" description: "Unified facade implementing both command and query services"
-      - name: "OrderCommandHandler" icon: "handler" description: "Handles order command operations with logging decorators"
-      - name: "OrderStatusCommandHandler" icon: "handler" description: "Handles order status transition commands"
-      - name: "OrderQueryHandler" icon: "handler" description: "Handles order query operations with pagination and filtering"
+      - name: "OrderApplicationFacade"
+        icon: "service"
+        description: "Unified facade implementing both command and query services"
+      - name: "OrderCommandHandler"
+        icon: "handler"
+        description: "Handles order command operations with logging decorators"
+      - name: "OrderStatusCommandHandler"
+        icon: "handler"
+        description: "Handles order status transition commands"
+      - name: "OrderQueryHandler"
+        icon: "handler"
+        description: "Handles order query operations with pagination and filtering"
 
   - name: "Domain Layer"
     color: "#FF9800"
     components:
-      - name: "Order Aggregate Root" icon: "domain" description: "Core domain entity encapsulating order state, business rules, and validation"
-      - name: "OrderStatus Enum" icon: "domain" description: "State machine defining valid order status transitions"
-      - name: "DeliveryMethod Enum" icon: "domain" description: "Enum for STORE_PICKUP, EXPRESS_DELIVERY, STANDARD_DELIVERY"
-      - name: "OrderCreatedEvent" icon: "event" description: "Domain event published when a new order is created"
-      - name: "OrderStatusChangedEvent" icon: "event" description: "Domain event published when order status changes"
+      - name: "Order Aggregate Root"
+        icon: "domain"
+        description: "Core domain entity encapsulating order state, business rules, and validation"
+      - name: "OrderStatus Enum"
+        icon: "domain"
+        description: "State machine defining valid order status transitions"
+      - name: "DeliveryMethod Enum"
+        icon: "domain"
+        description: "Enum for STORE_PICKUP, EXPRESS_DELIVERY, STANDARD_DELIVERY"
+      - name: "OrderCreatedEvent"
+        icon: "event"
+        description: "Domain event published when a new order is created"
+      - name: "OrderStatusChangedEvent"
+        icon: "event"
+        description: "Domain event published when order status changes"
 
   - name: "Infrastructure Layer"
     color: "#9C27B0"
     components:
-      - name: "OrderRepositoryImpl" icon: "repository" description: "JPA-based order repository implementation with specification-based search"
-      - name: "JpaOrderRepository" icon: "repository" description: "Spring Data JPA repository interface for OrderModel"
-      - name: "UserServiceImpl" icon: "service" description: "User service with caching and logging decorators"
-      - name: "AddressServiceImpl" icon: "service" description: "Address service for delivery address management"
+      - name: "OrderRepositoryImpl"
+        icon: "repository"
+        description: "JPA-based order repository implementation with specification-based search"
+      - name: "JpaOrderRepository"
+        icon: "repository"
+        description: "Spring Data JPA repository interface for OrderModel"
+      - name: "UserServiceImpl"
+        icon: "service"
+        description: "User service with caching and logging decorators"
+      - name: "AddressServiceImpl"
+        icon: "service"
+        description: "Address service for delivery address management"
 
   - name: "Observability Layer"
     color: "#F44336"
     components:
-      - name: "Spring Boot Actuator" icon: "monitoring" description: "Health checks, metrics, and environment info endpoints"
-      - name: "Spring Boot Admin Client" icon: "monitoring" description: "Registers with admin server for centralized management"
-      - name: "Logstash Encoder" icon: "logging" description: "JSON log encoding for ELK stack integration"
-      - name: "OpenAPI/Swagger" icon: "docs" description: "Automated API documentation with springdoc-openapi"
+      - name: "Spring Boot Actuator"
+        icon: "monitoring"
+        description: "Health checks, metrics, and environment info endpoints"
+      - name: "Spring Boot Admin Client"
+        icon: "monitoring"
+        description: "Registers with admin server for centralized management"
+      - name: "Logstash Encoder"
+        icon: "logging"
+        description: "JSON log encoding for ELK stack integration"
+      - name: "OpenAPI/Swagger"
+        icon: "docs"
+        description: "Automated API documentation with springdoc-openapi"
 
 # DockerFile[]
   # payment-service
@@ -307,9 +361,15 @@ deploymentLayers:
   - name: "API Layer (Input Adapters)"
     color: "#4CAF50"
     components:
-      - name: "PaymentController" icon: "controller" description: "REST endpoints for payment lifecycle (initiate, refund, query)"
-      - name: "SaleController" icon: "controller" description: "REST endpoints for sale queries (read-only from API)"
-      - name: "StripeWebhookController" icon: "controller" description: "Webhook receiver for Stripe events with signature verification"
+      - name: "PaymentController"
+        icon: "controller"
+        description: "REST endpoints for payment lifecycle (initiate, refund, query)"
+      - name: "SaleController"
+        icon: "controller"
+        description: "REST endpoints for sale queries (read-only from API)"
+      - name: "StripeWebhookController"
+        icon: "controller"
+        description: "Webhook receiver for Stripe events with signature verification"
     expanded: true
     responsibilities:
       - "Accept HTTP requests with validation"
@@ -325,8 +385,12 @@ deploymentLayers:
   - name: "Application Layer"
     color: "#2196F3"
     components:
-      - name: "PaymentApplicationService" icon: "service" description: "Unified interface for payment and sale operations"
-      - name: "PaymentApplicationServiceImpl" icon: "service" description: "Orchestrates payment lifecycle and sale creation (if exists)"
+      - name: "PaymentApplicationService"
+        icon: "service"
+        description: "Unified interface for payment and sale operations"
+      - name: "PaymentApplicationServiceImpl"
+        icon: "service"
+        description: "Orchestrates payment lifecycle and sale creation (if exists)"
     expanded: true
     responsibilities:
       - "Orchestrate domain logic execution"
@@ -341,15 +405,33 @@ deploymentLayers:
   - name: "Domain Layer (Core)"
     color: "#FF9800"
     components:
-      - name: "Payment" icon: "domain" description: "Aggregate root with lifecycle: PENDING → PROCESSING → COMPLETED → REFUNDED"
-      - name: "Sale" icon: "domain" description: "Aggregate root auto-generated from completed payments"
-      - name: "PaymentStatus" icon: "domain" description: "Enum with 6 states and business rule validation"
-      - name: "SaleStatus" icon: "domain" description: "Enum with 4 states for sale lifecycle"
-      - name: "PaymentMethod" icon: "domain" description: "Enum for 6 payment methods"
-      - name: "PaymentCompletedEvent" icon: "event" description: "Domain event when payment succeeds"
-      - name: "PaymentFailedEvent" icon: "event" description: "Domain event when payment fails"
-      - name: "Money" icon: "value" description: "Value object for monetary amounts with currency"
-      - name: "PaymentGatewayRef" icon: "value" description: "Value object tracking Stripe PaymentIntent and Charge IDs"
+      - name: "Payment"
+        icon: "domain"
+        description: "Aggregate root with lifecycle: PENDING → PROCESSING → COMPLETED → REFUNDED"
+      - name: "Sale"
+        icon: "domain"
+        description: "Aggregate root auto-generated from completed payments"
+      - name: "PaymentStatus"
+        icon: "domain"
+        description: "Enum with 6 states and business rule validation"
+      - name: "SaleStatus"
+        icon: "domain"
+        description: "Enum with 4 states for sale lifecycle"
+      - name: "PaymentMethod"
+        icon: "domain"
+        description: "Enum for 6 payment methods"
+      - name: "PaymentCompletedEvent"
+        icon: "event"
+        description: "Domain event when payment succeeds"
+      - name: "PaymentFailedEvent"
+        icon: "event"
+        description: "Domain event when payment fails"
+      - name: "Money"
+        icon: "value"
+        description: "Value object for monetary amounts with currency"
+      - name: "PaymentGatewayRef"
+        icon: "value"
+        description: "Value object tracking Stripe PaymentIntent and Charge IDs"
     expanded: true
     responsibilities:
       - "Encapsulate business rules and invariants"
@@ -364,14 +446,30 @@ deploymentLayers:
   - name: "Infrastructure Layer (Output Adapters)"
     color: "#9C27B0"
     components:
-      - name: "PaymentRepositoryImpl" icon: "repository" description: "JPA-based payment persistence"
-      - name: "SaleRepositoryImpl" icon: "repository" description: "JPA-based sale persistence"
-      - name: "JpaPaymentRepository" icon: "repository" description: "Spring Data JPA interface for PaymentEntity"
-      - name: "JpaSaleRepository" icon: "repository" description: "Spring Data JPA interface for SaleEntity"
-      - name: "StripeGatewayAdapter" icon: "gateway" description: "STUB - returns null/empty, not implemented!"
-      - name: "SpringEventPublisherAdapter" icon: "event" description: "Spring ApplicationEventPublisher adapter"
-      - name: "PaymentMapper" icon: "mapper" description: "Domain to JPA entity mapping"
-      - name: "SaleMapper" icon: "mapper" description: "Domain to JPA entity mapping"
+      - name: "PaymentRepositoryImpl"
+        icon: "repository"
+        description: "JPA-based payment persistence"
+      - name: "SaleRepositoryImpl"
+        icon: "repository"
+        description: "JPA-based sale persistence"
+      - name: "JpaPaymentRepository"
+        icon: "repository"
+        description: "Spring Data JPA interface for PaymentEntity"
+      - name: "JpaSaleRepository"
+        icon: "repository"
+        description: "Spring Data JPA interface for SaleEntity"
+      - name: "StripeGatewayAdapter"
+        icon: "gateway"
+        description: "STUB - returns null/empty, not implemented!"
+      - name: "SpringEventPublisherAdapter"
+        icon: "event"
+        description: "Spring ApplicationEventPublisher adapter"
+      - name: "PaymentMapper"
+        icon: "mapper"
+        description: "Domain to JPA entity mapping"
+      - name: "SaleMapper"
+        icon: "mapper"
+        description: "Domain to JPA entity mapping"
     expanded: true
     responsibilities:
       - "Implement output ports from domain"
@@ -388,9 +486,15 @@ deploymentLayers:
   - name: "Observability Layer"
     color: "#F44336"
     components:
-      - name: "Spring Boot Actuator" icon: "monitoring" description: "Health and metrics endpoints (configured but not in build.gradle)"
-      - name: "Spring Boot Admin Client" icon: "monitoring" description: "Registers with admin server for centralized management"
-      - name: "OpenAPI/Swagger" icon: "docs" description: "Automated API documentation at /swagger-ui.html"
+      - name: "Spring Boot Actuator"
+        icon: "monitoring"
+        description: "Health and metrics endpoints (configured but not in build.gradle)"
+      - name: "Spring Boot Admin Client"
+        icon: "monitoring"
+        description: "Registers with admin server for centralized management"
+      - name: "OpenAPI/Swagger"
+        icon: "docs"
+        description: "Automated API documentation at /swagger-ui.html"
     expanded: false
     responsibilities:
       - "Expose health and metrics endpoints"
@@ -519,7 +623,7 @@ dockerFiles:
       volumes:
         - postgres-data:/var/lib/postgresql/data
       networks:
-        - drugstore-network
+        - drugstore_network
       healthcheck:
         test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d address_db"]
         interval: 10s
@@ -538,7 +642,7 @@ dockerFiles:
       volumes:
         - redis-data:/data
       networks:
-        - drugstore-network
+        - drugstore_network
       healthcheck:
         test: ["CMD", "redis-cli", "ping"]
         interval: 10s
@@ -597,7 +701,7 @@ dockerFiles:
         address-service:
           condition: service_healthy
       networks:
-        - drugstore-network
+        - drugstore_network
       healthcheck:
         test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
         interval: 15s
@@ -695,7 +799,7 @@ dockerFiles:
       volumes:
         - redis-data:/data
       networks:
-        - drugstore-network
+        - drugstore_network
       healthcheck:
         test: ["CMD", "redis-cli", "ping"]
         interval: 10s
@@ -718,7 +822,7 @@ dockerFiles:
         auth-service:
           condition: service_healthy
       networks:
-        - drugstore-network
+        - drugstore_network
       healthcheck:
         test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
         interval: 15s
@@ -817,7 +921,7 @@ dockerFiles:
       volumes:
         - postgres-data:/var/lib/postgresql/data
       networks:
-        - drugstore-network
+        - drugstore_network
       healthcheck:
         test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d cart_db"]
         interval: 10s
@@ -836,7 +940,7 @@ dockerFiles:
       volumes:
         - redis-data:/data
       networks:
-        - drugstore-network
+        - drugstore_network
       healthcheck:
         test: ["CMD", "redis-cli", "ping"]
         interval: 10s
@@ -859,7 +963,7 @@ dockerFiles:
         cart-service:
           condition: service_healthy
       networks:
-        - drugstore-network
+        - drugstore_network
       healthcheck:
         test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
         interval: 15s
@@ -893,45 +997,45 @@ dockerFiles:
         employee-service:
           condition: service_started
   # inventory-service
-- service: "inventory-service"
-  description: "Dockerfile using openjdk:17-jdk-slim - VERSION MISMATCH with build.gradle which specifies Java 23"
-  content: |
-    # Use an official OpenJDK runtime as a parent image
-    FROM openjdk:17-jdk-slim
+  - service: "inventory-service"
+    description: "Dockerfile using openjdk:17-jdk-slim - VERSION MISMATCH with build.gradle which specifies Java 23"
+    content: |
+      # Use an official OpenJDK runtime as a parent image
+      FROM openjdk:17-jdk-slim
 
-    # Set the working directory in the container
-    WORKDIR /app
+      # Set the working directory in the container
+      WORKDIR /app
 
-    # Copy the entire project structure
-    COPY .. .
+      # Copy the entire project structure
+      COPY .. .
 
-    # Install dependencies and build the specific project
-    RUN ./gradlew :inventory-service:build -x test
+      # Install dependencies and build the specific project
+      RUN ./gradlew :inventory-service:build -x test
 
-    # Set the working directory to the inventory-service for the runtime
-    WORKDIR /app/inventory-service
+      # Set the working directory to the inventory-service for the runtime
+      WORKDIR /app/inventory-service
 
-    # Expose the port the app runs on
-    EXPOSE 8082
+      # Expose the port the app runs on
+      EXPOSE 8082
 
-    # Run the jar file
-    ENTRYPOINT ["java", "-jar", "build/libs/inventory-service-0.0.1-SNAPSHOT.jar"]
+      # Run the jar file
+      ENTRYPOINT ["java", "-jar", "build/libs/inventory-service-0.0.1-SNAPSHOT.jar"]
 
-- service: "nginx"
-  description: "Nginx reverse proxy — TLS :443, redirect :80, least_conn upstream inventory_backend"
-  content: |
-    image: nginx:1.27-alpine
-    container_name: inventory-nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl/nginx.crt:/etc/nginx/ssl/nginx.crt:ro
-      - ./nginx/ssl/nginx.key:/etc/nginx/ssl/nginx.key:ro
-    depends_on:
-      inventory-service:
-        condition: service_healthy
+  - service: "nginx"
+    description: "Nginx reverse proxy — TLS :443, redirect :80, least_conn upstream inventory_backend"
+    content: |
+      image: nginx:1.27-alpine
+      container_name: inventory-nginx
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        - ./nginx/ssl/nginx.crt:/etc/nginx/ssl/nginx.crt:ro
+        - ./nginx/ssl/nginx.key:/etc/nginx/ssl/nginx.key:ro
+      depends_on:
+        inventory-service:
+          condition: service_healthy
   # order-service
   - service: "order-service"
     description: "Spring Boot container on HTTP :8080 in compose (image order-service:latest)"
@@ -1130,18 +1234,39 @@ cloudServices:
     icon: "aws-ecs"
     cost: "PLACEHOLDER: ~$30-150/month"
 
-# DeploymentLayer[]
+# CloudService[]
   # inventory-service
-- name: "PostgreSQL" purpose: "Primary database for inventory, batches, reservations, and movements" icon: "postgresql" cost: "PLACEHOLDER"
-- name: "Redis" purpose: "Caching layer for inventory queries and rate limiting" icon: "redis" cost: "PLACEHOLDER"
-- name: "RabbitMQ" purpose: "Message queue for asynchronous inventory events" icon: "rabbitmq" cost: "PLACEHOLDER"
+  - name: "PostgreSQL"
+    purpose: "Primary database for inventory, batches, reservations, and movements"
+    icon: "postgresql"
+    cost: "PLACEHOLDER"
+  - name: "Redis"
+    purpose: "Caching layer for inventory queries and rate limiting"
+    icon: "redis"
+    cost: "PLACEHOLDER"
+  - name: "RabbitMQ"
+    purpose: "Message queue for asynchronous inventory events"
+    icon: "rabbitmq"
+    cost: "PLACEHOLDER"
 
 # DeploymentLayer[]
   # order-service
-  - name: "PostgreSQL" purpose: "Primary relational database for order persistence" icon: "database" cost: "TBD - Planned for cloud deployment"
-  - name: "Redis" purpose: "Caching layer for improved read performance" icon: "cache" cost: "TBD - Planned for cloud deployment"
-  - name: "OpenSearch" purpose: "Log aggregation and search" icon: "search" cost: "TBD - Planned for cloud deployment"
-  - name: "Spring Boot Admin" purpose: "Application monitoring and management" icon: "monitoring" cost: "Free (self-hosted)"
+  - name: "PostgreSQL"
+    purpose: "Primary relational database for order persistence"
+    icon: "database"
+    cost: "TBD - Planned for cloud deployment"
+  - name: "Redis"
+    purpose: "Caching layer for improved read performance"
+    icon: "cache"
+    cost: "TBD - Planned for cloud deployment"
+  - name: "OpenSearch"
+    purpose: "Log aggregation and search"
+    icon: "search"
+    cost: "TBD - Planned for cloud deployment"
+  - name: "Spring Boot Admin"
+    purpose: "Application monitoring and management"
+    icon: "monitoring"
+    cost: "Free (self-hosted)"
 
 # DeploymentLayer[]
   # payment-service
@@ -1373,34 +1498,94 @@ metrics:
     icon: "nginx"
     description: "HTTP→HTTPS redirect on :80, TLS termination on :443, least_conn load balancing"
 
-# CloudService[]
+# InfrastructureMetric[]
   # inventory-service
-- label: "API Response Time" value: "PLACEHOLDER" icon: "speed" description: "Average API response time for inventory operations"
-- label: "Cache Hit Rate" value: "PLACEHOLDER" icon: "storage" description: "Redis cache hit rate for inventory queries"
-- label: "Batch Expiration Alerts" value: "PLACEHOLDER" icon: "warning" description: "Number of batches near expiration (30 days threshold)"
-- label: "Active Reservations" value: "PLACEHOLDER" icon: "lock" description: "Currently active stock reservations"
-- label: "Reverse Proxy" value: "Nginx 1.27" icon: "nginx" description: "TLS :443, redirect :80; upstream inventory_backend → inventory-service:8080 (least_conn)"
+  - label: "API Response Time"
+    value: "PLACEHOLDER"
+    icon: "speed"
+    description: "Average API response time for inventory operations"
+  - label: "Cache Hit Rate"
+    value: "PLACEHOLDER"
+    icon: "storage"
+    description: "Redis cache hit rate for inventory queries"
+  - label: "Batch Expiration Alerts"
+    value: "PLACEHOLDER"
+    icon: "warning"
+    description: "Number of batches near expiration (30 days threshold)"
+  - label: "Active Reservations"
+    value: "PLACEHOLDER"
+    icon: "lock"
+    description: "Currently active stock reservations"
+  - label: "Reverse Proxy"
+    value: "Nginx 1.27"
+    icon: "nginx"
+    description: "TLS :443, redirect :80; upstream inventory_backend → inventory-service:8080 (least_conn)"
 
 # CloudService[]
   # order-service
-  - label: "Service Port" value: "8080 (compose)" icon: "server" description: "HTTP inside Docker network when SPRING_PROFILES_ACTIVE=docker; optional standalone SSL profile may differ"
-  - label: "Reverse Proxy" value: "Nginx 1.27" icon: "nginx" description: "TLS on host :443, redirect :80, upstream order_backend with least_conn to order-service:8080"
-  - label: "Database" value: "PostgreSQL 15" icon: "database" description: "Relational database for order persistence with Flyway migrations"
-  - label: "Cache" value: "Redis 7" icon: "cache" description: "In-memory data store for caching frequently accessed order data"
-  - label: "Search Engine" value: "OpenSearch 2.9.0" icon: "search" description: "Distributed search and analytics engine for log aggregation"
-  - label: "Log Processor" value: "Logstash 8.11.0" icon: "logs" description: "Data processing pipeline for shipping logs to OpenSearch"
-  - label: "Dashboard" value: "OpenSearch Dashboards 2.9.0" icon: "dashboard" description: "Visualization and monitoring dashboard for logs and metrics"
-  - label: "Rate Limiting" value: "5000 req/hour" icon: "rate-limit" description: "Global rate limit with per-profile limits for standard, sensitive, public, and admin endpoints"
+  - label: "Service Port"
+    value: "8080 (compose)"
+    icon: "server"
+    description: "HTTP inside Docker network when SPRING_PROFILES_ACTIVE=docker; optional standalone SSL profile may differ"
+  - label: "Reverse Proxy"
+    value: "Nginx 1.27"
+    icon: "nginx"
+    description: "TLS on host :443, redirect :80, upstream order_backend with least_conn to order-service:8080"
+  - label: "Database"
+    value: "PostgreSQL 15"
+    icon: "database"
+    description: "Relational database for order persistence with Flyway migrations"
+  - label: "Cache"
+    value: "Redis 7"
+    icon: "cache"
+    description: "In-memory data store for caching frequently accessed order data"
+  - label: "Search Engine"
+    value: "OpenSearch 2.9.0"
+    icon: "search"
+    description: "Distributed search and analytics engine for log aggregation"
+  - label: "Log Processor"
+    value: "Logstash 8.11.0"
+    icon: "logs"
+    description: "Data processing pipeline for shipping logs to OpenSearch"
+  - label: "Dashboard"
+    value: "OpenSearch Dashboards 2.9.0"
+    icon: "dashboard"
+    description: "Visualization and monitoring dashboard for logs and metrics"
+  - label: "Rate Limiting"
+    value: "5000 req/hour"
+    icon: "rate-limit"
+    description: "Global rate limit with per-profile limits for standard, sensitive, public, and admin endpoints"
 
 # CloudService[]
   # payment-service
-  - label: "Service Port" value: "8080 (compose)" icon: "server" description: "HTTP inside Docker network; host publishes 8085:8080 for direct access"
-  - label: "Reverse Proxy" value: "Nginx 1.27" icon: "nginx" description: "TLS :443 and redirect :80; upstream payment_backend → payment-service:8080 with least_conn"
-  - label: "Database" value: "PostgreSQL" icon: "database" description: "Relational database for payment and sale persistence with Flyway migrations"
-  - label: "Cache" value: "Redis" icon: "cache" description: "In-memory data store for caching frequently accessed payment data"
-  - label: "Message Broker" value: "Kafka (Dependency Only)" icon: "queue" description: "Kafka dependency in build.gradle but no implementation found"
-  - label: "Payment Gateway" value: "Stripe (Planned)" icon: "payment" description: "StripeGatewayAdapter is a STUB - not implemented"
-  - label: "Monitoring" value: "Spring Boot Admin 3.0.0" icon: "monitoring" description: "Application monitoring and management client"
+  - label: "Service Port"
+    value: "8080 (compose)"
+    icon: "server"
+    description: "HTTP inside Docker network; host publishes 8085:8080 for direct access"
+  - label: "Reverse Proxy"
+    value: "Nginx 1.27"
+    icon: "nginx"
+    description: "TLS :443 and redirect :80; upstream payment_backend → payment-service:8080 with least_conn"
+  - label: "Database"
+    value: "PostgreSQL"
+    icon: "database"
+    description: "Relational database for payment and sale persistence with Flyway migrations"
+  - label: "Cache"
+    value: "Redis"
+    icon: "cache"
+    description: "In-memory data store for caching frequently accessed payment data"
+  - label: "Message Broker"
+    value: "Kafka (Dependency Only)"
+    icon: "queue"
+    description: "Kafka dependency in build.gradle but no implementation found"
+  - label: "Payment Gateway"
+    value: "Stripe (Planned)"
+    icon: "payment"
+    description: "StripeGatewayAdapter is a STUB - not implemented"
+  - label: "Monitoring"
+    value: "Spring Boot Admin 3.0.0"
+    icon: "monitoring"
+    description: "Application monitoring and management client"
 
 # CloudService[]
   # store-service
@@ -1512,7 +1697,13 @@ metrics:
 
 cloudServices:
 
-- name: "" purpose: "" icon: "" cost: ""
+- name: ""
+
+  purpose: ""
+
+  icon: ""
+
+  cost: ""
 
 # DeploymentLayer[]
 
@@ -1523,7 +1714,9 @@ deploymentLayers:
     # DeploymentComponent[]
 
     components:
-    - name: "" icon: "" description: ""
+    - name: ""
+      icon: ""
+      description: ""
 
 # DockerFile[]
 
@@ -1713,7 +1906,7 @@ dockerFiles:
 <!-- Source: store-service/docs/project/source/ProjectInfrastructure.md -->
 # Infrastructure
 
-Compose file **`docker-compose.yml`** defines **`drugstore-network`**, persistent volumes for Postgres/Redis/Observability, and **mandatory env** variables **`JWT_SECRET_KEY`** and **`SPRING_KAFKA_BOOTSTRAP_SERVERS`** (Kafka container is **not** defined in this file — supply an external broker or add a kafka service).
+Compose file **`docker-compose.yml`** defines **`drugstore_network`**, persistent volumes for Postgres/Redis/Observability, and **mandatory env** variables **`JWT_SECRET_KEY`** and **`SPRING_KAFKA_BOOTSTRAP_SERVERS`** (Kafka container is **not** defined in this file — supply an external broker or add a kafka service).
 
 > [!danger] Blocking env without local Kafka  
 > Services will fail to start if **`SPRING_KAFKA_BOOTSTRAP_SERVERS`** is unset, even though event publishing is a **no-op** in code — consider relaxing Spring Kafka auto-config or providing an embedded/disabled profile.
@@ -1879,6 +2072,6 @@ dockerFiles:
 ## Raw commands (reference)
 
 - Copy `.env.example` → `.env`, set Kafka + JWT.
-- `docker compose up --build` from `user-service/` (network `drugstore-network`).
+- `docker compose up --build` from `user-service/` (network `drugstore_network`).
 
 <!-- END user-service -->

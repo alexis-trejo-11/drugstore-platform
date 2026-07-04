@@ -14,7 +14,6 @@ import io.github.alexisTrejo11.drugstore.stores.infrastructure.inbound.rest.dto.
 import io.github.alexisTrejo11.drugstore.stores.infrastructure.inbound.rest.dto.request.StoreContactInfoRequest;
 import libs_kernel.security.ApiSecurityResponseWriter;
 import libs_kernel.security.jwt.JwtTokenValidator;
-import io.github.alexisTrejo11.drugstore.stores.config.security.RestAccessDeniedHandler;
 import io.github.alexisTrejo11.drugstore.stores.config.security.RestAuthenticationEntryPoint;
 import io.github.alexisTrejo11.drugstore.stores.config.security.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;

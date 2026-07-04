@@ -1,85 +1,119 @@
 ---
 # InfrastructureMetric[]
 metrics:
-- label: "API Response Time" value: "PLACEHOLDER" icon: "speed" description: "Average API response time for inventory operations"
-- label: "Cache Hit Rate" value: "PLACEHOLDER" icon: "storage" description: "Redis cache hit rate for inventory queries"
-- label: "Batch Expiration Alerts" value: "PLACEHOLDER" icon: "warning" description: "Number of batches near expiration (30 days threshold)"
-- label: "Active Reservations" value: "PLACEHOLDER" icon: "lock" description: "Currently active stock reservations"
-- label: "Reverse Proxy" value: "Nginx 1.27" icon: "nginx" description: "TLS :443, redirect :80; upstream inventory_backend → inventory-service:8080 (least_conn)"
+  - label: "API Response Time"
+    value: "PLACEHOLDER"
+    icon: "speed"
+    description: "Average API response time for inventory operations"
+  - label: "Cache Hit Rate"
+    value: "PLACEHOLDER"
+    icon: "storage"
+    description: "Redis cache hit rate for inventory queries"
+  - label: "Batch Expiration Alerts"
+    value: "PLACEHOLDER"
+    icon: "warning"
+    description: "Number of batches near expiration (30 days threshold)"
+  - label: "Active Reservations"
+    value: "PLACEHOLDER"
+    icon: "lock"
+    description: "Currently active stock reservations"
+  - label: "Reverse Proxy"
+    value: "Nginx 1.27"
+    icon: "nginx"
+    description: "TLS :443, redirect :80; upstream inventory_backend → inventory-service:8080 (least_conn)"
 
 # CloudService[]
 cloudServices:
-- name: "PostgreSQL" purpose: "Primary database for inventory, batches, reservations, and movements" icon: "postgresql" cost: "PLACEHOLDER"
-- name: "Redis" purpose: "Caching layer for inventory queries and rate limiting" icon: "redis" cost: "PLACEHOLDER"
-- name: "RabbitMQ" purpose: "Message queue for asynchronous inventory events" icon: "rabbitmq" cost: "PLACEHOLDER"
+  - name: "PostgreSQL"
+    purpose: "Primary database for inventory, batches, reservations, and movements"
+    icon: "postgresql"
+    cost: "PLACEHOLDER"
+  - name: "Redis"
+    purpose: "Caching layer for inventory queries and rate limiting"
+    icon: "redis"
+    cost: "PLACEHOLDER"
+  - name: "RabbitMQ"
+    purpose: "Message queue for asynchronous inventory events"
+    icon: "rabbitmq"
+    cost: "PLACEHOLDER"
 
 # DeploymentLayer[]
 deploymentLayers:
-- name: "Reverse Proxy / Edge"
-  color: "#009688"
-  components:
-  - name: "Nginx 1.27"
-    icon: "nginx"
-    description: "inventory-nginx — terminates TLS on host :443"
+  - name: "Reverse Proxy / Edge"
+    color: "#009688"
+    components:
+      - name: "Nginx 1.27"
+        icon: "nginx"
+        description: "inventory-nginx — terminates TLS on host :443"
 
-- name: "Application Layer"
-  color: "#4CAF50"
-  components:
-  - name: "Inventory Service" icon: "spring" description: "Spring Boot 3.3.2 application with Java 23 (build.gradle) but Dockerfile uses Java 17"
-  - name: "Actuator" icon: "monitoring" description: "Health, info, metrics, env, prometheus endpoints exposed"
+  - name: "Application Layer"
+    color: "#4CAF50"
+    components:
+      - name: "Inventory Service"
+        icon: "spring"
+        description: "Spring Boot 3.3.2 application with Java 23 (build.gradle) but Dockerfile uses Java 17"
+      - name: "Actuator"
+        icon: "monitoring"
+        description: "Health, info, metrics, env, prometheus endpoints exposed"
 
-- name: "Data Layer"
-  color: "#2196F3"
-  components:
-  - name: "PostgreSQL 15" icon: "postgresql" description: "Persistent storage with Flyway migrations (currently disabled)"
-  - name: "Redis" icon: "redis" description: "Cache with 1 hour TTL, lettuce connection pool"
+  - name: "Data Layer"
+    color: "#2196F3"
+    components:
+      - name: "PostgreSQL 15"
+        icon: "postgresql"
+        description: "Persistent storage with Flyway migrations (currently disabled)"
+      - name: "Redis"
+        icon: "redis"
+        description: "Cache with 1 hour TTL, lettuce connection pool"
 
-- name: "Messaging Layer"
-  color: "#FF9800"
-  components:
-  - name: "RabbitMQ" icon: "rabbitmq" description: "AMQP messaging for inventory events (INCONSISTENT: other services use Kafka)"
+  - name: "Messaging Layer"
+    color: "#FF9800"
+    components:
+      - name: "RabbitMQ"
+        icon: "rabbitmq"
+        description: "AMQP messaging for inventory events (INCONSISTENT: other services use Kafka)"
 
 # DockerFile[]
 dockerFiles:
-- service: "inventory-service"
-  description: "Dockerfile using openjdk:17-jdk-slim - VERSION MISMATCH with build.gradle which specifies Java 23"
-  content: |
-    # Use an official OpenJDK runtime as a parent image
-    FROM openjdk:17-jdk-slim
+  - service: "inventory-service"
+    description: "Dockerfile using openjdk:17-jdk-slim - VERSION MISMATCH with build.gradle which specifies Java 23"
+    content: |
+      # Use an official OpenJDK runtime as a parent image
+      FROM openjdk:17-jdk-slim
 
-    # Set the working directory in the container
-    WORKDIR /app
+      # Set the working directory in the container
+      WORKDIR /app
 
-    # Copy the entire project structure
-    COPY .. .
+      # Copy the entire project structure
+      COPY .. .
 
-    # Install dependencies and build the specific project
-    RUN ./gradlew :inventory-service:build -x test
+      # Install dependencies and build the specific project
+      RUN ./gradlew :inventory-service:build -x test
 
-    # Set the working directory to the inventory-service for the runtime
-    WORKDIR /app/inventory-service
+      # Set the working directory to the inventory-service for the runtime
+      WORKDIR /app/inventory-service
 
-    # Expose the port the app runs on
-    EXPOSE 8082
+      # Expose the port the app runs on
+      EXPOSE 8082
 
-    # Run the jar file
-    ENTRYPOINT ["java", "-jar", "build/libs/inventory-service-0.0.1-SNAPSHOT.jar"]
+      # Run the jar file
+      ENTRYPOINT ["java", "-jar", "build/libs/inventory-service-0.0.1-SNAPSHOT.jar"]
 
-- service: "nginx"
-  description: "Nginx reverse proxy — TLS :443, redirect :80, least_conn upstream inventory_backend"
-  content: |
-    image: nginx:1.27-alpine
-    container_name: inventory-nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl/nginx.crt:/etc/nginx/ssl/nginx.crt:ro
-      - ./nginx/ssl/nginx.key:/etc/nginx/ssl/nginx.key:ro
-    depends_on:
-      inventory-service:
-        condition: service_healthy
+  - service: "nginx"
+    description: "Nginx reverse proxy — TLS :443, redirect :80, least_conn upstream inventory_backend"
+    content: |
+      image: nginx:1.27-alpine
+      container_name: inventory-nginx
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        - ./nginx/ssl/nginx.crt:/etc/nginx/ssl/nginx.crt:ro
+        - ./nginx/ssl/nginx.key:/etc/nginx/ssl/nginx.key:ro
+      depends_on:
+        inventory-service:
+          condition: service_healthy
 ---
 # Infrastructure
 

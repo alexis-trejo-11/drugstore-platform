@@ -59,8 +59,8 @@ store-service/
 │   └── test/
 ├── docker/
 │   ├── Dockerfile
-│   ├── docker-compose.full.yml
-│   ├── docker-compose.app.yml
+│   ├── docker-compose.yml
+│   ├── docker-compose.yml
 │   ├── nginx/
 │   └── observability/
 ├── docs/
@@ -105,10 +105,10 @@ cp .env.example .env
 # Edit .env — set JWT_SECRET_KEY and connection URLs
 chmod +x docker/nginx/ssl/generate-certs.sh
 ./docker/nginx/ssl/generate-certs.sh
-docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
+docker compose -f docker/docker-compose.yml --env-file .env up -d --build
 ```
 
-Two compose files: `docker-compose.full.yml` (app + infra + monitoring), `docker-compose.app.yml` (app + Nginx only).
+Two compose files: `docker-compose.yml` (app + infra + monitoring), `docker-compose.yml` (app + Nginx only).
 
 Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud RDS, ElastiCache, MSK, etc.).
 

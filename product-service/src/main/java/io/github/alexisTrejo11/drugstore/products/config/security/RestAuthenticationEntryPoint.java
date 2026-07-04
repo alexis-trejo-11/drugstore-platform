@@ -1,6 +1,6 @@
 package io.github.alexisTrejo11.drugstore.products.config.security;
 
-import libs_kernel.security.ApiSecurityResponseWriter;
+import io.github.alexisTrejo11.drugstore.products.config.security.ApiSecurityResponseWriter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;

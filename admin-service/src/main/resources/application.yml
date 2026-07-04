@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${ADMIN_SERVICE_PORT}
 
 management:
   endpoints:
@@ -9,7 +9,7 @@ management:
 
 spring:
   application:
-    name: spring-boot-admin
+    name: admin-service
   boot:
     admin:
       discovery:

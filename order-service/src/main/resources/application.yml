@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${ORDER_SERVICE_PORT}
   forward-headers-strategy: native
 
 spring:
@@ -44,7 +44,6 @@ spring:
     enabled: true
     locations: classpath:db/migration
     validate-on-migrate: true
-    schemas: public
     clean-disabled: false
 
 management:
@@ -93,6 +92,8 @@ springdoc:
     disabled: true
 
 app:
+  redis:
+    key-prefix: ${REDIS_KEY_PREFIX:drugstore:order:}
   rate-limit:
     global:
       enabled: true
@@ -117,6 +118,10 @@ app:
       customer-write:
         maxRequests: 20
         durationSeconds: 60
+
+loki:
+  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
+  env: ${LOKI_ENV:local}
 
 logging:
   file:

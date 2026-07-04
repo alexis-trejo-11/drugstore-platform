@@ -1,6 +1,12 @@
 # Build context: notification-service root (run from project root):
-#   docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
+#   docker compose -f docker/docker-compose.yml --env-file .env up -d --build
 FROM eclipse-temurin:23-jdk-noble AS builder
+
+# GitHub Packages — passed from docker compose build.args (reads host .env); not copied into the image.
+ARG GITHUB_ACTOR
+ARG GITHUB_TOKEN
+ENV GITHUB_ACTOR=$GITHUB_ACTOR
+ENV GITHUB_TOKEN=$GITHUB_TOKEN
 
 WORKDIR /app
 

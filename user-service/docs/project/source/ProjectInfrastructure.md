@@ -150,4 +150,4 @@ dockerFiles:
 ## Raw commands (reference)
 
 - Copy `.env.example` → `.env`, set Kafka + JWT.
-- `docker compose up --build` from `user-service/` (network `drugstore-network`).
+- `docker compose up --build` from `user-service/` (network `drugstore_network`).

@@ -10,7 +10,6 @@ import io.github.alexisTrejo11.drugstore.stores.infrastructure.outbound.persiste
 import io.github.alexisTrejo11.drugstore.stores.domain.model.ReconstructParams;
 import io.github.alexisTrejo11.drugstore.stores.domain.validation.StoreValidation;
 
-import libs_kernel.mapper.ModelMapper;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -22,7 +21,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Component
-public class StoreEntityMapper implements ModelMapper<Store, StoreEntity> {
+public class StoreEntityMapper {
 	private static final Logger logger = LoggerFactory.getLogger(StoreEntityMapper.class);
 
 	private final ScheduleJsonMapper scheduleJsonMapper;
@@ -31,7 +30,6 @@ public class StoreEntityMapper implements ModelMapper<Store, StoreEntity> {
 		this.scheduleJsonMapper = scheduleJsonMapper;
 	}
 
-	@Override
 	public StoreEntity fromDomain(Store domain) {
 		StoreEntity entity = new StoreEntity();
 		if (domain.getId() != null) {
@@ -80,7 +78,6 @@ public class StoreEntityMapper implements ModelMapper<Store, StoreEntity> {
 		return addressEmbeddable;
 	}
 
-	@Override
 	public Store toDomain(StoreEntity entity) {
 		validateEntity(entity);
 
@@ -97,17 +94,14 @@ public class StoreEntityMapper implements ModelMapper<Store, StoreEntity> {
 						reconstructTimeStamps(entity)));
 	}
 
-	@Override
 	public List<StoreEntity> fromDomains(List<Store> stores) {
 		return stores.stream().map(this::fromDomain).toList();
 	}
 
-	@Override
 	public List<Store> toDomains(List<StoreEntity> storeEntities) {
 		return storeEntities.stream().map(this::toDomain).toList();
 	}
 
-	@Override
 	public Page<Store> toDomainPage(Page<StoreEntity> storeEntities) {
 		return storeEntities.map(this::toDomain);
 	}

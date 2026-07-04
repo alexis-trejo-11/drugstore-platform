@@ -66,7 +66,13 @@ public class ProductResponseMapper {
       return null;
     }
 
-    return PageResponse.from(page.map(this::toResponse));
+    List<ProductResponse> productResponsePage = page.map(this::toResponse).toList();
+
+    return new PageResponse<>(
+        productResponsePage,
+        page.getNumber() + 1,
+        page.getSize(),
+        page.getTotalElements());
   }
 
   private String extractIdValue(Product product) {

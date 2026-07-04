@@ -1,5 +1,9 @@
 package io.github.alexisTrejo11.drugstore.stores.infrastructure.inbound.rest.controller;
 
+import io.github.alexisTrejo11.drugstore.stores.config.log.AuditLogger;
+import io.github.alexisTrejo11.drugstore.stores.config.security.ApiSecurityResponseWriter;
+import io.github.alexisTrejo11.drugstore.stores.config.security.JwtTokenValidator;
+import io.github.alexisTrejo11.drugstore.stores.infrastructure.inbound.rest.mapper.StoreResponseMapper;
 import libs_kernel.page.PageResponse;
 import io.github.alexisTrejo11.drugstore.stores.application.port.in.query.GetStoreByCodeQuery;
 import io.github.alexisTrejo11.drugstore.stores.application.port.in.query.GetStoreByIDQuery;
@@ -11,12 +15,6 @@ import io.github.alexisTrejo11.drugstore.stores.domain.model.valueobjects.StoreC
 import io.github.alexisTrejo11.drugstore.stores.domain.model.valueobjects.StoreID;
 import io.github.alexisTrejo11.drugstore.stores.domain.model.valueobjects.StoreName;
 import io.github.alexisTrejo11.drugstore.stores.infrastructure.inbound.rest.dto.response.StoreResponse;
-import libs_kernel.mapper.ResponseMapper;
-import libs_kernel.log.audit.AuditLogger;
-import libs_kernel.security.ApiSecurityResponseWriter;
-import libs_kernel.security.jwt.JwtTokenValidator;
-import io.github.alexisTrejo11.drugstore.stores.config.security.RestAccessDeniedHandler;
-import io.github.alexisTrejo11.drugstore.stores.config.security.RestAuthenticationEntryPoint;
 import io.github.alexisTrejo11.drugstore.stores.config.security.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,8 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = StoreQueryController.class, properties = "spring.cloud.config.enabled=false")
 @Import({
         ApiSecurityResponseWriter.class,
-        RestAuthenticationEntryPoint.class,
-        RestAccessDeniedHandler.class,
         SecurityConfig.class
 })
 @ActiveProfiles("test")
@@ -54,7 +50,7 @@ class StoreQueryControllerTest {
     private StoreQueryUseCases storeApplicationFacade;
 
     @MockitoBean
-    private ResponseMapper<StoreResponse, Store> responseMapper;
+    private StoreResponseMapper responseMapper;
 
     @MockitoBean
     private AuditLogger auditLogger;

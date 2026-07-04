@@ -218,7 +218,7 @@ dockerFiles:
       volumes:
         - redis-data:/data
       networks:
-        - drugstore-network
+        - drugstore_network
       healthcheck:
         test: ["CMD", "redis-cli", "ping"]
         interval: 10s
@@ -241,7 +241,7 @@ dockerFiles:
         auth-service:
           condition: service_healthy
       networks:
-        - drugstore-network
+        - drugstore_network
       healthcheck:
         test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
         interval: 15s

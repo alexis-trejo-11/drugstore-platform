@@ -1,6 +1,6 @@
 package io.github.alexisTrejo11.drugstore.stores.config.security;
 
-import libs_kernel.security.jwt.JwtAuthenticationFilter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,17 +15,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
-  private final RestAuthenticationEntryPoint authenticationEntryPoint;
-  private final RestAccessDeniedHandler accessDeniedHandler;
 
   @Autowired
-  public SecurityConfig(
-      JwtAuthenticationFilter jwtAuthenticationFilter,
-      RestAuthenticationEntryPoint authenticationEntryPoint,
-      RestAccessDeniedHandler accessDeniedHandler) {
+  public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    this.authenticationEntryPoint = authenticationEntryPoint;
-    this.accessDeniedHandler = accessDeniedHandler;
   }
 
   @Bean
@@ -37,9 +30,6 @@ public class SecurityConfig {
         // Stateless API: never save requests for a post-login redirect.
         .requestCache(AbstractHttpConfigurer::disable)
         .logout(AbstractHttpConfigurer::disable)
-        .exceptionHandling(ex -> ex
-            .authenticationEntryPoint(authenticationEntryPoint)
-            .accessDeniedHandler(accessDeniedHandler))
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(
                 "/swagger-ui/**",

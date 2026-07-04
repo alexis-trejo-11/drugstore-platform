@@ -22,10 +22,14 @@ httpEndpoints:
         schema:
           type: "object"
           properties:
-            success: type: "boolean"
-            message: type: "string"
-            data: type: "array"
-            timestamp: type: "string"
+            success:
+              type: "boolean"
+            message:
+              type: "string"
+            data:
+              type: "array"
+            timestamp:
+              type: "string"
         example:
           success: true
           message: "Operation completed successfully"
@@ -46,10 +50,14 @@ httpEndpoints:
         schema:
           type: "object"
           properties:
-            success: type: "boolean"
-            message: type: "string"
-            errorCode: type: "string"
-            timestamp: type: "string"
+            success:
+              type: "boolean"
+            message:
+              type: "string"
+            errorCode:
+              type: "string"
+            timestamp:
+              type: "string"
         example:
           success: false
           message: "Authentication required"
@@ -80,10 +88,14 @@ httpEndpoints:
         schema:
           type: "object"
           properties:
-            success: type: "boolean"
-            message: type: "string"
-            data: type: "object"
-            timestamp: type: "string"
+            success:
+              type: "boolean"
+            message:
+              type: "string"
+            data:
+              type: "object"
+            timestamp:
+              type: "string"
         example:
           success: true
           message: "Operation completed successfully"
@@ -132,13 +144,26 @@ httpEndpoints:
         type: "object"
         required: ["street", "city", "state", "country", "postalCode"]
         properties:
-          street: type: "string", maxLength: 200
-          city: type: "string", maxLength: 100
-          state: type: "string", maxLength: 100
-          country: type: "string", pattern: "^[A-Z]{2}$"
-          postalCode: type: "string", maxLength: 20
-          additionalDetails: type: "string", maxLength: 200
-          isDefault: type: "boolean"
+          street:
+            type: "string"
+            maxLength: 200
+          city:
+            type: "string"
+            maxLength: 100
+          state:
+            type: "string"
+            maxLength: 100
+          country:
+            type: "string"
+            pattern: "^[A-Z]{2}$"
+          postalCode:
+            type: "string"
+            maxLength: 20
+          additionalDetails:
+            type: "string"
+            maxLength: 200
+          isDefault:
+            type: "boolean"
       example:
         street: "123 Main St"
         city: "New York"
@@ -153,10 +178,14 @@ httpEndpoints:
         schema:
           type: "object"
           properties:
-            success: type: "boolean"
-            message: type: "string"
-            data: type: "object"
-            timestamp: type: "string"
+            success:
+              type: "boolean"
+            message:
+              type: "string"
+            data:
+              type: "object"
+            timestamp:
+              type: "string"
         example:
           success: true
           message: "Address created successfully"
@@ -225,13 +254,26 @@ httpEndpoints:
         type: "object"
         required: ["street", "city", "state", "country", "postalCode"]
         properties:
-          street: type: "string", maxLength: 200
-          city: type: "string", maxLength: 100
-          state: type: "string", maxLength: 100
-          country: type: "string", pattern: "^[A-Z]{2}$"
-          postalCode: type: "string", maxLength: 20
-          additionalDetails: type: "string", maxLength: 200
-          isDefault: type: "boolean"
+          street:
+            type: "string"
+            maxLength: 200
+          city:
+            type: "string"
+            maxLength: 100
+          state:
+            type: "string"
+            maxLength: 100
+          country:
+            type: "string"
+            pattern: "^[A-Z]{2}$"
+          postalCode:
+            type: "string"
+            maxLength: 20
+          additionalDetails:
+            type: "string"
+            maxLength: 200
+          isDefault:
+            type: "boolean"
       example:
         street: "456 Updated Ave"
         city: "Boston"
@@ -412,10 +454,14 @@ httpEndpoints:
         schema:
           type: "object"
           properties:
-            content: type: "array"
-            pageable: type: "object"
-            totalElements: type: "integer"
-            totalPages: type: "integer"
+            content:
+              type: "array"
+            pageable:
+              type: "object"
+            totalElements:
+              type: "integer"
+            totalPages:
+              type: "integer"
         example:
           content:
             - id: "123e4567-e89b-12d3-a456-426614174000"
@@ -572,13 +618,26 @@ httpEndpoints:
         type: "object"
         required: ["street", "city", "state", "country", "postalCode"]
         properties:
-          street: type: "string", maxLength: 200
-          city: type: "string", maxLength: 100
-          state: type: "string", maxLength: 100
-          country: type: "string", pattern: "^[A-Z]{2}$"
-          postalCode: type: "string", maxLength: 20
-          additionalDetails: type: "string", maxLength: 200
-          isDefault: type: "boolean"
+          street:
+            type: "string"
+            maxLength: 200
+          city:
+            type: "string"
+            maxLength: 100
+          state:
+            type: "string"
+            maxLength: 100
+          country:
+            type: "string"
+            pattern: "^[A-Z]{2}$"
+          postalCode:
+            type: "string"
+            maxLength: 20
+          additionalDetails:
+            type: "string"
+            maxLength: 200
+          isDefault:
+            type: "boolean"
       example:
         street: "789 Broadway"
         city: "Chicago"
@@ -640,13 +699,26 @@ httpEndpoints:
         type: "object"
         required: ["street", "city", "state", "country", "postalCode"]
         properties:
-          street: type: "string", maxLength: 200
-          city: type: "string", maxLength: 100
-          state: type: "string", maxLength: 100
-          country: type: "string", pattern: "^[A-Z]{2}$"
-          postalCode: type: "string", maxLength: 20
-          additionalDetails: type: "string", maxLength: 200
-          isDefault: type: "boolean"
+          street:
+            type: "string"
+            maxLength: 200
+          city:
+            type: "string"
+            maxLength: 100
+          state:
+            type: "string"
+            maxLength: 100
+          country:
+            type: "string"
+            pattern: "^[A-Z]{2}$"
+          postalCode:
+            type: "string"
+            maxLength: 20
+          additionalDetails:
+            type: "string"
+            maxLength: 200
+          isDefault:
+            type: "boolean"
       example:
         street: "999 Updated Street"
         city: "Miami"
@@ -801,8 +873,10 @@ httpEndpoints:
         type: "object"
         required: ["emailOrPhoneNumber", "password"]
         properties:
-          emailOrPhoneNumber: type: "string"
-          password: type: "string"
+          emailOrPhoneNumber:
+            type: "string"
+          password:
+            type: "string"
       example:
         emailOrPhoneNumber: "user@example.com"
         password: "SecurePass123!"
@@ -812,10 +886,14 @@ httpEndpoints:
         schema:
           type: "object"
           properties:
-            success: type: "boolean"
-            message: type: "string"
-            data: type: "object"
-            timestamp: type: "string"
+            success:
+              type: "boolean"
+            message:
+              type: "string"
+            data:
+              type: "object"
+            timestamp:
+              type: "string"
         example:
           success: true
           message: "Login successfully processed"
@@ -858,8 +936,10 @@ httpEndpoints:
         type: "object"
         required: ["email", "code"]
         properties:
-          email: type: "string"
-          code: type: "string"
+          email:
+            type: "string"
+          code:
+            type: "string"
       example:
         email: "user@example.com"
         code: "123456"
@@ -986,10 +1066,16 @@ httpEndpoints:
         type: "object"
         required: ["email", "password", "name", "phoneNumber"]
         properties:
-          email: type: "string" format: "email"
-          password: type: "string" format: "password"
-          name: type: "string"
-          phoneNumber: type: "string"
+          email:
+            type: "string"
+            format: "email"
+          password:
+            type: "string"
+            format: "password"
+          name:
+            type: "string"
+          phoneNumber:
+            type: "string"
       example:
         email: "customer@example.com"
         password: "SecurePass123!"
@@ -1102,7 +1188,9 @@ httpEndpoints:
         type: "object"
         required: ["email"]
         properties:
-          email: type: "string" format: "email"
+          email:
+            type: "string"
+            format: "email"
       example:
         email: "user@example.com"
     responses:
@@ -1130,7 +1218,8 @@ httpEndpoints:
         type: "object"
         required: ["token"]
         properties:
-          token: type: "string"
+          token:
+            type: "string"
       example:
         token: "123456"
     responses:
@@ -1165,8 +1254,11 @@ httpEndpoints:
         type: "object"
         required: ["token", "newPassword"]
         properties:
-          token: type: "string"
-          newPassword: type: "string" format: "password"
+          token:
+            type: "string"
+          newPassword:
+            type: "string"
+            format: "password"
       example:
         token: "123456"
         newPassword: "NewSecurePass123!"
@@ -1202,8 +1294,12 @@ httpEndpoints:
         type: "object"
         required: ["currentPassword", "newPassword"]
         properties:
-          currentPassword: type: "string" format: "password"
-          newPassword: type: "string" format: "password"
+          currentPassword:
+            type: "string"
+            format: "password"
+          newPassword:
+            type: "string"
+            format: "password"
       example:
         currentPassword: "OldPass123!"
         newPassword: "NewSecurePass123!"
@@ -1322,10 +1418,14 @@ httpEndpoints:
         schema:
           type: "object"
           properties:
-            success: type: "boolean"
-            message: type: "string"
-            data: type: "object"
-            timestamp: type: "string"
+            success:
+              type: "boolean"
+            message:
+              type: "string"
+            data:
+              type: "object"
+            timestamp:
+              type: "string"
         example:
           success: true
           message: "Cart found"
@@ -1378,10 +1478,14 @@ httpEndpoints:
             items:
               type: "object"
               properties:
-                productId: type: "string"
-                quantity: type: "integer"
-                unitPrice: type: "number"
-                discountPerUnit: type: "number"
+                productId:
+                  type: "string"
+                quantity:
+                  type: "integer"
+                unitPrice:
+                  type: "number"
+                discountPerUnit:
+                  type: "number"
       example:
         items:
           - productId: "prod-001"
@@ -1628,32 +1732,65 @@ httpEndpoints:
         type: "object"
         required: ["firstName", "lastName", "employeeNumber", "dateOfBirth", "contactInfo", "role", "employeeType", "status", "hireDate", "hourlyRate", "weeklyHours"]
         properties:
-          firstName: type: "string" maxLength: 100
-          lastName: type: "string" maxLength: 100
-          employeeNumber: type: "string" maxLength: 20
-          dateOfBirth: type: "string" format: "date"
+          firstName:
+            type: "string"
+            maxLength: 100
+          lastName:
+            type: "string"
+            maxLength: 100
+          employeeNumber:
+            type: "string"
+            maxLength: 20
+          dateOfBirth:
+            type: "string"
+            format: "date"
           contactInfo:
             type: "object"
             properties:
-              email: type: "string" format: "email"
-              phoneNumber: type: "string"
+              email:
+                type: "string"
+                format: "email"
+              phoneNumber:
+                type: "string"
               address:
                 type: "object"
                 properties:
-                  street: type: "string"
-                  city: type: "string"
-                  state: type: "string"
-                  country: type: "string"
-                  postalCode: type: "string"
-          role: type: "string" enum: ["PHARMACIST", "PHARMACY_TECHNICIAN", "STORE_MANAGER", "ASSISTANT_MANAGER", "CASHIER", "INVENTORY_CLERK", "DELIVERY_DRIVER", "CUSTOMER_SERVICE_REP", "JANITOR"]
-          employeeType: type: "string" enum: ["FULL_TIME", "PART_TIME", "CONTRACTOR", "INTERN", "SEASONAL"]
-          status: type: "string" enum: ["ACTIVE", "INACTIVE", "ON_LEAVE", "SUSPENDED", "TERMINATED"]
-          department: type: "string" maxLength: 100
-          storeId: type: "string" maxLength: 50
-          hireDate: type: "string" format: "date"
-          hourlyRate: type: "number" format: "double"
-          weeklyHours: type: "integer"
-          workdaySchedule: type: "object" description: "JSONB column for flexible schedule"
+                  street:
+                    type: "string"
+                  city:
+                    type: "string"
+                  state:
+                    type: "string"
+                  country:
+                    type: "string"
+                  postalCode:
+                    type: "string"
+          role:
+            type: "string"
+            enum: ["PHARMACIST", "PHARMACY_TECHNICIAN", "STORE_MANAGER", "ASSISTANT_MANAGER", "CASHIER", "INVENTORY_CLERK", "DELIVERY_DRIVER", "CUSTOMER_SERVICE_REP", "JANITOR"]
+          employeeType:
+            type: "string"
+            enum: ["FULL_TIME", "PART_TIME", "CONTRACTOR", "INTERN", "SEASONAL"]
+          status:
+            type: "string"
+            enum: ["ACTIVE", "INACTIVE", "ON_LEAVE", "SUSPENDED", "TERMINATED"]
+          department:
+            type: "string"
+            maxLength: 100
+          storeId:
+            type: "string"
+            maxLength: 50
+          hireDate:
+            type: "string"
+            format: "date"
+          hourlyRate:
+            type: "number"
+            format: "double"
+          weeklyHours:
+            type: "integer"
+          workdaySchedule:
+            type: "object"
+            description: "JSONB column for flexible schedule"
       example:
         firstName: "John"
         lastName: "Doe"
@@ -1754,10 +1891,18 @@ httpEndpoints:
         type: "object"
         required: ["name", "issuingOrganization", "issueDate"]
         properties:
-          name: type: "string" maxLength: 200
-          issuingOrganization: type: "string" maxLength: 200
-          issueDate: type: "string" format: "date"
-          expirationDate: type: "string" format: "date"
+          name:
+            type: "string"
+            maxLength: 200
+          issuingOrganization:
+            type: "string"
+            maxLength: 200
+          issueDate:
+            type: "string"
+            format: "date"
+          expirationDate:
+            type: "string"
+            format: "date"
       example:
         name: "Pharmacy License"
         issuingOrganization: "State Board of Pharmacy"
@@ -1793,7 +1938,9 @@ httpEndpoints:
         type: "object"
         required: ["role"]
         properties:
-          role: type: "string" enum: ["PHARMACIST", "PHARMACY_TECHNICIAN", "STORE_MANAGER", "ASSISTANT_MANAGER", "CASHIER", "INVENTORY_CLERK", "DELIVERY_DRIVER", "CUSTOMER_SERVICE_REP", "JANITOR"]
+          role:
+            type: "string"
+            enum: ["PHARMACIST", "PHARMACY_TECHNICIAN", "STORE_MANAGER", "ASSISTANT_MANAGER", "CASHIER", "INVENTORY_CLERK", "DELIVERY_DRIVER", "CUSTOMER_SERVICE_REP", "JANITOR"]
       example:
         role: "STORE_MANAGER"
     responses:
@@ -1826,7 +1973,9 @@ httpEndpoints:
         type: "object"
         required: ["status"]
         properties:
-          status: type: "string" enum: ["ACTIVE", "INACTIVE", "ON_LEAVE", "SUSPENDED", "TERMINATED"]
+          status:
+            type: "string"
+            enum: ["ACTIVE", "INACTIVE", "ON_LEAVE", "SUSPENDED", "TERMINATED"]
       example:
         status: "SUSPENDED"
     responses:
@@ -1858,8 +2007,11 @@ httpEndpoints:
       schema:
         type: "object"
         properties:
-          hourlyRate: type: "number" format: "double"
-          weeklyHours: type: "integer"
+          hourlyRate:
+            type: "number"
+            format: "double"
+          weeklyHours:
+            type: "integer"
       example:
         hourlyRate: 50.00
         weeklyHours: 40

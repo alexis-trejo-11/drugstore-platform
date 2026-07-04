@@ -19,7 +19,7 @@ CRT="$SCRIPT_DIR/nginx.crt"
 if [ -d "$KEY" ] || [ -d "$CRT" ]; then
     echo "ERROR: $KEY or $CRT is a directory (usually created by Docker when certs were missing)."
     echo "Stop nginx, then remove the directories and run this script again:"
-    echo "  cd <address-service>/docker && docker compose -f docker-compose.full.yml --profile local stop nginx"
+    echo "  cd <address-service>/docker && docker compose -f docker-compose.yml --profile nginx stop nginx"
     echo "  rm -rf \"$KEY\" \"$CRT\""
     exit 1
 fi
@@ -46,5 +46,5 @@ echo "Done."
 echo "  Key : $KEY"
 echo "  Cert: $CRT"
 echo ""
-echo "These files are mounted into the nginx container by docker-compose.full.yml."
+echo "These files are mounted into the nginx container by docker-compose.yml."
 echo "Add nginx.key and nginx.crt to .gitignore to avoid committing secrets."

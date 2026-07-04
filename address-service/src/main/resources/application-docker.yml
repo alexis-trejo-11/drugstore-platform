@@ -1,5 +1,9 @@
+# Docker profile: inter-container DNS defaults (postgres, redis, config-server).
+# Activated via SPRING_PROFILES_ACTIVE=docker in the container entrypoint / compose .env.
+# Override DATASOURCE_URL and REDIS_URL in .env for app-only compose or cloud endpoints.
+
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${ADDRESS_SERVICE_PORT}
   forward-headers-strategy: native
   compression:
     enabled: true
@@ -78,6 +82,8 @@ jwt:
   issuer: ${JWT_ISSUER:drugstore-prod}
 
 app:
+  redis:
+    key-prefix: ${REDIS_KEY_PREFIX:drugstore:address:}
   rate-limit:
     global:
       enabled: true
@@ -103,10 +109,13 @@ app:
         maxRequests: ${RATE_LIMIT_CUSTOMER_READ:100}
         durationSeconds: 60
 
+loki:
+  push-url: ${LOKI_PUSH_URL:http://loki:3100/loki/api/v1/push}
+  env: ${LOKI_ENV:docker}
+
 logging:
   file:
-    name: ${LOG_PATH:/app/logs}/address-service.log
-    path: ${LOG_PATH:/app/logs}
+    # Path is set via LOG_PATH (./logs for bootRun, /app/logs in Docker). Do not default to /app/logs here — that breaks local bootRun when the docker profile is active.
     max-size: ${LOG_MAX_SIZE:100MB}
     max-history: ${LOG_MAX_HISTORY:30}
   pattern:

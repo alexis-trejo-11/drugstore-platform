@@ -1,6 +1,6 @@
 package io.github.alexisTrejo11.drugstore.stores.infrastructure.outbound.persistence.repository;
 
-import libs_kernel.mapper.ModelMapper;
+import io.github.alexisTrejo11.drugstore.stores.infrastructure.outbound.persistence.mapper.StoreEntityMapper;
 import lombok.extern.slf4j.Slf4j;
 import io.github.alexisTrejo11.drugstore.stores.domain.model.Store;
 import io.github.alexisTrejo11.drugstore.stores.domain.model.valueobjects.StoreCode;
@@ -22,13 +22,13 @@ import java.util.Optional;
 @Slf4j
 public class StoreRepositoryImpl implements StoreRepository {
 	private final JpaStoreRepository jpaRepository;
-	private final ModelMapper<Store, StoreEntity> mapper;
+	private final StoreEntityMapper mapper;
 	private final StoreSpecificationBuilder specificationBuilder;
 
 	@Autowired
 	public StoreRepositoryImpl(
 			JpaStoreRepository jpaRepository,
-			ModelMapper<Store, StoreEntity> mapper,
+			StoreEntityMapper mapper,
 			StoreSpecificationBuilder specificationBuilder) {
 		this.jpaRepository = jpaRepository;
 		this.mapper = mapper;

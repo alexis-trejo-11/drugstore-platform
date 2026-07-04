@@ -1,12 +1,12 @@
 server:
-  port: ${USER_SERVER_PORT:8080}
+  port: ${USER_SERVICE_PORT}
   forward-headers-strategy: native
 
 spring:
   application:
     name: user-service
   profiles:
-    active: dev
+    active: dev,no-loki
   boot:
     admin:
       client:
@@ -194,6 +194,8 @@ springdoc:
 
 
 app:
+  redis:
+    key-prefix: ${REDIS_KEY_PREFIX:drugstore:user:}
   rate-limit:
     global:
       enabled: true
@@ -218,6 +220,10 @@ app:
       customer-write:
         maxRequests: 20
         durationSeconds: 60
+
+loki:
+  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
+  env: ${LOKI_ENV:local}
 
 logging:
   file:

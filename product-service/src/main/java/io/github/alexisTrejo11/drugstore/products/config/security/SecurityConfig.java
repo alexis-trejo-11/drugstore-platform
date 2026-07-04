@@ -1,6 +1,6 @@
 package io.github.alexisTrejo11.drugstore.products.config.security;
 
-import libs_kernel.security.jwt.JwtAuthenticationFilter;
+import io.github.alexisTrejo11.drugstore.products.config.security.jwt.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

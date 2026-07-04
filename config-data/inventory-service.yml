@@ -90,7 +90,7 @@ spring:
     enabled: false
     locations: classpath:db/migration
     validate-on-migrate: true
-    schemas: public
+    
     clean-disabled: false
 
 # MANAGEMENT ENDPOINTS

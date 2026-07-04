@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8085}
+  port: ${PAYMENT_SERVICE_PORT}
   forward-headers-strategy: native
 
 spring:
@@ -29,7 +29,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-        default_schema: public
         jdbc:
           batch_size: 20
         order_inserts: true
@@ -42,10 +41,14 @@ spring:
   # Flyway
   flyway:
     enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
     locations: classpath:db/migration
-    baseline-on-migrate: false
     validate-on-migrate: true
     out-of-order: false
+    encoding: UTF-8
+    table: flyway_schema_history
+    clean-disabled: true
 
 # Stripe
 stripe:
@@ -54,6 +57,14 @@ stripe:
   # publishable-key exposed to frontend via a separate config endpoint if needed
 
 # Logging
+loki:
+  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
+  env: ${LOKI_ENV:local}
+
+app:
+  redis:
+    key-prefix: ${REDIS_KEY_PREFIX:drugstore:payment:}
+
 logging:
   level:
     root: INFO

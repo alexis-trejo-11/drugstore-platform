@@ -1,12 +1,16 @@
+# Default / standalone profile (no spring.profiles.active required).
+# Connection targets come from env vars; localhost defaults suit ./gradlew bootRun and IDE runs.
+# For containers, set SPRING_PROFILES_ACTIVE=docker (see application-docker.yml).
+
 server:
-  port: ${ADDRESS_SERVER_PORT:8080}
+  port: ${ADDRESS_SERVICE_PORT}
   forward-headers-strategy: native
 
 spring:
   application:
     name: address-service
   datasource:
-    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/drugstore_addresses}
+    url: ${DATASOURCE_URL}
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -28,7 +32,7 @@ spring:
       ddl-auto: validate
   data:
     redis:
-      url: ${REDIS_URL:redis://localhost:6379}
+      url: ${REDIS_URL}
 
 springdoc:
   api-docs:
@@ -46,9 +50,11 @@ jwt:
   secret: ${JWT_SECRET_KEY}
   access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:15}
   refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200}
-  issuer: ${ISSUER}
+  issuer: ${JWT_ISSUER:drugstore-api}
 
 app:
+  redis:
+    key-prefix: ${REDIS_KEY_PREFIX:drugstore:address:}
   rate-limit:
     global:
       enabled: true
@@ -73,6 +79,10 @@ app:
       customer-read:
         maxRequests: 100
         durationSeconds: 60
+
+loki:
+  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
+  env: ${LOKI_ENV:local}
 
 logging:
   file:

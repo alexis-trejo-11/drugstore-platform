@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${CART_SERVICE_PORT}
   forward-headers-strategy: native
 
 # gRPC Server Configuration
@@ -76,6 +76,8 @@ jwt:
   issuer: ${JWT_ISSUER:${ISSUER:drugstore-dev}}
 
 app:
+  redis:
+    key-prefix: ${REDIS_KEY_PREFIX:drugstore:cart:}
   rate-limit:
     global:
       enabled: ${RATE_LIMIT_GLOBAL_ENABLED:true}
@@ -100,6 +102,10 @@ app:
       customer-read:
         maxRequests: ${RATE_LIMIT_CUSTOMER_READ:100}
         durationSeconds: 60
+
+loki:
+  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
+  env: ${LOKI_ENV:local}
 
 logging:
   file:

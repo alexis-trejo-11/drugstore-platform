@@ -62,8 +62,8 @@ cart-service/
 │   └── test/
 ├── docker/                        # All Docker assets (see docker/README.md)
 │   ├── Dockerfile
-│   ├── docker-compose.full.yml    # App + DB + Redis + monitoring
-│   ├── docker-compose.app.yml     # App + Nginx only
+│   ├── docker-compose.yml    # App + DB + Redis + monitoring
+│   ├── docker-compose.yml     # App + Nginx only
 │   ├── nginx/
 │   └── observability/
 ├── docs/
@@ -88,7 +88,7 @@ cart-service/
 
 - Actuator + Prometheus metrics.
 - Logback pushes to Loki outside test profile.
-- Local stack via `docker-compose.full.yml` (Prometheus, Loki, Grafana).
+- Local stack via `docker-compose.yml` (Prometheus, Loki, Grafana).
 
 ## Nginx Reverse Proxy and Load Balancer
 
@@ -112,7 +112,7 @@ chmod +x docker/nginx/ssl/generate-certs.sh
 ### Scale
 
 ```bash
-docker compose -f docker/docker-compose.full.yml --env-file .env up -d --scale cart-service=3
+docker compose -f docker/docker-compose.yml --env-file .env up -d --scale cart-service=3
 ```
 
 Nginx uses `least_conn` and Docker DNS (`cart-service`) to distribute traffic across replicas.
@@ -141,15 +141,15 @@ cp .env.example .env
 # Edit .env — set JWT_SECRET_KEY and GITHUB_TOKEN
 chmod +x docker/nginx/ssl/generate-certs.sh
 ./docker/nginx/ssl/generate-certs.sh
-docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
+docker compose -f docker/docker-compose.yml --env-file .env up -d --build
 ```
 
 Two compose files are available:
 
 | File | Contents |
 |------|----------|
-| `docker-compose.full.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
-| `docker-compose.app.yml` | App + Nginx only (external DB/Redis) |
+| `docker-compose.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
+| `docker-compose.yml` | App + Nginx only (external DB/Redis) |
 
 Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud RDS, ElastiCache, etc.).
 

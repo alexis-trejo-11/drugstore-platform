@@ -101,15 +101,15 @@ cp .env.example .env
 # Edit .env — set JWT_SECRET_KEY
 chmod +x docker/nginx/ssl/generate-certs.sh
 ./docker/nginx/ssl/generate-certs.sh
-docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
+docker compose -f docker/docker-compose.yml --env-file .env up -d --build
 ```
 
 Two compose files are available:
 
 | File | Contents |
 |------|----------|
-| `docker-compose.full.yml` | App + Nginx + MongoDB + monitoring |
-| `docker-compose.app.yml` | App + Nginx only (external MongoDB/Kafka) |
+| `docker-compose.yml` | App + Nginx + MongoDB + monitoring |
+| `docker-compose.yml` | App + Nginx only (external MongoDB/Kafka) |
 
 Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud Atlas, MSK, etc.). Set `COMPOSE_PROFILES` in the root `.env`.
 

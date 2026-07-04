@@ -62,8 +62,8 @@ auth-service/
 │   └── test/
 ├── docker/                        # All Docker / Compose configuration
 │   ├── Dockerfile
-│   ├── docker-compose.full.yml    # App + Redis + monitoring
-│   ├── docker-compose.app.yml     # App + Nginx only
+│   ├── docker-compose.yml    # App + Redis + monitoring
+│   ├── docker-compose.yml     # App + Nginx only
 │   ├── README.md                  # How to run each profile
 │   ├── nginx/
 │   └── observability/
@@ -90,7 +90,7 @@ auth-service/
 
 - Actuator exposes health, info, and Prometheus metrics (see `application-docker.yml`).
 - Logback **Loki4j** appender sends logs to Loki in non-test profiles.
-- `docker/docker-compose.full.yml` includes Prometheus, Loki, and Grafana with provisioned datasources.
+- `docker/docker-compose.yml` includes Prometheus, Loki, and Grafana with provisioned datasources.
 
 ## Nginx Reverse Proxy and Load Balancer
 
@@ -122,7 +122,7 @@ chmod +x docker/nginx/ssl/generate-certs.sh
 ### Scale horizontally
 
 ```bash
-docker compose -f docker/docker-compose.full.yml --env-file .env up -d --scale auth-service=3
+docker compose -f docker/docker-compose.yml --env-file .env up -d --scale auth-service=3
 ```
 
 Docker DNS resolves `auth-service` to all running replicas. Nginx distributes connections with `least_conn`.
@@ -169,7 +169,7 @@ cp .env.example .env
 # Edit .env — set JWT_SECRET_KEY, GITHUB_ACTOR, GITHUB_TOKEN
 chmod +x docker/nginx/ssl/generate-certs.sh
 ./docker/nginx/ssl/generate-certs.sh
-docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
+docker compose -f docker/docker-compose.yml --env-file .env up -d --build
 ```
 
 Typical URLs:

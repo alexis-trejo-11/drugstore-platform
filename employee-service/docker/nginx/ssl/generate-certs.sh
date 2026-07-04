@@ -19,7 +19,7 @@ CRT="$SCRIPT_DIR/nginx.crt"
 if [ -d "$KEY" ] || [ -d "$CRT" ]; then
     echo "ERROR: $KEY or $CRT is a directory (usually created by Docker when certs were missing)."
     echo "Stop nginx, then remove the directories and run this script again:"
-    echo "  cd <employee-service>/docker && docker compose -f docker-compose.full.yml --profile local stop nginx"
+    echo "  cd <employee-service>/docker && docker compose -f docker-compose.yml --profile nginx stop nginx"
     echo "  rm -rf \"$KEY\" \"$CRT\""
     exit 1
 fi

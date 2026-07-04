@@ -1,6 +1,11 @@
 # Build context: payment-service root (run from project root):
-#   docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build
+#   docker compose -f docker/docker-compose.yml --env-file .env up -d --build
 FROM eclipse-temurin:23-jdk-noble AS builder
+
+ARG GITHUB_ACTOR
+ARG GITHUB_TOKEN
+ENV GITHUB_ACTOR=$GITHUB_ACTOR
+ENV GITHUB_TOKEN=$GITHUB_TOKEN
 
 WORKDIR /app
 
@@ -22,13 +27,17 @@ FROM eclipse-temurin:23-jre-alpine
 
 WORKDIR /app
 
-RUN addgroup -S spring && adduser -S spring -G spring \
-    && apk add --no-cache wget
+RUN addgroup -S spring && adduser -S spring -G spring
 
-COPY --from=builder --chown=spring:spring /app/build/libs/*.jar app.jar
+COPY --from=builder /app/build/libs/*.jar app.jar
+RUN mkdir -p /app/logs /app/config && chown -R spring:spring /app
 
-RUN mkdir -p /app/logs && chown spring:spring /app/logs
+RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
+    echo 'chown -R spring:spring /app/logs 2>/dev/null || true' >> /app/entrypoint.sh && \
+    echo 'exec su-exec spring:spring java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-docker} -Dlogging.file.path=/app/logs -jar /app/app.jar "$@"' >> /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
 
-USER spring
+USER root
+RUN apk add --no-cache su-exec wget
 
-ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-docker} -jar /app/app.jar"]
+ENTRYPOINT ["/app/entrypoint.sh"]

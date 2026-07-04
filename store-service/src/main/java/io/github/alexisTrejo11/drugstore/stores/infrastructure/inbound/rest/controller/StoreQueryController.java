@@ -2,6 +2,7 @@ package io.github.alexisTrejo11.drugstore.stores.infrastructure.inbound.rest.con
 
 import io.github.alexisTrejo11.drugstore.stores.infrastructure.inbound.rest.annotation.*;
 import io.github.alexisTrejo11.drugstore.stores.infrastructure.inbound.rest.annotation.*;
+import io.github.alexisTrejo11.drugstore.stores.infrastructure.inbound.rest.mapper.StoreResponseMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import libs_kernel.config.rate_limit.RateLimit;
 import libs_kernel.config.rate_limit.RateLimitProfile;
-import libs_kernel.mapper.ResponseMapper;
 import libs_kernel.page.PageRequest;
 import libs_kernel.page.PageResponse;
 import libs_kernel.response.ResponseWrapper;
@@ -18,12 +18,13 @@ import io.github.alexisTrejo11.drugstore.stores.application.port.in.query.GetSto
 import io.github.alexisTrejo11.drugstore.stores.application.port.in.query.GetStoreByIDQuery;
 import io.github.alexisTrejo11.drugstore.stores.application.port.in.query.GetStoresByStatusQuery;
 import io.github.alexisTrejo11.drugstore.stores.application.port.in.usecase.StoreQueryUseCases;
-import io.github.alexisTrejo11.drugstore.stores.domain.model.Store;
 import io.github.alexisTrejo11.drugstore.stores.domain.model.enums.StoreStatus;
 import io.github.alexisTrejo11.drugstore.stores.infrastructure.inbound.rest.dto.request.SearchStoreRequest;
 import io.github.alexisTrejo11.drugstore.stores.infrastructure.inbound.rest.dto.response.StoreResponse;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/api/v2/stores")
@@ -31,12 +32,12 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "bearerAuth")
 public class StoreQueryController {
   private final StoreQueryUseCases storeApplicationFacade;
-  private final ResponseMapper<StoreResponse, Store> responseMapper;
+  private final StoreResponseMapper responseMapper;
 
   @Autowired
   public StoreQueryController(
       StoreQueryUseCases storeApplicationFacade,
-      ResponseMapper<StoreResponse, Store> responseMapper) {
+      StoreResponseMapper responseMapper) {
     this.storeApplicationFacade = storeApplicationFacade;
     this.responseMapper = responseMapper;
   }
@@ -84,7 +85,9 @@ public class StoreQueryController {
       @Parameter(description = "Store status to filter by", required = true, example = "ACTIVE", schema = @Schema(implementation = StoreStatus.class)) @PathVariable StoreStatus status,
       @Parameter(description = "Pagination parameters (page number and size)", required = false, schema = @Schema(implementation = PageRequest.class)) @ModelAttribute PageRequest pagination) {
     pagination = pagination == null ? PageRequest.defaultPageRequest() : pagination;
-    var query = new GetStoresByStatusQuery(status, pagination.toPageable(), null);
+    Pageable pageable = Pageable.ofSize(pagination.getSize()).withPage(pagination.getPage() - 1);
+
+    var query = new GetStoresByStatusQuery(status, pageable, null);
     var storesPage = storeApplicationFacade.getStoresByStatus(query);
 
     var storePageResponse = responseMapper.toResponsePage(storesPage);

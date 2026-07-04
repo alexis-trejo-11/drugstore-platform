@@ -105,7 +105,7 @@ dockerFiles:
 
 File: **`docker-compose.yml`**.
 
-- **Network:** `drugstore-network` (bridge).
+- **Network:** `drugstore_network` (bridge).
 - **Volumes:** `store-postgres-data`, `store-redis-data`, `store-prometheus-data`, `store-loki-data`, `store-grafana-data`.
 - **Scaling:** `docker compose up --scale store-service=3` (no fixed `container_name` on the app service).
 - **Required env (fail-fast):** `JWT_SECRET_KEY`, `SPRING_KAFKA_BOOTSTRAP_SERVERS` — see `.env.example`.

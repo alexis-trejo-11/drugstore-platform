@@ -1,5 +1,5 @@
 # Build context: user-service/ (run from project root:
-#   docker compose -f docker/docker-compose.full.yml --env-file .env up -d --build)
+#   docker compose -f docker/docker-compose.yml --env-file .env up -d --build)
 # glibc-based JDK: protoc-gen-grpc-java publishes linux binaries linked against glibc (Alpine/musl cannot run them).
 FROM eclipse-temurin:23-jdk-noble AS builder
 

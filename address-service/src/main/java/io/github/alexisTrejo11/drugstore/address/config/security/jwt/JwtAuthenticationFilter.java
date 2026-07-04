@@ -2,10 +2,11 @@ package io.github.alexisTrejo11.drugstore.address.config.security.jwt;
 
 import io.github.alexisTrejo11.drugstore.address.config.security.ApiSecurityResponseWriter;
 import io.jsonwebtoken.Claims;
-import libs_kernel.security.dto.AuthUserDetailsLocal;
+import libs_kernel.security.dto.AuthUserDetails;
 import libs_kernel.security.dto.TokenValidationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -16,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Collections;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -63,13 +65,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			}
 
 			Claims claims = jwtTokenService.extractAllClaims(token);
-			AuthUserDetailsLocal userDetails = createUserDetails(claims, validation);
+			AuthUserDetails userDetails = createUserDetails(claims, validation);
 
 			UsernamePasswordAuthenticationToken authentication =
 					new UsernamePasswordAuthenticationToken(
 						userDetails,
 						null,
-						userDetails.getAuthorities()
+						Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + validation.role()))
 					);
 
 			SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -86,13 +88,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 	}
 
-	private AuthUserDetailsLocal createUserDetails(Claims claims, TokenValidationResponse validation) {
-		return AuthUserDetailsLocal.of(
-				validation.userId(),
-				claims.get("email", String.class),
-				validation.role(),
-				claims.getId()
-		);
+	private AuthUserDetails createUserDetails(Claims claims, TokenValidationResponse validation) {
+		return AuthUserDetails.builder()
+				.userId(validation.userId())
+				.email(claims.get("email", String.class))
+				.role(validation.role())
+				.token(claims.getId())
+				.build();
 	}
 
 

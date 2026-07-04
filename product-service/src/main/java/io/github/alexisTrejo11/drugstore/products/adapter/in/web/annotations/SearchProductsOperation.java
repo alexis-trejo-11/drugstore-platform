@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import libs_kernel.response.ResponseWrapper;
 
 import java.lang.annotation.*;
 
@@ -13,7 +14,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(summary = "Search Products", description = "Retrieves a paginated list of products based on provided search criteria")
 @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved products", content = @Content(mediaType = "application/json", schema = @Schema(implementation = libs_kernel.response.ResponseWrapper.class), examples = @ExampleObject(name = "Success Response", value = """
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved products", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(name = "Success Response", value = """
         {
           "success": true,
           "message": "Product found",
@@ -29,14 +30,14 @@ import java.lang.annotation.*;
           ]
         }
         """))),
-    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid query parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = libs_kernel.response.ResponseWrapper.class), examples = @ExampleObject(name = "Bad Request Example", value = """
+    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid query parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(name = "Bad Request Example", value = """
         {
           "success": false,
           "message": "Invalid Argument Type",
           "data": "Parameter 'page' has an invalid type. Expected 'int'."
         }
         """))),
-    @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = libs_kernel.response.ResponseWrapper.class), examples = @ExampleObject(name = "Internal Server Error", value = """
+    @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseWrapper.class), examples = @ExampleObject(name = "Internal Server Error", value = """
         {
           "success": false,
           "message": "Internal Server Error",
