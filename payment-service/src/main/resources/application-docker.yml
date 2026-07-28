@@ -86,15 +86,10 @@ management:
       prometheus:
         enabled: true
 
-loki:
-  push-url: ${LOKI_PUSH_URL:http://loki:3100/loki/api/v1/push}
-  env: ${LOKI_ENV:docker}
-
 app:
   redis:
     key-prefix: ${REDIS_KEY_PREFIX:drugstore:payment:}
 
-# LOG_PATH: ./logs for bootRun, /app/logs in Docker (set via compose). Path configured in logback-spring.xml.
 logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}

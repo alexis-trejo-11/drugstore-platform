@@ -141,9 +141,6 @@ springdoc:
     disabled: true
 
 # LOGGING FOR RATE LIMITING
-loki:
-  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
-  env: ${LOKI_ENV:local}
 
 logging:
   level:

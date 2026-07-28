@@ -465,7 +465,7 @@ features:
       - "Spring Boot Actuator"
       - "Micrometer Prometheus"
       - "Micrometer Tracing (OpenTelemetry bridge)"
-      - "Loki4j Logback Appender"
+      - "Console logging + shared Promtail/Loki"
       - "Prometheus"
       - "Grafana"
       - "Loki"

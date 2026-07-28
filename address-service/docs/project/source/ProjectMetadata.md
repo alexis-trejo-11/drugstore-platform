@@ -18,7 +18,7 @@ techStack:
   - "Spring Boot Actuator"
   - "Micrometer + Prometheus"
   - "OpenTelemetry Tracing Bridge"
-  - "Loki4j + Loki + Grafana"
+  - "Console logging + shared Promtail/Loki/Grafana"
   - "Flyway Migrations"
   - "Spring Security + JWT"
   - "Springdoc OpenAPI 2.6.0"

@@ -102,7 +102,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-cache'
 
     // Observability
-    implementation 'com.github.loki4j:loki-logback-appender:1.5.2'
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
     // JWT
@@ -136,8 +135,6 @@ bootRun {
             "-XX:TieredStopAtLevel=1",
             "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     ]
-
-    def loadedLogPath = System.getenv('LOG_PATH')
     def envFile = file('./.env')
     if (envFile.exists()) {
         envFile.readLines().each { line ->
@@ -145,23 +142,15 @@ bootRun {
                 def (key, value) = line.split('=', 2)
                 key = key.trim()
                 value = value.trim()
-                if (key == 'LOG_PATH') {
-                    loadedLogPath = value
-                }
                 systemProperty key, value
                 environment key, value
             }
         }
     }
-    if (!loadedLogPath) {
-        def localLogs = file('logs').absolutePath
-        systemProperty 'LOG_PATH', localLogs
-        environment 'LOG_PATH', localLogs
-    }
 }
 
 tasks.register('buildDockerImage', Exec) {
     dependsOn bootJar
-    commandLine 'docker', 'build', '-f', 'docker/Dockerfile', '-t', 'store-service:latest', '.'
+    commandLine 'docker', 'build', '-f', 'Dockerfile', '-t', 'store-service:latest', '.'
 }
 

@@ -43,7 +43,7 @@ It owns **shopping cart** persistence and behavior: line items, pricing context,
 - Springdoc OpenAPI
 - Spring Boot Admin client
 - Actuator + Micrometer + Prometheus
-- Loki4j + Loki + Grafana
+- Console logging (stdout); shared Promtail → Loki + Grafana
 - Nginx 1.27 (reverse proxy + load balancer)
 - Docker / Docker Compose (app-only at service root)
 
@@ -82,7 +82,7 @@ cart-service/
 ## Observability
 
 - Actuator + Prometheus metrics.
-- Logback pushes to Loki outside test profile.
+- Logs go to stdout; Promtail (shared infra) ships them to Loki.
 - Local stack via `docker-compose.yml` (Prometheus, Loki, Grafana).
 
 

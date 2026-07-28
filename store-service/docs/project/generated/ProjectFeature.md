@@ -41,7 +41,7 @@ Mirrors `docs/project/source/ProjectFeature.md` in prose form for standard Markd
 ## 5. Observability (Compose)
 
 - **Metrics:** Micrometer Prometheus registry; scrape via Prometheus container.
-- **Logs:** Loki stack; app uses `loki-logback-appender`.
+- **Logs:** stdout → shared Promtail → Loki.
 - **Dashboards:** Grafana with admin password from env in compose (**change**).
 
 ---

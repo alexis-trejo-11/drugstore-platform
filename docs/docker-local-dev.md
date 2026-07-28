@@ -54,7 +54,8 @@ docker compose down
 
 ## Observability
 
-Apps expose Actuator (`/actuator/health`, `/actuator/prometheus` where enabled) and may push logs to Loki via Logback. Scrape/dashboards belong to the **shared** observability stack outside this monorepo — not bundled per service.
+Apps log to **stdout** only (no file volume, no Loki4j push). Shared **Promtail** collects container logs → Loki. Metrics: Actuator `/actuator/prometheus` scraped by shared Prometheus.
+
 
 ## Gradle (no Docker)
 

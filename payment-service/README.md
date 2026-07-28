@@ -41,7 +41,7 @@ It owns **payment capture and reconciliation**: Stripe integration, webhooks, pe
 - Stripe Java SDK
 - Springdoc OpenAPI
 - Actuator + Micrometer + Prometheus
-- Loki4j + Loki + Grafana
+- Console logging (stdout); shared Promtail → Loki + Grafana
 - Docker / Docker Compose (app-only at service root)
 
 ## Project Structure

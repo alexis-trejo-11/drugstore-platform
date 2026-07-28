@@ -110,7 +110,7 @@ deploymentLayers:
 dockerFiles:
 
 - service: "user-service"
-  description: "Multi-stage: Temurin 23 JDK builder (gradlew bootJar), Temurin 23 JRE Alpine runtime, non-root spring user, /app/logs"
+  description: "Multi-stage: Temurin 23 JDK builder (gradlew bootJar), Temurin 23 JRE Alpine runtime, non-root spring user; console-only logging"
   content: |
     FROM eclipse-temurin:23-jdk-noble AS builder
     WORKDIR /app
@@ -122,7 +122,7 @@ dockerFiles:
     WORKDIR /app
     RUN addgroup -S spring && adduser -S spring -G spring && apk add --no-cache wget
     COPY --from=builder --chown=spring:spring /app/build/libs/*.jar app.jar
-    RUN mkdir -p /app/logs && chown spring:spring /app/logs
+    RUN mkdir -p /app/config && chown spring:spring /app
     USER spring
     ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 

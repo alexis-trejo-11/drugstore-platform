@@ -80,16 +80,10 @@ app:
         maxRequests: 100
         durationSeconds: 60
 
-loki:
-  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
-  env: ${LOKI_ENV:local}
-
 logging:
-  file:
     name: logs/address-service.log
     path: logs
   pattern:
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
   level:
     root: INFO

@@ -120,7 +120,6 @@ dependencies {
 	implementation 'org.flywaydb:flyway-database-postgresql:10.17.0'
 
     // Observability
-    implementation 'com.github.loki4j:loki-logback-appender:1.5.2'
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
     // JWT
@@ -171,7 +170,6 @@ processResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
@@ -186,7 +184,6 @@ springBoot {
     mainClass = 'io.github.alexisTrejo11.drugstore.users.UserServiceApplication'
 }
 
-
 bootRun {
     jvmArgs = [
             "-XX:+TieredCompilation",
@@ -197,11 +194,5 @@ bootRun {
     dotEnv.each { key, value ->
         systemProperty key, value
         environment key, value
-    }
-
-    if (!dotEnv['LOG_PATH'] && !System.getenv('LOG_PATH')) {
-        def localLogs = file('logs').absolutePath
-        systemProperty 'LOG_PATH', localLogs
-        environment 'LOG_PATH', localLogs
     }
 }

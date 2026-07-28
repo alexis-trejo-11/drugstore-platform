@@ -10,10 +10,6 @@ management:
     health:
       show-details: always
 
-loki:
-  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
-  env: ${LOKI_ENV:local}
-
 logging:
   level:
     microservice.auth: DEBUG
@@ -112,8 +108,6 @@ kafka:
 
   producer:
     timeout-seconds: 10
-
-
 
 app:
   redis:

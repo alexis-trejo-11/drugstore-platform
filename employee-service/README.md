@@ -41,7 +41,7 @@ It owns **employee** domain data and APIs: profiles, assignments, and integratio
 - Spring Cloud Config (bootstrap) when enabled
 - Spring Boot Admin client
 - Actuator + Micrometer + Prometheus
-- Loki4j + Loki + Grafana
+- Console logging (stdout); shared Promtail → Loki + Grafana
 - Nginx 1.27 (reverse proxy + load balancer)
 - Docker / Docker Compose (app-only at service root)
 

@@ -83,10 +83,6 @@ kafka:
       two-factor-code: notification.two-factor-code
       welcome-email: notification.welcome-email
 
-loki:
-  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
-  env: ${LOKI_ENV:local}
-
 logging:
   level:
     root: INFO
@@ -94,7 +90,6 @@ logging:
     org.springframework.data.mongodb: ${MONGODB_LOG_LEVEL:DEBUG}
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
 management:
   endpoints:

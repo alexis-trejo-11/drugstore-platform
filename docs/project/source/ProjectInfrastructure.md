@@ -53,7 +53,7 @@ deploymentLayers:
         description: "Scrapes application metrics from /actuator/prometheus over HTTPS (internal network)"
       - name: "Loki"
         icon: "loki"
-        description: "Receives application logs through Loki4j HTTP appender"
+        description: "Receives container stdout logs via shared Promtail (apps do not push to Loki)"
       - name: "Grafana"
         icon: "grafana"
         description: "Dashboards and exploration UI for metrics and logs"
@@ -583,15 +583,14 @@ dockerFiles:
       COPY --from=builder /app/build/libs/*.jar app.jar
 
       # Create directory for logs and config
-      RUN mkdir -p /app/logs /app/config
+      RUN mkdir -p /app/config
 
       # Give permissions to the user
       RUN chown -R spring:spring /app
 
       # Create entrypoint script to fix mounted volume permissions
       RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
-          echo 'chown -R spring:spring /app/logs 2>/dev/null || true' >> /app/entrypoint.sh && \
-          echo 'exec su-exec spring:spring java -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-docker} -Dlogging.file.path=/app/logs -jar /app/app.jar "$@"' >> /app/entrypoint.sh && \
+          echo 'exec su-exec spring:spring java -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-docker} -jar /app/app.jar "$@"' >> /app/entrypoint.sh && \
           chmod +x /app/entrypoint.sh
 
       # Install su-exec for proper user switching
@@ -762,15 +761,14 @@ dockerFiles:
       COPY auth-service/src/main/resources/keystore.p12 /app/keystore.p12
 
       # Create directory for logs and config
-      RUN mkdir -p /app/logs /app/config
+      RUN mkdir -p /app/config
 
       # Give permissions to the user
       RUN chown -R spring:spring /app
 
       # Create entrypoint script
       RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
-          echo 'chown -R spring:spring /app/logs 2>/dev/null || true' >> /app/entrypoint.sh && \
-          echo 'exec su-exec spring:spring java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-docker} -Dlogging.file.path=/app/logs -jar /app/app.jar "$@"' >> /app/entrypoint.sh && \
+          echo 'exec su-exec spring:spring java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-docker} -jar /app/app.jar "$@"' >> /app/entrypoint.sh && \
           chmod +x /app/entrypoint.sh
 
       # Install runtime utilities
@@ -883,15 +881,14 @@ dockerFiles:
       COPY cart-service/src/main/resources/keystore.p12 /app/keystore.p12
 
       # Create directories
-      RUN mkdir -p /app/logs /app/config
+      RUN mkdir -p /app/config
 
       # Give permissions
       RUN chown -R spring:spring /app
 
       # Create entrypoint script
       RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
-          echo 'chown -R spring:spring /app/logs 2>/dev/null || true' >> /app/entrypoint.sh && \
-          echo 'exec su-exec spring:spring java -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-docker} -Dlogging.file.path=/app/logs -jar /app/app.jar "$@"' >> /app/entrypoint.sh && \
+          echo 'exec su-exec spring:spring java -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-docker} -jar /app/app.jar "$@"' >> /app/entrypoint.sh && \
           chmod +x /app/entrypoint.sh
 
       # Install su-exec
@@ -1612,7 +1609,7 @@ metrics:
   - label: "Logs"
     value: "Grafana Loki 3.1.1"
     icon: "loki"
-    description: "Log shipping via loki-logback-appender in app."
+    description: "Logs via stdout; shared Promtail ships to Loki."
   - label: "Dashboards"
     value: "Grafana 11.1.4"
     icon: "grafana"
@@ -2032,7 +2029,7 @@ deploymentLayers:
 dockerFiles:
 
 - service: "user-service"
-  description: "Multi-stage: Temurin 23 JDK builder (gradlew bootJar), Temurin 23 JRE Alpine runtime, non-root spring user, /app/logs"
+  description: "Multi-stage: Temurin 23 JDK builder (gradlew bootJar), Temurin 23 JRE Alpine runtime, non-root spring user; console-only logging"
   content: |
     FROM eclipse-temurin:23-jdk-noble AS builder
     WORKDIR /app
@@ -2044,7 +2041,7 @@ dockerFiles:
     WORKDIR /app
     RUN addgroup -S spring && adduser -S spring -G spring && apk add --no-cache wget
     COPY --from=builder --chown=spring:spring /app/build/libs/*.jar app.jar
-    RUN mkdir -p /app/logs && chown spring:spring /app/logs
+    RUN mkdir -p /app/config && chown spring:spring /app
     USER spring
     ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 

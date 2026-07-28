@@ -76,7 +76,6 @@ dependencies {
     // Spring Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
-
     // Requires Maven Local, Hard to dockerize will copy shared library for the moment
     //implementation 'io.github.alexisTrejo11:shared-kernel:1.0.0'
 
@@ -104,7 +103,6 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
     // Logging sink (Grafana Loki)
-    implementation 'com.github.loki4j:loki-logback-appender:1.5.2'
 
     // Metrics + Tracing
     implementation 'io.micrometer:micrometer-registry-prometheus'
@@ -136,11 +134,5 @@ bootRun {
         }
         systemProperty key, value
         environment key, value
-    }
-
-    if (!dotEnv['LOG_PATH'] && !System.getenv('LOG_PATH')) {
-        def localLogs = file('logs').absolutePath
-        systemProperty 'LOG_PATH', localLogs
-        environment 'LOG_PATH', localLogs
     }
 }

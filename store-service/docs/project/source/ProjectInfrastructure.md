@@ -24,7 +24,7 @@ metrics:
   - label: "Logs"
     value: "Grafana Loki 3.1.1"
     icon: "loki"
-    description: "Log shipping via loki-logback-appender in app."
+    description: "Logs via stdout; shared Promtail ships to Loki."
   - label: "Dashboards"
     value: "Grafana 11.1.4"
     icon: "grafana"

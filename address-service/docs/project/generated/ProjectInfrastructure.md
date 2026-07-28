@@ -59,7 +59,7 @@ Redis 7 container with persistence and healthcheck.
 Scrapes service metrics from `/actuator/prometheus` using `shared Prometheus scrape config (outside this monorepo)`.
 
 ### loki
-Receives centralized logs from Logback (Loki4j appender).
+Receives container stdout logs via shared Promtail.
 
 ### grafana
 Dashboard and exploration UI with pre-provisioned Prometheus/Loki datasources.

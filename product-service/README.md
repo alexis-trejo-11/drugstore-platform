@@ -41,7 +41,7 @@ It owns the **product catalog**: CRUD, search, caching, and **Kafka** publicatio
 - PostgreSQL, Flyway
 - Springdoc OpenAPI
 - Actuator + Micrometer + Prometheus
-- Loki4j + Loki + Grafana
+- Console logging (stdout); shared Promtail → Loki + Grafana
 - Docker / Docker Compose (app-only at service root)
 
 ## Project Structure

@@ -17,8 +17,6 @@ services:
     env_file:
       - path: .env
         required: true
-    volumes:
-      - ./logs:/app/logs
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:

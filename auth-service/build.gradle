@@ -111,9 +111,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
 	// Observability
-	implementation 'com.github.loki4j:loki-logback-appender:1.5.2'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
-
 
 	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'
@@ -181,11 +179,5 @@ bootRun {
 	dotEnv.each { key, value ->
 		systemProperty key, value
 		environment key, value
-	}
-
-	if (!dotEnv['LOG_PATH'] && !System.getenv('LOG_PATH')) {
-		def localLogs = file('logs').absolutePath
-		systemProperty 'LOG_PATH', localLogs
-		environment 'LOG_PATH', localLogs
 	}
 }

@@ -40,7 +40,7 @@ It owns the **order** aggregate: placement, state transitions, persistence, and 
 - Spring Web, Spring Security, Spring Data JPA, Spring Data Redis, Spring Cache
 - PostgreSQL, Flyway
 - Springdoc OpenAPI
-- Logstash encoder + Janino + Loki4j
+- Console logging (stdout); shared Promtail → Loki + Grafana
 - Actuator + Micrometer + Prometheus
 - Loki + Grafana + Prometheus (Docker)
 - Docker / Docker Compose (app-only at service root)

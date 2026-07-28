@@ -6,7 +6,7 @@ spring:
   application:
     name: user-service
   profiles:
-    active: dev,no-loki
+    active: dev
   boot:
     admin:
       client:
@@ -173,7 +173,6 @@ management:
     tags:
       application: ${spring.application.name}
 
-
 # Swagger
 springdoc:
   api-docs:
@@ -191,7 +190,6 @@ springdoc:
   paths-to-match: /api/**
   cache:
     disabled: true
-
 
 app:
   redis:
@@ -221,16 +219,10 @@ app:
         maxRequests: 20
         durationSeconds: 60
 
-loki:
-  push-url: ${LOKI_PUSH_URL:http://localhost:3100/loki/api/v1/push}
-  env: ${LOKI_ENV:local}
-
 logging:
-  file:
     name: logs/user-service.log
     path: logs
   pattern:
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
   level:
     root: INFO

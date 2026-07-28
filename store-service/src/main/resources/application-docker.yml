@@ -112,17 +112,8 @@ app:
         maxRequests: ${RATE_LIMIT_CUSTOMER_READ:100}
         durationSeconds: 60
 
-loki:
-  push-url: ${LOKI_PUSH_URL:http://loki:3100/loki/api/v1/push}
-  env: ${LOKI_ENV:docker}
-
 logging:
-  file:
-    # Path is set via LOG_PATH (./logs for bootRun, /app/logs in Docker). Do not default to /app/logs here — that breaks local bootRun when the docker profile is active.
-    max-size: ${LOG_MAX_SIZE:100MB}
-    max-history: ${LOG_MAX_HISTORY:30}
   pattern:
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
   level:
     root: ${LOG_LEVEL_ROOT:WARN}

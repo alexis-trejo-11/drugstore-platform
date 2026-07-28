@@ -42,7 +42,7 @@ It owns **inventory and stock** visibility: availability, reservations-friendly 
 - Logstash encoder (legacy ELK-style logs) + **Loki** for unified observability
 - Spring Boot Admin client
 - Actuator + Micrometer + Prometheus
-- Loki4j + Loki + Grafana
+- Console logging (stdout); shared Promtail → Loki + Grafana
 - Docker / Docker Compose (app-only at service root)
 
 ## Project Structure

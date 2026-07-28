@@ -181,15 +181,14 @@ dockerFiles:
       COPY auth-service/src/main/resources/keystore.p12 /app/keystore.p12
 
       # Create directory for logs and config
-      RUN mkdir -p /app/logs /app/config
+      RUN mkdir -p /app/config
 
       # Give permissions to the user
       RUN chown -R spring:spring /app
 
       # Create entrypoint script
       RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
-          echo 'chown -R spring:spring /app/logs 2>/dev/null || true' >> /app/entrypoint.sh && \
-          echo 'exec su-exec spring:spring java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-docker} -Dlogging.file.path=/app/logs -jar /app/app.jar "$@"' >> /app/entrypoint.sh && \
+          echo 'exec su-exec spring:spring java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-docker} -jar /app/app.jar "$@"' >> /app/entrypoint.sh && \
           chmod +x /app/entrypoint.sh
 
       # Install runtime utilities

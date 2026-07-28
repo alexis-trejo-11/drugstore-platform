@@ -76,11 +76,6 @@ kafka:
       two-factor-code: notification.two-factor-code
       welcome-email: notification.welcome-email
 
-loki:
-  push-url: ${LOKI_PUSH_URL:http://loki:3100/loki/api/v1/push}
-  env: ${LOKI_ENV:docker}
-
-# LOG_PATH: ./logs for bootRun, /app/logs in Docker (set via compose). Path configured in logback-spring.xml.
 logging:
   level:
     root: ${LOG_LEVEL_ROOT:WARN}

@@ -43,7 +43,7 @@ It centralizes **authentication and authorization**: JWT access and refresh flow
 - JJWT
 - Springdoc OpenAPI (where enabled by profile)
 - Actuator + Micrometer + Prometheus
-- Loki4j + Loki + Grafana
+- Console logging (stdout); shared Promtail → Loki + Grafana
 - Nginx 1.27 (reverse proxy + load balancer)
 - Docker / Docker Compose (app-only at service root)
 
@@ -83,7 +83,7 @@ auth-service/
 ## Observability
 
 - Actuator exposes health, info, and Prometheus metrics (see `application-docker.yml`).
-- Logback **Loki4j** appender sends logs to Loki in non-test profiles.
+- Logs go to stdout; Promtail (shared infra) ships them to Loki.
 - Metrics/logs go to the shared observability stack outside this monorepo.
 
 

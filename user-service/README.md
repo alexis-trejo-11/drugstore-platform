@@ -42,7 +42,7 @@ It owns **user identity and profile** persistence: accounts, attributes consumed
 - PostgreSQL, Flyway
 - Springdoc OpenAPI
 - Actuator + Micrometer + Prometheus
-- Loki4j + Loki + Grafana
+- Console logging (stdout); shared Promtail → Loki + Grafana
 - Docker / Docker Compose + `Dockerfile`
 
 ## Project Structure

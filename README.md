@@ -60,7 +60,7 @@ Start from a service README, then open **Project Overview** and **Project Archit
 
 ## Observability
 
-Services expose **Actuator** (`health`, `info`, `prometheus` where enabled) and often push logs via Logback **Loki4j** to a shared Loki instance. Metrics scrape and Grafana dashboards belong to the **shared observability stack** outside this repository — not a per-service Compose profile.
+Services expose **Actuator** (`health`, `info`, `prometheus` where enabled) and log to **stdout**. Shared **Promtail** ships container logs to Loki; **Prometheus** scrapes metrics. Observability lives outside this monorepo.
 
 ## Local development
 

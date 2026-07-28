@@ -41,7 +41,7 @@ It owns user address management with secure, validated, and observable APIs for 
 - Flyway
 - Springdoc OpenAPI
 - Actuator + Micrometer + Prometheus
-- Loki4j + Loki + Grafana
+- Console logging (stdout); shared Promtail → Loki + Grafana
 - Docker / Docker Compose (app-only at service root)
 
 ## Project Structure
@@ -90,7 +90,7 @@ address-service/
 ## Observability
 - Actuator endpoints expose health, info, and Prometheus metrics.
 - Common metrics tags configured for easier dashboard filtering.
-- Logback forwards logs to Loki in non-test profiles.
+- Logs go to stdout; Promtail (shared infra) ships them to Loki.
 - Tracing sampling configured for full visibility.
 - Metrics/logs go to the shared observability stack outside this monorepo.
 
