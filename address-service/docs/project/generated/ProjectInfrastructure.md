@@ -9,7 +9,7 @@
 - **Health Endpoint:** `/actuator/health`
 - **Metrics Endpoint:** `/actuator/prometheus`
 - **Observability Stack:** Prometheus + Loki + Grafana
-- **Reverse Proxy:** Nginx 1.27 — TLS termination on `:443`, HTTP→HTTPS redirect on `:80`, `least_conn` load balancing
+- **Reverse Proxy:** Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
 
 ## Cloud/Service Components
 - AWS RDS (placeholder for managed PostgreSQL)
@@ -38,7 +38,7 @@
 - Redis 7
 
 ### Reverse Proxy / Load Balancer Layer
-- Nginx 1.27 (TLS termination, HTTP→HTTPS redirect, least_conn upstream)
+- Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
 
 ### Observability Layer
 - Prometheus
@@ -56,7 +56,7 @@ PostgreSQL 15 container with persistent volume and healthcheck.
 Redis 7 container with persistence and healthcheck.
 
 ### prometheus
-Scrapes service metrics from `/actuator/prometheus` using `observability/prometheus/prometheus.yml`.
+Scrapes service metrics from `/actuator/prometheus` using `shared Prometheus scrape config (outside this monorepo)`.
 
 ### loki
 Receives centralized logs from Logback (Loki4j appender).
@@ -65,4 +65,4 @@ Receives centralized logs from Logback (Loki4j appender).
 Dashboard and exploration UI with pre-provisioned Prometheus/Loki datasources.
 
 ### nginx
-Nginx 1.27 reverse proxy. Terminates TLS on port `443` using self-signed certificates (dev). Redirects port `80` to HTTPS. Load-balances over `address_backend` upstream using `least_conn`. The address-service port 8443 is not bound to the host — all traffic enters through Nginx.
+Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).

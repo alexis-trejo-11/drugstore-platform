@@ -8,7 +8,7 @@
 - **Kafka:** `product-events` topic integration
 - **Container Runtime:** `eclipse-temurin:23-jre-alpine`
 - **HTTPS Port:** `8443` (internal only — all traffic enters through Nginx)
-- **Reverse Proxy:** Nginx 1.27 — TLS termination on `:443`, HTTP→HTTPS redirect on `:80`, `least_conn` load balancing
+- **Reverse Proxy:** Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
 - **Health Endpoint:** `/actuator/health`
 
 ## Cloud/Service Components
@@ -23,7 +23,7 @@
 - Order service (gRPC consumer)
 
 ### Reverse Proxy / Load Balancer Layer
-- Nginx 1.27 (TLS termination, HTTP→HTTPS redirect, least_conn upstream)
+- Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
 
 ### Application Layer
 - Cart Service (Spring Boot, DDD)
@@ -44,7 +44,6 @@
 Multi-stage Docker build with shared-kernel compilation. Port 8443 is internal-only via `expose:` and intended to be reached through Nginx.
 
 ### nginx
-Nginx reverse proxy and load balancer for cart-service. Handles HTTPS entrypoint (`:443`), HTTP redirect (`:80`), and upstream balancing with `least_conn`. Run `nginx/ssl/generate-certs.sh` before first `docker compose up`.
 
 ### postgres
 PostgreSQL 15 container with persistent volume and healthcheck.

@@ -1,4 +1,0 @@
-# Never commit actual TLS key material.
-nginx.key
-nginx.crt
-*.pem

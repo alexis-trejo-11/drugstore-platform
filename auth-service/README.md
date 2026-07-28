@@ -12,9 +12,8 @@ It centralizes **authentication and authorization**: JWT access and refresh flow
 - [API Surface](#api-surface)
 - [Security and Business Rules](#security-and-business-rules)
 - [Observability](#observability)
-- [Nginx Reverse Proxy and Load Balancer](#nginx-reverse-proxy-and-load-balancer)
 - [Run Locally](#run-locally)
-- [Docker and Full Local Stack](#docker-and-full-local-stack)
+- [Docker](#docker)
 - [Testing](#testing)
 - [Documentation Navigation](#documentation-navigation)
 
@@ -46,7 +45,7 @@ It centralizes **authentication and authorization**: JWT access and refresh flow
 - Actuator + Micrometer + Prometheus
 - Loki4j + Loki + Grafana
 - Nginx 1.27 (reverse proxy + load balancer)
-- Docker / Docker Compose
+- Docker / Docker Compose (app-only at service root)
 
 ## Project Structure
 
@@ -60,13 +59,8 @@ auth-service/
 │   │       ├── application-docker.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── docker/                        # All Docker / Compose configuration
-│   ├── Dockerfile
-│   ├── docker-compose.yml    # App + Redis + monitoring
-│   ├── docker-compose.yml     # App + Nginx only
-│   ├── README.md                  # How to run each profile
-│   ├── nginx/
-│   └── observability/
+├── Dockerfile
+├── docker-compose.yml         # App-only; shared infra outside monorepo
 ├── docs/
 │   └── project/
 │       ├── *.md                   # Human-readable docs
@@ -90,52 +84,8 @@ auth-service/
 
 - Actuator exposes health, info, and Prometheus metrics (see `application-docker.yml`).
 - Logback **Loki4j** appender sends logs to Loki in non-test profiles.
-- `docker/docker-compose.yml` includes Prometheus, Loki, and Grafana with provisioned datasources.
+- Metrics/logs go to the shared observability stack outside this monorepo.
 
-## Nginx Reverse Proxy and Load Balancer
-
-All external traffic enters the stack through Nginx — the auth-service port is not published on the host except for dev tools on **8082**.
-
-### Architecture
-
-```
-Client → Nginx :443 (TLS termination) → auth-service :8080 (internal HTTP)
-Client → Nginx :80  (redirect)        → HTTPS
-Client → host :8082 (dev only)        → auth-service :8080 (Swagger, etc.)
-```
-
-### Files
-
-| File | Purpose |
-|------|---------|
-| `docker/nginx/nginx.conf` | Upstream `auth_backend`, TLS config, proxy rules |
-| `docker/nginx/ssl/generate-certs.sh` | Generates self-signed `nginx.key` + `nginx.crt` for dev |
-| `docker/nginx/ssl/.gitignore` | Prevents committing private key material |
-
-### Generate certificates (first time)
-
-```bash
-chmod +x docker/nginx/ssl/generate-certs.sh
-./docker/nginx/ssl/generate-certs.sh
-```
-
-### Scale horizontally
-
-```bash
-docker compose -f docker/docker-compose.yml --env-file .env up -d --scale auth-service=3
-```
-
-Docker DNS resolves `auth-service` to all running replicas. Nginx distributes connections with `least_conn`.
-
-### Key Nginx settings
-
-| Setting | Value | Purpose |
-|---------|-------|---------|
-| `upstream auth_backend` | `server auth-service:8080` | Docker DNS expands to replicas |
-| Load-balancing policy | `least_conn` | Routes to replica with fewest active connections |
-| `proxy_ssl_verify` | `off` | Trusts internal self-signed cert on Docker network |
-| `client_max_body_size` | `1m` | Auth payloads are small |
-| HTTP → HTTPS redirect | `:80 → :443` | Force encrypted connections |
 
 ## Run Locally
 
@@ -156,29 +106,18 @@ Run tests:
 ./gradlew test
 ```
 
-## Docker and Full Local Stack
+## Docker
 
-All Docker configuration lives in **`docker/`**. See **[docker/README.md](docker/README.md)** for profiles, env files, and run commands.
+App-only Compose at the service root. Shared Postgres/Redis/Kafka/observability live outside this monorepo — set endpoints in `.env` and join `infra_central_network` + `shared_app_network`.
 
-Environment variables live in a single **`.env`** at the service root (copy from `.env.example`). Run Compose from the service root with `--env-file .env`.
-
-Quick start (full local stack):
+See **[docs/docker-local-dev.md](../docs/docker-local-dev.md)** for networks, ports, and prerequisites.
 
 ```bash
 cp .env.example .env
-# Edit .env — set JWT_SECRET_KEY, GITHUB_ACTOR, GITHUB_TOKEN
-chmod +x docker/nginx/ssl/generate-certs.sh
-./docker/nginx/ssl/generate-certs.sh
-docker compose -f docker/docker-compose.yml --env-file .env up -d --build
+# Edit .env — JWT, GITHUB_TOKEN, DB/Redis/Kafka endpoints, SERVICE_PORT
+docker compose up -d --build
 ```
 
-Typical URLs:
-
-- Service health (via Nginx): `https://localhost/actuator/health`
-- Swagger UI (direct): `http://localhost:8082/swagger-ui.html`
-- Prometheus UI: `http://localhost:9090`
-- Loki: `http://localhost:3100`
-- Grafana: `http://localhost:3000`
 
 ## Testing
 

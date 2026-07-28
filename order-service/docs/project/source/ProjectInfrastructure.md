@@ -2,7 +2,7 @@
 # InfrastructureMetric[]
 metrics:
   - label: "Service Port" value: "8080 (compose)" icon: "server" description: "HTTP inside Docker network when SPRING_PROFILES_ACTIVE=docker; optional standalone SSL profile may differ"
-  - label: "Reverse Proxy" value: "Nginx 1.27" icon: "nginx" description: "TLS on host :443, redirect :80, upstream order_backend with least_conn to order-service:8080"
+  - label: "Reverse Proxy" value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
   - label: "Database" value: "PostgreSQL 15" icon: "database" description: "Relational database for order persistence with Flyway migrations"
   - label: "Cache" value: "Redis 7" icon: "cache" description: "In-memory data store for caching frequently accessed order data"
   - label: "Search Engine" value: "OpenSearch 2.9.0" icon: "search" description: "Distributed search and analytics engine for log aggregation"
@@ -22,7 +22,7 @@ deploymentLayers:
   - name: "Reverse Proxy / Load Balancer Layer"
     color: "#009688"
     components:
-      - name: "Nginx 1.27"
+      - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
         icon: "nginx"
         description: "TLS termination on :443, HTTP→HTTPS on :80, load-balances order-service replicas"
 
@@ -81,7 +81,7 @@ dockerFiles:
         - SERVER_PORT=8080
         - SPRING_PROFILES_ACTIVE=docker
   - service: "nginx"
-    description: "Nginx reverse proxy — TLS :443, redirect :80, least_conn upstream order_backend"
+    description: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     content: |
       image: nginx:1.27-alpine
       container_name: order-nginx
@@ -107,4 +107,3 @@ dockerFiles:
 ---
 
 # Infrastructure
-> Compose stacks ship **Nginx** as the HTTPS edge (`order-nginx`), Prometheus, Loki, and Grafana. The Spring app listens on **HTTP :8080** on the compose network; clients use **HTTPS :443** through Nginx (`upstream order_backend`, `least_conn`). PostgreSQL and Redis are configured in Spring but are not defined in `docker-compose.yml` — supply them externally or extend compose. Generate dev certs with `nginx/ssl/generate-certs.sh`. Application profiles may still target OpenSearch/ELK for logs independently of this compose bundle.

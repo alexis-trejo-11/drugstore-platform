@@ -18,7 +18,7 @@ metrics:
     icon: "lock"
     description: "Currently active stock reservations"
   - label: "Reverse Proxy"
-    value: "Nginx 1.27"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "TLS :443, redirect :80; upstream inventory_backend → inventory-service:8080 (least_conn)"
 
@@ -42,7 +42,7 @@ deploymentLayers:
   - name: "Reverse Proxy / Edge"
     color: "#009688"
     components:
-      - name: "Nginx 1.27"
+      - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
         icon: "nginx"
         description: "inventory-nginx — terminates TLS on host :443"
 
@@ -100,7 +100,7 @@ dockerFiles:
       ENTRYPOINT ["java", "-jar", "build/libs/inventory-service-0.0.1-SNAPSHOT.jar"]
 
   - service: "nginx"
-    description: "Nginx reverse proxy — TLS :443, redirect :80, least_conn upstream inventory_backend"
+    description: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     content: |
       image: nginx:1.27-alpine
       container_name: inventory-nginx
@@ -117,7 +117,7 @@ dockerFiles:
 ---
 # Infrastructure
 
-> **Compose:** Includes **inventory-service**, **nginx** (`inventory-nginx`), Prometheus, Loki, and Grafana. HTTPS terminates at Nginx; optional HTTP via host **8093**. Run `nginx/ssl/generate-certs.sh` before first compose up.
+> **Compose:** App-only `docker-compose.yml` at the service root. Shared infra (DB, Redis, observability) lives outside this monorepo.
 
 > **CRITICAL ISSUES:**
 > 1. **Java Version Mismatch**: build.gradle specifies Java 23 (line 12: `JavaLanguageVersion.of(23)`) but Dockerfile uses `openjdk:17-jdk-slim`. This will cause runtime issues as compiled classes with Java 23 (class version 69) won't run on Java 17 (max class version 61).

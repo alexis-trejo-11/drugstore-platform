@@ -3,7 +3,7 @@
 ## Infrastructure Metrics
 
 - **Runtime Port:** `8080` (product-service container)
-- **Reverse Proxy:** Nginx 1.27 (`product-nginx`)
+- **Reverse Proxy:** Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
 - **Primary Datastore:** PostgreSQL 15
 - **Cache:** Redis 7
 - **Observability:** Prometheus + Loki + Grafana

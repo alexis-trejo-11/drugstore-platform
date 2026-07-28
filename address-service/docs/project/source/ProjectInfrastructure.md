@@ -42,7 +42,7 @@ metrics:
     description: "Containerized monitoring stack for metrics, logs, and dashboards"
 
   - label: "Reverse Proxy"
-    value: "Nginx 1.27"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "TLS termination on :443, HTTP→HTTPS redirect on :80, least_conn load balancing across replicas"
 
@@ -130,7 +130,7 @@ deploymentLayers:
   - name: "Reverse Proxy / Load Balancer Layer"
     color: "#009688"
     components:
-      - name: "Nginx 1.27"
+      - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
         icon: "nginx"
         description: "Terminates TLS on :443, redirects HTTP :80 to HTTPS, least_conn load-balances to address-service replicas via Docker DNS"
 
@@ -266,7 +266,7 @@ dockerFiles:
       ports:
         - "9090:9090"
       volumes:
-        - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+        - ./shared Prometheus scrape config (outside this monorepo):/etc/prometheus/prometheus.yml:ro
 
   - service: "loki"
     description: "Loki log aggregation backend used by Grafana Explore and panels"
@@ -288,10 +288,10 @@ dockerFiles:
         - GF_SECURITY_ADMIN_USER=admin
         - GF_SECURITY_ADMIN_PASSWORD=admin
       volumes:
-        - ./observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+        - ./shared Grafana provisioning (outside this monorepo)datasources:/etc/grafana/provisioning/datasources:ro
 
   - service: "nginx"
-    description: "Nginx reverse proxy — terminates TLS on :443, redirects :80 to HTTPS, least_conn load-balances across address-service replicas via Docker DNS. address-service port 8443 is NOT exposed to the host."
+    description: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     content: |
       image: nginx:1.27-alpine
       container_name: address-nginx
@@ -315,4 +315,4 @@ dockerFiles:
 ---
 # Infrastructure
 
-> Docker Compose setup ready for local development with PostgreSQL, Redis, Nginx reverse proxy, and the Address Service. The Nginx layer handles TLS termination on port 443 and HTTP-to-HTTPS redirection on port 80, load-balancing requests across address-service replicas via Docker DNS (`least_conn`). The address-service port 8443 is only exposed internally (via `expose:`) — all external traffic goes through Nginx. For production, need to set up: CI/CD pipeline (GitHub Actions/Jenkins), Kubernetes manifests (deployments, services, ingress), cloud provider resources (RDS, ElastiCache, ECS/EKS), SSL certificate automation (replace self-signed), and monitoring stack (Prometheus/Grafana). The docker-compose.yml has resource limits (768m max, 256m reservation) ready for production tuning.
+> Docker Compose setup ready for local development with PostgreSQL, Redis, Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).

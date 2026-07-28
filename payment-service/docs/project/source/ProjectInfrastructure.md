@@ -2,7 +2,7 @@
 # InfrastructureMetric[]
 metrics:
   - label: "Service Port" value: "8080 (compose)" icon: "server" description: "HTTP inside Docker network; host publishes 8085:8080 for direct access"
-  - label: "Reverse Proxy" value: "Nginx 1.27" icon: "nginx" description: "TLS :443 and redirect :80; upstream payment_backend → payment-service:8080 with least_conn"
+  - label: "Reverse Proxy" value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
   - label: "Database" value: "PostgreSQL" icon: "database" description: "Relational database for payment and sale persistence with Flyway migrations"
   - label: "Cache" value: "Redis" icon: "cache" description: "In-memory data store for caching frequently accessed payment data"
   - label: "Message Broker" value: "Kafka (Dependency Only)" icon: "queue" description: "Kafka dependency in build.gradle but no implementation found"
@@ -43,7 +43,7 @@ deploymentLayers:
     technologies:
       - "nginx:1.27-alpine"
     components:
-      - name: "Nginx 1.27"
+      - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
         icon: "nginx"
         description: "Host ports :443 / :80; proxies HTTP to payment-service:8080"
 
@@ -156,7 +156,7 @@ dockerFiles:
     description: "Redis container for caching (not configured in docker-compose)"
     content: "# Redis not configured in docker-compose.yml\n# Planned: image: redis:7-alpine\n# Planned port: 6379"
   - service: "nginx"
-    description: "Nginx reverse proxy — TLS :443, redirect :80, least_conn upstream payment_backend"
+    description: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     content: |
       image: nginx:1.27-alpine
       container_name: payment-nginx

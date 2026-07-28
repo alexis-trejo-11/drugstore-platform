@@ -6,7 +6,7 @@
 metrics:
 
 - label: "Reverse Proxy"
-  value: "Nginx 1.27 Alpine"
+  value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
   icon: "nginx"
   description: "user-nginx — TLS :443, HTTP :80 → redirect; /health on :80; upstream user_backend → user-service:8080 (least_conn, Docker DNS scaling)"
 
@@ -28,7 +28,7 @@ metrics:
 - label: "Prometheus"
   value: "v2.54.1"
   icon: "prometheus"
-  description: "Host :9090 — scrapes targets from observability/prometheus/prometheus.yml"
+  description: "Host :9090 — scrapes targets from shared Prometheus scrape config (outside this monorepo)"
 
 - label: "Grafana"
   value: "11.1.4"

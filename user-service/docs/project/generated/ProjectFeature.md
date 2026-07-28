@@ -41,7 +41,7 @@ Topics from config keys: **`kafka.topics.user.created|updated|deleted`**. Manual
 
 ## Observability bundle (Compose)
 
-Prometheus scrape + Grafana + Loki provisioning under `observability/`. Grafana ships **weak default password** (**rotate**).
+Metrics/logs via Actuator + shared observability stack outside this monorepo. Grafana ships **weak default password** (**rotate**).
 
 ## Dummy / future features (explicit placeholders)
 

@@ -13,7 +13,7 @@ It owns **inventory and stock** visibility: availability, reservations-friendly 
 - [Security and Business Rules](#security-and-business-rules)
 - [Observability](#observability)
 - [Run Locally](#run-locally)
-- [Docker and Full Local Stack](#docker-and-full-local-stack)
+- [Docker](#docker)
 - [Testing](#testing)
 - [Documentation Navigation](#documentation-navigation)
 
@@ -43,7 +43,7 @@ It owns **inventory and stock** visibility: availability, reservations-friendly 
 - Spring Boot Admin client
 - Actuator + Micrometer + Prometheus
 - Loki4j + Loki + Grafana
-- Docker / Docker Compose
+- Docker / Docker Compose (app-only at service root)
 
 ## Project Structure
 
@@ -57,12 +57,8 @@ inventory-service/
 │   │       ├── application.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── docker/
-│   ├── Dockerfile
-│   ├── docker-compose.yml    # App + DB + Redis + monitoring
-│   ├── docker-compose.yml     # App + Nginx only
-│   ├── nginx/
-│   └── observability/
+├── Dockerfile
+├── docker-compose.yml         # App-only; shared infra outside monorepo
 ├── docs/
 │   └── project/
 │       ├── *.md
@@ -92,28 +88,18 @@ inventory-service/
 ./gradlew test
 ```
 
-## Docker and Full Local Stack
+## Docker
 
-All containerization lives under **`docker/`**. See **[docker/README.md](docker/README.md)** for compose files, profiles, and run commands.
+App-only Compose at the service root. Shared Postgres/Redis/Kafka/observability live outside this monorepo — set endpoints in `.env` and join `infra_central_network` + `shared_app_network`.
 
-Quick start (full local stack):
+See **[docs/docker-local-dev.md](../docs/docker-local-dev.md)** for networks, ports, and prerequisites.
 
 ```bash
 cp .env.example .env
-# Edit .env — set JWT_SECRET_KEY and GITHUB_TOKEN
-chmod +x docker/nginx/ssl/generate-certs.sh
-./docker/nginx/ssl/generate-certs.sh
-docker compose -f docker/docker-compose.yml --env-file .env up -d --build
+# Edit .env — JWT, GITHUB_TOKEN, DB/Redis/Kafka endpoints, SERVICE_PORT
+docker compose up -d --build
 ```
 
-Two compose files are available:
-
-| File | Contents |
-|------|----------|
-| `docker-compose.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
-| `docker-compose.yml` | App + Nginx only (external DB/Redis) |
-
-Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud RDS, ElastiCache, etc.).
 
 ## Testing
 

@@ -14,7 +14,7 @@ Plain-Markdown twin of `docs/project/source/ProjectInfrastructure.md`.
 | gRPC | 1.60.0 | Protobuf RPC to user-service |
 | Container image | `eclipse-temurin:23-jre-alpine` | Multi-stage build + shared-kernel |
 | HTTPS (internal) | 8443 | `keystore.p12`; not exposed to host |
-| Reverse proxy | Nginx 1.27 | TLS `:443`, redirect `:80` → HTTPS, `least_conn` LB |
+| Reverse proxy | Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
 | Health | `/actuator/health` | 30s interval in Docker HEALTHCHECK |
 | Integration tests | Testcontainers | Redis + Kafka containers; in-process gRPC UserService |
 
@@ -29,7 +29,7 @@ Plain-Markdown twin of `docs/project/source/ProjectInfrastructure.md`.
 
 ### Reverse proxy / load balancer
 
-- **Nginx 1.27:** Terminates TLS on `:443`, redirects HTTP `:80`, load-balances to `auth-service` replicas via Docker DNS (`least_conn`). Scale with `docker compose up --scale auth-service=N`.
+- **Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
 
 ### Application layer
 

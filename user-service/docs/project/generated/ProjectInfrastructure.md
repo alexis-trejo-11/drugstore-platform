@@ -26,7 +26,7 @@ Used for tooling/import; cloud entries are **dummy**.
 # InfrastructureMetric[]
 metrics:
   - label: "Reverse Proxy"
-    value: "Nginx 1.27 Alpine"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "user-nginx; TLS :443; upstream → user-service:8080 (least_conn)"
   - label: "Application HTTP"

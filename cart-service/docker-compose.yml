@@ -1,0 +1,47 @@
+# cart-service — app-only. Shared infra (Postgres/Redis/Kafka/observability) lives outside this repo.
+# Usage (from this directory):
+#   cp .env.example .env
+#   docker compose up -d --build
+name: cart-service
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GITHUB_ACTOR: ${GITHUB_ACTOR:-alexisTrejo11}
+        GITHUB_TOKEN: ${GITHUB_TOKEN:?Set GITHUB_TOKEN in .env}
+    hostname: cart-service
+    container_name: cart-service-api
+    restart: unless-stopped
+    ports:
+      - ${CART_SERVICE_PORT}:${CART_SERVICE_PORT}
+    env_file:
+      - path: .env
+        required: true
+    volumes:
+      - ./logs:/app/logs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - infra_central_network
+      - shared_app_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:${CART_SERVICE_PORT}/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+        reservations:
+          memory: 256m
+
+networks:
+  infra_central_network:
+    external: true
+  shared_app_network:
+    external: true

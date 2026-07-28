@@ -9,7 +9,7 @@ metrics:
   icon: "server"
   description: "Spring Boot service internal container port."
 - label: "Reverse Proxy"
-  value: "Nginx 1.27"
+  value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
   icon: "nginx"
   description: "TLS :443, redirect :80; upstream product_backend -> product-service:8080 (least_conn)."
 - label: "Primary Datastore"
@@ -76,7 +76,7 @@ deploymentLayers:
 - name: "Reverse Proxy / Edge"
   color: "#009688"
   components:
-  - name: "Nginx 1.27"
+  - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "product-nginx — HTTPS entrypoint for Docker Compose"
 

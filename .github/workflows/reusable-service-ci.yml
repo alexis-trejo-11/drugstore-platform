@@ -120,7 +120,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./${{ inputs.service }}
-          file: ./${{ inputs.service }}/docker/Dockerfile
+          file: ./${{ inputs.service }}/Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE }}:latest

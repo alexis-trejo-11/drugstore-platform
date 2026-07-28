@@ -6,7 +6,7 @@
 - **Cache:** Redis (rate limiting + cache support)
 - **Config:** Spring Cloud Config integration
 - **Application Port:** `8081` (internal)
-- **Reverse Proxy:** Nginx 1.27 (`:443` TLS entrypoint, `:80` redirect, `least_conn` balancing)
+- **Reverse Proxy:** Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
 - **Health Endpoint:** `/actuator/health`
 
 ## Deployment Layers
@@ -21,11 +21,9 @@
 Spring Boot app listening on `8081` inside the Docker network.
 
 ### nginx
-Nginx 1.27 reverse proxy. Terminates TLS on `:443` with self-signed certs (dev). Redirects `:80` to HTTPS. Upstream `employee_backend` load-balances with `least_conn` to `employee-service:8081`. Run `nginx/ssl/generate-certs.sh` before first `docker compose up`.
 
 ### prometheus / loki / grafana
 Observability stack bundled with compose.
 
 ## Notes
 - Nginx terminates TLS and forwards to `http://employee-service:8081` inside Docker network.
-- Generate local certs with `nginx/ssl/generate-certs.sh` before first compose run.

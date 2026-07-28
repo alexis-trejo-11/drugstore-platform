@@ -13,7 +13,7 @@ It owns the **product catalog**: CRUD, search, caching, and **Kafka** publicatio
 - [Security and Business Rules](#security-and-business-rules)
 - [Observability](#observability)
 - [Run Locally](#run-locally)
-- [Docker and Full Local Stack](#docker-and-full-local-stack)
+- [Docker](#docker)
 - [Testing](#testing)
 - [Documentation Navigation](#documentation-navigation)
 
@@ -42,7 +42,7 @@ It owns the **product catalog**: CRUD, search, caching, and **Kafka** publicatio
 - Springdoc OpenAPI
 - Actuator + Micrometer + Prometheus
 - Loki4j + Loki + Grafana
-- Docker / Docker Compose (`docker/`)
+- Docker / Docker Compose (app-only at service root)
 
 ## Project Structure
 
@@ -55,11 +55,8 @@ product-service/
 │   │       ├── application.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── docker/
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   ├── docker-compose.yml
-│   └── README.md
+├── Dockerfile
+├── docker-compose.yml         # App-only; shared infra outside monorepo
 ├── docs/
 │   └── project/
 │       ├── *.md
@@ -80,7 +77,7 @@ product-service/
 ## Observability
 
 - Actuator (broad exposure in dev — restrict in production).
-- Prometheus + Loki + Grafana in `docker/docker-compose.yml`.
+- Actuator Prometheus endpoint; shared Loki/Grafana outside this monorepo.
 
 ## Run Locally
 
@@ -89,26 +86,18 @@ product-service/
 ./gradlew test
 ```
 
-## Docker and Full Local Stack
+## Docker
 
-All containerization lives under [`docker/`](docker/README.md). See that README for profiles (`local` / `prod`), compose files, and env setup.
+App-only Compose at the service root. Shared Postgres/Redis/Kafka/observability live outside this monorepo — set endpoints in `.env` and join `infra_central_network` + `shared_app_network`.
+
+See **[docs/docker-local-dev.md](../docs/docker-local-dev.md)** for networks, ports, and prerequisites.
 
 ```bash
 cp .env.example .env
-# Edit .env — set JWT_SECRET_KEY and GITHUB_TOKEN
-chmod +x docker/nginx/ssl/generate-certs.sh
-./docker/nginx/ssl/generate-certs.sh
-docker compose -f docker/docker-compose.yml --env-file .env up -d --build
+# Edit .env — JWT, GITHUB_TOKEN, DB/Redis/Kafka endpoints, SERVICE_PORT
+docker compose up -d --build
 ```
 
-Two compose files are available:
-
-| File | Contents |
-|------|----------|
-| `docker-compose.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
-| `docker-compose.yml` | App + Nginx only (external DB/Redis/Kafka) |
-
-Two profiles: **`local`** and **`prod`** (set `COMPOSE_PROFILES` in root `.env`).
 
 ## Testing
 

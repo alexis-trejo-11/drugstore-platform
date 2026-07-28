@@ -13,7 +13,7 @@ It owns **store** master data: locations, branding or operational attributes, an
 - [Security and Business Rules](#security-and-business-rules)
 - [Observability](#observability)
 - [Run Locally](#run-locally)
-- [Docker and Full Local Stack](#docker-and-full-local-stack)
+- [Docker](#docker)
 - [Testing](#testing)
 - [Documentation Navigation](#documentation-navigation)
 
@@ -43,7 +43,7 @@ It owns **store** master data: locations, branding or operational attributes, an
 - Logstash encoder + Janino + Loki4j
 - Actuator + Micrometer + Prometheus
 - Loki + Grafana + Prometheus (Docker)
-- Docker / Docker Compose
+- Docker / Docker Compose (app-only at service root)
 
 ## Project Structure
 
@@ -57,12 +57,8 @@ store-service/
 │   │       ├── application.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── docker/
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   ├── docker-compose.yml
-│   ├── nginx/
-│   └── observability/
+├── Dockerfile
+├── docker-compose.yml         # App-only; shared infra outside monorepo
 ├── docs/
 │   └── project/
 │       ├── *.md
@@ -96,21 +92,16 @@ cp .env.example .env   # set JWT_SECRET_KEY, DATASOURCE_URL, REDIS_URL for local
 
 ## Docker
 
-All containerization lives under **`docker/`**. See **[docker/README.md](docker/README.md)** for compose files, profiles, and run commands.
+App-only Compose at the service root. Shared Postgres/Redis/Kafka/observability live outside this monorepo — set endpoints in `.env` and join `infra_central_network` + `shared_app_network`.
 
-Quick start (full local stack):
+See **[docs/docker-local-dev.md](../docs/docker-local-dev.md)** for networks, ports, and prerequisites.
 
 ```bash
 cp .env.example .env
-# Edit .env — set JWT_SECRET_KEY and connection URLs
-chmod +x docker/nginx/ssl/generate-certs.sh
-./docker/nginx/ssl/generate-certs.sh
-docker compose -f docker/docker-compose.yml --env-file .env up -d --build
+# Edit .env — JWT, GITHUB_TOKEN, DB/Redis/Kafka endpoints, SERVICE_PORT
+docker compose up -d --build
 ```
 
-Two compose files: `docker-compose.yml` (app + infra + monitoring), `docker-compose.yml` (app + Nginx only).
-
-Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud RDS, ElastiCache, MSK, etc.).
 
 ## Testing
 

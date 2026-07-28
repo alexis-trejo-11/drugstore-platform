@@ -2,7 +2,7 @@
 # InfrastructureMetric[]
 metrics:
   - label: "Reverse proxy"
-    value: "Nginx 1.27-alpine"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "HTTPS 443, HTTP 80; proxies to store-service pool; see nginx/nginx.conf."
   - label: " JVM"
@@ -20,7 +20,7 @@ metrics:
   - label: "Prometheus"
     value: "v2.54.1"
     icon: "prometheus"
-    description: "Port 9090; config under observability/prometheus/."
+    description: "Port 9090; shared Prometheus (outside this monorepo)."
   - label: "Loki"
     value: "v3.1.1"
     icon: "loki"

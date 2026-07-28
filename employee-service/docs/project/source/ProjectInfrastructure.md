@@ -37,7 +37,7 @@ metrics:
     description: "Spring Boot Actuator (PLACEHOLDER: verify)"
 
   - label: "Reverse Proxy"
-    value: "Nginx 1.27"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "HTTP→HTTPS redirect on :80, TLS termination on :443, least_conn load balancing"
 
@@ -91,7 +91,7 @@ deploymentLayers:
   - name: "Reverse Proxy / Load Balancer Layer"
     color: "#009688"
     components:
-      - name: "Nginx 1.27"
+      - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
         icon: "nginx"
         description: "TLS edge, redirects HTTP to HTTPS, and routes to employee-service replicas over internal HTTP :8081"
 
@@ -126,7 +126,7 @@ dockerFiles:
       # Health check on appropriate port (check application.yml)
 
   - service: "nginx"
-    description: "Nginx reverse proxy and load balancer for employee-service"
+    description: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     content: |
       image: nginx:1.27-alpine
       container_name: employee-nginx

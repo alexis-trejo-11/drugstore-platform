@@ -2,8 +2,6 @@
 
 ## Reverse proxy (Nginx)
 
-`docker-compose.yml` includes **nginx** (`nginx:1.27-alpine`, container `inventory-nginx`). Public HTTPS on host `:443` and HTTP→HTTPS on `:80`. Upstream `inventory_backend` uses `least_conn` toward `inventory-service:8080`. Host port `8093:8080` still exposes plain HTTP for direct dev calls. Run `nginx/ssl/generate-certs.sh` before first compose run.
-
 ---
 
 > **CRITICAL ISSUES:**

@@ -18,9 +18,10 @@ Drugstore Platform is a **multi-service Spring Boot monorepo** for e-commerce an
 |------|---------|
 | `*-service/` | Domain microservices (each owns its API, data, and docs). |
 | `admin-service/` | Spring Boot Admin server — [Admin Service README](admin-service/README.md). |
-| `kafka-infrastrucuture/` | Kafka-oriented local or reference setup ([readme](kafka-infrastrucuture/readme.md)). |
 | `config-data/` | Shared configuration assets for config server workflows. |
 | `libs/` | Shared Java libraries (for example `shared-kernel`). |
+
+Shared infrastructure (databases, Kafka, Prometheus/Loki/Grafana) is **not** in this monorepo; it lives in your homelab / cloud and is consumed via `.env` + external Docker networks.
 
 ## Service catalog
 
@@ -43,7 +44,7 @@ Each row links to that service’s **root README** (same pattern as `address-ser
 
 ## Cross-cutting platform components
 
-- **Kafka** — Async integration between services (topics per domain; see `kafka-infrastrucuture/` and each service’s docs under `docs/project/generated/ProjectInfrastructure.md`).
+- **Kafka** — Async integration between services (topics per domain). Brokers are provided by shared infra; set `KAFKA_BOOTSTRAP_SERVERS` in each service `.env`.
 - **Spring Boot Admin** — Several services register as **admin clients** (`de.codecentric:spring-boot-admin-starter-client`); the **admin server** lives under `admin-service/` for a single operations entrypoint.
 - **Config** — Services that use Spring Cloud Config consume shared settings from your config server / `config-data/` as documented per service.
 - **Shared kernel** — `libs/shared-kernel` (and published coordinates where used) for cross-cutting types, audit helpers, etc.
@@ -59,21 +60,17 @@ Start from a service README, then open **Project Overview** and **Project Archit
 
 ## Observability
 
-Services that ship a local stack expose **Prometheus** (metrics scrape), **Loki** (log ingestion), and **Grafana** (dashboards + datasources), aligned with `address-service`:
-
-- Actuator: `health`, `info`, `prometheus` where enabled.
-- Logback **Loki4j** appender pushing to `http://loki:3100` in non-test profiles (per service `logback-spring.xml` and `docker-compose.yml`).
-
-Ports are **per compose file** (often `9090`, `3100`, `3000` on localhost); check each service’s compose file before running several stacks at once.
+Services expose **Actuator** (`health`, `info`, `prometheus` where enabled) and often push logs via Logback **Loki4j** to a shared Loki instance. Metrics scrape and Grafana dashboards belong to the **shared observability stack** outside this repository — not a per-service Compose profile.
 
 ## Local development
 
 Requirements (typical):
 
 - **Java 23** (toolchain in Gradle).
-- **Docker** + **Docker Compose** for databases, Redis, Kafka, and observability stacks.
+- **Docker** + **Docker Compose** for running a service container against shared infra.
+- External networks `infra_central_network` and `shared_app_network` (see [docs/docker-local-dev.md](docs/docker-local-dev.md)).
 
-Per service:
+Per service (Gradle):
 
 ```bash
 cd <service-name>
@@ -81,17 +78,20 @@ cd <service-name>
 ./gradlew test
 ```
 
-With Docker (when `docker-compose.yml` exists):
+With Docker (app-only compose at the service root):
 
 ```bash
 cd <service-name>
+cp .env.example .env
 docker compose up -d --build
 ```
+
+Full Docker notes: [docs/docker-local-dev.md](docs/docker-local-dev.md).
 
 ## Further reading
 
 - [Address Service README](address-service/README.md) — reference layout for all service READMEs.
-- [Kafka infrastructure](kafka-infrastrucuture/readme.md) — messaging setup notes.
+- [Docker local development](docs/docker-local-dev.md) — compose, networks, ports.
 
 ---
 

@@ -33,7 +33,7 @@ This document is the **plain-Markdown twin** of `docs/project/source/ProjectOver
 ## Key metrics (placeholder)
 
 - **SLOs:** Not formalized; define p95 latency and error budgets per environment.
-- **Cache:** Monitor Redis memory and hit ratio once metrics dashboards exist in Grafana (provisioning path: `observability/grafana/provisioning/`).
+- **Cache:** Monitor Redis memory and hit ratio once metrics dashboards exist in Grafana (provisioning path: `shared Grafana provisioning (outside this monorepo)`).
 
 ---
 

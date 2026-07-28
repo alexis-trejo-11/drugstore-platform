@@ -12,7 +12,6 @@ It owns **shopping cart** persistence and behavior: line items, pricing context,
 - [API Surface](#api-surface)
 - [Security and Business Rules](#security-and-business-rules)
 - [Observability](#observability)
-- [Nginx Reverse Proxy and Load Balancer](#nginx-reverse-proxy-and-load-balancer)
 - [Run Locally](#run-locally)
 - [Docker](#docker)
 - [Testing](#testing)
@@ -46,7 +45,7 @@ It owns **shopping cart** persistence and behavior: line items, pricing context,
 - Actuator + Micrometer + Prometheus
 - Loki4j + Loki + Grafana
 - Nginx 1.27 (reverse proxy + load balancer)
-- Docker / Docker Compose
+- Docker / Docker Compose (app-only at service root)
 
 ## Project Structure
 
@@ -60,12 +59,8 @@ cart-service/
 │   │       ├── application-docker.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── docker/                        # All Docker assets (see docker/README.md)
-│   ├── Dockerfile
-│   ├── docker-compose.yml    # App + DB + Redis + monitoring
-│   ├── docker-compose.yml     # App + Nginx only
-│   ├── nginx/
-│   └── observability/
+├── Dockerfile
+├── docker-compose.yml         # App-only; shared infra outside monorepo
 ├── docs/
 │   └── project/
 │       ├── *.md
@@ -90,32 +85,6 @@ cart-service/
 - Logback pushes to Loki outside test profile.
 - Local stack via `docker-compose.yml` (Prometheus, Loki, Grafana).
 
-## Nginx Reverse Proxy and Load Balancer
-
-External traffic enters through Nginx; `cart-service` runs on internal port **8080** only.
-
-### Architecture
-
-```text
-Client -> Nginx :443 (TLS termination) -> cart-service :8080 (internal HTTP)
-Client -> Nginx :80  (redirect)        -> HTTPS
-```
-
-### Setup
-
-```bash
-cd cart-service
-chmod +x docker/nginx/ssl/generate-certs.sh
-./docker/nginx/ssl/generate-certs.sh
-```
-
-### Scale
-
-```bash
-docker compose -f docker/docker-compose.yml --env-file .env up -d --scale cart-service=3
-```
-
-Nginx uses `least_conn` and Docker DNS (`cart-service`) to distribute traffic across replicas.
 
 ## Run Locally
 
@@ -132,28 +101,16 @@ cp .env.example .env
 
 ## Docker
 
-All containerization lives under **`docker/`**. See **[docker/README.md](docker/README.md)** for compose files, profiles, and run commands.
+App-only Compose at the service root. Shared Postgres/Redis/Kafka/observability live outside this monorepo — set endpoints in `.env` and join `infra_central_network` + `shared_app_network`.
 
-Quick start (full local stack):
+See **[docs/docker-local-dev.md](../docs/docker-local-dev.md)** for networks, ports, and prerequisites.
 
 ```bash
 cp .env.example .env
-# Edit .env — set JWT_SECRET_KEY and GITHUB_TOKEN
-chmod +x docker/nginx/ssl/generate-certs.sh
-./docker/nginx/ssl/generate-certs.sh
-docker compose -f docker/docker-compose.yml --env-file .env up -d --build
+# Edit .env — JWT, GITHUB_TOKEN, DB/Redis/Kafka endpoints, SERVICE_PORT
+docker compose up -d --build
 ```
 
-Two compose files are available:
-
-| File | Contents |
-|------|----------|
-| `docker-compose.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
-| `docker-compose.yml` | App + Nginx only (external DB/Redis) |
-
-Two profiles: **`local`** (bundled or host infrastructure) and **`prod`** (cloud RDS, ElastiCache, etc.).
-
-Connection URLs use **`DATASOURCE_URL`** and **`REDIS_URL`** (not host/port assembly). See `.env.example` for all variables.
 
 ## Testing
 

@@ -1,41 +1,26 @@
 # Docker local development
 
-Each microservice has a single Compose file at `{service}/docker/docker-compose.yml` with optional **profiles**. Environment variables live in `{service}/.env` (copy from `.env.example`).
+Each microservice ships an **app-only** Compose file at `{service}/docker-compose.yml` plus a `{service}/Dockerfile`. Shared infrastructure (Postgres, Redis, MongoDB, Kafka, Prometheus/Loki/Grafana) lives **outside** this monorepo — point `.env` at those endpoints and join the external Docker networks below.
 
-## Profiles
+## Prerequisites
 
-| Profile | Starts |
-|---------|--------|
-| *(none)* | Spring Boot app only |
-| `nginx` | TLS reverse proxy (`:80` / `:443`) |
-| `infra` | Bundled data stores (Postgres, Redis, or MongoDB — per service) |
-| `observability` | Prometheus, Loki, Grafana |
+1. Shared infra already running (homelab / cloud).
+2. External Docker networks exist on the host:
+   - `infra_central_network`
+   - `shared_app_network`
+3. Copy env: `cp .env.example .env` in the service directory and set ports, DB/Redis/Kafka URLs, `GITHUB_TOKEN` (when the Dockerfile needs GitHub Packages), etc.
 
-Combine profiles as needed. See the header comment in each service's `docker/docker-compose.yml` for copy-paste commands.
+## Run
 
-## Common workflows
-
-Run from the **service root** (e.g. `address-service/`):
+From the **service root** (e.g. `auth-service/`):
 
 ```bash
 cp .env.example .env
-# edit .env — JWT, GITHUB_TOKEN, DB/Redis endpoints, SERVICE_PORT, etc.
+# edit .env
 
-# App only — cloud RDS / Upstash / host DB (your .env endpoints)
-docker compose -f docker/docker-compose.yml --env-file .env up -d --build
-
-# App + bundled local Postgres & Redis (or MongoDB for notification-service)
-docker compose -f docker/docker-compose.yml --env-file .env --profile infra up -d --build
-
-# Full local stack (app + infra + monitoring)
-docker compose -f docker/docker-compose.yml --env-file .env --profile infra --profile observability up -d --build
-
-# App behind Nginx (generate certs first: ./docker/nginx/ssl/generate-certs.sh)
-docker compose -f docker/docker-compose.yml --env-file .env --profile nginx up -d --build
-
-# Everything
-docker compose -f docker/docker-compose.yml --env-file .env \
-  --profile nginx --profile infra --profile observability up -d --build
+docker compose up -d --build
+docker compose logs -f api
+docker compose down
 ```
 
 ## Service ports
@@ -55,39 +40,25 @@ docker compose -f docker/docker-compose.yml --env-file .env \
 | admin-service | `ADMIN_SERVICE_PORT` | 8090 |
 | notification-service | `NOTIFICATION_SERVICE_PORT` | 8093 |
 
+`admin-service` has no Dockerfile/compose in this repo (Gradle / `bootRun` only).
+
 ## Layout (per service)
 
 ```text
 {service}/
 ├── .env / .env.example
-└── docker/
-    ├── docker-compose.yml   # single file, profiles: nginx | infra | observability
-    ├── Dockerfile
-    ├── nginx/
-    └── observability/
+├── Dockerfile
+├── docker-compose.yml   # app container only
+└── src/
 ```
 
-## Kafka
+## Observability
 
-Services that use Kafka join the external `drugstore-kafka-network`. Start Kafka first:
-
-```bash
-cd infrastructure/kafka
-docker compose up -d
-```
-
-If Kafka is cloud-hosted, set `KAFKA_BOOTSTRAP_SERVERS` in `.env` and run without the Kafka network dependency.
-
-## Useful commands
-
-```bash
-docker compose -f docker/docker-compose.yml --env-file .env logs -f <service-name>
-docker compose -f docker/docker-compose.yml --env-file .env down
-docker compose -f docker/docker-compose.yml --env-file .env down -v   # remove volumes
-```
+Apps expose Actuator (`/actuator/health`, `/actuator/prometheus` where enabled) and may push logs to Loki via Logback. Scrape/dashboards belong to the **shared** observability stack outside this monorepo — not bundled per service.
 
 ## Gradle (no Docker)
 
 ```bash
 ./gradlew bootRun   # reads .env from service root
+./gradlew test
 ```

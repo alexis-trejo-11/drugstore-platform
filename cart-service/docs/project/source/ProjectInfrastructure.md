@@ -37,7 +37,7 @@ metrics:
     description: "SSL/TLS enabled with keystore.p12 (internal only — traffic enters via Nginx)"
 
   - label: "Reverse Proxy"
-    value: "Nginx 1.27"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "TLS termination on :443, HTTP→HTTPS redirect on :80, least_conn load balancing across replicas"
 
@@ -83,7 +83,7 @@ deploymentLayers:
   - name: "Reverse Proxy / Load Balancer Layer"
     color: "#009688"
     components:
-      - name: "Nginx 1.27"
+      - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
         icon: "nginx"
         description: "Terminates TLS on :443, redirects HTTP :80 to HTTPS, least_conn load-balances to cart-service replicas via Docker DNS"
 
@@ -242,7 +242,7 @@ dockerFiles:
         retries: 5
 
   - service: "nginx"
-    description: "Nginx reverse proxy — terminates TLS on :443, redirects :80 to HTTPS, least_conn load-balances across cart-service replicas via Docker DNS. cart-service port 8443 is NOT exposed to the host."
+    description: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     content: |
       image: nginx:1.27-alpine
       container_name: cart-nginx
@@ -266,4 +266,4 @@ dockerFiles:
 ---
 # Infrastructure
 
-> Docker Compose ready with PostgreSQL, Redis, Nginx reverse proxy, Prometheus, Loki, and Grafana. Nginx handles TLS termination on port 443 and HTTP-to-HTTPS redirection on port 80, load-balancing requests across cart-service replicas via Docker DNS (`least_conn`). The cart-service port 8443 is only exposed internally — all external traffic goes through Nginx. PLACEHOLDER: Kafka not included in docker-compose.yml (needs to be added for product-events). Missing: Kubernetes manifests, CI/CD pipeline. The service uses gRPC for order-service integration and Kafka for product events.
+> Docker Compose ready with PostgreSQL, Redis, Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).

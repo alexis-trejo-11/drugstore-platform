@@ -41,7 +41,7 @@ deploymentLayers:
   - name: "Reverse Proxy / Load Balancer Layer"
     color: "#009688"
     components:
-      - name: "Nginx 1.27"
+      - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
         icon: "nginx"
         description: "Terminates TLS on :443, redirects HTTP :80 to HTTPS, least_conn load-balances to address-service replicas via Docker DNS"
 
@@ -73,7 +73,7 @@ deploymentLayers:
   - name: "Reverse Proxy / Load Balancer Layer"
     color: "#009688"
     components:
-      - name: "Nginx 1.27"
+      - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
         icon: "nginx"
         description: "Terminates TLS on :443, redirects HTTP :80 to HTTPS, least_conn load-balances to auth-service replicas via Docker DNS"
 
@@ -125,7 +125,7 @@ deploymentLayers:
   - name: "Reverse Proxy / Load Balancer Layer"
     color: "#009688"
     components:
-      - name: "Nginx 1.27"
+      - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
         icon: "nginx"
         description: "Terminates TLS on :443, redirects HTTP :80 to HTTPS, least_conn load-balances to cart-service replicas via Docker DNS"
 
@@ -191,7 +191,7 @@ deploymentLayers:
   - name: "Reverse Proxy / Load Balancer Layer"
     color: "#009688"
     components:
-      - name: "Nginx 1.27"
+      - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
         icon: "nginx"
         description: "TLS edge, redirects HTTP to HTTPS, and routes to employee-service replicas over internal HTTP :8081"
 
@@ -217,7 +217,7 @@ deploymentLayers:
   - name: "Reverse Proxy / Edge"
     color: "#009688"
     components:
-      - name: "Nginx 1.27"
+      - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
         icon: "nginx"
         description: "inventory-nginx — terminates TLS on host :443"
 
@@ -253,7 +253,7 @@ deploymentLayers:
   - name: "Reverse Proxy / Load Balancer Layer"
     color: "#009688"
     components:
-      - name: "Nginx 1.27"
+      - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
         icon: "nginx"
         description: "TLS termination on :443, HTTP→HTTPS on :80, load-balances order-service replicas"
 
@@ -354,7 +354,7 @@ deploymentLayers:
     technologies:
       - "nginx:1.27-alpine"
     components:
-      - name: "Nginx 1.27"
+      - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
         icon: "nginx"
         description: "Host ports :443 / :80; proxies HTTP to payment-service:8080"
 
@@ -539,7 +539,7 @@ deploymentLayers:
         description: "Log aggregation volume store-loki-data."
       - name: "Grafana"
         icon: "grafana"
-        description: "Provisioning under ./observability/grafana/provisioning."
+        description: "Provisioning under ./shared Grafana provisioning (outside this monorepo)."
 
 # DockerFile[]
 dockerFiles:
@@ -661,7 +661,7 @@ dockerFiles:
       ports:
         - "9090:9090"
       volumes:
-        - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+        - ./shared Prometheus scrape config (outside this monorepo):/etc/prometheus/prometheus.yml:ro
 
   - service: "loki"
     description: "Loki log aggregation backend used by Grafana Explore and panels"
@@ -683,10 +683,10 @@ dockerFiles:
         - GF_SECURITY_ADMIN_USER=admin
         - GF_SECURITY_ADMIN_PASSWORD=admin
       volumes:
-        - ./observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+        - ./shared Grafana provisioning (outside this monorepo)datasources:/etc/grafana/provisioning/datasources:ro
 
   - service: "nginx"
-    description: "Nginx reverse proxy — terminates TLS on :443, redirects :80 to HTTPS, least_conn load-balances across address-service replicas via Docker DNS. address-service port 8443 is NOT exposed to the host."
+    description: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     content: |
       image: nginx:1.27-alpine
       container_name: address-nginx
@@ -807,7 +807,7 @@ dockerFiles:
         retries: 5
 
   - service: "nginx"
-    description: "Nginx reverse proxy — terminates TLS on :443, redirects :80 to HTTPS, least_conn load-balances across auth-service replicas via Docker DNS. auth-service port 8443 is NOT exposed to the host."
+    description: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     content: |
       image: nginx:1.27-alpine
       container_name: auth-nginx
@@ -948,7 +948,7 @@ dockerFiles:
         retries: 5
 
   - service: "nginx"
-    description: "Nginx reverse proxy — terminates TLS on :443, redirects :80 to HTTPS, least_conn load-balances across cart-service replicas via Docker DNS. cart-service port 8443 is NOT exposed to the host."
+    description: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     content: |
       image: nginx:1.27-alpine
       container_name: cart-nginx
@@ -982,7 +982,7 @@ dockerFiles:
       # Health check on appropriate port (check application.yml)
 
   - service: "nginx"
-    description: "Nginx reverse proxy and load balancer for employee-service"
+    description: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     content: |
       image: nginx:1.27-alpine
       container_name: employee-nginx
@@ -1022,7 +1022,7 @@ dockerFiles:
       ENTRYPOINT ["java", "-jar", "build/libs/inventory-service-0.0.1-SNAPSHOT.jar"]
 
   - service: "nginx"
-    description: "Nginx reverse proxy — TLS :443, redirect :80, least_conn upstream inventory_backend"
+    description: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     content: |
       image: nginx:1.27-alpine
       container_name: inventory-nginx
@@ -1048,7 +1048,7 @@ dockerFiles:
         - SERVER_PORT=8080
         - SPRING_PROFILES_ACTIVE=docker
   - service: "nginx"
-    description: "Nginx reverse proxy — TLS :443, redirect :80, least_conn upstream order_backend"
+    description: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     content: |
       image: nginx:1.27-alpine
       container_name: order-nginx
@@ -1082,7 +1082,7 @@ dockerFiles:
     description: "Redis container for caching (not configured in docker-compose)"
     content: "# Redis not configured in docker-compose.yml\n# Planned: image: redis:7-alpine\n# Planned port: 6379"
   - service: "nginx"
-    description: "Nginx reverse proxy — TLS :443, redirect :80, least_conn upstream payment_backend"
+    description: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     content: |
       image: nginx:1.27-alpine
       container_name: payment-nginx
@@ -1358,7 +1358,7 @@ metrics:
     description: "Containerized monitoring stack for metrics, logs, and dashboards"
 
   - label: "Reverse Proxy"
-    value: "Nginx 1.27"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "TLS termination on :443, HTTP→HTTPS redirect on :80, least_conn load balancing across replicas"
 
@@ -1395,7 +1395,7 @@ metrics:
     description: "SSL/TLS enabled with keystore.p12 certificate (internal only — traffic enters via Nginx)"
 
   - label: "Reverse Proxy"
-    value: "Nginx 1.27"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "TLS termination on :443, HTTP→HTTPS redirect on :80, least_conn load balancing across replicas"
 
@@ -1447,7 +1447,7 @@ metrics:
     description: "SSL/TLS enabled with keystore.p12 (internal only — traffic enters via Nginx)"
 
   - label: "Reverse Proxy"
-    value: "Nginx 1.27"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "TLS termination on :443, HTTP→HTTPS redirect on :80, least_conn load balancing across replicas"
 
@@ -1494,7 +1494,7 @@ metrics:
     description: "Spring Boot Actuator (PLACEHOLDER: verify)"
 
   - label: "Reverse Proxy"
-    value: "Nginx 1.27"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "HTTP→HTTPS redirect on :80, TLS termination on :443, least_conn load balancing"
 
@@ -1517,7 +1517,7 @@ metrics:
     icon: "lock"
     description: "Currently active stock reservations"
   - label: "Reverse Proxy"
-    value: "Nginx 1.27"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "TLS :443, redirect :80; upstream inventory_backend → inventory-service:8080 (least_conn)"
 
@@ -1528,7 +1528,7 @@ metrics:
     icon: "server"
     description: "HTTP inside Docker network when SPRING_PROFILES_ACTIVE=docker; optional standalone SSL profile may differ"
   - label: "Reverse Proxy"
-    value: "Nginx 1.27"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "TLS on host :443, redirect :80, upstream order_backend with least_conn to order-service:8080"
   - label: "Database"
@@ -1563,7 +1563,7 @@ metrics:
     icon: "server"
     description: "HTTP inside Docker network; host publishes 8085:8080 for direct access"
   - label: "Reverse Proxy"
-    value: "Nginx 1.27"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "TLS :443 and redirect :80; upstream payment_backend → payment-service:8080 with least_conn"
   - label: "Database"
@@ -1590,7 +1590,7 @@ metrics:
 # CloudService[]
   # store-service
   - label: "Reverse proxy"
-    value: "Nginx 1.27-alpine"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "TLS :443, HTTP→HTTPS :80; health via /health; upstream store_backend → store-service:8080 (least_conn implied in nginx.conf)."
   - label: "Application runtime"
@@ -1608,7 +1608,7 @@ metrics:
   - label: "Metrics"
     value: "Prometheus 2.54.1"
     icon: "prometheus"
-    description: "Scrapes store-service /actuator/prometheus — verify scrape config in ./observability/prometheus/prometheus.yml."
+    description: "Scrapes store-service /actuator/prometheus — verify scrape config in ./shared Prometheus scrape config (outside this monorepo)."
   - label: "Logs"
     value: "Grafana Loki 3.1.1"
     icon: "loki"
@@ -1629,7 +1629,7 @@ metrics:
 <!-- Source: address-service/docs/project/source/ProjectInfrastructure.md -->
 # Infrastructure
 
-> Docker Compose setup ready for local development with PostgreSQL, Redis, Nginx reverse proxy, and the Address Service. The Nginx layer handles TLS termination on port 443 and HTTP-to-HTTPS redirection on port 80, load-balancing requests across address-service replicas via Docker DNS (`least_conn`). The address-service port 8443 is only exposed internally (via `expose:`) — all external traffic goes through Nginx. For production, need to set up: CI/CD pipeline (GitHub Actions/Jenkins), Kubernetes manifests (deployments, services, ingress), cloud provider resources (RDS, ElastiCache, ECS/EKS), SSL certificate automation (replace self-signed), and monitoring stack (Prometheus/Grafana). The docker-compose.yml has resource limits (768m max, 256m reservation) ready for production tuning.
+> Docker Compose setup ready for local development with PostgreSQL, Redis, Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
 
 <!-- END address-service -->
 
@@ -1637,7 +1637,7 @@ metrics:
 <!-- Source: auth-service/docs/project/source/ProjectInfrastructure.md -->
 # Infrastructure
 
-> Docker Compose has Redis, Nginx reverse proxy, Prometheus, Loki, and Grafana. Nginx handles TLS termination on port 443 and HTTP-to-HTTPS redirection on port 80, load-balancing requests across auth-service replicas via Docker DNS (`least_conn`). The auth-service port 8443 is only exposed internally — all external traffic goes through Nginx. **Automated integration tests** pull Redis and Kafka images via Testcontainers and start an in-process gRPC UserService—Docker must be available to run them (otherwise skipped). For a full manual stack, still add Kafka and a real user-service if you need end-to-end beyond tests. Production: MSK or self-managed Kafka, managed TLS (e.g. AWS ACM), gRPC health checks, Kubernetes manifests. Note: auth-service has no local PostgreSQL — user persistence is via user-service (gRPC).
+> Docker Compose has Redis, Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
 
 <!-- END auth-service -->
 
@@ -1645,7 +1645,7 @@ metrics:
 <!-- Source: cart-service/docs/project/source/ProjectInfrastructure.md -->
 # Infrastructure
 
-> Docker Compose ready with PostgreSQL, Redis, Nginx reverse proxy, Prometheus, Loki, and Grafana. Nginx handles TLS termination on port 443 and HTTP-to-HTTPS redirection on port 80, load-balancing requests across cart-service replicas via Docker DNS (`least_conn`). The cart-service port 8443 is only exposed internally — all external traffic goes through Nginx. PLACEHOLDER: Kafka not included in docker-compose.yml (needs to be added for product-events). Missing: Kubernetes manifests, CI/CD pipeline. The service uses gRPC for order-service integration and Kafka for product events.
+> Docker Compose ready with PostgreSQL, Redis, Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
 
 <!-- END cart-service -->
 
@@ -1663,7 +1663,7 @@ Check and validate nginx i just shutdown my brain while dockerization, need to a
 <!-- Source: inventory-service/docs/project/source/ProjectInfrastructure.md -->
 # Infrastructure
 
-> **Compose:** Includes **inventory-service**, **nginx** (`inventory-nginx`), Prometheus, Loki, and Grafana. HTTPS terminates at Nginx; optional HTTP via host **8093**. Run `nginx/ssl/generate-certs.sh` before first compose up.
+> **Compose:** App-only `docker-compose.yml` at the service root. Shared infra (DB, Redis, observability) lives outside this monorepo.
 
 > **CRITICAL ISSUES:**
 > 1. **Java Version Mismatch**: build.gradle specifies Java 23 (line 12: `JavaLanguageVersion.of(23)`) but Dockerfile uses `openjdk:17-jdk-slim`. This will cause runtime issues as compiled classes with Java 23 (class version 69) won't run on Java 17 (max class version 61).
@@ -1735,7 +1735,7 @@ dockerFiles:
 <!-- BEGIN order-service -->
 <!-- Source: order-service/docs/project/source/ProjectInfrastructure.md -->
 # Infrastructure
-> Compose stacks ship **Nginx** as the HTTPS edge (`order-nginx`), Prometheus, Loki, and Grafana. The Spring app listens on **HTTP :8080** on the compose network; clients use **HTTPS :443** through Nginx (`upstream order_backend`, `least_conn`). PostgreSQL and Redis are configured in Spring but are not defined in `docker-compose.yml` — supply them externally or extend compose. Generate dev certs with `nginx/ssl/generate-certs.sh`. Application profiles may still target OpenSearch/ELK for logs independently of this compose bundle.
+> **Compose:** App-only at the service root. Shared Postgres/Redis/observability live outside this monorepo.
 
 <!-- END order-service -->
 
@@ -1758,7 +1758,7 @@ metrics:
   icon: "server"
   description: "Spring Boot service internal container port."
 - label: "Reverse Proxy"
-  value: "Nginx 1.27"
+  value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
   icon: "nginx"
   description: "TLS :443, redirect :80; upstream product_backend -> product-service:8080 (least_conn)."
 - label: "Primary Datastore"
@@ -1825,7 +1825,7 @@ deploymentLayers:
 - name: "Reverse Proxy / Edge"
   color: "#009688"
   components:
-  - name: "Nginx 1.27"
+  - name: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "product-nginx — HTTPS entrypoint for Docker Compose"
 
@@ -1928,7 +1928,7 @@ Compose file **`docker-compose.yml`** defines **`drugstore_network`**, persisten
 metrics:
 
 - label: "Reverse Proxy"
-  value: "Nginx 1.27 Alpine"
+  value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
   icon: "nginx"
   description: "user-nginx — TLS :443, HTTP :80 → redirect; /health on :80; upstream user_backend → user-service:8080 (least_conn, Docker DNS scaling)"
 
@@ -1950,7 +1950,7 @@ metrics:
 - label: "Prometheus"
   value: "v2.54.1"
   icon: "prometheus"
-  description: "Host :9090 — scrapes targets from observability/prometheus/prometheus.yml"
+  description: "Host :9090 — scrapes targets from shared Prometheus scrape config (outside this monorepo)"
 
 - label: "Grafana"
   value: "11.1.4"

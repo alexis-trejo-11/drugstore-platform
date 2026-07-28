@@ -13,7 +13,7 @@ It owns **payment capture and reconciliation**: Stripe integration, webhooks, pe
 - [Security and Business Rules](#security-and-business-rules)
 - [Observability](#observability)
 - [Run Locally](#run-locally)
-- [Docker and Full Local Stack](#docker-and-full-local-stack)
+- [Docker](#docker)
 - [Testing](#testing)
 - [Documentation Navigation](#documentation-navigation)
 
@@ -42,7 +42,7 @@ It owns **payment capture and reconciliation**: Stripe integration, webhooks, pe
 - Springdoc OpenAPI
 - Actuator + Micrometer + Prometheus
 - Loki4j + Loki + Grafana
-- Docker / Docker Compose
+- Docker / Docker Compose (app-only at service root)
 
 ## Project Structure
 
@@ -56,12 +56,8 @@ payment-service/
 │   │       ├── application-docker.yml
 │   │       └── logback-spring.xml
 │   └── test/
-├── docker/
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   ├── docker-compose.yml
-│   ├── nginx/
-│   └── observability/
+├── Dockerfile
+├── docker-compose.yml         # App-only; shared infra outside monorepo
 ├── docs/
 │   └── project/
 │       ├── *.md
@@ -83,7 +79,7 @@ payment-service/
 
 - `/actuator/prometheus` enabled in `application.yml`.
 - Logs to Loki via Logback in non-test profiles.
-- Local Prometheus, Loki, Grafana via `docker/docker-compose.yml`.
+- Actuator Prometheus endpoint; shared Loki/Grafana outside this monorepo.
 
 ## Run Locally
 
@@ -92,27 +88,18 @@ payment-service/
 ./gradlew test
 ```
 
-## Docker and Full Local Stack
+## Docker
 
-All Docker assets live under [`docker/`](docker/). See [`docker/README.md`](docker/README.md) for compose files, profiles, and env setup.
+App-only Compose at the service root. Shared Postgres/Redis/Kafka/observability live outside this monorepo — set endpoints in `.env` and join `infra_central_network` + `shared_app_network`.
+
+See **[docs/docker-local-dev.md](../docs/docker-local-dev.md)** for networks, ports, and prerequisites.
 
 ```bash
 cp .env.example .env
-# Edit .env — set STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET, and connection URLs for your profile
-chmod +x docker/nginx/ssl/generate-certs.sh
-./docker/nginx/ssl/generate-certs.sh
-
-docker compose -f docker/docker-compose.yml --env-file .env up -d --build
+# Edit .env — JWT, GITHUB_TOKEN, DB/Redis/Kafka endpoints, SERVICE_PORT
+docker compose up -d --build
 ```
 
-Two compose files are available:
-
-| File | Contents |
-|------|----------|
-| `docker-compose.yml` | App + Nginx + PostgreSQL + Redis + monitoring |
-| `docker-compose.yml` | App + Nginx only (external DB/Redis) |
-
-Set `# use --profile flags (see docker-compose.yml)` or `# use --profile flags (see docker-compose.yml)` in `.env`.
 
 ## Testing
 

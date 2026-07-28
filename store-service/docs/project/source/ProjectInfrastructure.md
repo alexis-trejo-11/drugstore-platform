@@ -2,7 +2,7 @@
 # InfrastructureMetric[]
 metrics:
   - label: "Reverse proxy"
-    value: "Nginx 1.27-alpine"
+    value: "Edge TLS/reverse proxy is provided by shared infra outside this monorepo (not bundled per service).
     icon: "nginx"
     description: "TLS :443, HTTP→HTTPS :80; health via /health; upstream store_backend → store-service:8080 (least_conn implied in nginx.conf)."
   - label: "Application runtime"
@@ -20,7 +20,7 @@ metrics:
   - label: "Metrics"
     value: "Prometheus 2.54.1"
     icon: "prometheus"
-    description: "Scrapes store-service /actuator/prometheus — verify scrape config in ./observability/prometheus/prometheus.yml."
+    description: "Scrapes store-service /actuator/prometheus — verify scrape config in ./shared Prometheus scrape config (outside this monorepo)."
   - label: "Logs"
     value: "Grafana Loki 3.1.1"
     icon: "loki"
@@ -87,7 +87,7 @@ deploymentLayers:
         description: "Log aggregation volume store-loki-data."
       - name: "Grafana"
         icon: "grafana"
-        description: "Provisioning under ./observability/grafana/provisioning."
+        description: "Provisioning under ./shared Grafana provisioning (outside this monorepo)."
 
 # DockerFile[]
 dockerFiles:
